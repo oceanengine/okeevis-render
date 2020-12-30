@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "outDir": "./lib/",
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "noImplicitAny": true,
+        "module": "commonjs",
+        "target": "es5",
+        "jsx": "react",
+        "declaration": false,
+        "allowSyntheticDefaultImports": true,
+        "experimentalDecorators": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "baseUrl": "./",
+        "lib": ["es2015", "es2017", "dom"]
+    },
+    "include": ["./src/**/*"]
+}
