@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@types/jquery": "^3.3.34",
-    "@types/lodash": "^4.14.149",
+    "@types/lodash": "^4.14.166",
     "@types/node": "^9.6.55",
     "@types/react": "^16.9.32",
     "@types/react-dom": "^16.9.6",
