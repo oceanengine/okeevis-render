@@ -4,41 +4,10 @@ const webpack = require('webpack');
 const root = path.resolve(__dirname, '../');
 const htmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-
-function isDir(path) {
-    const stat = fs.lstatSync(path);
-    return stat.isDirectory();
-}
-
-const testDir = path.resolve(__dirname, '../test');
-const testEntry = {
-};
-const htmlPluginList = [];
-fs.readdirSync(testDir).map(file => {
-    const entryPath = path.resolve(testDir, file);
-    if(!isDir(entryPath) && /index.ts$/g.test(file)) {
-        const content = fs.readFileSync(entryPath).toString('utf8');
-        const matchTemplates = content.match(/(?<=@template\s+)\S+(?=\s)/g);
-        const template = matchTemplates ? matchTemplates[0] : 'index.html';
-        const key = file.replace(/\.[^.]+$/g, '')
-        testEntry[key] = [
-            'webpack-hot-middleware/client?quiet=true&reload=true',
-            path.resolve(root, 'test', file)
-        ];
-        const templateFile = path.resolve(root, 'test/template/', template);
-        htmlPluginList.push(new htmlWebpackPlugin({
-            filename: key + '.html',
-            template: templateFile,
-            chunks: [key],
-            inject: true,
-            testEntry: testEntry,
-        }))
-    }
-})
 module.exports = {
     devtool: 'source-map',
 
-    entry: testEntry,
+    entry: {index: [path.resolve(root, 'test/index.ts'), 'webpack-hot-middleware/client?quiet=true&reload=true'] },
 
     output: {
         path: root + '/',
@@ -102,5 +71,10 @@ module.exports = {
         }),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
-    ].concat(htmlPluginList),
+        new htmlWebpackPlugin({
+            filename: 'index.html',
+            template: path.resolve(root, 'index.html'),
+            inject: true,
+        })
+    ]
 };

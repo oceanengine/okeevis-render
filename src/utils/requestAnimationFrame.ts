@@ -4,7 +4,6 @@
 // import { requestAnimationFrameHack } from '@/animation/scedular';
 
 declare global {
-  // tslint:disable-next-line:interface-name
   interface Window {
       msRequestAnimationFrame: Function;
       mozRequestAnimationFrame: Function;
@@ -22,3 +21,4 @@ export default (typeof window !== 'undefined' &&
   function (func: Function): void {
       setTimeout(func, 16);
   };
+// todo cancel request

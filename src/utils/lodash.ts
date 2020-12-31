@@ -40,11 +40,11 @@ import keys = require('lodash/keys');
 import intersection = require('lodash/intersection');
 import difference = require('lodash/difference');
 import sortBy = require('lodash/sortBy');
-import root = require('lodash/_root')
+// import root = require('lodash/_root')
 
-if (typeof root !== 'undefined' && !root.Date) {
-  root.Date = Date;
-}
+// if (typeof root !== 'undefined' && !root.Date) {
+//   root.Date = Date;
+// }
 
 export {
   isNull,

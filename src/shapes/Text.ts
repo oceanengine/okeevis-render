@@ -1,6 +1,7 @@
 import Shape from './Shape'
+import  {CommonAttr, } from './Element'
 
-export interface TextAttr {
+export interface TextAttr extends CommonAttr {
   x?: number;
   y?: number;
   text?: string;
@@ -17,7 +18,7 @@ export default class Line extends Shape<TextAttr> {
   public type = 'text';
 
   public brush(ctx: CanvasRenderingContext2D) {
-    
+    // todo
   }
   
 }

@@ -2,7 +2,9 @@ import Element from './Element';
 
 export default class Group<T extends Element = Element> extends Element {
   public type = 'group';
+
   protected _components: T[] = [];
+
   add(item: Element): this {
     this._components.push(item as T);
     item.renderer = this.renderer;
@@ -14,6 +16,14 @@ export default class Group<T extends Element = Element> extends Element {
   addAll(items: T[]): this {
     items.forEach(item => this.add(item));
     return this;
+  }
+
+  public destroy() {
+    super.destroy();
+    this._components.forEach(item => {
+      item.destroy();
+    });
+    this._components = [];
   }
 
   public remove(element: T) {

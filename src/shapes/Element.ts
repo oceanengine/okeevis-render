@@ -83,15 +83,23 @@ export default  class Element < T extends CommonAttr = CommonAttr > extends Even
 
   private _animations: AnimateOption[] = [];
 
-  public renderer: Render;
-  public parentNode: Group;
-  public bbox: BBox = {x: 0, y: 0, width: 0, height: 0};
-  public clientBoundingRect: BBox;
+  public renderer: Render | undefined;
+
+  public parentNode: Group | undefined;
+
+  private _bbox: BBox = {x: 0, y: 0, width: 0, height: 0};
+
+  private _clientBoundingRect: BBox;
 
   public static attrConf: AttrConf<CommonAttr> = ElementAttrConf;
 
+  public constructor(attr: T = {} as T) {
+    super();
+    this.attr = attr;
+  }
+
   public setAttr(attr: T) {
-    this.attr = {...this.attr, attr};
+    this.attr = {...this.attr, ...attr};
     this.dirty();
   }
 
@@ -109,29 +117,39 @@ export default  class Element < T extends CommonAttr = CommonAttr > extends Even
   }
 
   public stopAllAnimation() {
-    this._animations.forEach(animation => animation.stopped = true);
+    this._animations.forEach(animation => {
+      animation.stopped = true;
+    });
     this._animations = [];
     return this;
   }
 
   public dirty() {
-    // todo
-  }
-
-  public render() {
-    // nothing
+    if (this.renderer) {
+      this.renderer.dirty();
+    }
   }
 
   public getBBox(): BBox {
-    if (!this.bbox) {
-      this.bbox = this.computeBBox();
+    if (!this._bbox) {
+      this._bbox = this.computeBBox();
     }
-    return this.bbox;
+    return this._bbox;
+  }
+
+  public getClientBoundingRect(): BBox {
+    return this._clientBoundingRect;
+  }
+
+  // todo
+  public getTransform() {
+
   }
 
   public computeBBox(): BBox {
     return {x: 0, y: 0, width: 0, height: 0};
   }
+  
 
   public destroy() {
     this.parentNode = null;
