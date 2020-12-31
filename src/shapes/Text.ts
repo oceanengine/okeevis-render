@@ -11,7 +11,12 @@ export interface TextConf extends CommonAttr {
   fontVariant?: string;
   textAlign?: CanvasTextAlign;
   textBaseline?: CanvasTextBaseline;
-  // todo truncate
+  // todo
+  truncate?: {
+      outerWidth?: number;
+      outerHeight?: number;
+      ellipse?: string;
+  };
 }
 
 export default class Text extends Shape<TextConf> {

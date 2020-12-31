@@ -2,6 +2,13 @@ import {
   EasingName
 } from './ease'
 
+export interface AnimateConf {
+  during ? : number;
+  ease ? : Function;
+  delay ? : number;
+  onFrame ? : Function;
+  callback ? : Function;
+}
 
 export interface AnimateOption {
   statTime ? : number;
@@ -9,7 +16,7 @@ export interface AnimateOption {
   from: any;
   to: any;
   during ? : number;
-  ease ? : Function;
+  ease ? : Function | EasingName;
   delay ? : number;
   onFrame ? : Function;
   callback ? : Function;
@@ -24,5 +31,7 @@ export default abstract class AnimateAble < T > {
   public abstract animateTo(target: T, during: number, ease: EasingName, callback: Function, delay: number): void;
 
   public abstract stopAllAnimation(): this;
+
+  public abstract onFrame(now: number): void;
 
 }

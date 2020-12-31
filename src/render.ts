@@ -19,7 +19,7 @@ export default class Render extends EventFul {
   private _needUpdate: boolean = true;
   private _requestAnimationFrameId: number;
   private _root: Group;
-
+  
   public constructor(dom: HTMLDivElement | HTMLCanvasElement) {
     super();
     this._dom = dom;
@@ -99,10 +99,10 @@ export default class Render extends EventFul {
 
   private _onFrame = (now: number) => {
     this._painter.onFrame(now);
+    this._root.onFrame(now);
     this._needUpdate = false;
     requestAnimationFrame(this._onFrame)
   }
-  
 
   private _loop() {
     this._requestAnimationFrameId = requestAnimationFrame(this._onFrame);

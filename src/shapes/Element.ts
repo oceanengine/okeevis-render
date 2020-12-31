@@ -1,13 +1,10 @@
 import Eventful from '../utils/Eventful';
 import Render from '../render';
 import Group from './Group';
-import AnimateAble, {
-  AnimateOption,
-} from '../animate/AnimateAble';
-
+import AnimateAble, { AnimateConf, AnimateOption } from '../animate/AnimateAble';
+import { EasingName } from '../animate/ease';
 
 declare type Color = any;
-
 
 export interface CommonAttr {
   key?: string;
@@ -47,15 +44,15 @@ export interface CommonAttr {
   pointerEvents?: 'none' | 'auto';
 }
 
-export type AttrConf< T > = {
+export type AttrConf<T> = {
   [key in keyof T]: {
     animateAble: boolean;
     defaultValue: any;
     effectShape: boolean;
-  }
-}
+  };
+};
 
-const ElementAttrConf: AttrConf< CommonAttr > = {
+const ElementAttrConf: AttrConf<CommonAttr> = {
   fill: {
     animateAble: true,
     defaultValue: null,
@@ -66,7 +63,7 @@ const ElementAttrConf: AttrConf< CommonAttr > = {
     defaultValue: null,
     effectShape: false,
   },
-}
+};
 
 export interface BBox {
   x: number;
@@ -75,9 +72,10 @@ export interface BBox {
   height: number;
 }
 
-export default  class Element < T extends CommonAttr = CommonAttr > extends Eventful implements AnimateAble<CommonAttr & T> {
-
-  public  attr: T;
+export default class Element<T extends CommonAttr = CommonAttr>
+  extends Eventful
+  implements AnimateAble<T> {
+  public attr: T;
 
   public type: string;
 
@@ -87,9 +85,11 @@ export default  class Element < T extends CommonAttr = CommonAttr > extends Even
 
   public parentNode: Group | undefined;
 
-  private _bbox: BBox = {x: 0, y: 0, width: 0, height: 0};
+  private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
 
   private _clientBoundingRect: BBox;
+
+  private _lastFrameTime: number;
 
   public static attrConf: AttrConf<CommonAttr> = ElementAttrConf;
 
@@ -99,27 +99,42 @@ export default  class Element < T extends CommonAttr = CommonAttr > extends Even
   }
 
   public setAttr(attr: T) {
-    this.attr = {...this.attr, ...attr};
+    this.attr = { ...this.attr, ...attr };
     this.dirty();
   }
 
   public addAnimation(option: AnimateOption) {
-    option.statTime = Date.now();
+    option.statTime = this._lastFrameTime;
     this._animations.push(option);
   }
 
-  public getAttr(key: keyof (T)): any {
+  public getAttr(key: keyof T): any {
     return this.attr[key];
   }
 
-  public animateTo() {
-
+  public animateTo(toAttr: T, duringOrConf?: number | AnimateConf, ease?: EasingName, callback?: Function, delay?: number) {
+    
+    const fromAttr = this.attr;
+    if (typeof duringOrConf === 'object') {
+      this.addAnimation({
+        stopped: false,
+        from: fromAttr,
+        to: toAttr,
+        ...duringOrConf,
+      })
+    } else {
+      this.addAnimation({
+        from: fromAttr,
+        to: toAttr,
+        ease,
+        callback,
+        delay,
+        stopped: false
+      })
+    }
   }
 
   public stopAllAnimation() {
-    this._animations.forEach(animation => {
-      animation.stopped = true;
-    });
     this._animations = [];
     return this;
   }
@@ -142,14 +157,15 @@ export default  class Element < T extends CommonAttr = CommonAttr > extends Even
   }
 
   // todo
-  public getTransform() {
-
-  }
+  public getTransform() {}
 
   public computeBBox(): BBox {
-    return {x: 0, y: 0, width: 0, height: 0};
+    return { x: 0, y: 0, width: 0, height: 0 };
   }
-  
+
+  public onFrame(now: number) {
+    this._lastFrameTime = now;
+  }
 
   public destroy() {
     this.parentNode = null;
@@ -157,5 +173,4 @@ export default  class Element < T extends CommonAttr = CommonAttr > extends Even
     this.stopAllAnimation();
     this.removeAllListeners();
   }
-
 }

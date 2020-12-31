@@ -1,11 +1,16 @@
 import Element from './Element';
+import {TextConf, } from './Text';
 
-export default class Group<T extends Element = Element> extends Element {
+export interface GroupConf extends TextConf {
+  useGroupContext?: boolean;
+}
+
+export default class Group<T extends Element = Element> extends Element<GroupConf> {
   public type = 'group';
 
   protected _components: T[] = [];
 
-  add(item: Element): this {
+  public add(item: Element): this {
     this._components.push(item as T);
     item.renderer = this.renderer;
     item.parentNode = this;
@@ -13,9 +18,14 @@ export default class Group<T extends Element = Element> extends Element {
     return this;
   }
   
-  addAll(items: T[]): this {
+  public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
     return this;
+  }
+
+  public onFrame(now: number) {
+    super.onFrame(now);
+    this._components.forEach(item => item.onFrame(now));
   }
 
   public destroy() {
