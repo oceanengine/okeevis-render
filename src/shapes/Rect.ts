@@ -6,11 +6,11 @@ export interface RectConf extends CommonAttr {
   y?: number;
   width?: number;
   height?: number;
-  // todo rect r support
+  r?: number | number[];
 }
 
 export default class Rect extends Shape<RectConf> {
-  public type = 'line';
+  public type = 'rect';
 
   public brush(ctx: CanvasRenderingContext2D) {
     const {x, y, width, height, } = this.attr;

@@ -55,6 +55,9 @@ export default class CanvasPainter  implements Painter {
 
   public drawElement(ctx: CanvasRenderingContext2D, item: Element, contextStack: RenderingContext[]) {
     const attr = item.attr;
+    if (attr.display === false) {
+      return;
+    }
     const prevContext = lodash.last(contextStack);
     const changedContext = this._getChangedContext(prevContext, item.attr);
     if (item.type !== 'group') {

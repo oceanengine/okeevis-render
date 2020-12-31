@@ -1,24 +1,24 @@
-import Shape from './Shape'
-import  {CommonAttr, } from './Element'
+import Shape from './Shape';
+import { CommonAttr } from './Element';
 
-export interface TextAttr extends CommonAttr {
+export interface TextConf extends CommonAttr {
   x?: number;
   y?: number;
   text?: string;
   fontSize?: number;
-  textAlign?: 'left' | 'right' | 'center';
-  textBaseline?: 'top' | 'middle' | 'bottom';
+  fontWeight?: string | number;
   fontFamily?: string;
-  fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter' | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
-  fontStyle?: 'normal' | 'italic'| 'oblique';
+  fontVariant?: string;
+  textAlign?: CanvasTextAlign;
+  textBaseline?: CanvasTextBaseline;
+  // todo truncate
 }
 
-export default class Line extends Shape<TextAttr> {
-
+export default class Text extends Shape<TextConf> {
   public type = 'text';
 
   public brush(ctx: CanvasRenderingContext2D) {
-    // todo
+    const {x, y, text} = this.attr;
+    ctx.fillText(text, x, y);
   }
-  
 }

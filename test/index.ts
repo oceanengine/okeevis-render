@@ -1,1 +1,1 @@
-import './rect.ts'
+import './text'
