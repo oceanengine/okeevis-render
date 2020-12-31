@@ -12,6 +12,18 @@ export interface RectConf extends CommonAttr {
 export default class Rect extends Shape<RectConf> {
   public type = 'rect';
 
+
+  public getAnimationKeys(): Array<keyof RectConf> {
+    return [
+      ...super.getAnimationKeys(),
+      'x',
+      'y',
+      'width',
+      'height',
+      'r',
+    ];
+  }
+
   public brush(ctx: CanvasRenderingContext2D) {
     const {x, y, width, height, } = this.attr;
     ctx.moveTo(x, y);

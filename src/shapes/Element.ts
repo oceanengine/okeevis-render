@@ -72,14 +72,16 @@ export interface BBox {
   height: number;
 }
 
-export default class Element<T extends CommonAttr = CommonAttr>
-  extends Eventful
-  implements AnimateAble<T> {
+export default class Element<T extends CommonAttr = any> extends Eventful implements AnimateAble<T> {
   public attr: T;
 
   public type: string;
 
-  private _animations: AnimateOption[] = [];
+  public fillAble: boolean = true;
+  
+  public strokeAble: boolean = true;
+
+  private _animations: AnimateOption<T>[] = [];
 
   public renderer: Render | undefined;
 
@@ -92,10 +94,34 @@ export default class Element<T extends CommonAttr = CommonAttr>
   private _lastFrameTime: number;
 
   public static attrConf: AttrConf<CommonAttr> = ElementAttrConf;
+  
 
   public constructor(attr: T = {} as T) {
     super();
     this.attr = attr;
+  }
+
+  public getAnimationKeys(): Array<keyof T> {
+    return [
+      'fill',
+      'stroke',
+      'lineWidth',
+      'lineDash',
+      'lineDashOffset',
+      'opacity',
+      'fillOpacity',
+      'strokeOpacity',
+      'rotation',
+      'position',
+      'scale',
+      'origin',
+      'rotationOrigin',
+      'scaleOrigin',
+      'shadowColor',
+      'shadowBlur',
+      'shadowOffsetX',
+      'shadowOffsetY',
+    ] as Array<keyof CommonAttr>
   }
 
   public setAttr(attr: T) {
@@ -103,7 +129,7 @@ export default class Element<T extends CommonAttr = CommonAttr>
     this.dirty();
   }
 
-  public addAnimation(option: AnimateOption) {
+  public addAnimation(option: AnimateOption<T>) {
     option.statTime = this._lastFrameTime;
     this._animations.push(option);
   }
@@ -121,6 +147,7 @@ export default class Element<T extends CommonAttr = CommonAttr>
         from: fromAttr,
         to: toAttr,
         ...duringOrConf,
+        animationKeys: [],
       })
     } else {
       this.addAnimation({
@@ -129,7 +156,8 @@ export default class Element<T extends CommonAttr = CommonAttr>
         ease,
         callback,
         delay,
-        stopped: false
+        stopped: false,
+        animationKeys: [],
       })
     }
   }
@@ -157,7 +185,9 @@ export default class Element<T extends CommonAttr = CommonAttr>
   }
 
   // todo
-  public getTransform() {}
+  public getTransform() {
+
+  }
 
   public computeBBox(): BBox {
     return { x: 0, y: 0, width: 0, height: 0 };

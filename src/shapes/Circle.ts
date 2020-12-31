@@ -7,9 +7,18 @@ export interface CircleConf extends CommonAttr {
  radius?: number;
 }
 
-export default class Rect extends Shape<CircleConf> {
+export default class Circle extends Shape<CircleConf> {
   public type = 'circle';
 
+  public getAnimationKeys(): Array<keyof CircleConf> {
+    return [
+      ...super.getAnimationKeys(),
+      'cx',
+      'cy',
+      'radius',
+    ];
+  }
+  
   public brush(ctx: CanvasRenderingContext2D) {
     const {cx, cy, radius} = this.attr;
     ctx.arc(

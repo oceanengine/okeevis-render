@@ -11,6 +11,18 @@ export interface LineConf extends CommonAttr {
 export default class Line extends Shape<LineConf> {
   public type = 'line';
 
+  public fillAble = false;
+
+  public getAnimationKeys(): Array<keyof LineConf> {
+    return [
+      ...super.getAnimationKeys(),
+      'x1',
+      'y1',
+      'x2',
+      'y2'
+    ];
+  }
+
   public brush(ctx: CanvasRenderingContext2D) {
     ctx.moveTo(this.attr.x1, this.attr.y1);
     ctx.lineTo(this.attr.x2, this.attr.y2);

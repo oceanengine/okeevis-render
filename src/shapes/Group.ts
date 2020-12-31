@@ -8,6 +8,10 @@ export interface GroupConf extends TextConf {
 export default class Group<T extends Element = Element> extends Element<GroupConf> {
   public type = 'group';
 
+  public fillAble = false;
+
+  public strokeAble = false;
+
   protected _components: T[] = [];
 
   public add(item: Element): this {

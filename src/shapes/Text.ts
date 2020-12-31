@@ -22,6 +22,19 @@ export interface TextConf extends CommonAttr {
 export default class Text extends Shape<TextConf> {
   public type = 'text';
 
+  public fillAble = false;
+  
+  public strokeAble = false;
+
+  public getAnimationKeys(): Array<keyof TextConf> {
+    return[
+      ...super.getAnimationKeys(),
+      'x',
+      'y',
+      'fontSize'
+    ];
+  }
+
   public brush(ctx: CanvasRenderingContext2D) {
     const {x, y, text} = this.attr;
     ctx.fillText(text, x, y);

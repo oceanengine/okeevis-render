@@ -10,23 +10,24 @@ export interface AnimateConf {
   callback ? : Function;
 }
 
-export interface AnimateOption {
+export interface AnimateOption<T> {
   statTime ? : number;
   stopped: boolean;
-  from: any;
-  to: any;
+  from: T;
+  to: T;
   during ? : number;
   ease ? : Function | EasingName;
   delay ? : number;
   onFrame ? : Function;
   callback ? : Function;
+  animationKeys: Array<keyof T>;
 }
 
 
 
 export default abstract class AnimateAble < T > {
 
-  public abstract addAnimation(option: AnimateOption): void;
+  public abstract addAnimation(option: AnimateOption<T>): void;
 
   public abstract animateTo(target: T, during: number, ease: EasingName, callback: Function, delay: number): void;
 

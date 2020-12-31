@@ -12,6 +12,20 @@ export interface ImageConf extends CommonAttr {
 
 export default class Rect extends Shape<ImageConf> {
   public type = 'image';
+  
+  public fillAble = false;
+
+  public strokeAble = false;
+
+  public getAnimationKeys(): Array<keyof ImageConf> {
+    return [
+      ...super.getAnimationKeys(),
+      'x',
+      'y',
+      'width',
+      'height',
+    ];
+  }
 
   public brush(ctx: CanvasRenderingContext2D) {
     const { src, x, y, width, height } = this.attr;
