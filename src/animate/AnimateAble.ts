@@ -11,13 +11,13 @@ export interface AnimateConf {
 }
 
 export interface AnimateOption<T> {
-  statTime ? : number;
+  startTime ? : number;
   stopped: boolean;
   from: T;
   to: T;
-  during ? : number;
-  ease ? : Function | EasingName;
-  delay ? : number;
+  during : number;
+  ease : Function | EasingName;
+  delay : number;
   onFrame ? : Function;
   callback ? : Function;
   animationKeys: Array<keyof T>;

@@ -98,8 +98,8 @@ export default class Render extends EventFul {
   }
 
   private _onFrame = (now: number) => {
-    this._painter.onFrame(now);
     this._root.onFrame(now);
+    this._painter.onFrame(now);
     this._needUpdate = false;
     requestAnimationFrame(this._onFrame)
   }

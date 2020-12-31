@@ -1,8 +1,10 @@
 import Eventful from '../utils/Eventful';
 import Render from '../render';
 import Group from './Group';
+import * as lodash from '../utils/lodash';
 import AnimateAble, { AnimateConf, AnimateOption } from '../animate/AnimateAble';
 import { EasingName } from '../animate/ease';
+import {interpolateAttr, } from '../interpolate'
 
 declare type Color = any;
 
@@ -130,7 +132,7 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
   }
 
   public addAnimation(option: AnimateOption<T>) {
-    option.statTime = this._lastFrameTime;
+    option.startTime = this._lastFrameTime;
     this._animations.push(option);
   }
 
@@ -138,26 +140,40 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     return this.attr[key];
   }
 
-  public animateTo(toAttr: T, duringOrConf?: number | AnimateConf, ease?: EasingName, callback?: Function, delay?: number) {
+  public animateTo(toAttr: T, duringOrConf: number | AnimateConf = 400, ease?: EasingName, callback?: Function, delay?: number) {
     
     const fromAttr = this.attr;
+    const animationKeys = this.getAnimationKeys().filter(key => {
+      const value = toAttr[key];
+      return !(lodash.isNull(value) || lodash.isUndefined(value));
+    });
+
+    const nonAnimateAttr = lodash.omit(toAttr, animationKeys) as T;
+    const animateToAttr = lodash.pick(toAttr, animationKeys);
+    const animateFromAttr = lodash.pick(fromAttr, animationKeys);
+    this.setAttr(nonAnimateAttr);
+
     if (typeof duringOrConf === 'object') {
       this.addAnimation({
         stopped: false,
-        from: fromAttr,
-        to: toAttr,
+        from: animateFromAttr,
+        to: animateToAttr,
+        during: duringOrConf.during,
+        ease,
+        delay,
         ...duringOrConf,
-        animationKeys: [],
+        animationKeys,
       })
     } else {
       this.addAnimation({
-        from: fromAttr,
-        to: toAttr,
+        from: animateFromAttr,
+        to: animateToAttr,
+        during: duringOrConf,
         ease,
         callback,
         delay,
         stopped: false,
-        animationKeys: [],
+        animationKeys,
       })
     }
   }
@@ -194,6 +210,23 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
   }
 
   public onFrame(now: number) {
+    this._animations.forEach(animate => {
+      const { startTime, during, from, to, animationKeys, ease, callback, onFrame, delay } = animate;
+      let progress = 0;
+      if (startTime) {
+        progress = Math.min((now - startTime) / during, 1);
+      } else {
+        animate.startTime = now;
+      }
+      const attr = interpolateAttr(from, to, progress);
+      if (progress === 1) {
+        callback  && callback();
+        animate.stopped = true;
+      }
+      this.setAttr(attr);
+      onFrame && onFrame(progress);
+    })
+    this._animations = this._animations.filter(item => !item.stopped);
     this._lastFrameTime = now;
   }
 
