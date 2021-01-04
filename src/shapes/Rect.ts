@@ -12,6 +12,16 @@ export interface RectConf extends CommonAttr {
 export default class Rect extends Shape<RectConf> {
   public type = 'rect';
 
+  public getDefaultAttr(): RectConf {
+    return {
+      ...super.getDefaultAttr(),
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      r: 0,
+    };
+  }
 
   public getAnimationKeys(): Array<keyof RectConf> {
     return [

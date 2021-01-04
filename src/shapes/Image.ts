@@ -27,6 +27,16 @@ export default class Rect extends Shape<ImageConf> {
     ];
   }
 
+  public getDefaultAttr(): ImageConf {
+    return {
+      ...super.getDefaultAttr(),
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    };
+  }
+
   public brush(ctx: CanvasRenderingContext2D) {
     const { src, x, y, width, height } = this.attr;
     const image = getImage(src, () => {
@@ -34,4 +44,5 @@ export default class Rect extends Shape<ImageConf> {
     });
     image && ctx.drawImage(image, x, y, width >= 0 ? width : image.width, height >= 0 ? height : image.height);
   }
+  
 }

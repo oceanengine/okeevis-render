@@ -11,22 +11,4 @@ const text = new Text({
   fontSize: 12,
 })
 
-const nextText = new Text({
-  x: 50,
-  y: 400,
-  text: 'testddd',
-  fontSize: 12,
-});
-
-render.addAll(makeText(10))
-
-render.updateAll(makeText(10))
-
-
-function makeText(count: number) {
-  return new Array(count).fill(0).map((value, index) => new Text({
-    x: Math.random() * 400,
-    y: Math.random() * 600,
-    text: index + ''
-  }))
-}
+render.add(text)

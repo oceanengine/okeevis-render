@@ -19,6 +19,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._components.push(item as T);
     item.renderer = this.renderer;
     item.parentNode = this;
+    item.mounted();
     this.dirty();
     return this;
   }
@@ -26,6 +27,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
     return this;
+  }
+
+  public clear() {
+    this._components.forEach(item => item.destroy());
+    this._components = [];
   }
 
   public onFrame(now: number) {

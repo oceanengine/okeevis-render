@@ -26,6 +26,14 @@ export default class Text extends Shape<TextConf> {
   
   public strokeAble = false;
 
+  public getDefaultAttr(): TextConf {
+    return {
+      ...super.getDefaultAttr(),
+      x: 0,
+      y: 0,
+    }
+  }
+
   public getAnimationKeys(): Array<keyof TextConf> {
     return[
       ...super.getAnimationKeys(),

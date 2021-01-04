@@ -8,16 +8,24 @@ import requestAnimationFrame from './utils/requestAnimationFrame';
 
 export default class Render extends EventFul {
   public dpr: number;
+
   private _dom: HTMLDivElement | HTMLCanvasElement;
+
   private _width: number;
+
   private _height: number;
+
   private _painter: Painter;
+
   // private _eventHandle
-  // private _animator
   private _renderer: 'canvas' | 'svg';
+
   private _isBrowser: boolean;
+
   private _needUpdate: boolean = true;
+
   private _requestAnimationFrameId: number;
+
   private _root: Group;
   
   public constructor(dom: HTMLDivElement | HTMLCanvasElement) {
@@ -35,6 +43,7 @@ export default class Render extends EventFul {
     this._loop();
     this._root = new Group();
     this._root.renderer = this;
+    this._isBrowser =   /html.*?element/gi.test(Object.prototype.toString.call(dom));
   }
 
   public resize(width: number, height: number) {

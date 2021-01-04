@@ -13,6 +13,16 @@ export default class Line extends Shape<LineConf> {
 
   public fillAble = false;
 
+  public getDefaultAttr(): LineConf {
+    return {
+      ...super.getDefaultAttr(),
+      x1: 0,
+      y1: 0,
+      x2: 0,
+      y2: 0
+    };
+  }
+
   public getAnimationKeys(): Array<keyof LineConf> {
     return [
       ...super.getAnimationKeys(),

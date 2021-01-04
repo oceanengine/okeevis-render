@@ -8,14 +8,13 @@ import {interpolateAttr, } from '../interpolate'
 
 declare type Color = any;
 
-export interface CommonAttr {
+export interface BaseAttr {
   key?: string;
   ref?: {current: Element};
   display?: boolean;
   zIndex?: number;
 
   fill?: Color;
-
   stroke?: Color;
   strokeNoScale?: boolean;
   lineWidth?: number;
@@ -43,35 +42,16 @@ export interface CommonAttr {
   shadowOffsetX?: number;
   shadowOffsetY?: number;
 
-  transitionProperty?: 'all' | 'none' | string[];
-  transitionEase?: EasingName;
-  transitionDuration?: number;
-  transitionDelay?: number;
-
   cursor?: string;
   pointerEvents?: 'none' | 'auto';
 }
 
-export type AttrConf<T> = {
-  [key in keyof T]: {
-    animateAble: boolean;
-    defaultValue: any;
-    effectShape: boolean;
-  };
-};
-
-const ElementAttrConf: AttrConf<CommonAttr> = {
-  fill: {
-    animateAble: true,
-    defaultValue: null,
-    effectShape: false,
-  },
-  stroke: {
-    animateAble: true,
-    defaultValue: null,
-    effectShape: false,
-  },
-};
+export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
+  transitionProperty?: 'all' | 'none' | Array<keyof T>
+  transitionEase?: EasingName;
+  transitionDuration?: number;
+  transitionDelay?: number;
+}
 
 export interface BBox {
   x: number;
@@ -95,6 +75,8 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
 
   public parentNode: Group | undefined;
 
+  public isClip: boolean = false;
+
   private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
   
   private _bboxDirty: boolean = true;
@@ -104,15 +86,15 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
   private _transform: number[];
 
   private _clientBoundingRect: BBox;
-
-  public static attrConf: AttrConf<CommonAttr> = ElementAttrConf;
+  
   
   public constructor(attr: T = {} as T) {
     super();
-    this.attr = attr;
+    this.attr = {...this.getDefaultAttr(), ...attr};
     if (attr.ref) {
       attr.ref.current = this;
     }
+    this.created();
   }
 
   public getAnimationKeys(): Array<keyof T> {
@@ -136,6 +118,21 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
       'shadowOffsetX',
       'shadowOffsetY',
     ] as Array<keyof CommonAttr>
+  }
+
+  public getDefaultAttr(): T {
+    return {
+      display: true,
+      zIndex: 0,
+      rotation: 0,
+      position: [0, 0],
+      scale: [1, 1],
+      origin: [0, 0],
+    } as T;
+  }
+  
+  public getComputedAttr(): T {
+    return this.attr;
   }
 
   public setAttr(attr: T = {} as T): this {
@@ -246,5 +243,16 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     this.renderer = null;
     this.stopAllAnimation();
     this.removeAllListeners();
+  }
+  
+  public created() {
+    // null
+  }
+
+  public mounted() {
+    const clip = this.attr.clip;
+    if (clip) {
+      clip.renderer = this.renderer;
+    }
   }
 }
