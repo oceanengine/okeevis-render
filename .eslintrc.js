@@ -140,7 +140,7 @@ module.exports = {
 
     // https://github.com/typescript-eslint/typescript-eslint/issues/2540#issuecomment-692866111
     'no-use-before-define': 0,
-    '@typescript-eslint/no-use-before-define': 2,
+    '@typescript-eslint/no-use-before-define': 0,
     'no-shadow': 0,
     '@typescript-eslint/no-shadow': [2, { ignoreTypeValueShadow: true }],
     // https://github.com/typescript-eslint/typescript-eslint/issues/2528#issuecomment-689369395

@@ -10,6 +10,7 @@ declare type Color = any;
 
 export interface CommonAttr {
   key?: string;
+  ref?: {current: Element};
   display?: boolean;
   zIndex?: number;
 
@@ -41,6 +42,11 @@ export interface CommonAttr {
   shadowBlur?: number;
   shadowOffsetX?: number;
   shadowOffsetY?: number;
+
+  transitionProperty?: 'all' | 'none' | string[];
+  transitionEase?: EasingName;
+  transitionDuration?: number;
+  transitionDelay?: number;
 
   cursor?: string;
   pointerEvents?: 'none' | 'auto';
@@ -90,17 +96,23 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
   public parentNode: Group | undefined;
 
   private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
+  
+  private _bboxDirty: boolean = true;
+
+  private _transformDirty: boolean = true;
+
+  private _transform: number[];
 
   private _clientBoundingRect: BBox;
 
-  private _lastFrameTime: number;
-
   public static attrConf: AttrConf<CommonAttr> = ElementAttrConf;
   
-
   public constructor(attr: T = {} as T) {
     super();
     this.attr = attr;
+    if (attr.ref) {
+      attr.ref.current = this;
+    }
   }
 
   public getAnimationKeys(): Array<keyof T> {
@@ -126,13 +138,16 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     ] as Array<keyof CommonAttr>
   }
 
-  public setAttr(attr: T) {
+  public setAttr(attr: T = {} as T): this {
+    if (lodash.keys(attr).length === 0) {
+      return
+    }
     this.attr = { ...this.attr, ...attr };
     this.dirty();
+    return this;
   }
 
   public addAnimation(option: AnimateOption<T>) {
-    option.startTime = this._lastFrameTime;
     this._animations.push(option);
   }
 
@@ -145,14 +160,14 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     const fromAttr = this.attr;
     const animationKeys = this.getAnimationKeys().filter(key => {
       const value = toAttr[key];
-      return !(lodash.isNull(value) || lodash.isUndefined(value));
+      const fromValue = fromAttr[key];
+      return !(lodash.isNull(value) || lodash.isUndefined(value)) && fromValue !== value;
     });
 
     const nonAnimateAttr = lodash.omit(toAttr, animationKeys) as T;
     const animateToAttr = lodash.pick(toAttr, animationKeys);
     const animateFromAttr = lodash.pick(fromAttr, animationKeys);
     this.setAttr(nonAnimateAttr);
-
     if (typeof duringOrConf === 'object') {
       this.addAnimation({
         stopped: false,
@@ -162,7 +177,6 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
         ease,
         delay,
         ...duringOrConf,
-        animationKeys,
       })
     } else {
       this.addAnimation({
@@ -173,7 +187,6 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
         callback,
         delay,
         stopped: false,
-        animationKeys,
       })
     }
   }
@@ -196,13 +209,12 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     return this._bbox;
   }
 
-  public getClientBoundingRect(): BBox {
-    return this._clientBoundingRect;
+  public getTransform(): number[] {
+    return this._transform;
   }
 
-  // todo
-  public getTransform() {
-
+  public getClientBoundingRect(): BBox {
+    return this._clientBoundingRect;
   }
 
   public computeBBox(): BBox {
@@ -211,7 +223,7 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
 
   public onFrame(now: number) {
     this._animations.forEach(animate => {
-      const { startTime, during, from, to, animationKeys, ease, callback, onFrame, delay } = animate;
+      const { startTime, during, from, to, ease, callback, onFrame, delay } = animate;
       let progress = 0;
       if (startTime) {
         progress = Math.min((now - startTime) / during, 1);
@@ -227,7 +239,6 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
       onFrame && onFrame(progress);
     })
     this._animations = this._animations.filter(item => !item.stopped);
-    this._lastFrameTime = now;
   }
 
   public destroy() {

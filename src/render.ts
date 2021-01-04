@@ -54,10 +54,6 @@ export default class Render extends EventFul {
   public getHeight(): number {
     return this._height;
   }
-  
-  public updateAll() {
-
-  }
 
   public add(element: Element) {
     this._root.add(element);
@@ -69,6 +65,10 @@ export default class Render extends EventFul {
 
   public remove(element: Element) {
     this._root.remove(element);
+  }
+
+  public updateAll(elements: Element[]) {
+    this._root.updateChildren(elements);
   }
 
   public getDom(): HTMLDivElement | HTMLCanvasElement {

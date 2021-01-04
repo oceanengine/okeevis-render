@@ -3,30 +3,19 @@ import Text from '../src/shapes/Text'
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom)
+const ref = {current: null} as any;
 
-const text = new Text({
-  x: 50,
-  y: 50,
-  text: 'test',
-  fontSize: 12,
-})
-
-const nextText = new Text({
-  x: 50,
-  y: 400,
-  text: 'testddd',
-  fontSize: 12,
-});
-
-render.addAll(makeText(10))
-
-render.updateAll(makeText(10))
+render.addAll(makeText(0))
+render.updateAll(makeText(5))
 
 
 function makeText(count: number) {
   return new Array(count).fill(0).map((value, index) => new Text({
+    ref: index === 0 ? ref: null,
     x: Math.random() * 400,
     y: Math.random() * 600,
     text: index + ''
   }))
 }
+
+ref.current.animateTo({x: 100, y: 100,}, 400)

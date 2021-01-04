@@ -91,7 +91,7 @@
     "@byte-design/color-palette": "0.1.6",
     "@byted/bytedance-render": "1.0.0-38",
     "@byted/bytedance-visualization-geomathic": "0.0.6",
-    "@egjs/list-differ": "1.0.0",
+    "@egjs/list-differ": "^1.0.0",
     "es6-set": "0.1.5",
     "htmlparser2": "4.1.0",
     "lodash": "^4.17.20",

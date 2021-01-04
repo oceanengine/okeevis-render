@@ -20,7 +20,6 @@ export interface AnimateOption<T> {
   delay : number;
   onFrame ? : Function;
   callback ? : Function;
-  animationKeys: Array<keyof T>;
 }
 
 
