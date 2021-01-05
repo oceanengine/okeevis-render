@@ -8,7 +8,6 @@ export interface ArcConf extends CommonAttr {
   radius?: number;
   start?: number;
   end?: number;
-  anticlockwise?: boolean;
 }
 
 export default class Arc extends Shape<ArcConf> {
@@ -22,7 +21,6 @@ export default class Arc extends Shape<ArcConf> {
       radius: 0,
       start: 0,
       end: PI2,
-      anticlockwise: false,
     };
   }
 

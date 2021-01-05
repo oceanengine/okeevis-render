@@ -64,7 +64,7 @@ export default class EventHandle  {
     dom.removeEventListener('touchend', this._handleTouchEnd);
     dom.removeEventListener('mouseleave', this._handleMouseLeave);
     dom.removeEventListener('mouseenter', this._handleMouseEnter);
-    document.removeEventListener('mousemove', this._handleDocumentMouseMove);
+    document.removeEventListener('touchend', this._handleDocumentTouchEnd);
     document.removeEventListener('mouseup', this._handleDocumentMouseUp);
   }
 
@@ -84,13 +84,13 @@ export default class EventHandle  {
     dom.addEventListener('touchend', this._handleTouchEnd);
     dom.addEventListener('mouseleave', this._handleMouseLeave);
     dom.addEventListener('mouseenter', this._handleMouseEnter);
-    document.addEventListener('mousemove', this._handleDocumentMouseMove);
+    document.addEventListener('touchend', this._handleDocumentTouchEnd);
     document.addEventListener('mouseup', this._handleDocumentMouseUp);
   }
   
 
   private _handleMouseWheel = (event: WheelEvent) => {
-    // todo
+    // todo https://github.com/facebookarchive/fixed-data-table/blob/master/src/vendor_upstream/dom/normalizeWheel.js
   }
 
   private _handleMouseDown = (event: WheelEvent) => {
@@ -134,7 +134,7 @@ export default class EventHandle  {
     // todo
   }
 
-  private _handleDocumentMouseMove = (event: MouseEvent) => {
+  private _handleDocumentTouchEnd = (event: MouseEvent) => {
     // todo
   }
 

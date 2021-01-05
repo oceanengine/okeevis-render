@@ -9,7 +9,6 @@ export interface SectorConf extends CommonAttr {
   radiusI?: number;
   start?: number;
   end?: number;
-  anticlockwise?: boolean;
   round?: boolean;
   cornerRadius?: number | number[];
 }
@@ -28,7 +27,6 @@ export default class Sector extends Shape<SectorConf> {
       end: 0,
       round: false,
       cornerRadius: 0,
-      anticlockwise: false,
     };
   }
 

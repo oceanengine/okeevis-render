@@ -8,5 +8,8 @@ export default class Eventful {
   public dispatch() {}
 
   protected removeAllListeners() {}
-  protected onEvent(event: any) {}
+
+  protected onEvent(event: any) {
+    
+  }
 }
