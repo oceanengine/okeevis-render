@@ -10,6 +10,15 @@ export interface CircleConf extends CommonAttr {
 export default class Circle extends Shape<CircleConf> {
   public type = 'circle';
 
+  public getDefaultAttr(): CircleConf {
+    return {
+      ...super.getDefaultAttr(),
+      cx: 0,
+      cy: 0,
+      radius: 0,
+    }
+  }
+
   public getAnimationKeys(): Array<keyof CircleConf> {
     return [
       ...super.getAnimationKeys(),

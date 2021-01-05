@@ -168,6 +168,6 @@ export default class Path2D {
   }
 
   public drawOnCanvasContext(ctx: CanvasRenderingContext2D) {
-    this._pathList.forEach(item => ctx[item.action].apply(null, item.params));
+    this._pathList.forEach(item => ctx[item.action].apply(ctx, item.params));
   }
 }

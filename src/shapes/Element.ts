@@ -61,7 +61,7 @@ export interface BBox {
 }
 
 export default class Element<T extends CommonAttr = any> extends Eventful implements AnimateAble<T> {
-  public attr: T;
+  public attr: T = {} as T;
 
   public type: string;
 
@@ -85,15 +85,12 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
 
   private _transform: number[];
 
-  private _clientBoundingRect: BBox;
-  
+  private _clientBoundingRect: BBox;  
   
   public constructor(attr: T = {} as T) {
     super();
-    this.attr = {...this.getDefaultAttr(), ...attr};
-    if (attr.ref) {
-      attr.ref.current = this;
-    }
+    const initAttr = {...this.getDefaultAttr(), ...attr};
+    this.setAttr(initAttr);
     this.created();
   }
 
@@ -128,6 +125,10 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
       position: [0, 0],
       scale: [1, 1],
       origin: [0, 0],
+      opacity: 1,
+      fillOpacity: 1,
+      strokeOpacity: 1,
+      shadowBlur: 0,
     } as T;
   }
   
@@ -197,6 +198,13 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     if (this.renderer) {
       this.renderer.dirty();
     }
+    const clip = this.attr.clip;
+    if (clip) {
+      clip.renderer = this.renderer;
+    }
+    if (this.attr.ref) {
+      this.attr.ref.current = this;
+    }
   }
 
   public getBBox(): BBox {
@@ -246,13 +254,10 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
   }
   
   public created() {
-    // null
+    // do nothing
   }
 
   public mounted() {
-    const clip = this.attr.clip;
-    if (clip) {
-      clip.renderer = this.renderer;
-    }
+    // do nothing
   }
 }
