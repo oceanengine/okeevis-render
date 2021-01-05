@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { equalWithTolerance, PI2, getPointOnPolar,  } from '../utils/math';
+import {PI2, getPointOnPolar,  } from '../utils/math';
 
 export interface ArcConf extends CommonAttr {
   cx?: number;

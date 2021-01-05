@@ -1,6 +1,33 @@
 import Render from '../render';
 import Element from '../shapes/Element';
 
+export interface CompositeEvent<T> {
+  type: string;
+  original: T;
+  readonly detail?: any;
+  readonly stopped: boolean;
+  readonly bubble: boolean;
+  stopPropagation: () => void;
+}
+
+export interface CompositeMouseEvent extends CompositeEvent<MouseEvent> {
+  x: number;
+  y: number;
+  target: Element;
+}
+
+export interface CompositeTouch {
+  readonly identifier: number;
+  x: number;
+  y: number;
+  target: Element;
+}
+
+export interface CompositeTouchEvent extends CompositeEvent<TouchEvent> {
+  touches: CompositeTouch[];
+  changedTouches: CompositeTouch[];
+}
+
 export default class EventHandle  {
   public render: Render;
 

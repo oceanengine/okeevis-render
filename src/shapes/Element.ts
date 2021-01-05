@@ -3,6 +3,7 @@ import Render from '../render';
 import Group from './Group';
 import * as lodash from '../utils/lodash';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
+import DragAndDrop, {DragAndDropConf, CompositeDragEvent, } from '../abstract/DragAndDrop';
 import { EasingName } from '../animate/ease';
 import { interpolateAttr } from '../interpolate';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
@@ -12,12 +13,12 @@ const mat3 = require('gl-matrix/mat3');
 
 declare type Color = any;
 
-export interface BaseAttr extends TransformConf {
+export interface BaseAttr extends TransformConf, DragAndDropConf {
   key?: string;
   ref?: { current: Element };
   display?: boolean;
   zIndex?: number;
-
+  
   fill?: Color;
   stroke?: Color;
   strokeNoScale?: boolean;
@@ -59,7 +60,7 @@ export interface BBox {
 
 export default class Element<T extends CommonAttr = any>
   extends Eventful
-  implements AnimateAble<T>, TransformAble {
+  implements AnimateAble<T>, TransformAble, DragAndDrop {
   public attr: T = {} as T;
 
   public type: string;
@@ -125,6 +126,7 @@ export default class Element<T extends CommonAttr = any>
     return {
       display: true,
       zIndex: 0,
+      draggable: false,
       rotation: 0,
       position: [0, 0],
       scale: [1, 1],
@@ -151,13 +153,61 @@ export default class Element<T extends CommonAttr = any>
     return this;
   }
 
-  public addAnimation(option: AnimateOption<T>) {
-    this._animations.push(option);
+  public dirty() {
+    if (this.renderer) {
+      this.renderer.dirty();
+    }
+    this._mountClip();    
+    if (this.attr.ref) {
+      this.attr.ref.current = this;
+    }
   }
 
-  public getAttr(key: keyof T): any {
-    return this.attr[key];
+  public getBBox(): BBox {
+    if (!this._bbox || this._bboxDirty) {
+      this._bbox = this.computeBBox();
+      this._bboxDirty = false;
+    }
+    return this._bbox;
+  } 
+
+  public getClientBoundingRect(): BBox {
+    if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
+      this._clientBoundingRect = this._computClientBoundingRect();
+      this._clientBoundingRectDirty = false;
+    }
+    return this._clientBoundingRect;
   }
+
+  public computeBBox(): BBox {
+    return { x: 0, y: 0, width: 0, height: 0 };
+  }
+
+  public created() {
+    // do nothing
+  }
+
+  public updated(prevAttr: T, nextAttr: T) {
+    if (nextAttr.rotation) {
+      this._dirtyTransform();
+    }
+    // todo bbox dirty
+    // this.dirtyBBox();
+  }
+
+  public mounted() {
+    this._mountClip();
+  }
+
+  public destroy() {
+    this.parentNode = null;
+    this.renderer = null;
+    this.stopAllAnimation();
+    this.removeAllListeners();
+  }
+  
+
+  /* ************ AnimateAble Begin ******************* */
 
   public animateTo(
     toAttr: T,
@@ -200,28 +250,39 @@ export default class Element<T extends CommonAttr = any>
     }
   }
 
+  public addAnimation(option: AnimateOption<T>) {
+    this._animations.push(option);
+  }
+
   public stopAllAnimation() {
     this._animations = [];
     return this;
   }
 
-  public dirty() {
-    if (this.renderer) {
-      this.renderer.dirty();
-    }
-    this._mountClip();    
-    if (this.attr.ref) {
-      this.attr.ref.current = this;
-    }
+  public onFrame(now: number) {
+    this._animations.forEach(animate => {
+      const { startTime, during, from, to, ease, callback, onFrame, delay } = animate;
+      let progress = 0;
+      if (startTime) {
+        progress = Math.min((now - startTime) / during, 1);
+      } else {
+        animate.startTime = now;
+      }
+      const attr = interpolateAttr(from, to, progress);
+      if (progress === 1) {
+        callback && callback();
+        animate.stopped = true;
+      }
+      this.setAttr(attr);
+      onFrame && onFrame(progress);
+    });
+    this._animations = this._animations.filter(item => !item.stopped);
   }
+  /* ************ AnimateAble End ******************* */
 
-  public getBBox(): BBox {
-    if (!this._bbox || this._bboxDirty) {
-      this._bbox = this.computeBBox();
-      this._bboxDirty = false;
-    }
-    return this._bbox;
-  }
+  
+
+  /* ************ TransformAble Begin ******************* */
 
   public getTransform(): mat3 {
     if (!this._transform || this._transformDirty) {
@@ -255,60 +316,33 @@ export default class Element<T extends CommonAttr = any>
     this._dirtyTransform();
   }
 
-  public getClientBoundingRect(): BBox {
-    if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
-      this._clientBoundingRect = this._computClientBoundingRect();
-      this._clientBoundingRectDirty = false;
-    }
-    return this._clientBoundingRect;
+  /* ************ DragAndDrop Begin ******************* */
+
+  public onDragStart(event: CompositeDragEvent) {
+    // todo
   }
 
-  public computeBBox(): BBox {
-    return { x: 0, y: 0, width: 0, height: 0 };
+  public onDragMove(event: CompositeDragEvent) {
+    // todo
   }
 
-  public onFrame(now: number) {
-    this._animations.forEach(animate => {
-      const { startTime, during, from, to, ease, callback, onFrame, delay } = animate;
-      let progress = 0;
-      if (startTime) {
-        progress = Math.min((now - startTime) / during, 1);
-      } else {
-        animate.startTime = now;
-      }
-      const attr = interpolateAttr(from, to, progress);
-      if (progress === 1) {
-        callback && callback();
-        animate.stopped = true;
-      }
-      this.setAttr(attr);
-      onFrame && onFrame(progress);
-    });
-    this._animations = this._animations.filter(item => !item.stopped);
+  public onDragEnd(event: CompositeDragEvent) {
+
   }
 
-  public created() {
-    // do nothing
+  public onDragEnter(event: CompositeDragEvent) {
+    
   }
 
-  public updated(prevAttr: T, nextAttr: T) {
-    if (nextAttr.rotation) {
-      this._dirtyTransform();
-    }
-    // todo bbox dirty
-    // this.dirtyBBox();
+  public onDragLeave(event: CompositeDragEvent) {
+    
   }
 
-  public mounted() {
-    this._mountClip();
+  public onDrop(event: CompositeDragEvent) {
+    
   }
 
-  public destroy() {
-    this.parentNode = null;
-    this.renderer = null;
-    this.stopAllAnimation();
-    this.removeAllListeners();
-  }
+  /* ************ DragAndDrop End ******************* */
 
   private _computeTransform(): mat3 {
     const out = mat3.create();
