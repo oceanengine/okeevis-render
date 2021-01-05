@@ -68,6 +68,13 @@ export default class CanvasPainter  implements Painter {
     if (!mat3.equals(matrix3, identityMat3)) {
       ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
     }
+    
+    if ((item as Shape).attr.clip) {
+      ctx.beginPath();
+      (item as Shape).attr.clip.brush(ctx);
+      ctx.clip();
+    }
+
     if (item.type !== 'group') {
       const current = item as Shape;
       ctx.lineWidth = attr.lineWidth;

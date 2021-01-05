@@ -6,6 +6,7 @@ import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble
 import { EasingName } from '../animate/ease';
 import { interpolateAttr } from '../interpolate';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
+import Shape from './Shape';
 
 const mat3 = require('gl-matrix/mat3');
 
@@ -31,7 +32,7 @@ export interface BaseAttr extends TransformConf {
   fillOpacity?: number;
   strokeOpacity?: number;
 
-  clip?: Element;
+  clip?: Shape;
 
   shadowColor?: string;
   shadowBlur?: number;
@@ -86,6 +87,8 @@ export default class Element<T extends CommonAttr = any>
   private _transform: mat3;
 
   private _clientBoundingRect: BBox;
+
+  private _clientBoundingRectDirty: boolean = true;
 
   public constructor(attr: T = {} as T) {
     super();
@@ -205,10 +208,7 @@ export default class Element<T extends CommonAttr = any>
     if (this.renderer) {
       this.renderer.dirty();
     }
-    const clip = this.attr.clip;
-    if (clip) {
-      clip.renderer = this.renderer;
-    }
+    this._mountClip();    
     if (this.attr.ref) {
       this.attr.ref.current = this;
     }
@@ -221,7 +221,7 @@ export default class Element<T extends CommonAttr = any>
     }
     return this._bbox;
   }
-  
+
   public getTransform(): mat3 {
     if (!this._transform || this._transformDirty) {
       this._transform = this._computeTransform();
@@ -233,28 +233,32 @@ export default class Element<T extends CommonAttr = any>
   public resetTransform() {
     this._baseMatrix = mat3.create();
     this.dirty();
-    this._transformDirty = true;
+    this._dirtyTransform();
   }
 
   public translate(dx: number, dy: number) {
     this._baseMatrix = mat3.translate(this._baseMatrix, this._baseMatrix, [dx, dy]);
     this.dirty();
-    this._transformDirty = true;
+    this._dirtyTransform();
   }
 
   public scale(sx: number, sy: number = sx) {
     this._baseMatrix = mat3.scale(this._baseMatrix, this._baseMatrix, [sx, sy]);
     this.dirty();
-    this._transformDirty = true;
+    this._dirtyTransform();
   }
 
   public rotate(rad: number) {
     this._baseMatrix = mat3.rotate(this._baseMatrix, this._baseMatrix, rad);
     this.dirty();
-    this._transformDirty = true;
+    this._dirtyTransform();
   }
 
   public getClientBoundingRect(): BBox {
+    if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
+      this._clientBoundingRect = this._computClientBoundingRect();
+      this._clientBoundingRectDirty = false;
+    }
     return this._clientBoundingRect;
   }
 
@@ -288,12 +292,14 @@ export default class Element<T extends CommonAttr = any>
 
   public updated(prevAttr: T, nextAttr: T) {
     if (nextAttr.rotation) {
-      this._transformDirty = true;
+      this._dirtyTransform();
     }
+    // todo bbox dirty
+    // this.dirtyBBox();
   }
 
   public mounted() {
-    // do nothing
+    this._mountClip();
   }
 
   public destroy() {
@@ -304,11 +310,31 @@ export default class Element<T extends CommonAttr = any>
   }
 
   private _computeTransform(): mat3 {
-    const out =  mat3.create()
-    const {rotation, } = this.attr;
+    const out = mat3.create();
+    const { rotation } = this.attr;
     mat3.rotate(out, out, rotation);
     mat3.multiply(out, out, this._baseMatrix);
     return out;
   }
-  
+
+  private _computClientBoundingRect(): BBox {
+    return { x: 0, y: 0, width: 0, height: 0 };
+  }
+
+  private _dirtyTransform() {
+    this._transformDirty = true;
+    this._clientBoundingRectDirty = true;
+  }
+
+  private _dirtyBBox() {
+    this._bboxDirty = true;
+    this._clientBoundingRectDirty = true;
+  }
+
+  private _mountClip() {
+    const clip = this.attr.clip;
+    if (clip) {
+      clip.renderer = this.renderer;
+    }
+  }
 }

@@ -1,1 +1,1 @@
-import './transform'
+import './clip'
