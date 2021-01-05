@@ -1,5 +1,6 @@
 import Painter from './abstract/Painter';
 import CanvasPainter from './painter/CanvasPainter';
+import EventHandle from './event/EventHandle';
 import EventFul from './utils/Eventful';
 import Group from './shapes/Group';
 import Element from './shapes/Element';
@@ -19,9 +20,6 @@ export default class Render extends EventFul {
 
   private _height: number;
 
-  private _painter: Painter;
-
-  // private _eventHandle
   private _renderer: 'canvas' | 'svg';
 
   private _isBrowser: boolean;
@@ -29,8 +27,12 @@ export default class Render extends EventFul {
   private _needUpdate: boolean = true;
 
   private _requestAnimationFrameId: number;
-
+  
   private _root: Group;
+
+  private _painter: Painter;
+
+  private _eventHandle: EventHandle;
   
   public constructor(dom: HTMLDivElement | HTMLCanvasElement, option: RenderOptions = {}) {
     super();
@@ -48,6 +50,7 @@ export default class Render extends EventFul {
     this._isBrowser =   /html.*?element/gi.test(Object.prototype.toString.call(dom));
     this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio : 1);
     this._painter= new CanvasPainter(this);
+    this._eventHandle = new EventHandle(this);
     this._loop();
   }
 
@@ -109,6 +112,10 @@ export default class Render extends EventFul {
   
   public getAllElements(): Element[] {
     return this._root.children();
+  }
+
+  public isBrowser() {
+    return this._isBrowser;
   }
 
   private _onFrame = (now: number) => {
