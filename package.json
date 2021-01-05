@@ -93,6 +93,7 @@
     "@byted/bytedance-visualization-geomathic": "0.0.6",
     "@egjs/list-differ": "^1.0.0",
     "es6-set": "0.1.5",
+    "gl-matrix": "^3.3.0",
     "htmlparser2": "4.1.0",
     "lodash": "^4.17.20",
     "size-sensor": "0.2.6"

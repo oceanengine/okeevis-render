@@ -1,1 +1,1 @@
-import './path'
+import './transform'

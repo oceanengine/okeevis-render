@@ -6,16 +6,21 @@ import Shape from '../shapes/Shape';
 import Group from '../shapes/Group';
 import * as lodash from '../utils/lodash';
 
+const mat3 = require('gl-matrix/mat3');
+
 export interface RenderingContext extends CommonAttr {
 
 }
+const identityMat3 = mat3.create();
 
 export default class CanvasPainter  implements Painter {
   
   public render: Render;
 
   private _canvas: HTMLCanvasElement;
+
   private _width: number;
+
   private _height: number;
 
   public constructor(render: Render) {
@@ -58,8 +63,12 @@ export default class CanvasPainter  implements Painter {
     if (attr.display === false) {
       return;
     }
-    const prevContext = lodash.last(contextStack);
-    const changedContext = this._getChangedContext(prevContext, item.attr);
+    ctx.save();
+    const matrix3 = item.getTransform();
+    if (!mat3.equals(matrix3, identityMat3)) {
+      console.log(matrix3)
+      ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
+    }
     if (item.type !== 'group') {
       const current = item as Shape;
       ctx.lineWidth = attr.lineWidth;
@@ -73,6 +82,7 @@ export default class CanvasPainter  implements Painter {
       const current = item as Group;
       current.children().forEach(child => this.drawElement(ctx, child, contextStack));
     }
+    ctx.restore();
   }
   
   public initElementContext() {
@@ -103,10 +113,6 @@ export default class CanvasPainter  implements Painter {
     }
     this._width = width;
     this._height = height;
-  }
-
-  private _getChangedContext(prevContext: RenderingContext, currentContext: RenderingContext): Array<keyof RenderingContext> {
-    return ['fill', 'fillOpacity'];
   }
   
 }

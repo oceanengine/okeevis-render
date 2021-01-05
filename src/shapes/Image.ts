@@ -39,6 +39,9 @@ export default class Rect extends Shape<ImageConf> {
 
   public brush(ctx: CanvasRenderingContext2D) {
     const { src, x, y, width, height } = this.attr;
+    if (!src) {
+      return;
+    }
     const image = getImage(src, () => {
       this.dirty();
     });

@@ -4,13 +4,16 @@ import Group from './Group';
 import * as lodash from '../utils/lodash';
 import AnimateAble, { AnimateConf, AnimateOption } from '../animate/AnimateAble';
 import { EasingName } from '../animate/ease';
-import {interpolateAttr, } from '../interpolate'
+import { interpolateAttr } from '../interpolate';
+import TransformAble, { TransformConf } from '../transform/TransformAble';
+
+const mat3 = require('gl-matrix/mat3');
 
 declare type Color = any;
 
-export interface BaseAttr {
+export interface BaseAttr extends TransformConf {
   key?: string;
-  ref?: {current: Element};
+  ref?: { current: Element };
   display?: boolean;
   zIndex?: number;
 
@@ -30,13 +33,6 @@ export interface BaseAttr {
 
   clip?: Element;
 
-  rotation?: number;
-  position?: [number, number];
-  scale?: [number, number];
-  origin?: [number, number];
-  rotationOrigin?: [number, number];
-  scaleOrigin?: [number, number];
-
   shadowColor?: string;
   shadowBlur?: number;
   shadowOffsetX?: number;
@@ -47,7 +43,7 @@ export interface BaseAttr {
 }
 
 export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
-  transitionProperty?: 'all' | 'none' | Array<keyof T>
+  transitionProperty?: 'all' | 'none' | Array<keyof T>;
   transitionEase?: EasingName;
   transitionDuration?: number;
   transitionDelay?: number;
@@ -60,13 +56,15 @@ export interface BBox {
   height: number;
 }
 
-export default class Element<T extends CommonAttr = any> extends Eventful implements AnimateAble<T> {
+export default class Element<T extends CommonAttr = any>
+  extends Eventful
+  implements AnimateAble<T>, TransformAble {
   public attr: T = {} as T;
 
   public type: string;
 
   public fillAble: boolean = true;
-  
+
   public strokeAble: boolean = true;
 
   private _animations: AnimateOption<T>[] = [];
@@ -78,18 +76,18 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
   public isClip: boolean = false;
 
   private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
-  
+
   private _bboxDirty: boolean = true;
 
   private _transformDirty: boolean = true;
 
-  private _transform: number[];
+  private _transform: mat3;
 
-  private _clientBoundingRect: BBox;  
-  
+  private _clientBoundingRect: BBox;
+
   public constructor(attr: T = {} as T) {
     super();
-    const initAttr = {...this.getDefaultAttr(), ...attr};
+    const initAttr = { ...this.getDefaultAttr(), ...attr };
     this.setAttr(initAttr);
     this.created();
   }
@@ -114,7 +112,7 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
       'shadowBlur',
       'shadowOffsetX',
       'shadowOffsetY',
-    ] as Array<keyof CommonAttr>
+    ] as Array<keyof CommonAttr>;
   }
 
   public getDefaultAttr(): T {
@@ -131,14 +129,14 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
       shadowBlur: 0,
     } as T;
   }
-  
+
   public getComputedAttr(): T {
     return this.attr;
   }
 
   public setAttr(attr: T = {} as T): this {
     if (lodash.keys(attr).length === 0) {
-      return
+      return;
     }
     this.attr = { ...this.attr, ...attr };
     this.dirty();
@@ -153,8 +151,13 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     return this.attr[key];
   }
 
-  public animateTo(toAttr: T, duringOrConf: number | AnimateConf = 400, ease?: EasingName, callback?: Function, delay?: number) {
-    
+  public animateTo(
+    toAttr: T,
+    duringOrConf: number | AnimateConf = 400,
+    ease?: EasingName,
+    callback?: Function,
+    delay?: number,
+  ) {
     const fromAttr = this.attr;
     const animationKeys = this.getAnimationKeys().filter(key => {
       const value = toAttr[key];
@@ -175,7 +178,7 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
         ease,
         delay,
         ...duringOrConf,
-      })
+      });
     } else {
       this.addAnimation({
         from: animateFromAttr,
@@ -185,7 +188,7 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
         callback,
         delay,
         stopped: false,
-      })
+      });
     }
   }
 
@@ -214,7 +217,11 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     return this._bbox;
   }
 
-  public getTransform(): number[] {
+  public getTransform(): mat3 {
+    if (this._transform) {
+      return this._transform
+    }
+    this._transform = this._computeTransform();
     return this._transform;
   }
 
@@ -237,12 +244,12 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
       }
       const attr = interpolateAttr(from, to, progress);
       if (progress === 1) {
-        callback  && callback();
+        callback && callback();
         animate.stopped = true;
       }
       this.setAttr(attr);
       onFrame && onFrame(progress);
-    })
+    });
     this._animations = this._animations.filter(item => !item.stopped);
   }
 
@@ -252,7 +259,7 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
     this.stopAllAnimation();
     this.removeAllListeners();
   }
-  
+
   public created() {
     // do nothing
   }
@@ -260,4 +267,12 @@ export default class Element<T extends CommonAttr = any> extends Eventful implem
   public mounted() {
     // do nothing
   }
+
+  private _computeTransform(): mat3 {
+    const transform =  mat3.create()
+    const {rotation, } = this.attr;
+    mat3.rotate(transform, mat3.create(), rotation);
+    return transform;
+  }
+  
 }
