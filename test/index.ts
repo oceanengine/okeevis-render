@@ -1,1 +1,1 @@
-import './clip'
+import './dpr'

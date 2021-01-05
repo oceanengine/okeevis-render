@@ -6,8 +6,12 @@ import Element from './shapes/Element';
 import {getDomContentSize, } from './utils/dom';
 import requestAnimationFrame from './utils/requestAnimationFrame';
 
+export interface RenderOptions {
+  dpr?: number;
+}
+
 export default class Render extends EventFul {
-  public dpr: number;
+  public dpr: number = 1;
 
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
@@ -28,7 +32,7 @@ export default class Render extends EventFul {
 
   private _root: Group;
   
-  public constructor(dom: HTMLDivElement | HTMLCanvasElement) {
+  public constructor(dom: HTMLDivElement | HTMLCanvasElement, option: RenderOptions = {}) {
     super();
     this._dom = dom;
     if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
@@ -39,11 +43,12 @@ export default class Render extends EventFul {
       this._width = width;
       this._height = height;
     }
-    this._painter= new CanvasPainter(this);
-    this._loop();
     this._root = new Group();
     this._root.renderer = this;
     this._isBrowser =   /html.*?element/gi.test(Object.prototype.toString.call(dom));
+    this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio : 1);
+    this._painter= new CanvasPainter(this);
+    this._loop();
   }
 
   public resize(width: number, height: number) {

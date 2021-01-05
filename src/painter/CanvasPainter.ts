@@ -47,10 +47,10 @@ export default class CanvasPainter  implements Painter {
     const ctx = this._canvas.getContext('2d');
     const elements = this.render.getAllElements();
     ctx.clearRect(0, 0, this._width, this._height);
-    const dpr = this.render.dpr || 1;
+    const dpr = this.render.dpr;
     ctx.save();
     if (dpr !== 1) {
-      ctx.scale(dpr, dpr);
+      ctx.scale(dpr,  dpr);
     }
     const contextStack: RenderingContext[] = [];
     elements.forEach(item => this.drawElement(ctx, item, contextStack));
@@ -105,7 +105,7 @@ export default class CanvasPainter  implements Painter {
     const width = render.getWidth();
     const height = render.getHeight();
     // todo dpr
-    const dpr = this.render.dpr || 1;
+    const dpr = this.render.dpr;
     if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
       this._canvas = dom as HTMLCanvasElement;
     } else {

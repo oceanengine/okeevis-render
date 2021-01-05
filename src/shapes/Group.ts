@@ -16,6 +16,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   protected _components: T[] = [];
 
   public add(item: Element): this {
+    if (!item) {
+      return;
+    }
     this._components.push(item as T);
     item.renderer = this.renderer;
     item.parentNode = this;

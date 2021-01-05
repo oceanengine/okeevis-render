@@ -22,7 +22,7 @@ const rect = new Rect({
   height: 100,
   fill: 'blue',
   stroke: 'red',
-  lineWidth: 2,
+  lineWidth: 1,
 })
 
 
