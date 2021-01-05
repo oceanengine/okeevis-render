@@ -33,9 +33,9 @@ export default class EventHandle  {
 
   private _draggingTarget: Element;
 
-  private _mouseTarget: Element;
+  private _prevMouseTarget: Element;
 
-  private _touchTarget: Record<number, Element>;
+  private _prevTouchTarget: Record<number, Element>;
 
   public constructor(render: Render) {
     this.render = render;
@@ -64,6 +64,8 @@ export default class EventHandle  {
     dom.removeEventListener('touchend', this._handleTouchEnd);
     dom.removeEventListener('mouseleave', this._handleMouseLeave);
     dom.removeEventListener('mouseenter', this._handleMouseEnter);
+    document.removeEventListener('mousemove', this._handleDocumentMouseMove);
+    document.removeEventListener('mouseup', this._handleDocumentMouseUp);
   }
 
   private _initEvents() {
@@ -82,6 +84,8 @@ export default class EventHandle  {
     dom.addEventListener('touchend', this._handleTouchEnd);
     dom.addEventListener('mouseleave', this._handleMouseLeave);
     dom.addEventListener('mouseenter', this._handleMouseEnter);
+    document.addEventListener('mousemove', this._handleDocumentMouseMove);
+    document.addEventListener('mouseup', this._handleDocumentMouseUp);
   }
   
 
@@ -127,6 +131,14 @@ export default class EventHandle  {
   }
 
   private _handleMouseEnter= (event: WheelEvent) => {
+    // todo
+  }
+
+  private _handleDocumentMouseMove = (event: MouseEvent) => {
+    // todo
+  }
+
+  private _handleDocumentMouseUp = (event: MouseEvent) => {
     // todo
   }
 }
