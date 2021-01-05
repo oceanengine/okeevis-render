@@ -113,8 +113,6 @@ export default class Element<T extends CommonAttr = any>
       'position',
       'scale',
       'origin',
-      'rotationOrigin',
-      'scaleOrigin',
       'shadowColor',
       'shadowBlur',
       'shadowOffsetX',

@@ -8,12 +8,11 @@ const shape = new Arc({
   cy: 150,
   radius: 100,
   start: 0,
-  end: 0,
+  end: Math.PI / 4,
   stroke: 'red',
 })
 render.add(shape)
 
 shape.animateTo({
-  start: 0,
-  end: Math.PI
-}, 400)
+  rotation: 3.24
+}, 4000)

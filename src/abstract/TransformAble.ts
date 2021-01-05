@@ -4,8 +4,6 @@ export interface TransformConf {
   position?: [number, number];
   scale?: [number, number];
   origin?: [number, number];
-  rotationOrigin?: [number, number];
-  scaleOrigin?: [number, number];
 }
 
 
