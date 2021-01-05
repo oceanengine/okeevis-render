@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { equalWithTolerance, PI2 } from '../utils/math';
+import { equalWithTolerance, PI2, getPointOnPolar,  } from '../utils/math';
 
 export interface ArcConf extends CommonAttr {
   cx?: number;
@@ -32,19 +32,10 @@ export default class Arc extends Shape<ArcConf> {
 
   public brush(ctx: CanvasRenderingContext2D) {
     // TODO
-    const start: number = this.attr.start;
-    let end: number = this.attr.end;
-    let anticlockwise: boolean = this.attr.anticlockwise;
-
-    // 一定画圆
-    if (equalWithTolerance(Math.abs(start - end), PI2)) {
-      anticlockwise = false;
-      end = start + PI2;
-    }
-    // 一定什么都不画
-    if (equalWithTolerance(start, end)) {
-      anticlockwise = true;
-    }
-    ctx.arc(this.attr.cx, this.attr.cy, this.attr.radius, start, end, anticlockwise);
+    const {cx, cy, radius, start, end,} = this.attr;
+    const anticlockwise = start > end;
+    const p1 = getPointOnPolar(cx, cy, radius, start);
+    ctx.moveTo(p1.x, p1.y);
+    ctx.arc(cx, cy, radius, start, end, anticlockwise);
   }
 }

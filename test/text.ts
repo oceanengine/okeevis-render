@@ -8,7 +8,7 @@ const text = new Text({
   x: 50,
   y: 50,
   text: 'test',
-  fontSize: 12,
+  fontSize: 24,
 })
 
 render.add(text)

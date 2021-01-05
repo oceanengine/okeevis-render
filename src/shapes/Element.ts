@@ -80,11 +80,12 @@ export default class Element<T extends CommonAttr = any>
 
   private _bboxDirty: boolean = true;
 
+  private _transform: mat3;
+  
   private _transformDirty: boolean = true;
 
   private _baseMatrix: mat3 = mat3.create();
 
-  private _transform: mat3;
 
   private _clientBoundingRect: BBox;
 

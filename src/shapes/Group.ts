@@ -74,7 +74,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       if (nextElement.attr.ref) {
         nextElement.attr.ref.current = prevElement;
       }
-      this._components[from].stopAllAnimation().animateTo(nextElement.attr, 400);
+      this._components[from].stopAllAnimation().animateTo(nextElement.attr, 10000);
       if (prevElement.type === 'group') {
         (prevElement as unknown as Group).updateChildren((nextElement as Group).children())
       }

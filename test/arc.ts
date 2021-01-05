@@ -9,6 +9,6 @@ render.add(new Arc({
   cy: 150,
   radius: 100,
   start: 0,
-  end: Math.PI / 2,
+  end: Math.PI * 2 - 0.3,
   stroke: 'red',
 }))

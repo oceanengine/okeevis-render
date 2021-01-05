@@ -1,1 +1,1 @@
-import './dpr'
+import './sector'
