@@ -1,4 +1,4 @@
-import Painter from './painter/Painter';
+import Painter from './abstract/Painter';
 import CanvasPainter from './painter/CanvasPainter';
 import EventFul from './utils/Eventful';
 import Group from './shapes/Group';

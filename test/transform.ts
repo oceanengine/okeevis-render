@@ -1,23 +1,28 @@
 import Render from '../src/render'
-import Polyline from '../src/shapes/Polyline'
+import Line from '../src/shapes/Line'
 import Group from '../src/shapes/Group'
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom)
 
-const polyline = new Polyline({
-  pointList: [
-    {x: 0, y: 0,},
-    {x: 100, y: 0,},
-    {x: 100, y: 100,},
-  ],
+const line = new Line({
+  x1:0,
+  y1: 0,
+  x2: 100,
+  y2: 0,
   fill: 'red',
   stroke: 'blue',
-  rotation: 1 * Math.PI / 11,
+  rotation: 0,
 });
 
 const group = new Group({
-  rotation: Math.PI / 10,
+  rotation: 0 * Math.PI / 10,
 })
-group.add(polyline)
+group.add(line)
 render.add(group)
+
+group.translate(100, 0)
+
+group.animateTo({
+  rotation: Math.PI/ 2,
+}, 4000)

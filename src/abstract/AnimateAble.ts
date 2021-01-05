@@ -1,6 +1,6 @@
 import {
   EasingName
-} from './ease'
+} from '../animate/ease'
 
 export interface AnimateConf {
   during ? : number;

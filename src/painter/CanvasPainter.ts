@@ -1,5 +1,5 @@
 
-import Painter from './Painter';
+import Painter from '../abstract/Painter';
 import Render from '../render';
 import Element, {CommonAttr, } from '../shapes/Element';
 import Shape from '../shapes/Shape';
@@ -66,7 +66,6 @@ export default class CanvasPainter  implements Painter {
     ctx.save();
     const matrix3 = item.getTransform();
     if (!mat3.equals(matrix3, identityMat3)) {
-      console.log(matrix3)
       ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
     }
     if (item.type !== 'group') {
