@@ -8,9 +8,12 @@ export interface PolylineConf extends CommonAttr {
   smoothConstraint?: {x: number; y: number; width: number; height: number};
   smoothMonotone?: 'x' | 'y';
 }
+const shapeKeys: Array<keyof PolylineConf> = ['pointList', 'smooth', 'smoothConstraint', 'smoothMonotone', 'smoothType'];
 
 export default class Polyline extends Shape<PolylineConf> {
   public type = 'polyline';
+
+  public shapeKeys = shapeKeys;
 
   public getDefaultAttr(): PolylineConf {
     return {

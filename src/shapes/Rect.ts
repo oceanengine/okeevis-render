@@ -8,10 +8,13 @@ export interface RectConf extends CommonAttr {
   height?: number;
   r?: number | number[];
 }
+const shapeKeys: Array<keyof RectConf> = ['x', 'y', 'width', 'height'];
 
 export default class Rect extends Shape<RectConf> {
   public type = 'rect';
 
+  public shapeKeys = shapeKeys;
+  
   public getDefaultAttr(): RectConf {
     return {
       ...super.getDefaultAttr(),

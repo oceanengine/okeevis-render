@@ -23,7 +23,9 @@ export function interpolateAttr(from: any, to: any, k: number):any {
   for(const key in from) {
     const fromValue = from[key];
     const toValue = to[key];
-    ret[key] = interpolateNumber(fromValue, toValue, k);
+    if (typeof fromValue === 'number' && typeof toValue === 'number') {
+      ret[key] = interpolateNumber(fromValue, toValue, k);
+    }
   }
   return ret;
 }

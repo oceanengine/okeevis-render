@@ -66,10 +66,11 @@ export default class Element<T extends CommonAttr = any>
 
   public type: string;
 
+  public readonly shapeKeys: Array<keyof T> = [];
+
   public fillAble: boolean = true;
 
   public strokeAble: boolean = true;
-
 
   public ownerRender: Render | undefined;
 
@@ -125,10 +126,6 @@ export default class Element<T extends CommonAttr = any>
       display: true,
       zIndex: 0,
       draggable: false,
-      rotation: 0,
-      position: [0, 0],
-      scale: [1, 1],
-      origin: [0, 0],
       opacity: 1,
       fillOpacity: 1,
       strokeOpacity: 1,
@@ -169,9 +166,9 @@ export default class Element<T extends CommonAttr = any>
     return this._bbox;
   } 
 
-  public getClientBoundingRect(): BBox {
+  public getClientBoundingRect(parentTransform?: mat3): BBox {
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
-      this._clientBoundingRect = this._computClientBoundingRect();
+      this._clientBoundingRect = this._computClientBoundingRect(parentTransform);
       this._clientBoundingRectDirty = false;
     }
     return this._clientBoundingRect;
@@ -186,14 +183,23 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public updated(prevAttr: T, nextAttr: T) {
-    if (nextAttr.rotation) {
+    const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation'].filter(key => !lodash.isUndefined((nextAttr as any)[key])) as any;
+    const shapeKeys = this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key]));
+    
+    
+    if (transformKeys.length) {
       this._dirtyTransform();
     }
-    // todo bbox dirty
-    // this.dirtyBBox();
+
+    if (shapeKeys.some(key => prevAttr[key] !== nextAttr[key])) {
+      this._dirtyBBox();
+    }
   }
 
   public mounted() {
+    if (this.parentNode) {
+      this.ownerRender = this.parentNode.ownerRender;
+    }
     this._mountClip();
   }
 
@@ -220,7 +226,6 @@ export default class Element<T extends CommonAttr = any>
       const fromValue = fromAttr[key];
       return !(lodash.isNull(value) || lodash.isUndefined(value)) && fromValue !== value;
     });
-
     const nonAnimateAttr = lodash.omit(toAttr, animationKeys) as T;
     const animateToAttr = lodash.pick(toAttr, animationKeys);
     const animateFromAttr = lodash.pick(fromAttr, animationKeys);
@@ -258,10 +263,10 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public onFrame(now: number) {
-    const animate = this._animations[0];
-    if (!animate) {
+    if (!this._animations.length) {
       return;
     }
+    const animate = this._animations[0];
     const { startTime, during, from, to, ease, callback, onFrame, delay } = animate;
     let progress = 0;
     if (startTime) {
@@ -344,15 +349,24 @@ export default class Element<T extends CommonAttr = any>
 
   /* ************ DragAndDrop End ******************* */
 
+  public dirtyClientBoundingRect() {
+    this._clientBoundingRectDirty = true;
+  }
+
   private _computeTransform(): mat3 {
     const out = mat3.create();
-    const { rotation } = this.attr;
+    const { rotation = 0, origin = [1, 1], position = [0, 0], scale = [1, 1] } = this.attr;
     mat3.rotate(out, out, rotation);
     mat3.multiply(out, out, this._baseMatrix);
     return out;
   }
 
-  private _computClientBoundingRect(): BBox {
+  private _computClientBoundingRect(parentTransform?: mat3): BBox {
+    if (parentTransform) {
+      // todo
+    } else {
+      // todo
+    }
     return { x: 0, y: 0, width: 0, height: 0 };
   }
 
@@ -365,6 +379,7 @@ export default class Element<T extends CommonAttr = any>
     this._bboxDirty = true;
     this._clientBoundingRectDirty = true;
   }
+  
 
   private _mountClip() {
     const clip = this.attr.clip;

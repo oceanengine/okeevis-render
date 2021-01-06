@@ -18,6 +18,7 @@ export interface TextConf extends CommonAttr {
       ellipse?: string;
   };
 }
+const shapeKeys: Array<keyof TextConf> = ['x', 'y', 'text', 'truncate', 'textAlign', 'textBaseline', 'fontFamily', 'fontWeight'];
 
 export default class Text extends Shape<TextConf> {
   public type = 'text';
@@ -25,7 +26,9 @@ export default class Text extends Shape<TextConf> {
   public fillAble = false;
   
   public strokeAble = false;
-
+  
+  public shapeKeys = shapeKeys;
+  
   public getDefaultAttr(): TextConf {
     return {
       ...super.getDefaultAttr(),

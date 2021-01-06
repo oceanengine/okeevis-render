@@ -28,6 +28,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     ]
   }
 
+  public mounted() {
+    super.mounted();
+    this._components.forEach(item => item.mounted());
+  }
+
   public add(item: Element): this {
     if (!item) {
       return;
@@ -39,6 +44,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this.dirty();
     return this;
   }
+  
   
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
@@ -90,7 +96,8 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       if (prevElement.type === 'group') {
         (prevElement as unknown as Group).updateChildren((nextElement as Group).children())
       }
-      this._components[from].stopAllAnimation().animateTo(nextElement.attr, 10000);
+      
+      prevElement.stopAllAnimation().animateTo(nextElement.attr, 10000);
     });
 
     result.added.forEach(index => {
@@ -106,7 +113,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public children(): T[] {
-    return this._components;
+    return this._components.slice();
   }
 
   public sortByZIndex() {

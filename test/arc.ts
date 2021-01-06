@@ -12,7 +12,7 @@ const shape = new Arc({
   stroke: 'red',
 })
 render.add(shape)
-
 shape.animateTo({
-  rotation: Math.PI
-}, 400)
+  rotation: Math.PI,
+  radius: 200,
+}, 4000)

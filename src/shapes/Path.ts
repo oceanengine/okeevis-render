@@ -6,9 +6,12 @@ export interface PathConf extends CommonAttr {
   pathData?: Path2D;
   brush?: (ctx: CanvasRenderingContext2D | Path2D) => void;
 }
+const shapeKeys: Array<keyof PathConf> = ['pathData', 'brush'];
 
 export default class Path extends Shape<PathConf> {
   public type = 'path';
+
+  public shapeKeys = shapeKeys;
 
   public static fromSvgPath(inputPath: string): Path {
     return new Path({

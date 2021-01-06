@@ -13,8 +13,13 @@ export interface SectorConf extends CommonAttr {
   cornerRadius?: number | number[];
 }
 
+const shapeKeys: Array<keyof SectorConf> = ['cx', 'cy', 'start', 'end', 'radius', 'radiusI', 'round'];
+
+
 export default class Sector extends Shape<SectorConf> {
   public type = 'sector';
+
+  public shapeKeys = shapeKeys;
 
   public getDefaultAttr(): SectorConf {
     return {

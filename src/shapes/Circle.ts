@@ -6,10 +6,13 @@ export interface CircleConf extends CommonAttr {
   cy?: number;
   radius?: number;
 }
+const shapeKeys: Array<keyof CircleConf> = ['cx', 'cy', 'radius'];
 
 export default class Circle extends Shape<CircleConf> {
   public type = 'circle';
 
+  public shapeKeys = shapeKeys;
+  
   public getDefaultAttr(): CircleConf {
     return {
       ...super.getDefaultAttr(),

@@ -19,10 +19,6 @@ export default class CanvasPainter  implements Painter {
 
   private _canvas: HTMLCanvasElement;
 
-  private _width: number;
-
-  private _height: number;
-
   public constructor(render: Render) {
     this.render = render;
     this._initCanvas();
@@ -30,8 +26,8 @@ export default class CanvasPainter  implements Painter {
 
   public resize(width: number, height: number) {
     // todo dpr
-    this._width =  this._canvas.width = width * this.render.dpr;
-    this._height = this._canvas.height = height * this.render.dpr;
+    this._canvas.width = width * this.render.dpr;
+    this._canvas.height = height * this.render.dpr;
     this.paint(true);
   }
 
@@ -46,7 +42,7 @@ export default class CanvasPainter  implements Painter {
     console.time('paint');
     const ctx = this._canvas.getContext('2d');
     const elements = this.render.getAllElements();
-    ctx.clearRect(0, 0, this._width, this._height);
+    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
     const dpr = this.render.dpr;
     ctx.save();
     if (dpr !== 1) {
@@ -63,6 +59,7 @@ export default class CanvasPainter  implements Painter {
     if (attr.display === false) {
       return;
     }
+    
     ctx.save();
     const matrix3 = item.getTransform();
     if (!mat3.equals(matrix3, identityMat3)) {
@@ -80,10 +77,17 @@ export default class CanvasPainter  implements Painter {
       ctx.lineWidth = attr.lineWidth;
       ctx.strokeStyle = attr.stroke;
       ctx.fillStyle = attr.fill;
-      ctx.beginPath();
+      if (item.fillAble || item.strokeAble) {
+        ctx.beginPath();
+      }
       current.brush(ctx);
-      ctx.fill();
-      ctx.stroke();
+      if (item.fillAble) {
+        ctx.fill();
+      }
+      if (item.strokeAble) {
+        ctx.stroke();
+      }
+      
     } else {
       const current = item as Group;
       current.children().forEach(child => this.drawElement(ctx, child, contextStack));
@@ -117,8 +121,6 @@ export default class CanvasPainter  implements Painter {
       this._canvas = canvas;
       render.getDom().appendChild(canvas);
     }
-    this._width = width;
-    this._height = height;
   }
   
 }

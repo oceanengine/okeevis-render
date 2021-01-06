@@ -10,8 +10,12 @@ export interface ArcConf extends CommonAttr {
   end?: number;
 }
 
+const shapeKeys: Array<keyof ArcConf> = ['cx', 'cy', 'radius', 'start', 'end'];
+
 export default class Arc extends Shape<ArcConf> {
   public type = 'arc';
+
+  public readonly shapeKeys = shapeKeys;
 
   public getDefaultAttr(): ArcConf {
     return {

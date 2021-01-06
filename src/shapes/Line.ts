@@ -8,10 +8,14 @@ export interface LineConf extends CommonAttr {
   y2?: number;
 }
 
+const shapeKeys: Array<keyof LineConf> = ['x1', 'y1', 'x2', 'y2'];
+
 export default class Line extends Shape<LineConf> {
   public type = 'line';
 
   public fillAble = false;
+
+  public shapeKeys = shapeKeys;
 
   public getDefaultAttr(): LineConf {
     return {

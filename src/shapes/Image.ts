@@ -9,6 +9,7 @@ export interface ImageConf extends CommonAttr {
   height?: number;
   src?: string;
 }
+const shapeKeys: Array<keyof ImageConf> = ['x', 'y', 'width', 'height', 'src'];
 
 export default class Rect extends Shape<ImageConf> {
   public type = 'image';
@@ -16,6 +17,8 @@ export default class Rect extends Shape<ImageConf> {
   public fillAble = false;
 
   public strokeAble = false;
+
+  public shapeKeys = shapeKeys;
 
   public getAnimationKeys(): Array<keyof ImageConf> {
     return [
