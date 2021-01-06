@@ -1,7 +1,7 @@
 
 
 
-export default class  CompositeEvent<T extends MouseEvent | TouchEvent> {
+export default class  SyntheticEvent<T extends MouseEvent | TouchEvent> {
   public type: string;
 
   public original: T;

@@ -1,6 +1,6 @@
-import CompositeMouseEvent from './CompositeMouseEvent';
+import SyntheticMouseEvent from './SyntheticMouseEvent';
 
-export default class CompositeDragEvent extends CompositeMouseEvent {
+export default class SyntheticDragEvent extends SyntheticMouseEvent {
   public startX: number;
 
   public startY: number;

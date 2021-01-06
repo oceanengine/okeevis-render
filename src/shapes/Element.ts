@@ -3,7 +3,7 @@ import Render from '../render';
 import Group from './Group';
 import * as lodash from '../utils/lodash';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
-import CompositeDragEvent from '../event/CompositeDragEvent'
+import SyntheticDragEvent from '../event/SyntheticDragEvent'
 import DragAndDrop, {DragAndDropConf, } from '../abstract/DragAndDrop';
 import { EasingName } from '../animate/ease';
 import { interpolateAttr } from '../interpolate';
@@ -318,27 +318,27 @@ export default class Element<T extends CommonAttr = any>
 
   /* ************ DragAndDrop Begin ******************* */
 
-  public onDragStart(event: CompositeDragEvent) {
+  public onDragStart(event: SyntheticDragEvent) {
     // todo
   }
 
-  public onDragMove(event: CompositeDragEvent) {
+  public onDragMove(event: SyntheticDragEvent) {
     // todo
   }
 
-  public onDragEnd(event: CompositeDragEvent) {
+  public onDragEnd(event: SyntheticDragEvent) {
 
   }
 
-  public onDragEnter(event: CompositeDragEvent) {
+  public onDragEnter(event: SyntheticDragEvent) {
     
   }
 
-  public onDragLeave(event: CompositeDragEvent) {
+  public onDragLeave(event: SyntheticDragEvent) {
     
   }
 
-  public onDrop(event: CompositeDragEvent) {
+  public onDrop(event: SyntheticDragEvent) {
     
   }
 
