@@ -1,14 +1,6 @@
 /* eslint-disable lines-between-class-members */
-import { CompositeMouseEvent } from '../event/EventHandle';
+import CompositeDragEvent from '../event/CompositeDragEvent';
 
-export interface CompositeDragEvent extends CompositeMouseEvent {
-  startX: number;
-  startY: number;
-  offsetX: number;
-  offsetY: number;
-  dx: number;
-  dy: number;
-}
 
 export interface DragAndDropConf {
   draggable?: boolean;

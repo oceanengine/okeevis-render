@@ -3,7 +3,8 @@ import Render from '../render';
 import Group from './Group';
 import * as lodash from '../utils/lodash';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
-import DragAndDrop, {DragAndDropConf, CompositeDragEvent, } from '../abstract/DragAndDrop';
+import CompositeDragEvent from '../event/CompositeDragEvent'
+import DragAndDrop, {DragAndDropConf, } from '../abstract/DragAndDrop';
 import { EasingName } from '../animate/ease';
 import { interpolateAttr } from '../interpolate';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
