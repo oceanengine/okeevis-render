@@ -28,7 +28,7 @@ export default class Render extends EventFul {
 
   private _requestAnimationFrameId: number;
   
-  private _root: Group;
+  private _rootGroup: Group;
 
   private _painter: Painter;
 
@@ -45,8 +45,8 @@ export default class Render extends EventFul {
       this._width = width;
       this._height = height;
     }
-    this._root = new Group();
-    this._root.renderer = this;
+    this._rootGroup = new Group();
+    this._rootGroup.ownerRender = this;
     this._isBrowser =   /html.*?element/gi.test(Object.prototype.toString.call(dom));
     this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio : 1);
     this._painter= new CanvasPainter(this);
@@ -73,19 +73,19 @@ export default class Render extends EventFul {
   }
 
   public add(element: Element) {
-    this._root.add(element);
+    this._rootGroup.add(element);
   }
 
   public addAll(elements: Element[]) {
-    this._root.addAll(elements);
+    this._rootGroup.addAll(elements);
   }
 
   public remove(element: Element) {
-    this._root.remove(element);
+    this._rootGroup.remove(element);
   }
 
   public updateAll(elements: Element[]) {
-    this._root.updateChildren(elements);
+    this._rootGroup.updateChildren(elements);
   }
 
   public getDom(): HTMLDivElement | HTMLCanvasElement {
@@ -113,7 +113,7 @@ export default class Render extends EventFul {
   }
   
   public getAllElements(): Element[] {
-    return this._root.children();
+    return this._rootGroup.children();
   }
 
   public isBrowser() {
@@ -121,7 +121,7 @@ export default class Render extends EventFul {
   }
 
   private _onFrame = (now: number) => {
-    this._root.onFrame(now);
+    this._rootGroup.onFrame(now);
     this._painter.onFrame(now);
     this._needUpdate = false;
     requestAnimationFrame(this._onFrame)

@@ -71,7 +71,7 @@ export default class Element<T extends CommonAttr = any>
   public strokeAble: boolean = true;
 
 
-  public renderer: Render | undefined;
+  public ownerRender: Render | undefined;
 
   public parentNode: Group | undefined;
 
@@ -152,8 +152,8 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public dirty() {
-    if (this.renderer) {
-      this.renderer.dirty();
+    if (this.ownerRender) {
+      this.ownerRender.dirty();
     }
     this._mountClip();    
     if (this.attr.ref) {
@@ -199,7 +199,7 @@ export default class Element<T extends CommonAttr = any>
 
   public destroy() {
     this.parentNode = null;
-    this.renderer = null;
+    this.ownerRender = null;
     this.stopAllAnimation();
     this.removeAllListeners();
   }
@@ -369,7 +369,7 @@ export default class Element<T extends CommonAttr = any>
   private _mountClip() {
     const clip = this.attr.clip;
     if (clip) {
-      clip.renderer = this.renderer;
+      clip.ownerRender = this.ownerRender;
     }
   }
 }

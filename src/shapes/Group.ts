@@ -24,7 +24,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public getAnimationKeys(): Array<keyof GroupConf> {
     return [
       ...super.getAnimationKeys(),
-      'fontSize',
+      'fontSize'
     ]
   }
 
@@ -33,7 +33,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       return;
     }
     this._components.push(item as T);
-    item.renderer = this.renderer;
+    item.ownerRender = this.ownerRender;
     item.parentNode = this;
     item.mounted();
     this.dirty();
