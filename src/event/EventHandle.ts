@@ -17,6 +17,10 @@ export default class EventHandle  {
     this._initEvents();
   }
 
+  public onFrame() {
+    // 检测currentTarget的状态(是否挂载, 是否仍然在图形中, 否则更新事件).
+  }
+
   public dispose() {
     if (this.render.isBrowser()) {
       this._detachEvents();
