@@ -14,5 +14,5 @@ const shape = new Arc({
 render.add(shape)
 
 shape.animateTo({
-  rotation: 3.24
-}, 4000)
+  rotation: Math.PI
+}, 400)

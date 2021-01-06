@@ -108,6 +108,8 @@ export default class Render extends EventFul {
   public dispose() {
     // todo polyfill
     cancelAnimationFrame(this._requestAnimationFrameId);
+    this._eventHandle.dispose();
+    this._painter.dispose();
   }
   
   public getAllElements(): Element[] {

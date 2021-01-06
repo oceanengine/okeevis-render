@@ -69,14 +69,13 @@ export default class Element<T extends CommonAttr = any>
 
   public strokeAble: boolean = true;
 
-  private _animations: AnimateOption<T>[] = [];
 
   public renderer: Render | undefined;
 
   public parentNode: Group | undefined;
 
-  public isClip: boolean = false;
-
+  private _animations: AnimateOption<T>[] = [];
+  
   private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
 
   private _bboxDirty: boolean = true;
@@ -258,22 +257,24 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public onFrame(now: number) {
-    this._animations.forEach(animate => {
-      const { startTime, during, from, to, ease, callback, onFrame, delay } = animate;
-      let progress = 0;
-      if (startTime) {
-        progress = Math.min((now - startTime) / during, 1);
-      } else {
-        animate.startTime = now;
-      }
-      const attr = interpolateAttr(from, to, progress);
-      if (progress === 1) {
-        callback && callback();
-        animate.stopped = true;
-      }
-      this.setAttr(attr);
-      onFrame && onFrame(progress);
-    });
+    const animate = this._animations[0];
+    if (!animate) {
+      return;
+    }
+    const { startTime, during, from, to, ease, callback, onFrame, delay } = animate;
+    let progress = 0;
+    if (startTime) {
+      progress = Math.min((now - startTime) / during, 1);
+    } else {
+      animate.startTime = now;
+    }
+    const attr = interpolateAttr(from, to, progress);
+    if (progress === 1) {
+      callback && callback();
+      animate.stopped = true;
+    }
+    this.setAttr(attr);
+    onFrame && onFrame(progress);
     this._animations = this._animations.filter(item => !item.stopped);
   }
   /* ************ AnimateAble End ******************* */

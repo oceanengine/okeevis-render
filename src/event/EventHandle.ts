@@ -31,6 +31,8 @@ export interface CompositeTouchEvent extends CompositeEvent<TouchEvent> {
 export default class EventHandle  {
   public render: Render;
 
+  private _currentMousePosition: {x: number, y: number};
+
   private _draggingTarget: Element;
 
   private _prevMouseTarget: Element;
@@ -42,7 +44,7 @@ export default class EventHandle  {
     this._initEvents();
   }
 
-  public destroy() {
+  public dispose() {
     if (this.render.isBrowser()) {
       this._detachEvents();
     }

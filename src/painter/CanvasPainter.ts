@@ -30,17 +30,17 @@ export default class CanvasPainter  implements Painter {
 
   public resize(width: number, height: number) {
     // todo dpr
-    this._width =  this._canvas.width = width;
-    this._height = this._canvas.height = height;
-    this.paint();
+    this._width =  this._canvas.width = width * this.render.dpr;
+    this._height = this._canvas.height = height * this.render.dpr;
+    this.paint(true);
   }
 
   public onFrame() {
     this.paint();
   }
 
-  public paint() {
-    if (!this.render.needUpdate()) {
+  public paint(forceUpdate: boolean= false) {
+    if (!this.render.needUpdate() && !forceUpdate) {
       return;
     }
     console.time('paint');
