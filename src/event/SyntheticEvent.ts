@@ -6,12 +6,16 @@ export default class  SyntheticEvent<T extends MouseEvent | TouchEvent> {
 
   public original: T;
 
-  public stopped: boolean;
+  public isPropagationStopped: boolean;
 
-  public bubble: boolean;
+  // public isDefaultPrevented: boolean;
+
+  public bubbles: boolean;
+  
+  public timeStamp: number;
 
   public stopPropagation(): void {
-    this.stopped = true;
+    this.isPropagationStopped = true;
   }
   
 }

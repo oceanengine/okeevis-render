@@ -6,6 +6,7 @@ export interface SyntheticTouch {
   x: number;
   y: number;
   target: Element;
+  currentTarget: Element;
 }
 
 export default class SyntheticTouchEvent extends SyntheticEvent<TouchEvent> {

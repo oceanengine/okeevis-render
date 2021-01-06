@@ -12,6 +12,8 @@ export default class SyntheticMouseEvent extends SyntheticEvent<MouseEvent> {
 
   public target: Element;
 
+  public currentTarget: Element;
+
   public detail: number;
 
 }
