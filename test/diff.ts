@@ -20,7 +20,7 @@ function makeText(count: number) {
       ref: index === 0 ? ref: null,
       x: Math.random() * 400,
       y: Math.random() * 600,
-      text: index + ''
+      text: index + '',
     })
   })
 }

@@ -1,6 +1,20 @@
 import Element, {CommonAttr, } from './Element'
 
-export default  class Shape<T extends CommonAttr = any> extends Element<T> {
+import {ArcConf, } from './Arc';
+import {CircleConf, } from './Circle';
+import {ImageConf, } from './Image';
+import {LineConf, } from './Line';
+import {PathConf, } from './Path';
+import {PolygonConf, } from './Polygon';
+import {PolylineConf, } from './Polyline';
+import {RectConf, } from './Rect';
+import {SectorConf, } from './Sector';
+import {TextConf, } from './Text';
+
+
+export type ShapeConf = ArcConf & CircleConf & ImageConf & LineConf & PathConf & PolylineConf & PolygonConf & RectConf & SectorConf & TextConf;
+
+export default  class Shape<T extends CommonAttr = ShapeConf> extends Element<T> {
   public brush(ctx: CanvasRenderingContext2D) {
     ctx
   }

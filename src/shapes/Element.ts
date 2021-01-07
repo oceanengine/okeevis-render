@@ -6,7 +6,7 @@ import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble
 import SyntheticDragEvent from '../event/SyntheticDragEvent'
 import DragAndDrop, {DragAndDropConf, } from '../abstract/DragAndDrop';
 import { EasingName } from '../animate/ease';
-import { interpolateAttr } from '../interpolate';
+import interpolateAttr from '../interpolate/interpolateAttr';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import Shape from './Shape';
 import * as mat3 from '../../js/mat3';
@@ -274,7 +274,7 @@ export default class Element<T extends CommonAttr = any>
     } else {
       animate.startTime = now;
     }
-    const attr = interpolateAttr(from, to, progress);
+    const attr = interpolateAttr(from, to, progress) as T;
     if (progress === 1) {
       callback && callback();
       animate.stopped = true;
@@ -307,7 +307,7 @@ export default class Element<T extends CommonAttr = any>
     this._dirtyTransform();
   }
 
-  public setTransform(matrix: mat3) {
+  public setBaseTransform(matrix: mat3) {
     this._baseMatrix = matrix;
   }
 

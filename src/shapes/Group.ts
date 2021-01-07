@@ -104,7 +104,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       if (prevElement.type === 'group') {
         (prevElement as unknown as Group).updateAll((nextElement as any as Group).children())
       }
-      prevElement.setTransform(nextElement.getBaseTransform());
+      prevElement.setBaseTransform(nextElement.getBaseTransform());
       prevElement.stopAllAnimation().animateTo(nextElement.attr, 10000);
     });
 

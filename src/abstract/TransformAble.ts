@@ -12,9 +12,11 @@ export default abstract class TransformAble {
 
   public abstract  getTransform(): mat3;
 
+  public abstract getBaseTransform(): mat3;
+
   public abstract resetTransform(): void;
 
-  public abstract setTransform(transform: mat3): void;
+  public abstract setBaseTransform(transform: mat3): void;
 
   public abstract translate(x: number, y: number): void;
 

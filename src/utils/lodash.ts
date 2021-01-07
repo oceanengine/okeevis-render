@@ -8,6 +8,7 @@ import isBoolean = require('lodash/isBoolean');
 import isNumber = require('lodash/isNumber');
 import isString = require('lodash/isString');
 import isFunction = require('lodash/isFunction');
+import isObject = require('lodash/isObject');
 import min = require('lodash/min');
 import max = require('lodash/max');
 import isArray = require('lodash/isArray');
@@ -53,6 +54,7 @@ export {
   isNumber,
   isString,
   isFunction,
+  isObject,
   min,
   max,
   isArray,

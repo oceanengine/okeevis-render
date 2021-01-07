@@ -1,31 +1,23 @@
 
-import Path2D from '../geometry/Path2D';
+import * as lodash from '../utils/lodash';
 
-export function interpolateNumber(from: number, to: number, k: number): number {
-  return from + (to - from) * k;
-}
+import interpolateNumber from './interpolateNumber';
+import interpolateArray from './interpolateArray';
+import interpolateObject from './interpolateObject';
 
-// export function interpolateArray(from: number[], to: number[], k: number): number[] {
-//   // todo
-// }
 
-// export function interpolateColor(from: Color, to: Color, k: number): Color {
-// // todo
-// }
-
-// export function interpolatePath(fromPath: Path2D, toPath: Path2D, k: number): Path2D {
-// // todo
-// }
-
-export function interpolateAttr(from: any, to: any, k: number):any {
-  const ret = {} as any;
-  // eslint-disable-next-line guard-for-in
-  for(const key in from) {
-    const fromValue = from[key];
-    const toValue = to[key];
-    if (typeof fromValue === 'number' && typeof toValue === 'number') {
-      ret[key] = interpolateNumber(fromValue, toValue, k);
-    }
+export function interpolate<T=any>(from: T, to: T, k: number): T {
+  
+  if (lodash.isNumber(from) && lodash.isNumber(to)) {
+    return interpolateNumber(from, to, k) as any as T;
+  } if (lodash.isArray(from) && lodash.isArray(to)) {
+    return interpolateArray(from, to, k) as any as T;
+  } if (lodash.isObject(from) && lodash.isObject(to)) {
+    return interpolateObject(from, to, k);
   }
-  return ret;
+
+  return to;
+  
 }
+
+export type InterpolateFunction<T=any> = (from: T, to: T, k: number) => T;
