@@ -25,10 +25,13 @@ export default class CanvasPainter  implements Painter {
   }
 
   public resize(width: number, height: number) {
-    // todo dpr
     this._canvas.width = width * this.render.dpr;
     this._canvas.height = height * this.render.dpr;
-    this.paint(true);
+    if (this.render.isBrowser()) {
+      this._canvas.style.width = width + 'px';
+      this._canvas.style.height = height + 'px';
+    }
+    this.render.dirty();
   }
 
   public onFrame() {

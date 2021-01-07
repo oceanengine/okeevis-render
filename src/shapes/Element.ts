@@ -188,6 +188,7 @@ export default class Element<T extends CommonAttr = any>
     
     
     if (transformKeys.length) {
+      // todo 精确判断数组变化
       this._dirtyTransform();
     }
 
