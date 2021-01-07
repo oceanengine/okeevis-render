@@ -14,6 +14,8 @@ export default abstract class Gradient<T extends GradientOption> {
     this.option = option;
   }
 
-  public abstract applyToCanvasContext(ctx: CanvasRenderingContext2D, bbox: BBox): void;
+  public abstract toCssString(): string;
+
+  public abstract getCanvasContextStyle(ctx: CanvasRenderingContext2D, bbox: BBox): CanvasGradient;
   
 }

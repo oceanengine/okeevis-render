@@ -1,15 +1,53 @@
-import Gradient, {GradientOption, } from '../abstract/Gradient';
+import Gradient, { GradientOption } from '../abstract/Gradient';
+import { BBox } from '../utils/bbox';
 
-export interface RadialGradientOption  extends GradientOption {
+export interface RadialGradientOption extends GradientOption {
   cx: number;
   cy: number;
   r: number;
 }
 
+const defaultOption: RadialGradientOption = {
+  cx: 0.5,
+  cy: 0.5,
+  r: 1,
+  stops: [],
+};
+
 export default class RadialGradient implements Gradient<RadialGradientOption> {
   public option: RadialGradientOption;
 
-  public  applyToCanvasContext(ctx: CanvasRenderingContext2D, bbox: BBox) {
-    // todo
+  public constructor(option: RadialGradientOption) {
+    this.option = { ...defaultOption, ...option };
+  }
+
+  public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {
+    const option = this.option;
+    const min: number = Math.min(rect.width, rect.height);
+    const x1: number = option.cx * rect.width + rect.x;
+    const y1: number = option.cy * rect.height + rect.y;
+    const r1: number = min * option.r;
+    const x2: number = option.cx;
+    const y2: number = option.cy;
+    const r2: number = 0;
+    const gradient: CanvasGradient = ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
+    if (option.stops.length) {
+      option.stops.map(stop => {
+        gradient.addColorStop(stop.offset, stop.color);
+      });
+    }
+    return gradient;
+  }
+
+  public toCssString(): string {
+    const { cx, cy, stops } = this.option;
+    // TODO 有结束参数的实现上有问题
+    const stopStr = stops
+      .map(stop => {
+        return `${stop.color} ${stop.offset * 100}%`;
+      })
+      .join(', ');
+
+    return `radial-gradient(circle at ${cx * 100}% ${cy * 100}%,  ${stopStr})`;
   }
 }
