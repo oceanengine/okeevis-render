@@ -297,6 +297,10 @@ export default class Element<T extends CommonAttr = any>
     return this._transform;
   }
 
+  public getBaseTransform(): mat3 {
+    return this._baseMatrix;
+  }
+
   public resetTransform() {
     this._baseMatrix = mat3.create();
     this.dirty();
