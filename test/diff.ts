@@ -12,7 +12,7 @@ const group = new Group({
 
 group.addAll(makeText(3000))
 render.add(group);
-group.updateChildren(makeText(3000))
+group.updateAll(makeText(3000))
 
 function makeText(count: number) {
   return new Array(count).fill(0).map((value, index) => {
@@ -24,5 +24,3 @@ function makeText(count: number) {
     })
   })
 }
-
-ref.current.animateTo({x: 100, y: 100,}, 400)

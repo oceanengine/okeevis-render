@@ -85,7 +85,7 @@ export default class Render extends EventFul {
   }
 
   public updateAll(elements: Element[]) {
-    this._rootGroup.updateChildren(elements);
+    this._rootGroup.updateAll(elements);
   }
 
   public getDom(): HTMLDivElement | HTMLCanvasElement {

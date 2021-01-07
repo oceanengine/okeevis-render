@@ -70,8 +70,12 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._components = [];
   }
 
-  public updateChildren(list: Element[]) {
+  public updateAll(list: T[]) {
     const prevList = this._components;
+    if (prevList.length === 0) {
+      this.addAll(list);
+      return;
+    }
     const result = diff(prevList, list, (item, index) => {
       const attr = item.attr;
       const key = attr.key ? (attr.type + attr.key) : `auto-key-${item.type}-${index}`;
@@ -84,19 +88,22 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
     result.ordered.forEach(([from, to], i) => {
       this._components.splice(from, 1)
-      this._components.splice(to, 0, list[result.pureChanged[i][1]] as any);
+      this._components.splice(to, 0, list[result.pureChanged[i][1]]);
     });
 
     result.maintained.forEach(([from, to]) => {
       const prevElement = this._components[from];
       const nextElement = list[to];
+      // 相同实例
+      if (prevElement === nextElement) {
+        return;
+      }
       if (nextElement.attr.ref) {
         nextElement.attr.ref.current = prevElement;
       }
       if (prevElement.type === 'group') {
-        (prevElement as unknown as Group).updateChildren((nextElement as Group).children())
+        (prevElement as unknown as Group).updateAll((nextElement as any as Group).children())
       }
-      
       prevElement.stopAllAnimation().animateTo(nextElement.attr, 10000);
     });
 
