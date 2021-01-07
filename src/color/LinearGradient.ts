@@ -9,6 +9,8 @@ export interface LinearGradientOption extends GradientOption {
 }
 
 export default class LinearGradient implements Gradient<LinearGradientOption> {
+  public type = 'linearGradient';
+  
   public option: LinearGradientOption;
 
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {

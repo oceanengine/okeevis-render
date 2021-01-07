@@ -8,6 +8,8 @@ export interface GradientOption {
   stops: ColorStop[];
 }
 export default abstract class Gradient<T extends GradientOption> {
+  public abstract type: string;
+
   public  option: T;
   
   public constructor(option: T) {

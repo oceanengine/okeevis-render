@@ -2,6 +2,7 @@ import Eventful from '../utils/Eventful';
 import Render from '../render';
 import Group from './Group';
 import * as lodash from '../utils/lodash';
+import {ColorValue, } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
 import SyntheticDragEvent from '../event/SyntheticDragEvent'
 import DragAndDrop, {DragAndDropConf, } from '../abstract/DragAndDrop';
@@ -11,16 +12,14 @@ import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import Shape from './Shape';
 import * as mat3 from '../../js/mat3';
 
-declare type Color = any;
-
 export interface BaseAttr extends TransformConf, DragAndDropConf {
   key?: string;
   ref?: { current: Element };
   display?: boolean;
   zIndex?: number;
   
-  fill?: Color;
-  stroke?: Color;
+  fill?: ColorValue;
+  stroke?: ColorValue;
   strokeNoScale?: boolean;
   lineWidth?: number;
   lineDash?: number[];
@@ -35,7 +34,7 @@ export interface BaseAttr extends TransformConf, DragAndDropConf {
 
   clip?: Shape;
 
-  shadowColor?: string;
+  shadowColor?: ColorValue;
   shadowBlur?: number;
   shadowOffsetX?: number;
   shadowOffsetY?: number;

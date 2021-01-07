@@ -22,5 +22,5 @@ function makeText(count: number) {
       y: Math.random() * 600,
       text: index + '',
     })
-  })
+  });
 }

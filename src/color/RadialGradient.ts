@@ -15,6 +15,8 @@ const defaultOption: RadialGradientOption = {
 };
 
 export default class RadialGradient implements Gradient<RadialGradientOption> {
+  public type = 'radialGradient';
+
   public option: RadialGradientOption;
 
   public constructor(option: RadialGradientOption) {
