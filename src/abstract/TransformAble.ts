@@ -14,6 +14,8 @@ export default abstract class TransformAble {
 
   public abstract resetTransform(): void;
 
+  public abstract setTransform(transform: mat3): void;
+
   public abstract translate(x: number, y: number): void;
 
   public abstract scale(sx: number, sy: number): void;

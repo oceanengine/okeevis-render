@@ -9,8 +9,7 @@ import { EasingName } from '../animate/ease';
 import { interpolateAttr } from '../interpolate';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import Shape from './Shape';
-
-const mat3 = require('gl-matrix/mat3');
+import * as mat3 from '../../js/mat3';
 
 declare type Color = any;
 
@@ -302,6 +301,10 @@ export default class Element<T extends CommonAttr = any>
     this._baseMatrix = mat3.create();
     this.dirty();
     this._dirtyTransform();
+  }
+
+  public setTransform(matrix: mat3) {
+    this._baseMatrix = matrix;
   }
 
   public translate(dx: number, dy: number) {

@@ -5,8 +5,7 @@ import Element, {CommonAttr, } from '../shapes/Element';
 import Shape from '../shapes/Shape';
 import Group from '../shapes/Group';
 import * as lodash from '../utils/lodash';
-
-const mat3 = require('gl-matrix/mat3');
+import * as mat3 from '../../js/mat3';
 
 export interface RenderingContext extends CommonAttr {
 
