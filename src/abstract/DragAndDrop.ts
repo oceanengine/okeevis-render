@@ -4,13 +4,13 @@ import SyntheticDragEvent from '../event/SyntheticDragEvent';
 
 export interface DragAndDropConf {
   draggable?: boolean;
-  onDragstart?: Function;
-  onDrag?: Function;
-  onDragend?: Function;
-  onDragenter?: Function;
-  onDragleave?: Function;
-  onDrop?: Function;
-  getDragOffset?: Function;
+  onDrag?: (event: SyntheticDragEvent) => void;
+  onDragend?: (event: SyntheticDragEvent) => void;
+  onDragstart?: (event: SyntheticDragEvent) => void;
+  onDragenter?: (event: SyntheticDragEvent) => void;
+  onDragleave?: (event: SyntheticDragEvent) => void;
+  onDrop?: (event: SyntheticDragEvent) => void;
+  getDragOffset?: (event: SyntheticDragEvent) => void;
 }
 
 export default abstract class DragAndDrop {

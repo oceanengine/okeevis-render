@@ -2,22 +2,23 @@ import Eventful from '../utils/Eventful';
 import Render from '../render';
 import Group from './Group';
 import * as lodash from '../utils/lodash';
-import {ColorValue, } from '../color';
+import { ColorValue } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
-import SyntheticDragEvent from '../event/SyntheticDragEvent'
+import SyntheticDragEvent from '../event/SyntheticDragEvent';
 import DragAndDrop, {DragAndDropConf, } from '../abstract/DragAndDrop';
 import { EasingName } from '../animate/ease';
 import interpolateAttr from '../interpolate/interpolateAttr';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
+import { EventConf } from '../event';
 import Shape from './Shape';
 import * as mat3 from '../../js/mat3';
 
-export interface BaseAttr extends TransformConf, DragAndDropConf {
+export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   key?: string;
   ref?: { current: Element };
   display?: boolean;
   zIndex?: number;
-  
+
   fill?: ColorValue;
   stroke?: ColorValue;
   strokeNoScale?: boolean;
@@ -75,17 +76,16 @@ export default class Element<T extends CommonAttr = any>
   public parentNode: Group | undefined;
 
   private _animations: AnimateOption<T>[] = [];
-  
+
   private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
 
   private _bboxDirty: boolean = true;
 
   private _transform: mat3;
-  
+
   private _transformDirty: boolean = true;
 
   private _baseMatrix: mat3 = mat3.create();
-
 
   private _clientBoundingRect: BBox;
 
@@ -150,7 +150,7 @@ export default class Element<T extends CommonAttr = any>
     if (this.ownerRender) {
       this.ownerRender.dirty();
     }
-    this._mountClip();    
+    this._mountClip();
     if (this.attr.ref) {
       this.attr.ref.current = this;
     }
@@ -162,7 +162,7 @@ export default class Element<T extends CommonAttr = any>
       this._bboxDirty = false;
     }
     return this._bbox;
-  } 
+  }
 
   public getClientBoundingRect(parentTransform?: mat3): BBox {
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
@@ -181,10 +181,11 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public updated(prevAttr: T, nextAttr: T) {
-    const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation'].filter(key => !lodash.isUndefined((nextAttr as any)[key])) as any;
+    const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation'].filter(
+      key => !lodash.isUndefined((nextAttr as any)[key]),
+    ) as any;
     const shapeKeys = this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key]));
-    
-    
+
     if (transformKeys.length) {
       // todo 精确判断数组变化
       this._dirtyTransform();
@@ -208,7 +209,6 @@ export default class Element<T extends CommonAttr = any>
     this.stopAllAnimation();
     this.removeAllListeners();
   }
-  
 
   /* ************ AnimateAble Begin ******************* */
 
@@ -284,8 +284,6 @@ export default class Element<T extends CommonAttr = any>
   }
   /* ************ AnimateAble End ******************* */
 
-  
-
   /* ************ TransformAble Begin ******************* */
 
   public getTransform(): mat3 {
@@ -338,21 +336,13 @@ export default class Element<T extends CommonAttr = any>
     // todo
   }
 
-  public onDragEnd(event: SyntheticDragEvent) {
+  public onDragEnd(event: SyntheticDragEvent) {}
 
-  }
+  public onDragEnter(event: SyntheticDragEvent) {}
 
-  public onDragEnter(event: SyntheticDragEvent) {
-    
-  }
+  public onDragLeave(event: SyntheticDragEvent) {}
 
-  public onDragLeave(event: SyntheticDragEvent) {
-    
-  }
-
-  public onDrop(event: SyntheticDragEvent) {
-    
-  }
+  public onDrop(event: SyntheticDragEvent) {}
 
   /* ************ DragAndDrop End ******************* */
 
@@ -386,7 +376,6 @@ export default class Element<T extends CommonAttr = any>
     this._bboxDirty = true;
     this._clientBoundingRectDirty = true;
   }
-  
 
   private _mountClip() {
     const clip = this.attr.clip;
