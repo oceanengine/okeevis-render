@@ -1,5 +1,6 @@
 import { diff } from '@egjs/list-differ';
 import Element from './Element';
+import Shape from './Shape';
 import {TextConf, } from './Text';
 
 export interface GroupConf extends TextConf {
@@ -55,6 +56,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public clear() {
     this._components.forEach(item => item.destroy());
     this._components = [];
+    this.dirty();
   }
 
   public onFrame(now: number) {
@@ -123,6 +125,17 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public children(): T[] {
     return this._components.slice();
+  }
+
+  public getAllLeafNodes(ret: Shape[] = []): Shape[] {
+    this._components.forEach(item => {
+      if (item.type !== 'group') {
+        ret.push(item as any as Shape);
+      } else {
+        (item as any as Group).getAllLeafNodes(ret);
+      }
+    })
+    return ret;
   }
 
   public sortByZIndex() {
