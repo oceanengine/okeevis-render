@@ -33,7 +33,7 @@ export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   opacity?: number;
   fillOpacity?: number;
   strokeOpacity?: number;
-  blendMode?: string;
+  blendMode?: 'source-over' | 'source-atop' | 'source-in' | 'source-out' | 'destination-over' | 'destination-atop' | 'destination-in' | 'destination-out' | 'lighter' | 'copy' | 'xor';
 
   clip?: Shape;
 
