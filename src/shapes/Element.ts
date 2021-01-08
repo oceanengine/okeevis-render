@@ -12,6 +12,7 @@ import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, {ShapeConf, } from './Shape';
 import * as mat3 from '../../js/mat3';
+import {NAME_TRANSPARENT, RGBA_TRANSPARENT, } from '../constant';
 
 export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   key?: string;
@@ -36,7 +37,7 @@ export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
 
   clip?: Shape;
 
-  shadowColor?: ColorValue;
+  shadowColor?: string;
   shadowBlur?: number;
   shadowOffsetX?: number;
   shadowOffsetY?: number;
@@ -60,6 +61,34 @@ export interface BBox {
 }
 
 const identityTrasnform = mat3.create();
+// 可继承(不可跨级)
+const defaultCanvasContext: ShapeConf = {
+  fill: 'none',
+  stroke: 'none',
+  lineWidth: 1,
+  lineDash: null,
+  lineDashOffset: 0,
+  lineJoin: 'miter',
+  lineCap: 'butt',
+  miterLimit: 10,
+  blendMode: 'source-over',
+  fontSize: 10,
+  fontFamily: 'sans-serif',
+  textAlign: 'start',
+  textBaseline: 'alphabetic',
+  shadowColor: null,
+  shadowBlur: 0,
+  shadowOffsetX: 0,
+  shadowOffsetY: 0,
+}
+const extendAbleKeys = lodash.keys(defaultCanvasContext);
+
+const defaultTransformConf: CommonAttr = {
+  position: [0, 0],
+  rotation: 0,
+  scale: [1, 1],
+  origin: [0, 0],
+}
 
 export default class Element<T extends CommonAttr = any>
   extends Eventful
@@ -136,41 +165,48 @@ export default class Element<T extends CommonAttr = any>
     } as T;
   }
 
-  public getComputedAttr(keys: Array<keyof T>): T {
-    // todo 确认默认canvas上下文, 这些都是可继承的
-    const defaultCanvasContext: ShapeConf = {
-      fill: null,
-      stroke: null,
-      lineWidth: 1,
-      lineDash: null,
-      lineDashOffset: 0,
-      lineJoin: 'miter',
-      lineCap: 'butt',
-      miterLimit: 10,
-      blendMode: 'source-over',
-      fontSize: 10,
-      fontFamily: 'sans-serif',
-      textAlign: 'start',
-      textBaseline: 'alphabetic',
-      shadowColor: null,
-      shadowBlur: 0,
-      shadowOffsetX: 0,
-      shadowOffsetY: 0,
+  public getFillAndStrokeStyle(): {
+    fill: ColorValue, 
+    stroke: ColorValue, 
+    lineWidth: number, 
+    hasFill: boolean; 
+    hasStroke: boolean;
+    fillOpacity: number;
+    strokeOpacity: number;
+  } {
+    let {fillOpacity, strokeOpacity, } = this.attr;
+    let node: Element= this;
+    // 透明度有继承叠加效果
+    while(node) {
+      fillOpacity *= node.attr.opacity * node.attr.fillOpacity;
+      strokeOpacity *= node.attr.opacity * node.attr.fillOpacity;
+      node = node.parentNode;
     }
-
-    const defaultTransformConf: CommonAttr = {
-      position: [0, 0],
-      rotation: 0,
-      scale: [1, 1],
-      origin: [0, 0],
+    const {fill, stroke, lineWidth,} =  {
+      fill: 'none',
+      stroke: 'none',
+      lineWidth: 0,
+      ...this.parentNode?.attr,
+      ...this.attr,
+    };
+    return {
+      fill,
+      stroke,
+      fillOpacity,
+      strokeOpacity,
+      lineWidth,
+      hasFill:  fillOpacity !== 0 && fill !== 'none' && fill !== null && fill !== NAME_TRANSPARENT && fill !== RGBA_TRANSPARENT,
+      hasStroke: strokeOpacity !== 0 && lineWidth > 0 && stroke !== 'none' && stroke !== null && stroke !== NAME_TRANSPARENT && stroke !== RGBA_TRANSPARENT
     }
-    
+  }
 
-    // todo
-    // 可继承
-    // transform不可继承
-
-    return lodash.pick(this.attr, keys);
+  public getComputedAttr(): T {
+    return {
+      ...defaultCanvasContext,
+      ...this.parentNode ? lodash.pick(this.parentNode.attr, extendAbleKeys) : null,
+      ...defaultTransformConf,
+      ...this.attr,
+    }
   }
 
   public setAttr(attr: T = {} as T): this {

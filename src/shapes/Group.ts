@@ -17,6 +17,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public getDefaultAttr(): GroupConf {
     return {
+      ...super.getDefaultAttr(),
       batchBrush: false,
     }
   }

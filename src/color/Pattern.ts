@@ -10,6 +10,8 @@ export interface PatternOption {
  * pattern
  */
 export default class Pattern {
+  public type = 'pattern';
+
   public option: PatternOption;
 
   private _pattern: CanvasPattern;
