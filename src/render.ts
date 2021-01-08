@@ -111,6 +111,10 @@ export default class Render extends EventFul {
     this._eventHandle.dispose();
     this._painter.dispose();
   }
+
+  public getAllLeafNodes(): Element[] {
+    return this._rootGroup.getAllLeafNodes();
+  }
   
   public getAllElements(): Element[] {
     return this._rootGroup.children();

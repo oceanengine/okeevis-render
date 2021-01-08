@@ -1,4 +1,3 @@
-import Painter from '../abstract/Painter';
 import Render from '../render';
 import Element, { CommonAttr } from '../shapes/Element';
 import Shape from '../shapes/Shape';
@@ -10,7 +9,7 @@ import { getCtxColor, isGradient } from '../color';
 export interface RenderingContext extends CommonAttr {}
 const identityMat3 = mat3.create();
 
-export default class CanvasPainter implements Painter {
+export default class PixelPainter {
   public render: Render;
 
   public dpr: number;
@@ -20,32 +19,16 @@ export default class CanvasPainter implements Painter {
   public constructor(render: Render) {
     this.render = render;
     this.dpr = render.dpr;
-    this._initCanvas();
-  }
-
-  public resize(width: number, height: number) {
-    this._canvas.width = width * this.dpr;
-    this._canvas.height = height * this.dpr;
-    if (this.render.isBrowser()) {
-      this._canvas.style.width = width + 'px';
-      this._canvas.style.height = height + 'px';
-    }
-    this.render.dirty();
-  }
-
-  public onFrame() {
-    this.paint();
+    this._initPixelCanvas();
+    
   }
 
   public getImageData(x: number, y: number, width: number, height: number): ImageData {
     return this._canvas.getContext('2d').getImageData(x, y, width, height);
   }
 
-  public paint(forceUpdate: boolean = false, offset?: [number, number]) {
-    if (!this.render.needUpdate() && !forceUpdate) {
-      return;
-    }
-    console.time('paint');
+  public paintAt(x: number, y: number) {
+    console.time('pixel paint');
     const ctx = this._canvas.getContext('2d');
     const elements = this.render.getAllElements();
     ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
@@ -54,12 +37,10 @@ export default class CanvasPainter implements Painter {
     if (dpr !== 1) {
       ctx.scale(dpr, dpr);
     }
-    if (offset) {
-      ctx.translate(-offset[0], -offset[1]);
-    }
+    ctx.translate(-x, -y);
     elements.forEach(item => this.drawElement(ctx, item, false));
     ctx.restore();
-    console.timeEnd('paint');
+    console.timeEnd('pixel paint');
   }
 
   public initCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
@@ -103,7 +84,7 @@ export default class CanvasPainter implements Painter {
       ctx.strokeStyle = getCtxColor(ctx, computedFill, item);
     }
 
-    // todo faontStyle, fontVarient
+    // 像素拾取使用背景矩形,不需要这些字体样式.
     if (fontSize || fontFamily) {
       ctx.font = `${fontSize}px sans-serif`;
     }

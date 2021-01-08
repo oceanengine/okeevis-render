@@ -1,4 +1,5 @@
 import Render from '../render';
+import PixelPainter from '../painter/PixelPainter';
 import Element from '../shapes/Element';
 
 export default class EventHandle  {
@@ -12,13 +13,31 @@ export default class EventHandle  {
 
   private _prevTouchTarget: Record<number, Element>;
 
+  private _PixelPainter: PixelPainter;
+
   public constructor(render: Render) {
     this.render = render;
+    this._PixelPainter = new PixelPainter(render);
     this._initEvents();
   }
 
   public onFrame() {
     // 检测currentTarget的状态(是否挂载, 是否仍然在图形中, 否则更新事件).
+  }
+
+  public pickTarget(x: number, y: number) {
+    console.time('pick')
+    const pixelPainter = this._PixelPainter;
+    const leafNodes = this.render.getAllLeafNodes();
+    // https://www.yuque.com/antv/ou292n/okxrus
+    leafNodes.forEach((item, index) => {
+      item.colorId = (index * 1000);
+    });
+    pixelPainter.paintAt(x, y);
+    // todo 考虑小程序getImageData兼容
+    // const prevImageData = pixelPainter.getImageData(x, y);
+    const imageData = pixelPainter.getImageData(0, 0, 1, 1);
+    console.timeEnd('pick')
   }
 
   public dispose() {
@@ -72,21 +91,20 @@ export default class EventHandle  {
     // todo https://github.com/facebookarchive/fixed-data-table/blob/master/src/vendor_upstream/dom/normalizeWheel.js
   }
 
-  private _handleMouseDown = (event: WheelEvent) => {
+  private _handleMouseDown = (event: MouseEvent) => {
     // todo
   }
 
-  private _handleMouseUp = (event: WheelEvent) => {
+  private _handleMouseUp = (event: MouseEvent) => {
     // todo
   }
 
-  private _handleMouseMove = (event: WheelEvent) => {
-    // todo
+  private _handleMouseMove = (event: MouseEvent) => {
+    this.pickTarget(event.offsetX, event.offsetY);
   }
 
   private _handleClick= (event: WheelEvent) => {
-    // todo
-    console.log('click')
+    this.pickTarget(event.offsetX, event.offsetY);
   }
 
   private _handleDblClick= (event: WheelEvent) => {
