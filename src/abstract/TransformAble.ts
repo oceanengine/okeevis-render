@@ -6,7 +6,6 @@ export interface TransformConf {
   origin?: [number, number];
 }
 
-
 export default abstract class TransformAble {
   public abstract attr: TransformConf;
 

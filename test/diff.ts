@@ -12,7 +12,7 @@ const group = new Group({
 
 group.addAll(makeText(3000))
 render.add(group);
-group.updateAll(makeText(3000))
+// group.updateAll(makeText(3000))
 
 function makeText(count: number) {
   return new Array(count).fill(0).map((value, index) => {

@@ -10,7 +10,7 @@ import { EasingName } from '../animate/ease';
 import interpolateAttr from '../interpolate/interpolateAttr';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
-import Shape from './Shape';
+import Shape, {ShapeConf, } from './Shape';
 import * as mat3 from '../../js/mat3';
 
 export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
@@ -32,6 +32,7 @@ export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   opacity?: number;
   fillOpacity?: number;
   strokeOpacity?: number;
+  blendMode?: string;
 
   clip?: Shape;
 
@@ -58,6 +59,8 @@ export interface BBox {
   height: number;
 }
 
+const identityTrasnform = mat3.create();
+
 export default class Element<T extends CommonAttr = any>
   extends Eventful
   implements AnimateAble<T>, TransformAble, DragAndDrop {
@@ -81,9 +84,9 @@ export default class Element<T extends CommonAttr = any>
 
   private _bboxDirty: boolean = true;
 
-  private _transform: mat3;
+  private _transform: mat3 = identityTrasnform;
 
-  private _transformDirty: boolean = true;
+  private _transformDirty: boolean = false;
 
   private _baseMatrix: mat3 = mat3.create();
 
@@ -127,12 +130,47 @@ export default class Element<T extends CommonAttr = any>
       opacity: 1,
       fillOpacity: 1,
       strokeOpacity: 1,
-      shadowBlur: 0,
+      strokeNoScale: false,
+      cursor: 'auto',
+      pointerEvents: 'auto',
     } as T;
   }
 
-  public getComputedAttr(): T {
-    return this.attr;
+  public getComputedAttr(keys: Array<keyof T>): T {
+    // todo 确认默认canvas上下文, 这些都是可继承的
+    const defaultCanvasContext: ShapeConf = {
+      fill: null,
+      stroke: null,
+      lineWidth: 1,
+      lineDash: null,
+      lineDashOffset: 0,
+      lineJoin: 'miter',
+      lineCap: 'butt',
+      miterLimit: 10,
+      blendMode: 'source-over',
+      fontSize: 10,
+      fontFamily: 'sans-serif',
+      textAlign: 'start',
+      textBaseline: 'alphabetic',
+      shadowColor: null,
+      shadowBlur: 0,
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
+    }
+
+    const defaultTransformConf: CommonAttr = {
+      position: [0, 0],
+      rotation: 0,
+      scale: [1, 1],
+      origin: [0, 0],
+    }
+    
+
+    // todo
+    // 可继承
+    // transform不可继承
+
+    return lodash.pick(this.attr, keys);
   }
 
   public setAttr(attr: T = {} as T): this {
@@ -165,6 +203,7 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public getClientBoundingRect(parentTransform?: mat3): BBox {
+    // 考虑stroke
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
       this._clientBoundingRect = this._computClientBoundingRect(parentTransform);
       this._clientBoundingRectDirty = false;
@@ -181,7 +220,7 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public updated(prevAttr: T, nextAttr: T) {
-    const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation'].filter(
+    const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation', 'scale'].filter(
       key => !lodash.isUndefined((nextAttr as any)[key]),
     ) as any;
     const shapeKeys = this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key]));
@@ -352,7 +391,7 @@ export default class Element<T extends CommonAttr = any>
 
   private _computeTransform(): mat3 {
     const out = mat3.create();
-    const { rotation = 0, origin = [1, 1], position = [0, 0], scale = [1, 1] } = this.attr;
+    const { rotation = 0, origin = [0, 0], position = [0, 0], scale = [1, 1] } = this.attr;
     mat3.rotate(out, out, rotation);
     mat3.multiply(out, out, this._baseMatrix);
     return out;
