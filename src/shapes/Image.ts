@@ -5,6 +5,8 @@ import { getImage } from '../utils/imageLoader';
 export interface ImageConf extends CommonAttr {
   x?: number;
   y?: number;
+  // 只有一个时自适应宽高,参照小程序规则
+  // 注意ie下兼容性,domImage先append 后remove
   width?: number;
   height?: number;
   src?: string;

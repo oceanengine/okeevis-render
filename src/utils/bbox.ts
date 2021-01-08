@@ -4,3 +4,11 @@ export interface BBox {
   width: number;
   height: number;
 }
+
+// export function composeBBox(bboxList: BBox[]): BBox {
+
+// }
+
+// export function isPointInBBox(x: number, y: number, box: BBox): boolean {
+
+// }
