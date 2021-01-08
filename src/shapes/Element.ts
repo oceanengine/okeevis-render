@@ -83,6 +83,8 @@ const defaultCanvasContext: ShapeConf = {
 }
 const extendAbleKeys = lodash.keys(defaultCanvasContext);
 
+const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
+
 const defaultTransformConf: CommonAttr = {
   position: [0, 0],
   rotation: 0,
@@ -96,6 +98,8 @@ export default class Element<T extends CommonAttr = any>
   public attr: T = {} as T;
 
   public type: string;
+  
+  public colorId: number;
 
   public readonly shapeKeys: Array<keyof T> = [];
 
@@ -295,7 +299,12 @@ export default class Element<T extends CommonAttr = any>
     delay?: number,
   ) {
     const fromAttr = this.attr;
-    const animationKeys = this.getAnimationKeys().filter(key => {
+    let animationKeys = animationKeysMap[this.type] as Array<keyof T>;
+    if (!animationKeysMap) {
+      animationKeys = this.getAnimationKeys();
+      animationKeysMap[this.type] = animationKeys as Array<keyof ShapeConf>;
+    }
+    animationKeys.filter(key => {
       const value = toAttr[key];
       const fromValue = fromAttr[key];
       return !(lodash.isNull(value) || lodash.isUndefined(value)) && fromValue !== value;
@@ -331,7 +340,8 @@ export default class Element<T extends CommonAttr = any>
     this._animations.push(option);
   }
 
-  public stopAllAnimation() {
+  public stopAllAnimation(gotoEnd: boolean = false) {
+    // todo goToEnd
     this._animations = [];
     return this;
   }
