@@ -1,11 +1,13 @@
 import Render from '../render';
-import PixelPainter from '../painter/PixelPainter';
+import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
+import {valueToRgb, } from '../color';
+import * as lodash from '../utils/lodash';
 
 export default class EventHandle {
   public render: Render;
 
-  private _currentMousePosition: { x: number; y: number };
+  private _currentMousePosition: { x: number; y: number } | null;
 
   private _draggingTarget: Element;
 
@@ -13,11 +15,11 @@ export default class EventHandle {
 
   private _prevTouchTarget: Record<number, Element>;
 
-  private _PixelPainter: PixelPainter;
+  private _PixelPainter: CanvasPainter;
 
   public constructor(render: Render) {
     this.render = render;
-    this._PixelPainter = new PixelPainter(render);
+    this._PixelPainter = new CanvasPainter(render, true);
     this._initEvents();
   }
 
@@ -39,12 +41,30 @@ export default class EventHandle {
     const leafNodes = this.render.getAllLeafNodes();
     // https://www.yuque.com/antv/ou292n/okxrus
     leafNodes.forEach((item, index) => {
-      item.colorId = index * 1000;
+      // 颜色空间大约有40W个,基本够用.
+      item.pickRGB = valueToRgb(((index + 1)))
     });
     pixelPainter.paintAt(x, y);
     // todo 考虑小程序getImageData兼容
     // const prevImageData = pixelPainter.getImageData(x, y);
     const imageData = pixelPainter.getImageData(0, 0, 1, 1);
+    const pickValue = imageData.data;
+    const r0 = pickValue[0];
+    const g0 = pickValue[1];
+    const b0 = pickValue[2];
+    let target: Element;
+    for( let i = 0; i< leafNodes.length; i++) {
+      const node = leafNodes[i];
+      const [r, g, b] = node.pickRGB;
+      const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
+      if (gap < 3) {
+        target = node;
+        break;
+      }
+    }
+    if (target) {
+      target.setAttr({fill: 'red'})
+    }
     console.timeEnd('pick');
   }
 
@@ -108,7 +128,7 @@ export default class EventHandle {
 
   private _handleMouseMove = (event: MouseEvent) => {
     this._currentMousePosition = { x: event.offsetX, y: event.offsetY };
-    this.pickTarget(event.offsetX, event.offsetY);
+    // this.pickTarget(event.offsetX, event.offsetY);
   };
 
   private _handleClick = (event: WheelEvent) => {
@@ -133,6 +153,7 @@ export default class EventHandle {
 
   private _handleMouseLeave = (event: WheelEvent) => {
     // todo
+    this._currentMousePosition = null;
   };
 
   private _handleMouseEnter = (event: WheelEvent) => {

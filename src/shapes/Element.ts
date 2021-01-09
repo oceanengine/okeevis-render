@@ -95,6 +95,8 @@ const defaultCanvasContext: ShapeConf = {
   shadowBlur: 0,
   shadowOffsetX: 0,
   shadowOffsetY: 0,
+  cursor: 'auto',
+
 }
 const extendAbleKeys = lodash.keys(defaultCanvasContext);
 
@@ -114,7 +116,7 @@ export default class Element<T extends CommonAttr = any>
 
   public type: string;
   
-  public colorId: number;
+  public pickRGB: [number, number, number];
 
   public readonly shapeKeys: Array<keyof T> = [];
 
@@ -177,7 +179,6 @@ export default class Element<T extends CommonAttr = any>
       draggable: false,
       opacity: 1,
       strokeNoScale: false,
-      cursor: 'auto',
       pointerEvents: 'auto',
     } as T;
   }

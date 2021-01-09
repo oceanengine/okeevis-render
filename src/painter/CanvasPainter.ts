@@ -5,7 +5,7 @@ import Shape, {ShapeConf, } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import * as lodash from '../utils/lodash';
 import * as mat3 from '../../js/mat3';
-import { getCtxColor, isGradient, isTransparent, } from '../color';
+import { getCtxColor, isGradient, isTransparent, valueToRgb, } from '../color';
 
 export interface RenderingContext extends CommonAttr {}
 const identityMat3 = mat3.create();
@@ -19,10 +19,13 @@ export default class CanvasPainter implements Painter {
 
   private _canvasByCreated: boolean;
 
-  public constructor(render: Render) {
+  private _isPixelPainter: boolean = false;
+
+  public constructor(render: Render, isPixelPainter: boolean=false) {
     this.render = render;
-    this.dpr = render.dpr;
-    this._initCanvas();
+    this._isPixelPainter = isPixelPainter;
+    this.dpr = isPixelPainter ? 1 : render.dpr;
+    isPixelPainter ? this._initPixelCanvas() : this._initCanvas();
   }
 
   public resize(width: number, height: number) {
@@ -43,7 +46,21 @@ export default class CanvasPainter implements Painter {
     return this._canvas.getContext('2d').getImageData(x, y, width, height);
   }
 
-  public paint(forceUpdate: boolean = false, offset?: [number, number]) {
+  public paintAt(x: number, y: number) {
+    const ctx = this._canvas.getContext('2d');
+    const elements = this.render.getAllElements();
+    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    const dpr = this.dpr;
+    ctx.save();
+    if (dpr !== 1) {
+      ctx.scale(dpr, dpr);
+    }
+    ctx.translate(-x, -y);
+    elements.forEach(item => this.drawElement(ctx, item));
+    ctx.restore();
+  }
+
+  public paint(forceUpdate: boolean = false) {
     if (!this.render.needUpdate() && !forceUpdate) {
       return;
     }
@@ -55,9 +72,6 @@ export default class CanvasPainter implements Painter {
     ctx.save();
     if (dpr !== 1) {
       ctx.scale(dpr, dpr);
-    }
-    if (offset) {
-      ctx.translate(-offset[0], -offset[1]);
     }
     elements.forEach(item => this.drawElement(ctx, item, false));
     ctx.restore();
@@ -73,7 +87,7 @@ export default class CanvasPainter implements Painter {
   ) {
     const {display, } = item.attr;
     const fillAndStrokeStyle = item.getFillAndStrokeStyle();
-    const {fill, stroke, opacity, fillOpacity, strokeOpacity, needFill, needStroke } = fillAndStrokeStyle;
+    const {fill, stroke, opacity, fillOpacity, strokeOpacity, hasFill, hasStroke,  needFill, needStroke } = fillAndStrokeStyle;
     if (display === false) {
       return;
     }
@@ -87,10 +101,10 @@ export default class CanvasPainter implements Painter {
       return;
     }
 
-    if (opacity === 0) {
+    if (opacity === 0 && !this._isPixelPainter) {
       return;
     }
-    const hasSelfContext = this._hasSelfContext(item, fillAndStrokeStyle);
+    const hasSelfContext = this._isPixelPainter ? true : this._hasSelfContext(item, fillAndStrokeStyle);
     
     if (hasSelfContext) {
       ctx.save();
@@ -99,7 +113,7 @@ export default class CanvasPainter implements Painter {
     hasSelfContext && this._setElementCanvasContext(ctx, item);
     if (item.type !== 'group') {
       const current = item as Shape;
-      if (item.fillAble && needFill) {
+      if (item.fillAble && needFill && !this._isPixelPainter) {
         if (fillOpacity !== strokeOpacity) {
           ctx.globalAlpha =  fillOpacity;
         }
@@ -108,15 +122,15 @@ export default class CanvasPainter implements Painter {
         ctx.beginPath();
       }
       current.brush(ctx);
-      if (item.fillAble && needFill && item.type !== 'text') {
+      if (item.fillAble && (needFill || (this._isPixelPainter && hasFill)) && item.type !== 'text') {
          ctx.fill();
       }
-      if (item.strokeAble && needStroke) {
+      if (item.strokeAble && needStroke && !this._isPixelPainter) {
         if (fillOpacity !== strokeOpacity) {
           ctx.globalAlpha = strokeOpacity;
         }
       }
-      if (item.strokeAble && needStroke && item.type !== 'text') {
+      if (item.strokeAble && (needStroke || (this._isPixelPainter && hasStroke)) && item.type !== 'text') {
         ctx.stroke();
       }
     } else {
@@ -142,7 +156,7 @@ export default class CanvasPainter implements Painter {
 
   public dispose() {
     if (this._canvasByCreated) {
-      this._canvas.parentNode.removeChild(this._canvas);
+      this._canvas.parentNode?.removeChild(this._canvas);
     }
     this._canvas = null;
     this.render = null;
@@ -169,6 +183,24 @@ export default class CanvasPainter implements Painter {
     }
   }
 
+  private _initPixelCanvas() {
+    if (this.render.isBrowser()) {
+      const canvas = document.createElement('canvas');
+      // todo 考虑dpr < 1 (缩放的场景)
+      const w = 1;
+      const h = 1;
+      canvas.width = w * this.render.dpr;
+      canvas.height = h * this.render.dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      this._canvas = canvas;
+      // document.body.appendChild(canvas);
+      // canvas.style.cssText = 'margin: 20px;'
+    } else {
+      this._canvas = this.render.getDom() as HTMLCanvasElement;
+    }
+  }
+
   protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
     const {
       stroke,
@@ -191,6 +223,27 @@ export default class CanvasPainter implements Painter {
     } = item.attr;
 
     const {fillOpacity, strokeOpacity, fill: computedFill, stroke: computedStroke, hasFill, hasStroke, needFill, needStroke, } = item.getFillAndStrokeStyle();
+
+    const matrix3 = item.getTransform();
+    if (!mat3.exactEquals(matrix3, identityMat3)) {
+      ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
+    }
+
+    if ((item as Shape).attr.clip) {
+      ctx.beginPath();
+      (item as Shape).attr.clip.brush(ctx);
+      ctx.clip();
+    }
+
+    if (this._isPixelPainter && item.type !== 'group') {
+      const rgb = item.pickRGB;
+      const pickColor = `rgb(${rgb.join(',')})`;
+      console
+      ctx.fillStyle = pickColor;
+      ctx.strokeStyle = pickColor;
+      return;
+    }
+
 
     // group只支持color string, pattern,不支持渐变
     // todo 考虑小程序api setXXXX
@@ -262,17 +315,7 @@ export default class CanvasPainter implements Painter {
     if (!lodash.isUndefined(lineDash)) {
       ctx.setLineDash(lineDash || [])
     }
-
-    const matrix3 = item.getTransform();
-    if (!mat3.exactEquals(matrix3, identityMat3)) {
-      ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
-    }
-
-    if ((item as Shape).attr.clip) {
-      ctx.beginPath();
-      (item as Shape).attr.clip.brush(ctx);
-      ctx.clip();
-    }
+    
   }
 
   protected _hasSelfContext(item: Element<ShapeConf>, fillAndStrokeStyle: FillAndStrokeStyle): boolean {

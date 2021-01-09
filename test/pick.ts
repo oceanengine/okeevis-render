@@ -9,12 +9,13 @@ const render = new Render(dom);
 const ref = { current: null } as any;
 
 const group = new Group({
-  fontSize: 10,
+  fontSize: 12,
   fill: 'blue',
+  stroke: 'blue',
   lineWidth: 1,
 });
 
-group.addAll(makeRect(10000));
+group.addAll(makeRect(30000));
 render.add(group);
 // group.updateAll(makeRect(3000));
 
