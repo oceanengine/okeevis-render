@@ -173,8 +173,8 @@ export default class CanvasPainter implements Painter {
     item: Element,
     isInBatch: boolean = false,
   ) {
-    const {display, opacity, batchBrush, } = item.attr;
-    const {fill, stroke, fillOpacity, strokeOpacity, hasFill, hasStroke, } = item.getFillAndStrokeStyle();
+    const {display, opacity, } = item.attr;
+    const {fill, stroke, fillOpacity, strokeOpacity, needFill, needStroke } = item.getFillAndStrokeStyle();
     if (display === false) {
       return;
     }
@@ -201,13 +201,13 @@ export default class CanvasPainter implements Painter {
         ctx.beginPath();
       }
       current.brush(ctx);
-      if (hasFill && item.fillAble && fillOpacity !== 0) {
+      if (item.fillAble && needFill) {
         if (fillOpacity !== strokeOpacity) {
           ctx.globalAlpha = opacity * fillOpacity;
         }
          ctx.fill();
       }
-      if (hasStroke && item.strokeAble && strokeOpacity !== 0) {
+      if (item.strokeAble && needStroke) {
         if (fillOpacity !== strokeOpacity) {
           ctx.globalAlpha = opacity * strokeOpacity;
         }
@@ -215,6 +215,7 @@ export default class CanvasPainter implements Painter {
       }
     } else {
       const current = item as Group;
+      const batchBrush = current.attr.batchBrush;
       if (batchBrush) {
         ctx.beginPath();
       }
