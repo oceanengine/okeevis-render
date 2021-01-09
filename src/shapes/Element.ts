@@ -60,6 +60,19 @@ export interface BBox {
   height: number;
 }
 
+export interface FillAndStrokeStyle {
+  fill: ColorValue, 
+  stroke: ColorValue, 
+  lineWidth: number, 
+  hasFill: boolean; 
+  hasStroke: boolean;
+  needFill: boolean;
+  needStroke: boolean;
+  opacity: number;
+  fillOpacity: number;
+  strokeOpacity: number;
+}
+
 const identityTrasnform = mat3.create();
 // 可继承(不可跨级)
 const defaultCanvasContext: ShapeConf = {
@@ -194,17 +207,7 @@ export default class Element<T extends CommonAttr = any>
     return value;
   }
 
-  public getFillAndStrokeStyle(): {
-    fill: ColorValue, 
-    stroke: ColorValue, 
-    lineWidth: number, 
-    hasFill: boolean; 
-    hasStroke: boolean;
-    needFill: boolean;
-    needStroke: boolean;
-    fillOpacity: number;
-    strokeOpacity: number;
-  } {
+  public getFillAndStrokeStyle(): FillAndStrokeStyle {
     const opacity = this.getComputedOpacity();
     const fillOpacity = this.getExtendAttr('fillOpacity') * opacity;
     const strokeOpacity = this.getExtendAttr('strokeOpacity') * opacity;
@@ -220,6 +223,7 @@ export default class Element<T extends CommonAttr = any>
     return {
       fill,
       stroke,
+      opacity,
       fillOpacity,
       strokeOpacity,
       lineWidth,
@@ -266,6 +270,15 @@ export default class Element<T extends CommonAttr = any>
       this._bboxDirty = false;
     }
     return this._bbox;
+  }
+
+  public brushBBox(ctx: CanvasRenderingContext2D) {
+    const {x, y, width, height} = this.getBBox();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x + width, y + height);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
   }
 
   public getClientBoundingRect(parentTransform?: mat3): BBox {
