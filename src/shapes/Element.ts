@@ -144,6 +144,8 @@ export default class Element<T extends CommonAttr = any>
 
   private _clientBoundingRectDirty: boolean = true;
 
+  private _lastFrameTime: number;
+
   public constructor(attr: T = {} as T) {
     super();
     const initAttr = { ...this.getDefaultAttr(), ...attr };
@@ -344,7 +346,7 @@ export default class Element<T extends CommonAttr = any>
       animationKeys = this.getAnimationKeys();
       animationKeysMap[this.type] = animationKeys as Array<keyof ShapeConf>;
     }
-    animationKeys.filter(key => {
+    animationKeys = animationKeys.filter(key => {
       const value = toAttr[key];
       const fromValue = fromAttr[key];
       return !(lodash.isNull(value) || lodash.isUndefined(value)) && fromValue !== value;
@@ -387,9 +389,21 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public onFrame(now: number) {
+    // clip element maybe usesed for muti component
+    
+    if (this._lastFrameTime === now) {
+      return;
+    }
+
+    this._lastFrameTime = now;
+    if (this.attr.clip) {
+      this.attr.clip.onFrame(now);
+    }
+
     if (!this._animations.length) {
       return;
     }
+
     const animate = this._animations[0];
     const { startTime, during, from, to, ease, callback, onFrame, delay } = animate;
     let progress = 0;

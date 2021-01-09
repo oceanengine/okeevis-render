@@ -220,6 +220,7 @@ export default class CanvasPainter implements Painter {
       textAlign,
       textBaseline,
       lineDash,
+      clip,
     } = item.attr;
 
     const {fillOpacity, strokeOpacity, fill: computedFill, stroke: computedStroke, hasFill, hasStroke, needFill, needStroke, } = item.getFillAndStrokeStyle();
@@ -229,9 +230,9 @@ export default class CanvasPainter implements Painter {
       ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
     }
 
-    if ((item as Shape).attr.clip) {
+    if (clip) {
       ctx.beginPath();
-      (item as Shape).attr.clip.brush(ctx);
+        clip.brush(ctx);
       ctx.clip();
     }
     
