@@ -5,7 +5,7 @@ import Shape, {ShapeConf, } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import * as lodash from '../utils/lodash';
 import * as mat3 from '../../js/mat3';
-import { getCtxColor, isGradient, } from '../color';
+import { getCtxColor, isGradient, isTransparent, } from '../color';
 
 export interface RenderingContext extends CommonAttr {}
 const identityMat3 = mat3.create();
@@ -252,7 +252,7 @@ export default class CanvasPainter implements Painter {
       ctx.miterLimit = miterLimit;
     }
 
-    if (shadowBlur > 0) {
+    if (shadowBlur > 0 && !isTransparent(shadowColor)) {
       ctx.shadowBlur = shadowBlur;
       ctx.shadowColor = shadowColor;
       ctx.shadowOffsetX = shadowOffsetX;

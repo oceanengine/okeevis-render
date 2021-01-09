@@ -2,7 +2,7 @@ import Eventful from '../utils/Eventful';
 import Render from '../render';
 import Group from './Group';
 import * as lodash from '../utils/lodash';
-import { ColorValue } from '../color';
+import { ColorValue, isTransparent, } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
 import SyntheticDragEvent from '../event/SyntheticDragEvent';
 import DragAndDrop, {DragAndDropConf, } from '../abstract/DragAndDrop';
@@ -12,7 +12,7 @@ import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, {ShapeConf, } from './Shape';
 import * as mat3 from '../../js/mat3';
-import {NAME_TRANSPARENT, RGBA_TRANSPARENT, } from '../constant';
+import {RGBA_TRANSPARENT, } from '../constant';
 
 export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   key?: string;
@@ -91,7 +91,7 @@ const defaultCanvasContext: ShapeConf = {
   fontFamily: 'sans-serif',
   textAlign: 'start',
   textBaseline: 'alphabetic',
-  shadowColor: null,
+  shadowColor: RGBA_TRANSPARENT,
   shadowBlur: 0,
   shadowOffsetX: 0,
   shadowOffsetY: 0,
@@ -229,8 +229,8 @@ export default class Element<T extends CommonAttr = any>
       lineWidth,
       hasFill,
       hasStroke,
-      needFill: hasFill &&  fillOpacity !== 0 && fill !== NAME_TRANSPARENT && fill !== RGBA_TRANSPARENT,
-      needStroke: hasStroke && strokeOpacity !== 0 && stroke !== NAME_TRANSPARENT && stroke !== RGBA_TRANSPARENT,
+      needFill: hasFill &&  fillOpacity !== 0 && !isTransparent(fill),
+      needStroke: hasStroke && strokeOpacity !== 0 && !isTransparent(stroke),
     }
   }
 

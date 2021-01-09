@@ -4,6 +4,7 @@ import RadialGradient from './RadialGradient';
 import Pattern from './Pattern';
 import Element from '../shapes/Element';
 import * as lodash from '../utils/lodash';
+import {NAME_TRANSPARENT, RGBA_TRANSPARENT, } from '../constant';
 
 export type ColorValue = string | LinearGradient | RadialGradient | Pattern;
 
@@ -16,6 +17,10 @@ export {
 
 export function isGradient(color: ColorValue) {
   return color instanceof LinearGradient || color instanceof RadialGradient;
+}
+
+export function isTransparent(color: ColorValue) {
+  return color === RGBA_TRANSPARENT || color === NAME_TRANSPARENT
 }
 
 export function getCtxColor(ctx: CanvasRenderingContext2D, color: ColorValue, item: Element): string | CanvasGradient | CanvasPattern {
