@@ -71,6 +71,8 @@ const defaultCanvasContext: ShapeConf = {
   lineJoin: 'miter',
   lineCap: 'butt',
   miterLimit: 10,
+  fillOpacity: 1,
+  strokeOpacity: 1,
   blendMode: 'source-over',
   fontSize: 10,
   fontFamily: 'sans-serif',
@@ -161,12 +163,35 @@ export default class Element<T extends CommonAttr = any>
       zIndex: 0,
       draggable: false,
       opacity: 1,
-      fillOpacity: 1,
-      strokeOpacity: 1,
       strokeNoScale: false,
       cursor: 'auto',
       pointerEvents: 'auto',
     } as T;
+  }
+
+  public getComputedOpacity(): number {
+    let node: Element= this;
+    let opacity = 1;
+    // 透明度有继承叠加效果
+    while(node) {
+      opacity *= node.attr.opacity;
+      node = node.parentNode;
+    }
+    return opacity;
+  }
+
+  public getExtendAttr<U extends keyof T>(key: U): T[U] {
+    let value: T[U] = (defaultCanvasContext as T)[key];
+    // 透明度有继承叠加效果
+    let node: Element = this;
+    while(node) {
+      if (typeof node.attr[key] !== 'undefined') {
+        value = node.attr[key];
+        break;
+      }
+      node = node.parentNode;
+    }
+    return value;
   }
 
   public getFillAndStrokeStyle(): {
@@ -175,17 +200,14 @@ export default class Element<T extends CommonAttr = any>
     lineWidth: number, 
     hasFill: boolean; 
     hasStroke: boolean;
+    needFill: boolean;
+    needStroke: boolean;
     fillOpacity: number;
     strokeOpacity: number;
   } {
-    let {fillOpacity, strokeOpacity, } = this.attr;
-    let node: Element= this;
-    // 透明度有继承叠加效果
-    while(node) {
-      fillOpacity *= node.attr.opacity * node.attr.fillOpacity;
-      strokeOpacity *= node.attr.opacity * node.attr.fillOpacity;
-      node = node.parentNode;
-    }
+    const opacity = this.getComputedOpacity();
+    const fillOpacity = this.getExtendAttr('fillOpacity') * opacity;
+    const strokeOpacity = this.getExtendAttr('strokeOpacity') * opacity;
     const {fill, stroke, lineWidth,} =  {
       fill: 'none',
       stroke: 'none',
@@ -193,14 +215,18 @@ export default class Element<T extends CommonAttr = any>
       ...this.parentNode?.attr,
       ...this.attr,
     };
+    const hasFill = fill !== 'none' && fill !== null;
+    const hasStroke = stroke !== 'none' && fill !== null && lineWidth > 0;
     return {
       fill,
       stroke,
       fillOpacity,
       strokeOpacity,
       lineWidth,
-      hasFill:  fillOpacity !== 0 && fill !== 'none' && fill !== null && fill !== NAME_TRANSPARENT && fill !== RGBA_TRANSPARENT,
-      hasStroke: strokeOpacity !== 0 && lineWidth > 0 && stroke !== 'none' && stroke !== null && stroke !== NAME_TRANSPARENT && stroke !== RGBA_TRANSPARENT
+      hasFill,
+      hasStroke,
+      needFill: hasFill &&  fillOpacity !== 0 && fill !== NAME_TRANSPARENT && fill !== RGBA_TRANSPARENT,
+      needStroke: hasStroke && strokeOpacity !== 0 && stroke !== NAME_TRANSPARENT && stroke !== RGBA_TRANSPARENT,
     }
   }
 
@@ -300,7 +326,7 @@ export default class Element<T extends CommonAttr = any>
   ) {
     const fromAttr = this.attr;
     let animationKeys = animationKeysMap[this.type] as Array<keyof T>;
-    if (!animationKeysMap) {
+    if (!animationKeys) {
       animationKeys = this.getAnimationKeys();
       animationKeysMap[this.type] = animationKeys as Array<keyof ShapeConf>;
     }
