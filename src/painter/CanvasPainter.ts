@@ -99,20 +99,24 @@ export default class CanvasPainter implements Painter {
     hasSelfContext && this._setElementCanvasContext(ctx, item);
     if (item.type !== 'group') {
       const current = item as Shape;
-      if (item.fillAble || item.strokeAble) {
-        ctx.beginPath();
-      }
-      current.brush(ctx);
       if (item.fillAble && needFill) {
         if (fillOpacity !== strokeOpacity) {
           ctx.globalAlpha =  fillOpacity;
         }
-         ctx.fill();
       }
       if (item.strokeAble && needStroke) {
         if (fillOpacity !== strokeOpacity) {
           ctx.globalAlpha = strokeOpacity;
         }
+      }
+      if (item.fillAble || item.strokeAble && item.type !== 'text') {
+        ctx.beginPath();
+      }
+      current.brush(ctx);
+      if (item.fillAble && needFill && item.type !== 'text') {
+         ctx.fill();
+      }
+      if (item.strokeAble && needStroke && item.type !== 'text') {
         ctx.stroke();
       }
     } else {
@@ -186,7 +190,7 @@ export default class CanvasPainter implements Painter {
       lineDash,
     } = item.attr;
 
-    const {fillOpacity, strokeOpacity, fill: computedFill, stroke: computedStroke} = item.getFillAndStrokeStyle();
+    const {fillOpacity, strokeOpacity, fill: computedFill, stroke: computedStroke, hasFill, hasStroke, needFill, needStroke, } = item.getFillAndStrokeStyle();
 
     // group只支持color string, pattern,不支持渐变
     // todo 考虑小程序api setXXXX

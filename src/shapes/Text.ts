@@ -22,10 +22,6 @@ const shapeKeys: Array<keyof TextConf> = ['x', 'y', 'text', 'truncate', 'textAli
 
 export default class Text extends Shape<TextConf> {
   public type = 'text';
-
-  public fillAble = false;
-  
-  public strokeAble = false;
   
   public shapeKeys = shapeKeys;
   
