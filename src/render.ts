@@ -110,6 +110,9 @@ export default class Render extends EventFul {
     cancelAnimationFrame(this._requestAnimationFrameId);
     this._eventHandle.dispose();
     this._painter.dispose();
+    this._rootGroup.clear();
+    this._rootGroup = null;
+    this._dom = undefined;
   }
 
   public getAllLeafNodes(): Element[] {

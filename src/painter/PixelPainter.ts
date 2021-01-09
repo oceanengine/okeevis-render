@@ -191,8 +191,6 @@ export default class PixelPainter {
     ctx.restore();
   }
 
-  public initElementContext() {}
-
   public dispose() {}
 
   private _initPixelCanvas() {

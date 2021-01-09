@@ -17,6 +17,8 @@ export default class CanvasPainter implements Painter {
 
   private _canvas: HTMLCanvasElement;
 
+  private _canvasByCreated: boolean;
+
   public constructor(render: Render) {
     this.render = render;
     this.dpr = render.dpr;
@@ -134,7 +136,13 @@ export default class CanvasPainter implements Painter {
     }
   }
 
-  public dispose() {}
+  public dispose() {
+    if (this._canvasByCreated) {
+      this._canvas.parentNode.removeChild(this._canvas);
+    }
+    this._canvas = null;
+    this.render = null;
+  }
 
   protected _initCanvas() {
     const render = this.render;
@@ -152,6 +160,7 @@ export default class CanvasPainter implements Painter {
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       this._canvas = canvas;
+      this._canvasByCreated = true;
       render.getDom().appendChild(canvas);
     }
   }
