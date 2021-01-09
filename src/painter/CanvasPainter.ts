@@ -104,17 +104,17 @@ export default class CanvasPainter implements Painter {
           ctx.globalAlpha =  fillOpacity;
         }
       }
-      if (item.strokeAble && needStroke) {
-        if (fillOpacity !== strokeOpacity) {
-          ctx.globalAlpha = strokeOpacity;
-        }
-      }
       if (item.fillAble || item.strokeAble && item.type !== 'text') {
         ctx.beginPath();
       }
       current.brush(ctx);
       if (item.fillAble && needFill && item.type !== 'text') {
          ctx.fill();
+      }
+      if (item.strokeAble && needStroke) {
+        if (fillOpacity !== strokeOpacity) {
+          ctx.globalAlpha = strokeOpacity;
+        }
       }
       if (item.strokeAble && needStroke && item.type !== 'text') {
         ctx.stroke();
