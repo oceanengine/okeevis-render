@@ -28,7 +28,6 @@ export default class PixelPainter {
   }
 
   public paintAt(x: number, y: number) {
-    console.time('pixel paint');
     const ctx = this._canvas.getContext('2d');
     const elements = this.render.getAllElements();
     ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
@@ -38,9 +37,8 @@ export default class PixelPainter {
       ctx.scale(dpr, dpr);
     }
     ctx.translate(-x, -y);
-    elements.forEach(item => this.drawElement(ctx, item, false));
+    elements.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
-    console.timeEnd('pixel paint');
   }
 
   public initCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
@@ -152,23 +150,12 @@ export default class PixelPainter {
   public drawElement(
     ctx: CanvasRenderingContext2D,
     item: Element,
-    isInBatch: boolean = false,
   ) {
     const {display, opacity, batchBrush, } = item.attr;
     const {fill, stroke, fillOpacity, strokeOpacity, hasFill, hasStroke, } = item.getFillAndStrokeStyle();
     if (display === false) {
       return;
     }
-    if (isInBatch) {
-      if (item.type === 'group') {
-        console.warn('batch brush muse be shape element');
-        return;
-      }
-      const shape = item as Shape;
-      shape.brush(ctx);
-      return;
-    }
-
     if (fillOpacity === 0 && strokeOpacity === 0) {
       return;
     }
@@ -199,15 +186,7 @@ export default class PixelPainter {
       if (batchBrush) {
         ctx.beginPath();
       }
-      current.children().forEach(child => this.drawElement(ctx, child, batchBrush));
-      if (batchBrush) {
-        if (fill && fill !== 'none') {
-          ctx.fill();
-        }
-        if (stroke && stroke !== 'none') {
-          ctx.stroke();
-        }
-      }
+      current.children().forEach(child => this.drawElement(ctx, child));
     }
     ctx.restore();
   }
@@ -215,26 +194,6 @@ export default class PixelPainter {
   public initElementContext() {}
 
   public dispose() {}
-
-  private _initCanvas() {
-    const render = this.render;
-    const dom = render.getDom();
-    const width = render.getWidth();
-    const height = render.getHeight();
-    // todo dpr
-    const dpr = this.dpr;
-    if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
-      this._canvas = dom as HTMLCanvasElement;
-    } else {
-      const canvas = document.createElement('canvas');
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = width + 'px';
-      canvas.style.height = height + 'px';
-      this._canvas = canvas;
-      render.getDom().appendChild(canvas);
-    }
-  }
 
   private _initPixelCanvas() {
     if (this.render.isBrowser()) {

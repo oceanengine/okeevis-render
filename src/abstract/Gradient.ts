@@ -1,5 +1,7 @@
 import {BBox, } from '../utils/bbox';
 
+// todo 支持全局坐标系的gradient, 此时不用切换上下文
+
 export interface ColorStop {
   offset: number;
   color: string;
@@ -7,6 +9,7 @@ export interface ColorStop {
 export interface GradientOption {
   stops: ColorStop[];
 }
+
 export default abstract class Gradient<T extends GradientOption> {
   public abstract type: string;
 

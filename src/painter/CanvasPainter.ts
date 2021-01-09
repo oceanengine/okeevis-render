@@ -1,11 +1,11 @@
 import Painter from '../abstract/Painter';
 import Render from '../render';
-import Element, { CommonAttr } from '../shapes/Element';
-import Shape from '../shapes/Shape';
+import Element, { CommonAttr, FillAndStrokeStyle, } from '../shapes/Element';
+import Shape, {ShapeConf, } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import * as lodash from '../utils/lodash';
 import * as mat3 from '../../js/mat3';
-import { getCtxColor, isGradient } from '../color';
+import { getCtxColor, isGradient, } from '../color';
 
 export interface RenderingContext extends CommonAttr {}
 const identityMat3 = mat3.create();
@@ -62,7 +62,101 @@ export default class CanvasPainter implements Painter {
     console.timeEnd('paint');
   }
 
-  public initCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
+  
+
+  public drawElement(
+    ctx: CanvasRenderingContext2D,
+    item: Element,
+    isInBatch: boolean = false,
+  ) {
+    const {display, } = item.attr;
+    const fillAndStrokeStyle = item.getFillAndStrokeStyle();
+    const {fill, stroke, opacity, fillOpacity, strokeOpacity, needFill, needStroke } = fillAndStrokeStyle;
+    if (display === false) {
+      return;
+    }
+    if (isInBatch) {
+      if (item.type === 'group') {
+        console.warn('batch brush muse be shape element');
+        return;
+      }
+      const shape = item as Shape;
+      shape.brush(ctx);
+      return;
+    }
+
+    if (opacity === 0) {
+      return;
+    }
+    const hasSelfContext = this._hasSelfContext(item, fillAndStrokeStyle);
+    
+    if (hasSelfContext) {
+      ctx.save();
+    }
+
+    hasSelfContext && this._setElementCanvasContext(ctx, item);
+    if (item.type !== 'group') {
+      const current = item as Shape;
+      if (item.fillAble || item.strokeAble) {
+        ctx.beginPath();
+      }
+      current.brush(ctx);
+      if (item.fillAble && needFill) {
+        if (fillOpacity !== strokeOpacity) {
+          ctx.globalAlpha =  fillOpacity;
+        }
+         ctx.fill();
+      }
+      if (item.strokeAble && needStroke) {
+        if (fillOpacity !== strokeOpacity) {
+          ctx.globalAlpha = strokeOpacity;
+        }
+        ctx.stroke();
+      }
+    } else {
+      const current = item as Group;
+      const batchBrush = current.attr._batchBrush;
+      if (batchBrush) {
+        ctx.beginPath();
+      }
+      current.children().forEach(child => this.drawElement(ctx, child, batchBrush));
+      if (batchBrush) {
+        if (fill && fill !== 'none') {
+          ctx.fill();
+        }
+        if (stroke && stroke !== 'none') {
+          ctx.stroke();
+        }
+      }
+    }
+    if (hasSelfContext) {
+      ctx.restore();
+    }
+  }
+
+  public dispose() {}
+
+  protected _initCanvas() {
+    const render = this.render;
+    const dom = render.getDom();
+    const width = render.getWidth();
+    const height = render.getHeight();
+    // todo dpr
+    const dpr = this.dpr;
+    if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
+      this._canvas = dom as HTMLCanvasElement;
+    } else {
+      const canvas = document.createElement('canvas');
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      this._canvas = canvas;
+      render.getDom().appendChild(canvas);
+    }
+  }
+
+  protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
     const {
       stroke,
       fill,
@@ -157,7 +251,7 @@ export default class CanvasPainter implements Painter {
     }
 
     const matrix3 = item.getTransform();
-    if (!mat3.equals(matrix3, identityMat3)) {
+    if (!mat3.exactEquals(matrix3, identityMat3)) {
       ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
     }
 
@@ -168,107 +262,48 @@ export default class CanvasPainter implements Painter {
     }
   }
 
-  public drawElement(
-    ctx: CanvasRenderingContext2D,
-    item: Element,
-    isInBatch: boolean = false,
-  ) {
-    const {display, opacity, } = item.attr;
-    const {fill, stroke, fillOpacity, strokeOpacity, needFill, needStroke } = item.getFillAndStrokeStyle();
-    if (display === false) {
-      return;
+  protected _hasSelfContext(item: Element<ShapeConf>, fillAndStrokeStyle: FillAndStrokeStyle): boolean {
+    const {fill, stroke, fillOpacity, strokeOpacity, } = fillAndStrokeStyle;
+    const contextKeys: Array<keyof ShapeConf> = [
+      'fill',
+      'fontSize',
+      'blendMode',
+      'lineCap',
+      'fillOpacity',
+      'strokeOpacity',
+      'lineDashOffset',
+      'lineJoin',
+      'lineWidth',
+      'miterLimit',
+      'shadowBlur',
+      'shadowColor',
+      'shadowOffsetX',
+      'shadowOffsetY',
+      'stroke',
+      'textAlign',
+      'textBaseline',
+      'lineDash',
+      'clip',
+    ];
+
+
+    if (contextKeys.some(key => item.attr[key] !== undefined)) {
+      return true;
     }
-    if (isInBatch) {
-      if (item.type === 'group') {
-        console.warn('batch brush muse be shape element');
-        return;
-      }
-      const shape = item as Shape;
-      shape.brush(ctx);
-      return;
+    if (isGradient(fill) || isGradient(stroke)) {
+      return true;
     }
 
-    if (fillOpacity === 0 && strokeOpacity === 0) {
-      return;
+    if (fillOpacity !== 1 || strokeOpacity !== 1) {
+      return true;
     }
 
-    ctx.save();
-
-    this.initCanvasContext(ctx, item);
-    if (item.type !== 'group') {
-      const current = item as Shape;
-      if (item.fillAble || item.strokeAble) {
-        ctx.beginPath();
-      }
-      current.brush(ctx);
-      if (item.fillAble && needFill) {
-        if (fillOpacity !== strokeOpacity) {
-          ctx.globalAlpha = opacity * fillOpacity;
-        }
-         ctx.fill();
-      }
-      if (item.strokeAble && needStroke) {
-        if (fillOpacity !== strokeOpacity) {
-          ctx.globalAlpha = opacity * strokeOpacity;
-        }
-        ctx.stroke();
-      }
-    } else {
-      const current = item as Group;
-      const batchBrush = current.attr.batchBrush;
-      if (batchBrush) {
-        ctx.beginPath();
-      }
-      current.children().forEach(child => this.drawElement(ctx, child, batchBrush));
-      if (batchBrush) {
-        if (fill && fill !== 'none') {
-          ctx.fill();
-        }
-        if (stroke && stroke !== 'none') {
-          ctx.stroke();
-        }
-      }
+    const matrix3 = item.getTransform();
+    if (!mat3.exactEquals(matrix3, identityMat3)) {
+      return true;
     }
-    ctx.restore();
-  }
 
-  public initElementContext() {}
-
-  public dispose() {}
-
-  private _initCanvas() {
-    const render = this.render;
-    const dom = render.getDom();
-    const width = render.getWidth();
-    const height = render.getHeight();
-    // todo dpr
-    const dpr = this.dpr;
-    if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
-      this._canvas = dom as HTMLCanvasElement;
-    } else {
-      const canvas = document.createElement('canvas');
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = width + 'px';
-      canvas.style.height = height + 'px';
-      this._canvas = canvas;
-      render.getDom().appendChild(canvas);
-    }
-  }
-
-  private _initPixelCanvas() {
-    if (this.render.isBrowser()) {
-      const canvas = document.createElement('canvas');
-      // todo 考虑dpr < 1 (缩放的场景)
-      canvas.width = this.dpr * 10;
-      canvas.height = this.dpr * 10;
-      canvas.style.width = '1px';
-      canvas.style.width = '1px';
-      this._canvas = canvas;
-      document.body.appendChild(canvas);
-      canvas.style.cssText = 'margin: 20px;'
-    } else {
-      this._canvas = this.render.getDom() as HTMLCanvasElement;
-    }
+    return false;
+    
   }
 }

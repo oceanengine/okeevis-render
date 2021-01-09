@@ -44,9 +44,9 @@ export default class Sector extends Shape<SectorConf> {
     const anticlockwise = end < start;
     const p1 = getPointOnPolar(cx, cy, radiusI, end);
     const p2 = getPointOnPolar(cx, cy, radius, start);
-    ctx.moveTo(p1.x, p1.y);
+    ctx.moveTo(p1.x, p1.y); // 为了转svg, canvas下不需要这个
     ctx.arc(cx, cy, radiusI, end, start, !anticlockwise);
-    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p2.x, p2.y); // 为了转svg, canvas下不需要这个
     ctx.arc(cx, cy, radius, start, end, anticlockwise);
     ctx.closePath()
   }

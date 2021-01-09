@@ -17,5 +17,5 @@ export type ShapeConf = ArcConf & CircleConf & ImageConf & LineConf & PathConf &
 export default  class Shape<T extends CommonAttr = ShapeConf> extends Element<T> {
   public brush(ctx: CanvasRenderingContext2D) {
     ctx
-  }
+  }  
 }

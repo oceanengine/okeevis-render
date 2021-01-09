@@ -4,7 +4,10 @@ import Shape from './Shape';
 import {TextConf, } from './Text';
 
 export interface GroupConf extends TextConf {
-  batchBrush?: boolean;
+  /**
+   * 废弃属性, 合并绘制路径,并没有什么用, 但是保留作为测试用.
+   */
+  _batchBrush?: boolean;
 }
 
 export default class Group<T extends Element = Element> extends Element<GroupConf> {
@@ -19,7 +22,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public getDefaultAttr(): GroupConf {
     return {
       ...super.getDefaultAttr(),
-      batchBrush: false,
+      _batchBrush: false,
     }
   }
 

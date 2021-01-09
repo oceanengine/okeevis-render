@@ -10,14 +10,12 @@ const ref = { current: null } as any;
 
 const group = new Group({
   fontSize: 10,
-  fill: 'blue',
-  lineWidth: 1,
-  batchBrush: false,
+  fill: 'red',
 });
 
-group.addAll(makeRect(3000));
+group.addAll(makeText(3000));
 render.add(group);
-group.updateAll(makeRect(3000));
+group.updateAll(makeText(3000));
 
 function makeText(count: number) {
   return new Array(count).fill(0).map((value, index) => {

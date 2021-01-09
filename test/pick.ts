@@ -12,7 +12,6 @@ const group = new Group({
   fontSize: 10,
   fill: 'blue',
   lineWidth: 1,
-  batchBrush: false,
 });
 
 group.addAll(makeRect(10000));

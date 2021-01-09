@@ -58,5 +58,5 @@ export default class Text extends Shape<TextConf> {
     if (needFill) {
       ctx.fillText(text, x, y);
     }
-  }
+  }  
 }
