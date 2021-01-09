@@ -5,7 +5,7 @@ import Shape, {ShapeConf, } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import * as lodash from '../utils/lodash';
 import * as mat3 from '../../js/mat3';
-import { getCtxColor, isGradient, isTransparent, valueToRgb, } from '../color';
+import { getCtxColor, isGradient, isTransparent, } from '../color';
 
 export interface RenderingContext extends CommonAttr {}
 const identityMat3 = mat3.create();
@@ -64,7 +64,7 @@ export default class CanvasPainter implements Painter {
     if (!this.render.needUpdate() && !forceUpdate) {
       return;
     }
-    console.time('paint');
+    //console.time('paint');
     const ctx = this._canvas.getContext('2d');
     const elements = this.render.getAllElements();
     ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
@@ -75,7 +75,7 @@ export default class CanvasPainter implements Painter {
     }
     elements.forEach(item => this.drawElement(ctx, item, false));
     ctx.restore();
-    console.timeEnd('paint');
+    //console.timeEnd('paint');
   }
 
   
@@ -301,7 +301,7 @@ export default class CanvasPainter implements Painter {
       ctx.lineWidth = lineWidth;
     }
 
-    if (miterLimit) {
+    if (miterLimit >= 0) {
       ctx.miterLimit = miterLimit;
     }
 

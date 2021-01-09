@@ -14,6 +14,10 @@ export default class  SyntheticEvent<T extends MouseEvent | TouchEvent> {
   
   public timeStamp: number;
 
+  public preventDefault(): void {
+    this.original.stopPropagation();
+  }
+
   public stopPropagation(): void {
     this.isPropagationStopped = true;
   }
