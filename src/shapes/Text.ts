@@ -48,14 +48,14 @@ export default class Text extends Shape<TextConf> {
 
   public brush(ctx: CanvasRenderingContext2D) {
     const {x, y, text} = this.attr;
-    const {hasFill, hasStroke, } = this.getFillAndStrokeStyle();
+    const {needStroke, needFill, } = this.getFillAndStrokeStyle();
     if (!text) {
       return;
     }
-    if (hasStroke) {
+    if (needStroke) {
       ctx.strokeText(text, x, y);
     }
-    if (hasFill) {
+    if (needFill) {
       ctx.fillText(text, x, y);
     }
   }
