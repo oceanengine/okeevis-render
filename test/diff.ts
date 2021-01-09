@@ -11,13 +11,11 @@ const ref = { current: null } as any;
 const group = new Group({
   fontSize: 10,
   fill: 'red',
-  stroke: 'blue',
-  lineWidth: 1,
 });
 
-group.addAll(makeLine(4000));
+group.addAll(makeText(4000));
 render.add(group);
-group.updateAll(makeLine(4000));
+group.updateAll(makeText(4000));
 
 function makeText(count: number) {
   return new Array(count).fill(0).map((value, index) => {
@@ -48,7 +46,6 @@ function makeLine(count: number) {
       y1: Math.random() * 480,
       x2: Math.random() * 600,
       y2: Math.random() * 480,
-      stroke: '#' + Math.random().toString(16).substr(2, 6),
     });
   });
 }

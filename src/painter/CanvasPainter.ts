@@ -39,6 +39,9 @@ export default class CanvasPainter implements Painter {
   }
 
   public onFrame() {
+    if (!this.render.needUpdate()) {
+      return;
+    }
     this.paint();
   }
 
@@ -60,11 +63,8 @@ export default class CanvasPainter implements Painter {
     ctx.restore();
   }
 
-  public paint(forceUpdate: boolean = false) {
-    if (!this.render.needUpdate() && !forceUpdate) {
-      return;
-    }
-    //console.time('paint');
+  public paint() {
+    console.time('paint');
     const ctx = this._canvas.getContext('2d');
     const elements = this.render.getAllElements();
     ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
@@ -75,7 +75,7 @@ export default class CanvasPainter implements Painter {
     }
     elements.forEach(item => this.drawElement(ctx, item, false));
     ctx.restore();
-    //console.timeEnd('paint');
+    console.timeEnd('paint');
   }
 
   
@@ -234,6 +234,10 @@ export default class CanvasPainter implements Painter {
       (item as Shape).attr.clip.brush(ctx);
       ctx.clip();
     }
+    
+    if (lineWidth >= 0) {
+      ctx.lineWidth = lineWidth;
+    }
 
     if (this._isPixelPainter && item.type !== 'group') {
       const rgb = item.pickRGB;
@@ -297,9 +301,7 @@ export default class CanvasPainter implements Painter {
       ctx.lineJoin = lineJoin;
     }
 
-    if (lineWidth >= 0) {
-      ctx.lineWidth = lineWidth;
-    }
+    
 
     if (miterLimit >= 0) {
       ctx.miterLimit = miterLimit;

@@ -1,7 +1,7 @@
 import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
-import {valueToRgb, } from '../color';
+import { valueToRgb } from '../color';
 import * as lodash from '../utils/lodash';
 
 export default class EventHandle {
@@ -39,10 +39,12 @@ export default class EventHandle {
     console.time('pick');
     const pixelPainter = this._PixelPainter;
     const leafNodes = this.render.getAllLeafNodes();
-    // https://www.yuque.com/antv/ou292n/okxrus
+    // todo 过渡pointerEvents:none
+    // todo 过渡display: none
+    // todo f过渡
     leafNodes.forEach((item, index) => {
       // 颜色空间大约有40W个,基本够用.
-      item.pickRGB = valueToRgb(((index + 1)))
+      item.pickRGB = valueToRgb(index + 1);
     });
     pixelPainter.paintAt(x, y);
     // todo 考虑小程序getImageData兼容
@@ -53,7 +55,7 @@ export default class EventHandle {
     const g0 = pickValue[1];
     const b0 = pickValue[2];
     let target: Element;
-    for( let i = 0; i< leafNodes.length; i++) {
+    for (let i = 0; i < leafNodes.length; i++) {
       const node = leafNodes[i];
       const [r, g, b] = node.pickRGB;
       const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
@@ -63,7 +65,7 @@ export default class EventHandle {
       }
     }
     if (target) {
-      target.setAttr({fill: 'red'})
+      target.setAttr({ fill: 'red', stroke: 'red', });
     }
     console.timeEnd('pick');
   }

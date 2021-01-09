@@ -12,10 +12,10 @@ const group = new Group({
   fontSize: 12,
   fill: 'blue',
   stroke: 'blue',
-  lineWidth: 1,
+  lineWidth: 20,
 });
 
-group.addAll(makeRect(30000));
+group.addAll(makeLine(10));
 render.add(group);
 // group.updateAll(makeRect(3000));
 
