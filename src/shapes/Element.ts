@@ -536,6 +536,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public dirtyClientBoundingRect() {
     this._clientBoundingRectDirty = true;
+    this.parentNode?.dirtyBBox();
   }
 
   private _computeTransform(): mat3 {
@@ -553,12 +554,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
   
   public dirtyAbsTransform() {
     this._absTransformDirty = true;
-    this._clientBoundingRectDirty = true;
+    this.dirtyClientBoundingRect();
   }
 
   protected dirtyBBox() {
     this._bboxDirty = true;
-    this._clientBoundingRectDirty = true;
+    this.dirtyClientBoundingRect();
   }
 
   private _mountClip() {
