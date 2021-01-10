@@ -97,6 +97,7 @@ const group = new Group({
   rotation: 0
 });
 
+circle.translate(-100, 0)
 
 group.add(arc);
 group.add(circle)

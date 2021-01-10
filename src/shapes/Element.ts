@@ -293,6 +293,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
     ctx.closePath();
   }
 
+  public brushClientBoundingBox(ctx: CanvasRenderingContext2D) {
+    const {x, y, width, height} = this.getClientBoundingRect();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x + width, y + height);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
+  }
+
   public getClientBoundingRect(): BBox {
     // 考虑stroke
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
