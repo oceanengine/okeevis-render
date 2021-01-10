@@ -26,13 +26,13 @@ export function getImageLoader(): ImageLoader {
   return imageLoader;
 }
 
-export function getImage(src: string, callback: (image: HTMLImageElement) => void): HTMLImageElement {
+export function getImage(src: string, callback?: (image: HTMLImageElement) => void): HTMLImageElement {
   if (loadedImage[src]) {
     return loadedImage[src]
   }
   imageLoader(src, (image: HTMLImageElement) => {
     loadedImage[src] = image;
-    callback(image);
+    callback && callback(image);
   })
   return loadedImage[src]
 }

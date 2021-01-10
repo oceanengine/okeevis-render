@@ -1,5 +1,6 @@
 import Shape from './Shape'
 import  {CommonAttr, } from './Element'
+import { BBox, polygonBBox, } from '../utils/bbox';
 
 export interface PolylineConf extends CommonAttr {
   pointList?: Array<{x: number;y:number}>;
@@ -38,6 +39,11 @@ export default class Polyline extends Shape<PolylineConf> {
     }
     ctx.moveTo(pointList[0].x, pointList[0].y);
     pointList.slice(1).forEach(point => ctx.lineTo(point.x, point.y));
+  }
+
+  protected computeBBox(): BBox {
+    return polygonBBox(this.attr.pointList || []);
+    
   }
   
 }

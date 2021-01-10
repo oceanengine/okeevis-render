@@ -1,5 +1,4 @@
 
-import {TextConf, } from '../shapes/Text';
 
 export default abstract class Painter {
   public abstract paint(): void;
@@ -8,7 +7,7 @@ export default abstract class Painter {
 
   public abstract onFrame(now: number): void;
 
-  public abstract measureText<T extends string | string[]>(text: T, textStyle: TextConf): T extends string ? TextMetrics : TextMetrics[];
+  public abstract getContext(): CanvasRenderingContext2D;
 
   public abstract dispose(): void;
 }

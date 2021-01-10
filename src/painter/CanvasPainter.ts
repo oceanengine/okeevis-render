@@ -52,21 +52,8 @@ export default class CanvasPainter implements Painter {
     return this._canvas.getContext('2d').getImageData(x, y, width, height);
   }
 
-  public measureText<T extends string | string[]>(
-    text: T,
-    textStyle: TextConf = {},
-  ): T extends string ? TextMetrics : TextMetrics[] {
-    const { fontFamily = 'sans-serif', fontSize = 10, fontWeight = 'normal' } = textStyle;
-    let ret: T extends string ? TextMetrics : TextMetrics[];
-    this._ctx.save();
-    this._ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-    if (lodash.isArray(text)) {
-      ret = text.map(item => this._ctx.measureText(item)) as any;
-    } else {
-      ret = this._ctx.measureText(text + '') as any;
-    }
-    this._ctx.restore();
-    return ret;
+  public getContext(): CanvasRenderingContext2D {
+    return this._ctx;
   }
 
   public paintAt(x: number, y: number) {
@@ -290,7 +277,6 @@ export default class CanvasPainter implements Painter {
     if (this._isPixelPainter && item.type !== 'group') {
       const rgb = item.pickRGB;
       const pickColor = `rgb(${rgb.join(',')})`;
-      console;
       ctx.fillStyle = pickColor;
       ctx.strokeStyle = pickColor;
       return;

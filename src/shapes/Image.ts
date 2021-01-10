@@ -1,6 +1,7 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { getImage } from '../utils/imageLoader';
+import { BBox, rectBBox } from '../utils/bbox';
 
 export interface ImageConf extends CommonAttr {
   x?: number;
@@ -15,7 +16,7 @@ const shapeKeys: Array<keyof ImageConf> = ['x', 'y', 'width', 'height', 'src'];
 
 export default class Rect extends Shape<ImageConf> {
   public type = 'image';
-  
+
   public fillAble = false;
 
   public strokeAble = false;
@@ -23,13 +24,7 @@ export default class Rect extends Shape<ImageConf> {
   public shapeKeys = shapeKeys;
 
   public getAnimationKeys(): Array<keyof ImageConf> {
-    return [
-      ...super.getAnimationKeys(),
-      'x',
-      'y',
-      'width',
-      'height',
-    ];
+    return [...super.getAnimationKeys(), 'x', 'y', 'width', 'height'];
   }
 
   public getDefaultAttr(): ImageConf {
@@ -50,7 +45,21 @@ export default class Rect extends Shape<ImageConf> {
     const image = getImage(src, () => {
       this.dirty();
     });
-    image && ctx.drawImage(image, x, y, width >= 0 ? width : image.width, height >= 0 ? height : image.height);
+    image &&
+      ctx.drawImage(
+        image,
+        x,
+        y,
+        width >= 0 ? width : image.width,
+        height >= 0 ? height : image.height,
+      );
   }
-  
+
+  protected computeBBox(): BBox {
+    const { src, x, y, width, height } = this.attr;
+    const image = getImage(src);
+    const sw = width > 0 ? width : image?.width || 0;
+    const sh = height > 0 ? height : image?.height || 0;
+    return rectBBox(x, y, sw, sh);
+  }
 }

@@ -9,5 +9,5 @@ export class Polygon extends Polyline {
   public brush(ctx: CanvasRenderingContext2D) {
     super.brush(ctx);
     ctx.closePath();
-  }
+  }  
 }

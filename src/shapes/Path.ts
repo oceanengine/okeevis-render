@@ -1,6 +1,7 @@
 import Shape from './Shape';
 import  {CommonAttr, } from './Element';
 import Path2D from '../geometry/Path2D';
+import { BBox, polygonBBox, } from '../utils/bbox';
 
 export interface PathConf extends CommonAttr {
   pathData?: Path2D;
@@ -41,6 +42,10 @@ export default class Path extends Shape<PathConf> {
     } else if (this.attr.brush) {
       this.attr.brush(ctx);
     }
+  }
+
+  protected computeBBox(): BBox {
+    return this.attr.pathData?.getBBox();
   }
   
 }

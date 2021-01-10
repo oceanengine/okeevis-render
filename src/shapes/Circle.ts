@@ -1,5 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
+import { BBox, circleBBox, } from '../utils/bbox';
 
 export interface CircleConf extends CommonAttr {
   cx?: number;
@@ -29,5 +30,10 @@ export default class Circle extends Shape<CircleConf> {
   public brush(ctx: CanvasRenderingContext2D) {
     const { cx, cy, radius } = this.attr;
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  }
+  
+  protected computeBBox(): BBox {
+    const {cx, cy, radius: r} = this.attr;
+    return circleBBox(cx, cy, r);
   }
 }

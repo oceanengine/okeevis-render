@@ -1,4 +1,5 @@
 import parsePath from './parsePath';
+import {BBox, } from '../utils/bbox';
 
 interface PathAction {
   action:
@@ -169,5 +170,9 @@ export default class Path2D {
 
   public drawOnCanvasContext(ctx: CanvasRenderingContext2D) {
     this._pathList.forEach(item => ctx[item.action].apply(ctx, item.params));
+  }
+
+  public getBBox(): BBox {
+    return {x: 0, y: 0, width: 0, height: 0}
   }
 }

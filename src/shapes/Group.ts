@@ -62,6 +62,17 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this.dirty();
   }
 
+  public contain(child: Element): boolean {
+    let node = child;
+    while (node) {
+      if (node === this) {
+        return true;
+      }
+      node = node.parentNode;
+    }
+    return false;
+  }
+
   public onFrame(now: number) {
     super.onFrame(now);
     this.sortByZIndex();

@@ -13,8 +13,13 @@ const group = new Group({
   fill: 'blue',
   stroke: 'blue',
   lineWidth: 20,
+  cursor: 'pointer',
+  clip: new Rect({ref, x: 50, y: 200, width: 100, height: 100})
 });
 
+ref.current.animateTo({x: 500, height: 500}, 5000)
+
+console.log(ref.current)
 group.addAll(makeLine(10));
 render.add(group);
 // group.updateAll(makeRect(3000));

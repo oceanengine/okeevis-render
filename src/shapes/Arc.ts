@@ -1,6 +1,7 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
 import {PI2, getPointOnPolar,  } from '../utils/math';
+import {arcBBox, BBox,} from '../utils/bbox';
 
 export interface ArcConf extends CommonAttr {
   cx?: number;
@@ -39,5 +40,10 @@ export default class Arc extends Shape<ArcConf> {
     const p1 = getPointOnPolar(cx, cy, radius, start);
     ctx.moveTo(p1.x, p1.y);
     ctx.arc(cx, cy, radius, start, end, anticlockwise);
+  }
+  
+  protected computeBBox(): BBox {
+    const {cx, cy, radius, start, end,} = this.attr;
+    return arcBBox(cx, cy, radius, start, end);
   }
 }
