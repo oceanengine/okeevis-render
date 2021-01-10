@@ -61,6 +61,7 @@ const rect = new Rect({
   height: 100,
   fill: 'blue',
   fillOpacity: 0.5,
+  rotation: 0.2,
 })
 
 const polygon = new Polygon({
@@ -92,12 +93,9 @@ const text = new Text({
   textAlign: 'left',
   textBaseline: 'bottom',
 })
-
 const group = new Group({
   rotation: 0
 });
-
-circle.translate(-100, 0)
 
 group.add(arc);
 group.add(circle)
