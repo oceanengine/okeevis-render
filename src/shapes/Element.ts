@@ -14,11 +14,13 @@ import Shape, {ShapeConf, } from './Shape';
 import * as mat3 from '../../js/mat3';
 import {RGBA_TRANSPARENT, } from '../constant';
 
+export type Ref<T extends Element=Element> = {current?: T};
+
 export type ElementAttr = GroupConf & ShapeConf;
 
 export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   key?: string;
-  ref?: { current: Element<CommonAttr> };
+  ref?: Ref;
   display?: boolean;
   zIndex?: number;
 
@@ -37,7 +39,7 @@ export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   strokeOpacity?: number;
   blendMode?: 'source-over' | 'source-atop' | 'source-in' | 'source-out' | 'destination-over' | 'destination-atop' | 'destination-in' | 'destination-out' | 'lighter' | 'copy' | 'xor';
 
-  clip?: Shape;
+  clip?: Shape | Ref<Shape>;
 
   shadowColor?: string;
   shadowBlur?: number;
@@ -295,7 +297,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._clientBoundingRect;
   }
 
-  public computeBBox(): BBox {
+  protected computeBBox(): BBox {
     return { x: 0, y: 0, width: 0, height: 0 };
   }
 
@@ -396,12 +398,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this._lastFrameTime === now) {
       return;
     }
-
     this._lastFrameTime = now;
-    if (this.attr.clip) {
-      this.attr.clip.onFrame(now);
-    }
-
+    const clipElement = this.getClipElement();
+    clipElement && clipElement.onFrame(now);
+    
     if (!this._animations.length) {
       return;
     }
@@ -423,6 +423,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
     onFrame && onFrame(progress);
     this._animations = this._animations.filter(item => !item.stopped);
   }
+
+  public getClipElement(): Shape {
+    const {clip, } = this.attr;
+    if (!clip) {
+      return;
+    }
+    if (clip instanceof Element) {
+      return clip;
+    } 
+    if (clip.current instanceof  Element) {
+      return clip.current;
+    }
+  }
+
   /* ************ AnimateAble End ******************* */
 
   /* ************ TransformAble Begin ******************* */
@@ -519,9 +533,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _mountClip() {
-    const clip = this.attr.clip;
+    const clip = this.getClipElement();
     if (clip) {
       clip.ownerRender = this.ownerRender;
     }
   }
+  
 }
