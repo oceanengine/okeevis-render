@@ -13,6 +13,8 @@ export interface RenderOptions {
 
 export default class Render extends EventFul {
   public dpr: number = 1;
+  
+  public isDebugMode: boolean = false;
 
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
@@ -62,6 +64,11 @@ export default class Render extends EventFul {
 
   public dirty() {
     this._needUpdate = true;
+  }
+
+  public debug(debugMode: boolean = true) {
+    this.isDebugMode = debugMode;
+    this.dirty();
   }
 
   public getWidth(): number {

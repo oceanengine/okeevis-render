@@ -66,6 +66,7 @@ export default class CanvasPainter implements Painter {
       ctx.scale(dpr, dpr);
     }
     ctx.translate(-x, -y);
+    // todo 初始化LineWidth = 0;
     elements.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
   }
@@ -80,6 +81,7 @@ export default class CanvasPainter implements Painter {
     if (dpr !== 1) {
       ctx.scale(dpr, dpr);
     }
+    // todo 初始化LineWidth = 0;
     elements.forEach(item => this.drawElement(ctx, item, false));
     ctx.restore();
     console.timeEnd('paint');
@@ -153,6 +155,16 @@ export default class CanvasPainter implements Painter {
         item.type !== 'text'
       ) {
         ctx.stroke();
+      }
+      // debugger, 显示包围盒
+      if (this.render.isDebugMode && !this._isPixelPainter) {
+        ctx.save();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'red';
+        ctx.beginPath();
+        item.brushBBox(ctx);
+        ctx.stroke();
+        ctx.restore();
       }
     } else {
       const current = item as Group;
