@@ -284,27 +284,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     return this._bbox;
   }
-
-  // todo 抽到canvasPainter里
-
-  public brushBBox(ctx: CanvasRenderingContext2D) {
-    const {x, y, width, height} = this.getBBox();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + width, y);
-    ctx.lineTo(x + width, y + height);
-    ctx.lineTo(x, y + height);
-    ctx.closePath();
-  }
-
-  public brushClientBoundingBox(ctx: CanvasRenderingContext2D) {
-    const {x, y, width, height} = this.getClientBoundingRect();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + width, y);
-    ctx.lineTo(x + width, y + height);
-    ctx.lineTo(x, y + height);
-    ctx.closePath();
-  }
-
+  
   public getClientBoundingRect(): BBox {
     // 考虑stroke
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {

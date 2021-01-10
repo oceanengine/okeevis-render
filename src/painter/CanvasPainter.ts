@@ -161,7 +161,7 @@ export default class CanvasPainter implements Painter {
       }
       // debugger, 显示包围盒
       if (this.render.isDebugMode && !this._isPixelPainter) {
-       this._brushBBox(item);
+       this._brushBoundingBBox(item);
       }
     } else {
       const current = item as Group;
@@ -181,7 +181,7 @@ export default class CanvasPainter implements Painter {
       }
        // debugger, 显示包围盒
        if (this.render.isDebugMode && !this._isPixelPainter) {
-        this._brushBBox(item);
+        this._brushBoundingBBox(item);
        }
     }
     if (hasSelfContext) {
@@ -410,14 +410,19 @@ export default class CanvasPainter implements Painter {
     return false;
   }
 
-  private _brushBBox(item: Element) {
+  private _brushBoundingBBox(item: Element) {
     const ctx = this._ctx;
+    const {x, y, width, height} = item.getClientBoundingRect();
     ctx.save();
     ctx.globalAlpha = 1;
     ctx.lineWidth = 1;
     ctx.strokeStyle = 'red';
     ctx.beginPath();
-    item.brushBBox(ctx);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x + width, y + height);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
     ctx.stroke();
     ctx.restore();
   }
