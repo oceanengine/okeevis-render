@@ -92,6 +92,10 @@ export default class Render extends EventFul {
     return this._dom;
   }
 
+  public getRoot(): Group {
+    return this._rootGroup;
+  }
+
   public getBase64() {
 
   }

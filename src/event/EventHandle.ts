@@ -35,7 +35,7 @@ export default class EventHandle {
     }
   }
 
-  public pickTarget(x: number, y: number) {
+  public pickTarget(x: number, y: number): Element {
     console.time('pick');
     const pixelPainter = this._PixelPainter;
     const leafNodes = this.render.getAllLeafNodes();
@@ -68,12 +68,18 @@ export default class EventHandle {
       target.setAttr({ fill: 'red', stroke: 'red', });
     }
     console.timeEnd('pick');
+    return target || this.render.getRoot();
   }
 
   public dispose() {
     if (this.render.isBrowser()) {
       this._detachEvents();
     }
+  }
+
+  public setCurosr(item: Element) {
+    const cursor = item.getExtendAttr('cursor');
+    this.render.getDom().style.cursor = cursor;
   }
 
   private _detachEvents() {
@@ -129,8 +135,10 @@ export default class EventHandle {
   };
 
   private _handleMouseMove = (event: MouseEvent) => {
+    return
     this._currentMousePosition = { x: event.offsetX, y: event.offsetY };
-    // this.pickTarget(event.offsetX, event.offsetY);
+    const target = this.pickTarget(event.offsetX, event.offsetY);
+    this.setCurosr(target);
   };
 
   private _handleClick = (event: WheelEvent) => {
