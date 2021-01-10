@@ -140,7 +140,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _transform: mat3 = identityTrasnform;
 
+  private _absTransform: mat3;
+
   private _transformDirty: boolean = false;
+
+  private _absTransformDirty: boolean = false; // 自身或祖先矩阵变化
 
   private _baseMatrix: mat3 = mat3.create();
 
@@ -149,6 +153,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _clientBoundingRectDirty: boolean = true;
 
   private _lastFrameTime: number;
+  
 
   public constructor(attr: T = {} as T) {
     super();
@@ -288,10 +293,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     ctx.closePath();
   }
 
-  public getClientBoundingRect(parentTransform?: mat3): BBox {
+  public getClientBoundingRect(): BBox {
     // 考虑stroke
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
-      this._clientBoundingRect = this._computClientBoundingRect(parentTransform);
+      this._clientBoundingRect = this.computClientBoundingRect();
       this._clientBoundingRectDirty = false;
     }
     return this._clientBoundingRect;
@@ -299,6 +304,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected computeBBox(): BBox {
     return { x: 0, y: 0, width: 0, height: 0 };
+  }
+
+  protected computClientBoundingRect(): BBox {
+    const bbox = this.getBBox();
+    const matrix = this.getAbsTransform();
+    // todo 计算包围盒
+    return bbox;
   }
 
   public created() {
@@ -309,15 +321,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation', 'scale'].filter(
       key => !lodash.isUndefined((nextAttr as any)[key]),
     ) as any;
-    const shapeKeys = this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key]));
+    const shapeKeys = ['display' as keyof T, ...this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key]))];
 
     if (transformKeys.length) {
       // todo 精确判断数组变化
-      this._dirtyTransform();
+      this.dirtyTransform();
     }
 
     if (shapeKeys.some(key => prevAttr[key] !== nextAttr[key])) {
-      this._dirtyBBox();
+      this.dirtyBBox();
     }
   }
 
@@ -331,6 +343,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public destroy() {
     this.parentNode = null;
     this.ownerRender = null;
+    this._transformDirty = true;
+    this._absTransformDirty = true;
+    this._clientBoundingRectDirty = true;
+    this._bboxDirty = true;
     this.stopAllAnimation();
     this.removeAllListeners();
   }
@@ -453,10 +469,18 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._baseMatrix;
   }
 
+  private getAbsTransform(): mat3 {
+    if (!this._absTransform || this._absTransformDirty) {
+      this._absTransform = this._computeAbsTransform();
+      this._absTransformDirty = false;
+    }
+    return this._absTransform;
+  }
+
   public resetTransform() {
     this._baseMatrix = mat3.create();
     this.dirty();
-    this._dirtyTransform();
+    this.dirtyTransform();
   }
 
   public setBaseTransform(matrix: mat3) {
@@ -466,19 +490,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public translate(dx: number, dy: number) {
     this._baseMatrix = mat3.translate(this._baseMatrix, this._baseMatrix, [dx, dy]);
     this.dirty();
-    this._dirtyTransform();
+    this.dirtyTransform();
   }
 
   public scale(sx: number, sy: number = sx) {
     this._baseMatrix = mat3.scale(this._baseMatrix, this._baseMatrix, [sx, sy]);
     this.dirty();
-    this._dirtyTransform();
+    this.dirtyTransform();
   }
 
   public rotate(rad: number) {
     this._baseMatrix = mat3.rotate(this._baseMatrix, this._baseMatrix, rad);
     this.dirty();
-    this._dirtyTransform();
+    this.dirtyTransform();
   }
 
   /* ************ DragAndDrop Begin ******************* */
@@ -513,21 +537,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return out;
   }
 
-  private _computClientBoundingRect(parentTransform?: mat3): BBox {
-    if (parentTransform) {
-      // todo
-    } else {
-      // todo
-    }
-    return { x: 0, y: 0, width: 0, height: 0 };
-  }
-
-  private _dirtyTransform() {
+  public dirtyTransform() {
     this._transformDirty = true;
+    this.dirtyAbsTransform();
+  }
+  
+  public dirtyAbsTransform() {
+    this._absTransformDirty = true;
     this._clientBoundingRectDirty = true;
   }
 
-  private _dirtyBBox() {
+  protected dirtyBBox() {
     this._bboxDirty = true;
     this._clientBoundingRectDirty = true;
   }
@@ -537,6 +557,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (clip) {
       clip.ownerRender = this.ownerRender;
     }
+  }
+
+  private _computeAbsTransform(): mat3 {
+    const parentTransform = this.parentNode ? this.parentNode.getAbsTransform() : mat3.create();
+    const selfTransform = this.getTransform();
+    return mat3.multiply(mat3.create(), parentTransform, selfTransform);
   }
   
 }

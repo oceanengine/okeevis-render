@@ -35,13 +35,20 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   protected computeBBox(): BBox {
-    const bboxList = this._components.map(child => child.getClientBoundingRect());
+    const bboxList = this._components.filter(item => item.attr.display).map(child => child.getClientBoundingRect());
     return unionBBox(bboxList);
   }
 
   public mounted() {
     super.mounted();
     this._components.forEach(item => item.mounted());
+  }
+
+  public dirtyTransform() {
+    super.dirtyTransform();
+    if (this._components) {
+      this._components.forEach(child => child.dirtyAbsTransform());
+    }
   }
 
   public add(item: Element): this {
@@ -53,19 +60,27 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     item.parentNode = this;
     item.mounted();
     this.dirty();
+    this.dirtyBBox();
     return this;
   }
-  
   
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
     return this;
   }
 
+  public remove(element: T) {
+    element.destroy();
+    this._components = this._components.filter(item => item !== element);
+    this.dirty();
+    this.dirtyBBox();
+  }
+
   public clear() {
     this._components.forEach(item => item.destroy());
     this._components = [];
     this.dirty();
+    this.dirtyBBox();
   }
 
   public contain(child: Element): boolean {
@@ -135,12 +150,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       this.add(list[index]);
     });
     
-  }
-
-  public remove(element: T) {
-    element.destroy();
-    this._components = this._components.filter(item => item !== element);
-    this.dirty();
   }
 
   public children(): T[] {

@@ -36,7 +36,6 @@ const circle = new Circle({
   fill: 'blue'
 })
 
-const group = new Group();
 
 const image = new Image({
   src: 'https://lf1-hscdn-tos.pstatp.com/obj/developer-baas/baas/ttkw6x/1ddf8408cdd9f7e0_1600424925672.png',
@@ -77,8 +76,8 @@ const sector = new Sector({
   cx: 500,
   cy: 255,
   radius: 100,
-  start: degToRad(-50),
-  end: degToRad(270),
+  start: degToRad(-30),
+  end: degToRad(27),
   fill: 'blue',
   radiusI: 0
 })
@@ -87,22 +86,27 @@ const sector = new Sector({
 const text = new Text({
   x: 50,
   y: 480,
-  text: '文本fdsfds文本',
+  text: '文本文本',
   fontSize: 50,
   fill: 'blue',
   textAlign: 'left',
   textBaseline: 'bottom',
 })
 
-render.add(arc);
-render.add(circle)
-render.add(image);
-render.add(line)
-render.add(rect);
-render.add(polygon)
-render.add(sector)
-render.add(text)
+const group = new Group({
+  rotation: 0
+});
 
 
+group.add(arc);
+group.add(circle)
+group.add(image);
+group.add(line)
+group.add(rect);
+group.add(polygon)
+group.add(sector)
+group.add(text)
+
+render.add(group)
 render.debug();
 render.resize(1200, 800);
