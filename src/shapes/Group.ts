@@ -2,7 +2,7 @@ import { diff } from '@egjs/list-differ';
 import Element from './Element';
 import Shape from './Shape';
 import {TextConf, } from './Text';
-import { BBox, composeBBox, } from '../utils/bbox';
+import { BBox, unionBBox, } from '../utils/bbox';
 
 export interface GroupConf extends TextConf {
   /**
@@ -36,7 +36,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   protected computeBBox(): BBox {
     const bboxList = this._components.map(child => child.getClientBoundingRect());
-    return composeBBox(bboxList);
+    return unionBBox(bboxList);
   }
 
   public mounted() {

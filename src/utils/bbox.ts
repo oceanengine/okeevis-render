@@ -8,17 +8,21 @@ export interface BBox {
   height: number;
 }
 
-export function composeBBox(bboxList: BBox[]): BBox {
-  let minX = 0;
-  let minY = 0;
-  let maxX = 0;
-  let maxY = 0;
-  bboxList.forEach(box => {
+export function unionBBox(bboxList: BBox[]): BBox {
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+  for (let i = 0; i < bboxList.length; i++) {
+    const box = bboxList[i];
+    if (box.width === 0 || box.height === 0) {
+      continue;
+    }
     minX = Math.min(box.x, minX);
     minY = Math.min(box.y, minY);
     maxX = Math.max(box.x + box.width, maxX);
     maxY = Math.max(box.y + box.height, maxY);
-  });
+  }
   return {
     x: minX,
     y: minY,
@@ -60,6 +64,14 @@ export function lineBBox(x1: number, y1: number, x2: number, y2: number): BBox {
 }
 
 export function arcBBox(cx: number, cy: number, r: number, start: number, end: number): BBox {
+  if (r === 0 || start === end) {
+    return {
+      x: cx,
+      y: cy,
+      width: 0,
+      height: 0,
+    }
+  }
   // 找圆弧中心点切线平移形成包围盒
   const delta = Math.abs(end - start);
   const xRange = [cx - r, cx + r];
@@ -101,8 +113,8 @@ export function sectorBBox(
   end: number,
 ): BBox {
   const outerArcBBox = arcBBox(cx, cy, r, start, end);
-  const innterArcBBox = arcBBox(cx, cy, ri, start, end);
-  return composeBBox([outerArcBBox, innterArcBBox]);
+  const innterArcBBox = arcBBox(cx, cy, Math.max(ri, 1e-6), start, end);
+  return unionBBox([outerArcBBox, innterArcBBox]);
 }
 
 export function polygonBBox(points: Array<{ x: number; y: number }>): BBox {

@@ -13,6 +13,7 @@ export interface TextConf extends CommonAttr {
   fontVariant?: string;
   textAlign?: CanvasTextAlign;
   textBaseline?: CanvasTextBaseline;
+  lineHeight?: number;
   // todo
   truncate?: {
     outerWidth?: number;
@@ -63,36 +64,52 @@ export default class Text extends Shape<TextConf> {
   }
 
   public measureText(ctx: CanvasRenderingContext2D): TextMetrics {
-   return measureText(ctx, this.attr.text, this.getTextStyle());
+    // todo LRUCache
+    return measureText(ctx, this.attr.text, this.getTextStyle());
   }
 
   public getTextStyle(): TextConf {
+    const fontSize = this.getExtendAttr('fontSize');
     return {
-      fontSize: this.getExtendAttr('fontSize'),
+      fontSize,
       fontFamily: this.getExtendAttr('fontFamily'),
       fontWeight: this.getExtendAttr('fontWeight'),
+      textAlign: this.getExtendAttr('textAlign'),
+      textBaseline: this.getExtendAttr('textBaseline'),
+      lineHeight: this.attr.lineHeight || fontSize,
     };
   }
 
   protected computeBBox(): BBox {
     const { x, y } = this.attr;
-    const fontSize = this.getExtendAttr('fontSize');
+    const { textAlign, textBaseline, lineHeight } = this.getTextStyle();
+    let textWidth = 0;
     if (this.ownerRender) {
       const painter = this.ownerRender.getPainter();
       const result = this.measureText(painter.getContext());
-      return {
-        x,
-        y,
-        width: result.width,
-        height: fontSize,
-      };
+      textWidth = result.width;
     }
-    return {
+    const bbox: BBox = {
       x,
       y,
-      width: 0,
-      height: 0,
+      width: textWidth,
+      height: lineHeight,
+    };
+
+    if (textAlign === 'center') {
+      bbox.x = x - textWidth / 2;
+    } else if (textAlign === 'right') {
+      bbox.x = x - textWidth;
     }
-    
+
+    if (textBaseline === 'top') {
+      bbox.y = y;
+    } else if (textBaseline === 'middle') {
+      bbox.y = y - lineHeight / 2;
+    } else {
+      bbox.y = y - lineHeight;
+    }
+
+    return bbox;
   }
 }
