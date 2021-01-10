@@ -1,6 +1,6 @@
 import Eventful from '../utils/Eventful';
 import Render from '../render';
-import Group from './Group';
+import Group, {GroupConf, } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue, isTransparent, } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
@@ -14,9 +14,11 @@ import Shape, {ShapeConf, } from './Shape';
 import * as mat3 from '../../js/mat3';
 import {RGBA_TRANSPARENT, } from '../constant';
 
+export type ElementAttr = GroupConf & ShapeConf;
+
 export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   key?: string;
-  ref?: { current: Element };
+  ref?: { current: Element<CommonAttr> };
   display?: boolean;
   zIndex?: number;
 
@@ -109,10 +111,10 @@ const defaultTransformConf: CommonAttr = {
   origin: [0, 0],
 }
 
-export default class Element<T extends CommonAttr = any>
+export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
   implements AnimateAble<T>, TransformAble, DragAndDrop {
-  public attr: T = {} as T;
+  public attr: T & CommonAttr = {} as T ;
 
   public type: string;
   
@@ -186,7 +188,7 @@ export default class Element<T extends CommonAttr = any>
   }
 
   public getComputedOpacity(): number {
-    let node: Element= this;
+    let node: Element<any> = this;
     let opacity = 1;
     // 透明度有继承叠加效果
     while(node) {
@@ -199,7 +201,7 @@ export default class Element<T extends CommonAttr = any>
   public getExtendAttr<U extends keyof T>(key: U): T[U] {
     let value: T[U] = (defaultCanvasContext as T)[key];
     // 透明度有继承叠加效果
-    let node: Element = this;
+    let node: Element<any> = this;
     while(node) {
       if (typeof node.attr[key] !== 'undefined') {
         value = node.attr[key];
@@ -246,7 +248,7 @@ export default class Element<T extends CommonAttr = any>
     }
   }
 
-  public setAttr(attr: T = {} as T): this {
+  public setAttr(attr: T & CommonAttr= {} as T): this {
     if (lodash.keys(attr).length === 0) {
       return;
     }
@@ -263,7 +265,7 @@ export default class Element<T extends CommonAttr = any>
     }
     this._mountClip();
     if (this.attr.ref) {
-      this.attr.ref.current = this;
+      this.attr.ref.current = this as Element<any>;
     }
   }
 

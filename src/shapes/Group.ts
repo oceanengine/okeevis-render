@@ -84,7 +84,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     }
     const result = diff(prevList, list, (item, index) => {
       const attr = item.attr;
-      const key = attr.key ? (attr.type + attr.key) : `auto-key-${item.type}-${index}`;
+      const key = attr.key ? (item.type + attr.key) : `auto-key-${item.type}-${index}`;
       return key;
     });
 
