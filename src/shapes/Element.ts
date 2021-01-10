@@ -79,7 +79,7 @@ export interface FillAndStrokeStyle {
 
 const identityTrasnform = mat3.create();
 // 可继承(不可跨级)
-const defaultCanvasContext: ShapeConf = {
+export const defaultCanvasContext: ShapeConf = {
   fill: 'none',
   stroke: 'none',
   lineWidth: 1,
@@ -91,10 +91,10 @@ const defaultCanvasContext: ShapeConf = {
   fillOpacity: 1,
   strokeOpacity: 1,
   blendMode: 'source-over',
-  fontSize: 10,
+  fontSize: 12, // 非canvas默认
   fontFamily: 'sans-serif',
   textAlign: 'start',
-  textBaseline: 'alphabetic',
+  textBaseline: 'bottom', // canvas默认值'alphabetic',
   shadowColor: RGBA_TRANSPARENT,
   shadowBlur: 0,
   shadowOffsetX: 0,

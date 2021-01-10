@@ -1,8 +1,7 @@
 import Painter from '../abstract/Painter';
 import Render from '../render';
-import Element, { CommonAttr, FillAndStrokeStyle } from '../shapes/Element';
+import Element, { CommonAttr, FillAndStrokeStyle, defaultCanvasContext, } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
-import { TextConf } from '../shapes/Text';
 import Group, { GroupConf } from '../shapes/Group';
 import * as lodash from '../utils/lodash';
 import * as mat3 from '../../js/mat3';
@@ -81,6 +80,10 @@ export default class CanvasPainter implements Painter {
     if (dpr !== 1) {
       ctx.scale(dpr, dpr);
     }
+    // 改变默认的canvas上下文
+    ctx.font = `sans-serif ${defaultCanvasContext.fontSize}px`;
+    ctx.textBaseline = 'bottom';
+
     // todo 初始化LineWidth = 0;
     elements.forEach(item => this.drawElement(ctx, item, false));
     ctx.restore();
@@ -159,6 +162,7 @@ export default class CanvasPainter implements Painter {
       // debugger, 显示包围盒
       if (this.render.isDebugMode && !this._isPixelPainter) {
         ctx.save();
+        ctx.globalAlpha = 1;
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'red';
         ctx.beginPath();
