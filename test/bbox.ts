@@ -12,7 +12,6 @@ import POlyline from '../src/shapes/Polyline'
 import Rect from '../src/shapes/Rect'
 import Sector from '../src/shapes/Sector'
 import Text from '../src/shapes/Text'
-
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
 
@@ -52,8 +51,8 @@ const line = new Line({
   y1: 80,
   x2: 300,
   y2: 10,
-  stroke: 'red',
-  lineWidth: 1,
+  stroke: 'blue',
+  lineWidth: 2,
 })
 
 const rect = new Rect({
@@ -77,17 +76,18 @@ const polygon = new Polygon({
 const sector = new Sector({
   cx: 500,
   cy: 255,
-  start: degToRad(-0),
-  end: degToRad(33),
+  radius: 100,
+  start: degToRad(-50),
+  end: degToRad(270),
   fill: 'blue',
-  radius: 120,
-  radiusI: 0,
+  radiusI: 0
 })
+
 
 const text = new Text({
   x: 50,
   y: 480,
-  text: '文本文本',
+  text: '文本fdsfds文本',
   fontSize: 50,
   fill: 'blue',
   textAlign: 'left',
@@ -102,6 +102,7 @@ render.add(rect);
 render.add(polygon)
 render.add(sector)
 render.add(text)
+
 
 render.debug();
 render.resize(1200, 800);

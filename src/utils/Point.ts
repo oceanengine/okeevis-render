@@ -48,11 +48,11 @@ export default class Point {
   }
 
   public getAngleFrom(x: number, y: number): number {
-    return Math.atan2(this.x - x, this.y - y);
+    return Math.atan2(this.y - y, this.x - x);
   }
 
   public getAngleTo(x: number, y: number): number {
-    return Math.atan2(x - this.x, y - this.y);
+    return Math.atan2(y - this.y, x - this.x,);
   }
 
   /**

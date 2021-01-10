@@ -17,10 +17,10 @@ export interface SectorConf extends CommonAttr {
 const shapeKeys: Array<keyof SectorConf> = [
   'cx',
   'cy',
-  'start',
-  'end',
   'radius',
   'radiusI',
+  'start',
+  'end',
   'round',
 ];
 

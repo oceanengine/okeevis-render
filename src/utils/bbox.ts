@@ -84,18 +84,22 @@ export function arcBBox(cx: number, cy: number, r: number, start: number, end: n
   const startPoint = Point.fromPolar(cx, cy, r, start);
   const endPoint = Point.fromPolar(cx, cy, r, end);
   const distance = endPoint.distanceTo(startPoint.x, startPoint.y);
-  const midArcPoint = Point.fromPolar(cx, cy, r, midAngle);
   const lineAngle = endPoint.getAngleFrom(startPoint.x, startPoint.y);
-  const sidePoints = [
+  const midArcPoint = Point.fromPolar(cx, cy, r, midAngle);
+  const midPoint = new Point((startPoint.x + endPoint.x) / 2, (startPoint.y + endPoint.y) / 2);
+  const mideArcSidePoints = [
     midArcPoint.clone().angleMoveTo(lineAngle, isLargeArc ? r : distance / 2),
-    midArcPoint.clone().angleMoveTo(-lineAngle, isLargeArc ? r : distance / 2),
+    midArcPoint.clone().angleMoveTo(lineAngle + Math.PI, isLargeArc ? r : distance / 2),
   ];
-  const {x, y, width, height} =  polygonBBox([startPoint, endPoint, midArcPoint, ...sidePoints]);
+  const midSidePoints = [
+    midPoint.clone().angleMoveTo(lineAngle, isLargeArc ? r : distance / 2),
+    midPoint.clone().angleMoveTo(lineAngle + Math.PI, isLargeArc ? r : distance / 2)
+  ]
+  const {x, y, width, height} =  polygonBBox([...mideArcSidePoints, ...midSidePoints]);
   const left = Math.max(xRange[0], x);
   const top = Math.max(yRange[0], y);
   const right = Math.min(xRange[1], x + width);
   const bottom = Math.min(yRange[1], y + height);
-
   return {
     x: left,
     y: top,
