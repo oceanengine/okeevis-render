@@ -161,14 +161,7 @@ export default class CanvasPainter implements Painter {
       }
       // debugger, 显示包围盒
       if (this.render.isDebugMode && !this._isPixelPainter) {
-        ctx.save();
-        ctx.globalAlpha = 1;
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = 'red';
-        ctx.beginPath();
-        item.brushBBox(ctx);
-        ctx.stroke();
-        ctx.restore();
+       this._brushBBox(item);
       }
     } else {
       const current = item as Group;
@@ -177,6 +170,7 @@ export default class CanvasPainter implements Painter {
         ctx.beginPath();
       }
       current.children().forEach(child => this.drawElement(ctx, child, batchBrush));
+     
       if (batchBrush) {
         if (fill && fill !== 'none') {
           ctx.fill();
@@ -185,6 +179,10 @@ export default class CanvasPainter implements Painter {
           ctx.stroke();
         }
       }
+       // debugger, 显示包围盒
+       if (this.render.isDebugMode && !this._isPixelPainter) {
+        this._brushBBox(item);
+       }
     }
     if (hasSelfContext) {
       ctx.restore();
@@ -410,5 +408,17 @@ export default class CanvasPainter implements Painter {
     }
 
     return false;
+  }
+
+  private _brushBBox(item: Element) {
+    const ctx = this._ctx;
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'red';
+    ctx.beginPath();
+    item.brushBBox(ctx);
+    ctx.stroke();
+    ctx.restore();
   }
 }
