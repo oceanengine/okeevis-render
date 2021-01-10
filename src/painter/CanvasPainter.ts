@@ -411,11 +411,12 @@ export default class CanvasPainter implements Painter {
   }
 
   private _brushBoundingBBox(item: Element) {
+    const clientBBox = true;
     const ctx = this._ctx;
-    const {x, y, width, height} = item.getClientBoundingRect();
+    const {x, y, width, height} = clientBBox ? item.getClientBoundingRect() : item.getBBox();
     ctx.save();
-    ctx.resetTransform();
-    ctx.scale(this.dpr, this.dpr);
+    clientBBox && ctx.resetTransform();
+    clientBBox && ctx.scale(this.dpr, this.dpr);
     ctx.globalAlpha = 1;
     ctx.lineWidth = 1;
     ctx.strokeStyle = 'red';
