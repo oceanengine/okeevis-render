@@ -1,4 +1,4 @@
-import {equalWithTolerance, PI2 } from './math';
+import { equalWithTolerance, PI2 } from './math';
 import Point from './Point';
 
 export interface BBox {
@@ -60,8 +60,10 @@ export function lineBBox(x1: number, y1: number, x2: number, y2: number): BBox {
 }
 
 export function arcBBox(cx: number, cy: number, r: number, start: number, end: number): BBox {
-  // 找切点
+  // 找圆弧中心点切线平移形成包围盒
   const delta = Math.abs(end - start);
+  const xRange = [cx - r, cx + r];
+  const yRange = [cy - r, cy + r];
   if (delta > PI2 || equalWithTolerance(delta, PI2)) {
     return circleBBox(cx, cy, r);
   }
@@ -71,15 +73,23 @@ export function arcBBox(cx: number, cy: number, r: number, start: number, end: n
   const endPoint = Point.fromPolar(cx, cy, r, end);
   const distance = endPoint.distanceTo(startPoint.x, startPoint.y);
   const midArcPoint = Point.fromPolar(cx, cy, r, midAngle);
-  const center = new Point(cx, cy);
   const lineAngle = endPoint.getAngleFrom(startPoint.x, startPoint.y);
-  const sidePoints = isLargeArc
-    ? [center.clone().angleMoveTo(lineAngle, r), center.clone().angleMoveTo(-lineAngle, r)]
-    : [
-        midArcPoint.clone().angleMoveTo(lineAngle, distance),
-        midArcPoint.clone().angleMoveTo(-lineAngle, distance),
-      ];
-  return polygonBBox([startPoint, endPoint, midArcPoint, ...sidePoints]);
+  const sidePoints = [
+    midArcPoint.clone().angleMoveTo(lineAngle, isLargeArc ? r : distance / 2),
+    midArcPoint.clone().angleMoveTo(-lineAngle, isLargeArc ? r : distance / 2),
+  ];
+  const {x, y, width, height} =  polygonBBox([startPoint, endPoint, midArcPoint, ...sidePoints]);
+  const left = Math.max(xRange[0], x);
+  const top = Math.max(yRange[0], y);
+  const right = Math.min(xRange[1], x + width);
+  const bottom = Math.min(yRange[1], y + height);
+
+  return {
+    x: left,
+    y: top,
+    width: right - left,
+    height: bottom - top,
+  }
 }
 
 export function sectorBBox(
@@ -96,10 +106,10 @@ export function sectorBBox(
 }
 
 export function polygonBBox(points: Array<{ x: number; y: number }>): BBox {
-  let minX = 0;
-  let minY = 0;
-  let maxX = 0;
-  let maxY = 0;
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
   points.forEach(item => {
     minX = Math.min(item.x, minX);
     maxX = Math.max(item.x, maxX);

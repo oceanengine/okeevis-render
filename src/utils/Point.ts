@@ -38,8 +38,8 @@ export default class Point {
    */
   public angleMoveTo(angle: number, distance: number): this {
     return this.moveBy(
-      distance * Math.cos((Math.PI * angle) / 180),
-      distance * Math.sin((Math.PI * angle) / 180),
+      distance * Math.cos(angle),
+      distance * Math.sin(angle),
     );
   }
 

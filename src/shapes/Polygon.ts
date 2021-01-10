@@ -3,7 +3,7 @@ import Polyline, { PolylineConf } from './Polyline';
 export type PolygonConf = PolylineConf;
 
 
-export class Polygon extends Polyline {
+export default class Polygon extends Polyline {
   public type = 'polygon';
 
   public brush(ctx: CanvasRenderingContext2D) {
