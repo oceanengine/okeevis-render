@@ -127,6 +127,10 @@ export default class Render extends EventFul {
     return this._isBrowser;
   }
 
+  public getPainter(): Painter {
+    return this._painter;
+  }
+
   private _onFrame = (now: number) => {
     this._rootGroup.onFrame(now);
     this._eventHandle.onFrame();
