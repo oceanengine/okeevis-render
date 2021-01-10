@@ -15,6 +15,7 @@ export default abstract class TransformAble {
 
   public abstract resetTransform(): void;
 
+  // todo 考虑换成标准的transform
   public abstract setBaseTransform(transform: mat3): void;
 
   public abstract translate(x: number, y: number): void;
