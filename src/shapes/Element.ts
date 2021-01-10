@@ -11,7 +11,8 @@ import interpolateAttr from '../interpolate/interpolateAttr';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, {ShapeConf, } from './Shape';
-import * as mat3 from '../../js/mat3';
+import * as mat3 from '../../js/mat3'
+import {Vec2, transformMat3, } from '../utils/vec2';
 import {RGBA_TRANSPARENT, } from '../constant';
 
 export type Ref<T extends Element=Element> = {current?: T};
@@ -284,6 +285,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._bbox;
   }
 
+  // todo 抽到canvasPainter里
+
   public brushBBox(ctx: CanvasRenderingContext2D) {
     const {x, y, width, height} = this.getBBox();
     ctx.moveTo(x, y);
@@ -316,10 +319,28 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   protected computClientBoundingRect(): BBox {
-    const bbox = this.getBBox();
+    const {x, y, width, height, } = this.getBBox();
+    const vectors: Vec2[] = [
+      [x, y],
+      [x + width, y],
+      [x + width, y + height],
+      [x, y + height],
+    ];
     const matrix = this.getAbsTransform();
-    // todo 计算包围盒
-    return bbox;
+    vectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
+    const xCoords =  vectors.map(vec2 => vec2[0]);
+    const yCoords = vectors.map(vec2 => vec2[1]);
+    const minX = lodash.min(xCoords);
+    const maxX = lodash.max(xCoords);
+    const minY = lodash.min(yCoords);
+    const maxY = lodash.max(yCoords);
+
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+    }
   }
 
   public created() {
