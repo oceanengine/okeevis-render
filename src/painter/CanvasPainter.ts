@@ -414,6 +414,8 @@ export default class CanvasPainter implements Painter {
     const ctx = this._ctx;
     const {x, y, width, height} = item.getClientBoundingRect();
     ctx.save();
+    ctx.resetTransform();
+    ctx.scale(this.dpr, this.dpr);
     ctx.globalAlpha = 1;
     ctx.lineWidth = 1;
     ctx.strokeStyle = 'red';
