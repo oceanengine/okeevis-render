@@ -61,8 +61,13 @@ const rect = new Rect({
   height: 100,
   fill: 'blue',
   fillOpacity: 0.5,
+  lineWidth: 20,
+  stroke: '#333',
+  origin: [350, 530],
   rotation: 0.2,
 })
+
+rect.animateTo({rotation: degToRad(360)}, 10000)
 
 const polygon = new Polygon({
   fill: 'blue',

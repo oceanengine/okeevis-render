@@ -143,7 +143,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       if (nextElement.attr.ref) {
         nextElement.attr.ref.current = prevElement;
       }
-      if (prevElement.type === 'group') {
+      if (prevElement.isGroup) {
         (prevElement as unknown as Group).updateAll((nextElement as any as Group).children())
       }
       prevElement.setBaseTransform(nextElement.getBaseTransform());
@@ -174,7 +174,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public sortByZIndex() {
     this._components = this._components.sort((a, b) => b.attr.zIndex - a.attr.zIndex);
     this._components.forEach((item) => {
-      if (item.type === 'group') {
+      if (item.isGroup) {
         (item as any as Group).sortByZIndex();
       }
     })

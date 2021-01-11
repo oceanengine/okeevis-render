@@ -108,7 +108,7 @@ export default class CanvasPainter implements Painter {
       return;
     }
     if (isInBatch) {
-      if (item.type === 'group') {
+      if (item.isGroup) {
         console.warn('batch brush muse be shape element');
         return;
       }
@@ -298,7 +298,7 @@ export default class CanvasPainter implements Painter {
 
     // group只支持color string, pattern,不支持渐变
     // todo 考虑小程序api setXXXX
-    if (stroke && !(item.type === 'group' && isGradient(stroke))) {
+    if (stroke && !(item.isGroup && isGradient(stroke))) {
       ctx.strokeStyle = getCtxColor(ctx, stroke, item);
     }
 
@@ -306,7 +306,7 @@ export default class CanvasPainter implements Painter {
       ctx.strokeStyle = getCtxColor(ctx, computedStroke, item);
     }
 
-    if (fill && !(item.type === 'group' && isGradient(fill))) {
+    if (fill && !(item.isGroup && isGradient(fill))) {
       ctx.fillStyle = getCtxColor(ctx, fill, item);
     }
 
@@ -415,7 +415,7 @@ export default class CanvasPainter implements Painter {
     const ctx = this._ctx;
     const {x, y, width, height} = clientBBox ? item.getClientBoundingRect() : item.getBBox();
     ctx.save();
-    if(clientBBox || item.type === 'group') {
+    if(clientBBox || item.isGroup) {
       ctx.resetTransform();
       ctx.scale(this.dpr, this.dpr);
     }
