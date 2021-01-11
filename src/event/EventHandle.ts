@@ -38,7 +38,8 @@ export default class EventHandle {
   public pickTarget(x: number, y: number): Element {
     console.time('pick');
     const pixelPainter = this._PixelPainter;
-    const leafNodes = this.render.getAllLeafNodes();
+    const ignoreInvisible = true;
+    const leafNodes = this.render.getAllLeafNodes(ignoreInvisible);
     // todo 过渡pointerEvents:none
     // todo 过渡display: none
     // todo f过渡

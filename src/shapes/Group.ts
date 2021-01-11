@@ -160,12 +160,15 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return this._components.slice();
   }
 
-  public getAllLeafNodes(ret: Shape[] = []): Shape[] {
+  public getAllLeafNodes(ret: Shape[] = [], ignoreInvisible = false): Shape[] {
     this._components.forEach(item => {
+      if (item.attr.display === false) {
+        return;
+      }
       if (item.type !== 'group') {
         ret.push(item as any as Shape);
       } else {
-        (item as any as Group).getAllLeafNodes(ret);
+        (item as any as Group).getAllLeafNodes(ret, ignoreInvisible);
       }
     })
     return ret;

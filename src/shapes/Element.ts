@@ -301,6 +301,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
   
   public getClientBoundingRect(): BBox {
+    if (this.attr.display === false) {
+      return {x: 0, y: 0, width: 0, height: 0};
+    }
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
       this._clientBoundingRect = this.computClientBoundingRect();
       this._clientBoundingRectDirty = false;
