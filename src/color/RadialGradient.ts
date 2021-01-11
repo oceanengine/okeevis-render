@@ -31,8 +31,7 @@ export default class RadialGradient implements Gradient<RadialGradientOption> {
     const r1: number = min * option.r;
     const x2: number = x1
     const y2: number = y1;
-    const r2: number = 0;
-    const gradient: CanvasGradient = ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
+    const gradient: CanvasGradient = ctx.createRadialGradient(x1, y1, 0, x2, y2, r1);
     option.stops.forEach(stop => {
       gradient.addColorStop(stop.offset, stop.color);
     });

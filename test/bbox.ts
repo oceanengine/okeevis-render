@@ -42,11 +42,11 @@ const circle = new Circle({
     stops: [
       {
         offset: 0,
-        color: 'blue'
+        color: 'red'
       },
       {
         offset: 1,
-        color: 'red',
+        color: 'blue',
       }
     ]
   })
@@ -75,16 +75,31 @@ const rect = new Rect({
   y: 400,
   width: 100,
   height: 100,
-  fill: 'blue',
-  fillOpacity: 0.5,
+  fillOpacity: 1,
   lineWidth: 20,
   stroke: '#333',
   origin: [450, 450],
   rotation: 0.2,
+  fill: new LinearGradient({
+    x1: 0,
+    y1: 0,
+    x2: 1,
+    y2: 0,
+    stops: [
+      {
+        offset: 0,
+        color: 'red',
+      },
+      {
+        offset: 1,
+        color: 'blue'
+      }
+    ]
+  })
 })
 
 
-// rect.animateTo({rotation: degToRad(360)}, 5000, 'linear')
+rect.animateTo({rotation: degToRad(360)}, 5000, 'linear')
 
 const polygon = new Polygon({
   fill: 'blue',
