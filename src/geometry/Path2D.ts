@@ -1,5 +1,5 @@
 import parsePath from './parsePath';
-import { BBox, unionBBox, rectBBox, arcBBox, lineBBox, polygonBBox,  } from '../utils/bbox';
+import { BBox, unionBBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
 
 interface PathAction {
   action:
@@ -18,17 +18,28 @@ interface PathAction {
   params: any[];
 }
 
-const PathKeyPoints: Partial<Record<PathAction['action'],[number, number][]>> = {
-  'moveTo': [[0, 1]],
-  'lineTo': [[0, 1]],
-  'bezierCurveTo': [[0, 1], [2, 3], [4, 5]],
-  'quadraticCurveTo': [[0, 1], [2, 3]],
-}
+const PathKeyPoints: Partial<Record<PathAction['action'], [number, number][]>> = {
+  arcTo: [
+    [0, 1],
+    [2, 3],
+  ],
+  moveTo: [[0, 1]],
+  lineTo: [[0, 1]],
+  bezierCurveTo: [
+    [0, 1],
+    [2, 3],
+    [4, 5],
+  ],
+  quadraticCurveTo: [
+    [0, 1],
+    [2, 3],
+  ],
+};
 function getActionKeyPoints(action: PathAction['action'], params: any[]): [number, number][] {
   return PathKeyPoints[action].map(item => {
     const [xIndex, yIndex] = item;
-    return [params[xIndex], params[yIndex]]
-  })
+    return [params[xIndex], params[yIndex]];
+  });
 }
 
 export default class Path2D {
@@ -190,28 +201,34 @@ export default class Path2D {
     let points: [number, number][] = [];
     const bboxList: BBox[] = [];
     if (pathList.length === 0) {
-      return {x: 0, y: 0, width: 0, height: 0};
+      return { x: 0, y: 0, width: 0, height: 0 };
     }
     for (let i = 0; i < pathList.length; i++) {
-      const {action, params} = pathList[i];
+      const { action, params } = pathList[i];
       if (action === 'arc') {
-        const [cx, cy, r, startAngle, endAngle ] = params;
+        const [cx, cy, r, startAngle, endAngle] = params;
         bboxList.push(arcBBox(cx, cy, r, startAngle, endAngle));
-      } else if (action === 'arcTo') {
-        // todo
       } else if (action === 'rect') {
         const [x, y, width, height] = params;
         bboxList.push(rectBBox(x, y, width, height));
-      } else if (action === 'moveTo' || action === 'lineTo' || action === 'bezierCurveTo' || action === 'quadraticCurveTo') {
-        points = points.concat(getActionKeyPoints(action, params))
+      } else if (
+        action === 'moveTo' ||
+        action === 'lineTo' ||
+        action === 'bezierCurveTo' ||
+        action === 'quadraticCurveTo' ||
+        action === 'arcTo'
+      ) {
+        points = points.concat(getActionKeyPoints(action, params));
       }
     }
     return unionBBox([
-      polygonBBox(points.map(vec2 => {
-        const [x, y] = vec2;
-        return {x, y};
-      })),
-      ...bboxList
+      polygonBBox(
+        points.map(vec2 => {
+          const [x, y] = vec2;
+          return { x, y };
+        }),
+      ),
+      ...bboxList,
     ]);
   }
 }
