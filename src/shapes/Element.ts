@@ -13,6 +13,7 @@ import { EventConf } from '../event';
 import Shape, {ShapeConf, } from './Shape';
 import * as mat3 from '../../js/mat3'
 import {Vec2, transformMat3, } from '../utils/vec2';
+import * as transformUtils from '../utils/transform';
 import {RGBA_TRANSPARENT, } from '../constant';
 
 export type Ref<T extends Element=Element> = {current?: T};
@@ -543,7 +544,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _computeTransform(): mat3 {
     const out = mat3.create();
     const { rotation = 0, origin = [0, 0], position = [0, 0], scale = [1, 1] } = this.attr;
-    mat3.rotate(out, out, rotation);
+    const [sx, sy] = scale;
+    // todo 旋转为0时不旋转, position[0,0]是不位移,scale[1, 1]时不计算, 避免相关计算
+    mat3.translate(out, out, position);
+    transformUtils.rotate(out, rotation, origin[0], origin[1]);
+    transformUtils.scale(out, sx, sy, origin[0], origin[1]);
     mat3.multiply(out, out, this._baseMatrix);
     return out;
   }

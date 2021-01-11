@@ -94,8 +94,12 @@ const text = new Text({
   textBaseline: 'bottom',
 })
 const group = new Group({
-  rotation: 0
+  origin: [300, 300],
+  rotation: degToRad(0)
 });
+console.log(group)
+
+group.animateTo({rotation: degToRad(360)}, 10000)
 
 group.add(arc);
 group.add(circle)
