@@ -271,6 +271,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (lodash.keys(attr).length === 0) {
       return;
     }
+    this.prevProcessAttr(attr);
     const prevAttr = this.attr;
     this.attr = { ...this.attr, ...attr };
     this.dirty();
@@ -406,7 +407,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     callback?: Function,
     delay?: number,
   ) {
-    this.prevProcessAnimateToAttr(toAttr);
+    this.prevProcessAttr(toAttr);
     const fromAttr = this.attr;
     let animationKeys = animationKeysMap[this.type] as Array<keyof T>;
     if (!animationKeys) {
@@ -445,8 +446,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  protected prevProcessAnimateToAttr(toAttr: T) {
-    // nothing;
+  protected prevProcessAttr(attr: T) {
+    attr;
   }
 
   public addAnimation(option: AnimateOption<T>) {

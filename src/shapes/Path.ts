@@ -27,11 +27,6 @@ export default class Path extends Shape<PathConf> {
     ];
   }
 
-  public dirty() {
-    super.dirty();
-    this._brushAttr(this.attr);
-  }
-
   public brush(ctx: CanvasRenderingContext2D) {
     if (this.attr.pathData) {
       this.attr.pathData.drawOnCanvasContext(ctx);
@@ -44,8 +39,8 @@ export default class Path extends Shape<PathConf> {
     return this.attr.pathData?.getPathBBox() || {x: 0, y: 0, width: 0, height: 0}
   }
 
-  protected prevProcessAnimateToAttr(toAttr: PathConf) {
-    this._brushAttr(toAttr);
+  protected prevProcessAttr(attr: PathConf) {
+    this._brushAttr(attr);
   }
 
   private _brushAttr(attr: PathConf) {
