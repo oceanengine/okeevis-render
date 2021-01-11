@@ -34,6 +34,10 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     ]
   }
 
+  public computClientBoundingRect(): BBox {
+    return this.getBBox();
+  }
+
   protected computeBBox(): BBox {
     const bboxList = this._components.filter(item => item.attr.display).map(child => child.getClientBoundingRect());
     return unionBBox(bboxList);
