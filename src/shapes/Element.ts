@@ -322,6 +322,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
+  public getDirtyRect(): BBox {
+    // todo
+    return this.getClientBoundingRect();
+    const shadowBlur = this.getExtendAttr('shadowBlur');
+    const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
+    const shadowOffsetY = this.getExtendAttr('shadowOffsetY');        
+  }
+
   protected computeBBox(): BBox {
     return { x: 0, y: 0, width: 0, height: 0 };
   }
