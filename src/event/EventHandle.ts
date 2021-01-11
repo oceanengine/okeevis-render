@@ -3,6 +3,9 @@ import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
 import {inBBox, } from '../utils/bbox';
+import * as mat3 from '../../js/mat3';
+import {transformMat3, } from '../utils/vec2'
+
 import * as lodash from '../utils/lodash';
 
 export default class EventHandle {
@@ -41,30 +44,59 @@ export default class EventHandle {
     
     const pixelPainter = this._PixelPainter;
     const ignoreInvisibleNodes = true;
-    let leafNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes);
+    let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes).reverse();
 
     this.render.getRoot().resetPickRGB();
 
     // 初步过滤掉不显示和不触发事件的元素, 以及不在包围盒中的
-    leafNodes = leafNodes.filter(
+    pickNodes = pickNodes.filter(
       node => node.attr.display && node.getExtendAttr('pointerEvents') !== 'none' && inBBox(x, y, node.getClientBoundingRect())
     );
 
-    if (leafNodes.length === 0) {
+    if (pickNodes.length === 0) {
       console.timeEnd('pick');
       return this.render.getRoot();
     }
 
     // todo  自己几何检测 文本图像, 矩形, 圆等可以做的事
-    // 要考虑剪切, 逆矩阵坐标
+    // 倒排, 要考虑剪切, 逆矩阵坐标
 
-    leafNodes.forEach((item, index) => {
+    let geometryPickIndex: number = -1;
+    let gpuPickIndex: number = -1;
+    
+
+    for (let i = 0; i < pickNodes.length; i++) {
+      const node = pickNodes[i];
+      if (node.pickByGPU) {
+        continue;
+      }
+      const absTransform = node.getGlobalTransform();
+      const inverMatrix = mat3.invert(mat3.create(), absTransform);
+      const vec2: [number, number] = [0, 0];
+      transformMat3(vec2, [x, y], inverMatrix);
+      const inShape = node.isInShape(vec2[0], vec2[1]);
+      const inClip = node.isInClip(vec2[0], vec2[1]);
+      if (inShape && inClip) {
+        geometryPickIndex = i;
+        break;
+      }
+    }
+
+    const gpuPickNodes = pickNodes.filter(node => node.pickByGPU);
+    gpuPickNodes.forEach((item, index) => {
       // 颜色空间大约有40W个,基本够用.
       item.pickRGB = valueToRgb(index + 1);
     });
 
     
-    console.log('gpu pick size ', leafNodes.length);
+    console.log('gpu pick size ', gpuPickNodes.length);
+
+    if (gpuPickNodes.length === 0) {
+      console.log(pickNodes[geometryPickIndex])
+      pickNodes[geometryPickIndex]?.setAttr({fill: 'red'})
+      console.timeEnd('pick');
+      return pickNodes[geometryPickIndex] || this.render.getRoot();
+    }
 
     pixelPainter.paintAt(x, y);
     // todo 考虑小程序getImageData兼容
@@ -74,20 +106,33 @@ export default class EventHandle {
     const r0 = pickValue[0];
     const g0 = pickValue[1];
     const b0 = pickValue[2];
+
     let target: Element;
-    for (let i = 0; i < leafNodes.length; i++) {
-      const node = leafNodes[i];
+
+    for (let i = 0; i < pickNodes.length; i++) {
+      const node = pickNodes[i];
+      if (!node.pickByGPU) {
+        continue;
+      }
       const [r, g, b] = node.pickRGB;
       const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
       if (gap < 3) {
-        target = node;
+        gpuPickIndex = i;
         break;
       }
     }
-    if (target) {
-      target.setAttr({ fill: 'red', stroke: 'red' });
-      this._prevMouseTarget = target;
+    
+    if (geometryPickIndex >= 0 || gpuPickIndex >= 0) {
+      let pickIndex: number;
+      if (geometryPickIndex === -1 || gpuPickIndex === -1) {
+        pickIndex = Math.max(geometryPickIndex, gpuPickIndex);
+      } else {
+        pickIndex = Math.min(geometryPickIndex, gpuPickIndex);
+      }
+      target = pickNodes[pickIndex];
+      target.setAttr({fill: 'red', stroke: 'red'})
     }
+    
     console.timeEnd('pick');
     return target || this.render.getRoot();
   }
