@@ -6,6 +6,7 @@ export interface CircleConf extends CommonAttr {
   cx?: number;
   cy?: number;
   radius?: number;
+  anticlockwise?: boolean;
 }
 const shapeKeys: Array<keyof CircleConf> = ['cx', 'cy', 'radius'];
 
@@ -20,6 +21,7 @@ export default class Circle extends Shape<CircleConf> {
       cx: 0,
       cy: 0,
       radius: 0,
+      anticlockwise: false,
     };
   }
 
@@ -28,8 +30,8 @@ export default class Circle extends Shape<CircleConf> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { cx, cy, radius } = this.attr;
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    const { cx, cy, radius, anticlockwise, } = this.attr;
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2, anticlockwise);
   }
   
   protected computeBBox(): BBox {
