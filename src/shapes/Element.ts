@@ -268,6 +268,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this;
   }
 
+  public  get isGroup(): boolean {
+    return this.type === 'group';
+  }
+
   public dirty() {
     if (this.ownerRender) {
       this.ownerRender.dirty();
@@ -287,12 +291,22 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
   
   public getClientBoundingRect(): BBox {
-    // 考虑stroke
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
       this._clientBoundingRect = this.computClientBoundingRect();
       this._clientBoundingRectDirty = false;
     }
-    return this._clientBoundingRect;
+    let {x, y, width, height}  =  this._clientBoundingRect;
+    const lineWidth = !this.isGroup ? this.getExtendAttr('lineWidth') : 0
+    x -= lineWidth / 2;
+    y -= lineWidth / 2;
+    width += lineWidth;
+    height += lineWidth;
+    return {
+      x,
+      y,
+      width,
+      height,
+    }
   }
 
   protected computeBBox(): BBox {
