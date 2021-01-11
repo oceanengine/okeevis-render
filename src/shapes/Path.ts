@@ -45,7 +45,6 @@ export default class Path extends Shape<PathConf> {
   }
 
   protected computeBBox(): BBox {
-    return this.attr.pathData?.getBBox();
+    return this.attr.pathData?.getPathBBox() || {x: 0, y: 0, width: 0, height: 0}
   }
-  
 }

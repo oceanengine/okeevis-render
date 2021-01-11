@@ -12,6 +12,7 @@ import POlyline from '../src/shapes/Polyline'
 import Rect from '../src/shapes/Rect'
 import Sector from '../src/shapes/Sector'
 import Text from '../src/shapes/Text'
+
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
 
@@ -96,15 +97,36 @@ const text = new Text({
   text: '文本文本',
   fontSize: 50,
   fill: 'blue',
+  lineWidth: 4,
+  stroke: '#333',
   textAlign: 'left',
   textBaseline: 'bottom',
 })
+
+const path = new Path({
+  fill: 'blue',
+  lineWidth: 4,
+  stroke: '#333',
+  brush: ctx => {
+    ctx.moveTo(20, 20);
+    ctx.lineTo(100, 100)
+    ctx.bezierCurveTo(20, 100, 200, 100, 200, 20);
+    ctx.closePath();
+  },
+  rotation:degToRad(45),
+  position: [200, 200],
+  origin:[100, 80],
+})
+
+
+
 const group = new Group({
   origin: [300, 300],
   rotation: degToRad(0)
 });
 
-// group.animateTo({rotation: degToRad(360)}, 10000)
+
+//group.animateTo({rotation: degToRad(360)}, 10000)
 
 group.add(arc);
 group.add(circle)
@@ -114,18 +136,19 @@ group.add(rect);
 group.add(polygon)
 group.add(sector)
 group.add(text)
+group.add(path)
 
-document.onclick = () => {
-  group.add(new Rect({
-    fill: 'none',
-    stroke: 'blue',
-    lineWidth: 4,
-    x: Math.random() * 1000,
-    y: Math.random() * 800,
-    width: 100,
-    height: 100,
-  }))
-}
+// document.onclick = () => {
+//   group.add(new Rect({
+//     fill: 'none',
+//     stroke: 'blue',
+//     lineWidth: 4,
+//     x: Math.random() * 1000,
+//     y: Math.random() * 800,
+//     width: 100,
+//     height: 100,
+//   }))
+// }
 
 render.add(group)
 render.debug();
