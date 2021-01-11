@@ -12,6 +12,7 @@ import POlyline from '../src/shapes/Polyline'
 import Rect from '../src/shapes/Rect'
 import Sector from '../src/shapes/Sector'
 import Text from '../src/shapes/Text'
+import {LinearGradient, RadialGradient, } from '../src/color';
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
@@ -34,7 +35,21 @@ const circle = new Circle({
   cx: 100,
   cy: 100,
   radius: 50,
-  fill: 'blue'
+  fill: new RadialGradient({
+    cx: 0.5,
+    cy: 0.5,
+    r: 1,
+    stops: [
+      {
+        offset: 0,
+        color: 'blue'
+      },
+      {
+        offset: 1,
+        color: 'red',
+      }
+    ]
+  })
 })
 
 
@@ -69,7 +84,7 @@ const rect = new Rect({
 })
 
 
-rect.animateTo({rotation: degToRad(360)}, 5000, 'linear')
+// rect.animateTo({rotation: degToRad(360)}, 5000, 'linear')
 
 const polygon = new Polygon({
   fill: 'blue',
@@ -126,7 +141,7 @@ const group = new Group({
 });
 
 
-//group.animateTo({rotation: degToRad(360)}, 10000)
+// group.animateTo({rotation: degToRad(360)}, 50000)
 
 group.add(arc);
 group.add(circle)

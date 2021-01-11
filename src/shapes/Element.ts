@@ -406,6 +406,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     callback?: Function,
     delay?: number,
   ) {
+    this.prevProcessAnimateToAttr(toAttr);
     const fromAttr = this.attr;
     let animationKeys = animationKeysMap[this.type] as Array<keyof T>;
     if (!animationKeys) {
@@ -442,6 +443,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
         stopped: false,
       });
     }
+  }
+
+  protected prevProcessAnimateToAttr(toAttr: T) {
+    // nothing;
   }
 
   public addAnimation(option: AnimateOption<T>) {
@@ -615,5 +620,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const selfTransform = this.getTransform();
     return mat3.multiply(mat3.create(), parentTransform, selfTransform);
   }
+  
   
 }

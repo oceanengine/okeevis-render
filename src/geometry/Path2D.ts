@@ -114,11 +114,11 @@ export default class Path2D {
     radius: number,
     startAngle: number,
     endAngle: number,
-    closewise: boolean = true,
+    anticlockwise: boolean = false,
   ): this {
     this._pathList.push({
       action: 'arc',
-      params: [x, y, radius, startAngle, endAngle, closewise],
+      params: [x, y, radius, startAngle, endAngle, anticlockwise],
     });
 
     return this;

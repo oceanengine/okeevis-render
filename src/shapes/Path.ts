@@ -29,11 +29,7 @@ export default class Path extends Shape<PathConf> {
 
   public dirty() {
     super.dirty();
-    if (this.attr.brush) {
-      const path = new Path2D()
-       this.attr.brush(path);
-       this.attr.pathData = path;
-    }
+    this._brushAttr(this.attr);
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
@@ -46,5 +42,17 @@ export default class Path extends Shape<PathConf> {
 
   protected computeBBox(): BBox {
     return this.attr.pathData?.getPathBBox() || {x: 0, y: 0, width: 0, height: 0}
+  }
+
+  protected prevProcessAnimateToAttr(toAttr: PathConf) {
+    this._brushAttr(toAttr);
+  }
+
+  private _brushAttr(attr: PathConf) {
+    if (attr && attr.brush) {
+      const path = new Path2D()
+      attr.brush(path);
+      attr.pathData = path;
+    }
   }
 }

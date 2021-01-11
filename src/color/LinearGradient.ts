@@ -2,16 +2,27 @@ import Gradient, { GradientOption } from '../abstract/Gradient';
 import { BBox } from '../utils/bbox';
 
 export interface LinearGradientOption extends GradientOption {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
 }
+const defaultOption: LinearGradientOption = {
+  x1: 0,
+  y1: 0,
+  x2: 1,
+  y2: 0,
+  stops: [],
+};
 
 export default class LinearGradient implements Gradient<LinearGradientOption> {
   public type = 'linearGradient';
   
   public option: LinearGradientOption;
+
+  public constructor(option: LinearGradientOption) {
+    this.option = {...defaultOption, ...option};
+  }
 
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {
     const option = this.option;
