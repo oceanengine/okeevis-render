@@ -1,7 +1,7 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { getImage } from '../utils/imageLoader';
-import { BBox, rectBBox } from '../utils/bbox';
+import { BBox, rectBBox, inBBox, } from '../utils/bbox';
 
 export interface ImageConf extends CommonAttr {
   x?: number;
@@ -16,6 +16,8 @@ const shapeKeys: Array<keyof ImageConf> = ['x', 'y', 'width', 'height', 'src'];
 
 export default class Rect extends Shape<ImageConf> {
   public type = 'image';
+
+  public pickByGPU = false;
 
   public fillAble = false;
 
@@ -55,6 +57,10 @@ export default class Rect extends Shape<ImageConf> {
       );
   }
 
+  public isInShape(x: number, y: number): boolean {
+    return inBBox(x, y, this.getBBox());
+  }
+
   protected computeBBox(): BBox {
     const { src, x, y, width, height } = this.attr;
     const image = getImage(src);
@@ -62,4 +68,5 @@ export default class Rect extends Shape<ImageConf> {
     const sh = height > 0 ? height : image?.height || 0;
     return rectBBox(x, y, sw, sh);
   }
+  
 }

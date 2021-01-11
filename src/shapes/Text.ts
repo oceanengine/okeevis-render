@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { BBox } from '../utils/bbox';
+import { BBox, inBBox, } from '../utils/bbox';
 import measureText from '../utils/measureText';
 import LRUMap from '../utils/lru';
 
@@ -37,6 +37,8 @@ const shapeKeys: Array<keyof TextConf> = [
 
 export default class Text extends Shape<TextConf> {
   public type = 'text';
+
+  public pickByGPU = false;
 
   public shapeKeys = shapeKeys;
 
@@ -124,4 +126,9 @@ export default class Text extends Shape<TextConf> {
 
     return bbox;
   }
+
+  public isInShape(x: number, y: number): boolean {
+     return inBBox(x, y, this.getBBox()); 
+  }
+
 }

@@ -1,1 +1,1 @@
-import './pick'
+import './bbox'

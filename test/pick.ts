@@ -11,17 +11,18 @@ const ref = { current: null } as any;
 const group = new Group({
   fontSize: 12,
   fill: 'blue',
-  lineWidth: 0,
+  lineWidth: 2,
+  stroke: 'blue',
   rotation: 0,
   cursor: 'pointer',
-  // clip: new Rect({ref, x: 50, y: 200, width: 100, height: 100})
+  // clip: new Rect({ref, fill: 'red', x: 50, y: 200, width: 100, height: 100})
 });
 
 // group.animateTo({rotation: 2}, 5000)
 
 // ref.current.animateTo({x: 500, height: 500}, 5000)
 
-group.addAll(makeRect(3000));
+group.addAll(makeRect(100));
 render.add(group);
 // group.updateAll(makeRect(3000));
 
@@ -58,3 +59,5 @@ function makeLine(count: number) {
     });
   });
 }
+
+// render.debug()

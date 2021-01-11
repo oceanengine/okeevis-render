@@ -12,6 +12,15 @@ export function inBBox(x: number, y: number, bbox: BBox): boolean {
   return x >= bbox.x && x <= (bbox.x + bbox.width) && y >= bbox.y && y <= (bbox.y + bbox.height);
 }
 
+export function getOffsetBBox(bbox: BBox, offset: number): BBox {
+  return {
+    x: bbox.x - offset,
+    y: bbox.y - offset,
+    width: bbox.width  + offset * 2,
+    height: bbox.height + offset * 2,
+  }
+}
+
 export function unionBBox(bboxList: BBox[]): BBox {
   if (bboxList.length === 0) {
     return {x: 0, y :0, width: 0, height: 0};

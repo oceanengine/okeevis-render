@@ -122,6 +122,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public type: string;
 
+  public pickByGPU: boolean = true;
+
   public pickRGB: [number, number, number];
 
   public readonly shapeKeys: Array<keyof T> = [];
@@ -342,7 +344,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       [x + width, y + height],
       [x, y + height],
     ];
-    const matrix = this.getAbsTransform();
+    const matrix = this.getGlobalTransform();
     vectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
     const xCoords =  vectors.map(vec2 => vec2[0]);
     const yCoords = vectors.map(vec2 => vec2[1]);
@@ -388,6 +390,43 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public resetPickRGB() {
     this.pickRGB = null;
+  }
+
+  /**
+   * 
+   * @param x inverted x
+   * @param y inverted y
+   */
+  public isInShape(x: number, y: number): boolean {
+    const hasFill = this.hasFill();
+    const hasStroke = this.hasStroke();
+    return (hasFill && this.isPointInFill(x, y)) || (hasStroke && this.isPointInStroke(x, y));
+  }
+
+  public isInClip(x: number, y: number): boolean {
+    const clips = this.getClipList();
+    return clips.every(clip => clip.isPointInFill(x, y));
+  }
+  
+  public getClipList(): Element[] {
+    const clips: Element[] = [];
+    let node: any = this;
+    while (node) {
+      const clip = node.getClipElement();
+      clip && clips.push(clip);
+      node = node.parentNode;
+    }
+    return clips;
+  }
+
+  public isPointInStroke(x: number, y: number): boolean {
+    x && y;
+    return false;
+  }
+
+  public isPointInFill(x: number, y: number): boolean {
+    x && y;
+    return false;
   }
 
   public destroy() {
@@ -524,7 +563,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._baseMatrix;
   }
 
-  private getAbsTransform(): mat3 {
+  public getGlobalTransform(): mat3 {
     if (!this._absTransform || this._absTransformDirty) {
       this._absTransform = this._computeAbsTransform();
       this._absTransformDirty = false;
@@ -620,7 +659,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeAbsTransform(): mat3 {
-    const parentTransform = this.parentNode ? this.parentNode.getAbsTransform() : mat3.create();
+    const parentTransform = this.parentNode ? this.parentNode.getGlobalTransform() : mat3.create();
     const selfTransform = this.getTransform();
     return mat3.multiply(mat3.create(), parentTransform, selfTransform);
   }

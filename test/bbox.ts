@@ -156,7 +156,7 @@ const group = new Group({
 });
 
 
-// group.animateTo({rotation: degToRad(360)}, 50000)
+group.animateTo({rotation: degToRad(360)}, 50000)
 
 group.add(arc);
 group.add(circle)
@@ -182,4 +182,4 @@ group.add(path)
 
 render.add(group)
 render.debug();
-// render.resize(1200, 800);
+render.resize(1200, 800);

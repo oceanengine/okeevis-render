@@ -9,13 +9,14 @@ const render = new Render(dom);
 const ref = { current: null } as any;
 
 const group = new Group({
-  fontSize: 10,
+  fontSize: 40,
   fill: 'red',
 });
 
-group.addAll(makeText(3000));
+group.addAll(makeText(100));
 render.add(group);
-group.updateAll(makeText(3000));
+group.updateAll(makeText(100));
+render.debug();
 
 function makeText(count: number) {
   return new Array(count).fill(0).map((value, index) => {
