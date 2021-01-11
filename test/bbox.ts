@@ -67,6 +67,7 @@ const rect = new Rect({
   rotation: 0.2,
 })
 
+
 rect.animateTo({rotation: degToRad(360)}, 10000)
 
 const polygon = new Polygon({
@@ -102,9 +103,8 @@ const group = new Group({
   origin: [300, 300],
   rotation: degToRad(0)
 });
-console.log(group)
 
-group.animateTo({rotation: degToRad(360)}, 10000)
+// group.animateTo({rotation: degToRad(360)}, 10000)
 
 group.add(arc);
 group.add(circle)
@@ -114,6 +114,18 @@ group.add(rect);
 group.add(polygon)
 group.add(sector)
 group.add(text)
+
+document.onclick = () => {
+  group.add(new Rect({
+    fill: 'none',
+    stroke: 'blue',
+    lineWidth: 4,
+    x: Math.random() * 1000,
+    y: Math.random() * 800,
+    width: 100,
+    height: 100,
+  }))
+}
 
 render.add(group)
 render.debug();

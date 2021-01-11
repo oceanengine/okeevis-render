@@ -221,6 +221,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return value;
   }
 
+  public hasFill(): boolean {
+    const fill = this.getExtendAttr('fill')
+    return fill && fill !== 'none';
+  }
+
+  public hasStroke() {
+    const stroke = this.getExtendAttr('stroke');
+    return stroke && stroke !== 'none';
+  }
+
   public getFillAndStrokeStyle(): FillAndStrokeStyle {
     const opacity = this.getComputedOpacity();
     const fillOpacity = this.getExtendAttr('fillOpacity') * opacity;
