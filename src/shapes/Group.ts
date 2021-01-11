@@ -165,13 +165,18 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       if (item.attr.display === false) {
         return;
       }
-      if (item.type !== 'group') {
+      if (!item.isGroup) {
         ret.push(item as any as Shape);
       } else {
         (item as any as Group).getAllLeafNodes(ret, ignoreInvisible);
       }
     })
     return ret;
+  }
+
+  public resetPickRGB() {
+    super.resetPickRGB();
+    this._components.forEach(child => child.resetPickRGB());
   }
 
   public sortByZIndex() {

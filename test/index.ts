@@ -1,1 +1,1 @@
-import './mutipath'
+import './pick'

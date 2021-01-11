@@ -2,6 +2,7 @@ import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
+import {inBBox, } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 
 export default class EventHandle {
@@ -37,16 +38,34 @@ export default class EventHandle {
 
   public pickTarget(x: number, y: number): Element {
     console.time('pick');
+    
     const pixelPainter = this._PixelPainter;
-    const ignoreInvisible = true;
-    const leafNodes = this.render.getAllLeafNodes(ignoreInvisible);
-    // todo 过渡pointerEvents:none
-    // todo 过渡display: none
-    // todo f过渡
+    const ignoreInvisibleNodes = true;
+    let leafNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes);
+
+    this.render.getRoot().resetPickRGB();
+
+    // 初步过滤掉不显示和不触发事件的元素, 以及不在包围盒中的
+    leafNodes = leafNodes.filter(
+      node => node.attr.display && node.getExtendAttr('pointerEvents') !== 'none' && inBBox(x, y, node.getClientBoundingRect())
+    );
+
+    if (leafNodes.length === 0) {
+      console.timeEnd('pick');
+      return this.render.getRoot();
+    }
+
+    // todo  自己几何检测 文本图像, 矩形, 圆等可以做的事
+    // 要考虑剪切, 逆矩阵坐标
+
     leafNodes.forEach((item, index) => {
       // 颜色空间大约有40W个,基本够用.
       item.pickRGB = valueToRgb(index + 1);
     });
+
+    
+    console.log('gpu pick size ', leafNodes.length);
+
     pixelPainter.paintAt(x, y);
     // todo 考虑小程序getImageData兼容
     // const prevImageData = pixelPainter.getImageData(x, y);
@@ -66,7 +85,8 @@ export default class EventHandle {
       }
     }
     if (target) {
-      target.setAttr({ fill: 'red', stroke: 'red', });
+      target.setAttr({ fill: 'red', stroke: 'red' });
+      this._prevMouseTarget = target;
     }
     console.timeEnd('pick');
     return target || this.render.getRoot();
@@ -83,45 +103,7 @@ export default class EventHandle {
     this.render.getDom().style.cursor = cursor;
   }
 
-  private _detachEvents() {
-    if (!this.render.isBrowser()) {
-      return;
-    }
-    const dom = this.render.getDom();
-    dom.removeEventListener('wheel', this._handleMouseWheel);
-    dom.removeEventListener('mousedown', this._handleMouseDown);
-    dom.removeEventListener('mouseup', this._handleMouseUp);
-    dom.removeEventListener('mousemove', this._handleMouseMove);
-    dom.removeEventListener('click', this._handleClick);
-    dom.removeEventListener('dblclick', this._handleDblClick);
-    dom.removeEventListener('touchstart', this._handleTouchStart);
-    dom.removeEventListener('touchmove', this._handleTouchMove);
-    dom.removeEventListener('touchend', this._handleTouchEnd);
-    dom.removeEventListener('mouseleave', this._handleMouseLeave);
-    dom.removeEventListener('mouseenter', this._handleMouseEnter);
-    document.removeEventListener('touchend', this._handleDocumentTouchEnd);
-    document.removeEventListener('mouseup', this._handleDocumentMouseUp);
-  }
-
-  private _initEvents() {
-    if (!this.render.isBrowser()) {
-      return;
-    }
-    const dom = this.render.getDom();
-    dom.addEventListener('wheel', this._handleMouseWheel);
-    dom.addEventListener('mousedown', this._handleMouseDown);
-    dom.addEventListener('mouseup', this._handleMouseUp);
-    dom.addEventListener('mousemove', this._handleMouseMove);
-    dom.addEventListener('click', this._handleClick);
-    dom.addEventListener('dblclick', this._handleDblClick);
-    dom.addEventListener('touchstart', this._handleTouchStart);
-    dom.addEventListener('touchmove', this._handleTouchMove);
-    dom.addEventListener('touchend', this._handleTouchEnd);
-    dom.addEventListener('mouseleave', this._handleMouseLeave);
-    dom.addEventListener('mouseenter', this._handleMouseEnter);
-    document.addEventListener('touchend', this._handleDocumentTouchEnd);
-    document.addEventListener('mouseup', this._handleDocumentMouseUp);
-  }
+  public dispatchEvent(event: string) {}
 
   private _handleMouseWheel = (event: WheelEvent) => {
     // todo https://github.com/facebookarchive/fixed-data-table/blob/master/src/vendor_upstream/dom/normalizeWheel.js
@@ -136,7 +118,7 @@ export default class EventHandle {
   };
 
   private _handleMouseMove = (event: MouseEvent) => {
-    return
+    // return;
     this._currentMousePosition = { x: event.offsetX, y: event.offsetY };
     const target = this.pickTarget(event.offsetX, event.offsetY);
     this.setCurosr(target);
@@ -178,4 +160,44 @@ export default class EventHandle {
   private _handleDocumentMouseUp = (event: MouseEvent) => {
     // todo
   };
+
+  private _detachEvents() {
+    if (!this.render.isBrowser()) {
+      return;
+    }
+    const dom = this.render.getDom();
+    dom.removeEventListener('wheel', this._handleMouseWheel);
+    dom.removeEventListener('mousedown', this._handleMouseDown);
+    dom.removeEventListener('mouseup', this._handleMouseUp);
+    dom.removeEventListener('mousemove', this._handleMouseMove);
+    dom.removeEventListener('click', this._handleClick);
+    dom.removeEventListener('dblclick', this._handleDblClick);
+    dom.removeEventListener('touchstart', this._handleTouchStart);
+    dom.removeEventListener('touchmove', this._handleTouchMove);
+    dom.removeEventListener('touchend', this._handleTouchEnd);
+    dom.removeEventListener('mouseleave', this._handleMouseLeave);
+    dom.removeEventListener('mouseenter', this._handleMouseEnter);
+    document.removeEventListener('touchend', this._handleDocumentTouchEnd);
+    document.removeEventListener('mouseup', this._handleDocumentMouseUp);
+  }
+
+  private _initEvents() {
+    if (!this.render.isBrowser()) {
+      return;
+    }
+    const dom = this.render.getDom();
+    dom.addEventListener('wheel', this._handleMouseWheel);
+    dom.addEventListener('mousedown', this._handleMouseDown);
+    dom.addEventListener('mouseup', this._handleMouseUp);
+    dom.addEventListener('mousemove', this._handleMouseMove);
+    dom.addEventListener('click', this._handleClick);
+    dom.addEventListener('dblclick', this._handleDblClick);
+    dom.addEventListener('touchstart', this._handleTouchStart);
+    dom.addEventListener('touchmove', this._handleTouchMove);
+    dom.addEventListener('touchend', this._handleTouchEnd);
+    dom.addEventListener('mouseleave', this._handleMouseLeave);
+    dom.addEventListener('mouseenter', this._handleMouseEnter);
+    document.addEventListener('touchend', this._handleDocumentTouchEnd);
+    document.addEventListener('mouseup', this._handleDocumentMouseUp);
+  }
 }

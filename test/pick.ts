@@ -11,16 +11,17 @@ const ref = { current: null } as any;
 const group = new Group({
   fontSize: 12,
   fill: 'blue',
-  stroke: 'blue',
-  lineWidth: 20,
+  lineWidth: 0,
+  rotation: 0,
   cursor: 'pointer',
-  clip: new Rect({ref, x: 50, y: 200, width: 100, height: 100})
+  // clip: new Rect({ref, x: 50, y: 200, width: 100, height: 100})
 });
 
-ref.current.animateTo({x: 500, height: 500}, 5000)
+// group.animateTo({rotation: 2}, 5000)
 
-console.log(ref.current)
-group.addAll(makeLine(10));
+// ref.current.animateTo({x: 500, height: 500}, 5000)
+
+group.addAll(makeRect(3000));
 render.add(group);
 // group.updateAll(makeRect(3000));
 

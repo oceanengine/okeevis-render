@@ -121,7 +121,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public attr: T & CommonAttr = {} as T ;
 
   public type: string;
-  
+
   public pickRGB: [number, number, number];
 
   public readonly shapeKeys: Array<keyof T> = [];
@@ -156,7 +156,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _lastFrameTime: number;
   
-
   public constructor(attr: T = {} as T) {
     super();
     const initAttr = { ...this.getDefaultAttr(), ...attr };
@@ -385,6 +384,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this.ownerRender = this.parentNode.ownerRender;
     }
     this._mountClip();
+  }
+
+  public resetPickRGB() {
+    this.pickRGB = null;
   }
 
   public destroy() {

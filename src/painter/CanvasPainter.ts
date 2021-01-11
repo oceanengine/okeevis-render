@@ -92,6 +92,15 @@ export default class CanvasPainter implements Painter {
 
   public drawElement(ctx: CanvasRenderingContext2D, item: Element, isInBatch: boolean = false) {
     const { display } = item.attr;
+
+    if (display === false) {
+      return;
+    }
+
+    if (this._isPixelPainter && !item.pickRGB && !item.isGroup) {
+      return;
+    }
+
     const fillAndStrokeStyle = item.getFillAndStrokeStyle();
     const {
       fill,
@@ -104,9 +113,7 @@ export default class CanvasPainter implements Painter {
       needFill,
       needStroke,
     } = fillAndStrokeStyle;
-    if (display === false) {
-      return;
-    }
+   
     if (isInBatch) {
       if (item.isGroup) {
         console.warn('batch brush muse be shape element');
@@ -225,7 +232,7 @@ export default class CanvasPainter implements Painter {
       const canvas = document.createElement('canvas');
       // todo 考虑dpr < 1 (缩放的场景)
       const w = 1;
-      const h = 1;
+      const h = 1
       canvas.width = w * this.render.dpr;
       canvas.height = h * this.render.dpr;
       canvas.style.width = `${w}px`;
@@ -288,6 +295,7 @@ export default class CanvasPainter implements Painter {
       ctx.lineWidth = lineWidth;
     }
 
+    // 文本和图像自己检测, 不走gpu,不故考虑fontSize
     if (this._isPixelPainter && item.type !== 'group') {
       const rgb = item.pickRGB;
       const pickColor = `rgb(${rgb.join(',')})`;
