@@ -16,7 +16,6 @@ const shape2 = new Circle({
   cx: 390,
   cy: 120,
   radius: 50,
-  anticlockwise: true,
 })
 
 const shape = new CompoundPath({
