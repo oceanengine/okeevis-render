@@ -287,7 +287,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public dirty() {
     if (this.ownerRender) {
-      this.ownerRender.dirty();
+      this.ownerRender.dirty(this);
     }
     this._mountClip();
     if (this.attr.ref) {

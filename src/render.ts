@@ -66,7 +66,7 @@ export default class Render extends EventFul {
     this._painter.resize(width, height);
   }
 
-  public dirty(el?: Element) {
+  public dirty(el?: Element<any>) {
     this._needUpdate = true;
     el && this._dirtyElements.add(el);
   }
