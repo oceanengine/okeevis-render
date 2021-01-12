@@ -1,6 +1,7 @@
 import Shape from './Shape';
 import  {CommonAttr, } from './Element';
 import Path2D from '../geometry/Path2D';
+import { BBox, } from '../utils/bbox';
 
 export interface PathConf extends CommonAttr {
   pathData?: Path2D;
@@ -35,9 +36,9 @@ export default class Path extends Shape<PathConf> {
     }
   }
 
-  // protected computeBBox(): BBox {
-  //   return this.attr.pathData?.getPathBBox() || {x: 0, y: 0, width: 0, height: 0}
-  // }
+  protected computeBBox(): BBox {
+    return this.attr.pathData?.getPathBBox() || {x: 0, y: 0, width: 0, height: 0}
+  }
 
   protected prevProcessAttr(attr: PathConf) {
     this._setAttrPathData(attr);
