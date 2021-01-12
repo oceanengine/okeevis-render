@@ -270,9 +270,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public setAttr(attr: T & CommonAttr= {} as T): this {
     const keys = lodash.keys(attr) as Array<keyof T>;
-    if (lodash.keys(attr).length === 0) {
-      return;
-    }
     if (keys.every(key => attr[key] === this.attr[key])) {
       return;
     }
