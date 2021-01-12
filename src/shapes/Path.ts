@@ -40,10 +40,10 @@ export default class Path extends Shape<PathConf> {
   }
 
   protected prevProcessAttr(attr: PathConf) {
-    this._brushAttr(attr);
+    this._setAttrPathData(attr);
   }
 
-  private _brushAttr(attr: PathConf) {
+  private _setAttrPathData(attr: PathConf) {
     if (attr && attr.brush) {
       const path = new Path2D()
       attr.brush(path);
