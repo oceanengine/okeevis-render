@@ -1,10 +1,12 @@
 import Painter from '../abstract/Painter';
 import Render from '../render';
-import Element, { CommonAttr, FillAndStrokeStyle, defaultCanvasContext, } from '../shapes/Element';
+import Element, { CommonAttr, FillAndStrokeStyle, defaultCanvasContext } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import * as lodash from '../utils/lodash';
+import { BBox, bboxIntersect, } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
+import {mergeDirtyRect, } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
 
 export interface RenderingContext extends CommonAttr {}
@@ -22,6 +24,8 @@ export default class CanvasPainter implements Painter {
   private _ctx: CanvasRenderingContext2D;
 
   private _isPixelPainter: boolean = false;
+
+  private _isFirstFrame: boolean = true;
 
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
@@ -44,7 +48,12 @@ export default class CanvasPainter implements Painter {
     if (!this.render.needUpdate()) {
       return;
     }
-    this.paint();
+    if (!this._isFirstFrame) {
+      this.paintInDirtyRegion();
+    } else {
+      this.paint();
+    }
+    this._isFirstFrame = false;
   }
 
   public getImageData(x: number, y: number, width: number, height: number): ImageData {
@@ -70,12 +79,29 @@ export default class CanvasPainter implements Painter {
     ctx.restore();
   }
 
-  public paint() {
+  public paintInDirtyRegion() {
+    console.time('compute dirty rects');
+    const dirtyElements: Element[] = []
+    let dirtyRegions: BBox[] = [];
+    this.render.getDirtyElements().forEach(el => dirtyElements.push(el));
+    for (let i = 0; i < dirtyElements.length; i++) {
+      const el = dirtyElements[i];
+      dirtyRegions = mergeDirtyRect(dirtyRegions, el.getDirtyRects());
+    }
+    this.paint(dirtyRegions);
+    console.timeEnd('compute dirty rects');
+  }
+
+  public paint(dirtyRegions?: BBox[]) {
     console.time('paint');
     const ctx = this._canvas.getContext('2d');
-    const elements = this.render.getAllElements();
-    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
     const dpr = this.dpr;
+    const elements = this.render.getAllElements();
+    if (!dirtyRegions) {
+      ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    } else {
+      dirtyRegions.forEach(region => ctx.clearRect(region.x * dpr, region.y * dpr, region.width * dpr, region.height * dpr));
+    }
     ctx.save();
     if (dpr !== 1) {
       ctx.scale(dpr, dpr);
@@ -84,13 +110,19 @@ export default class CanvasPainter implements Painter {
     ctx.font = `sans-serif ${defaultCanvasContext.fontSize}px`;
     ctx.textBaseline = 'bottom';
 
+    if (dirtyRegions) {
+      ctx.beginPath();
+      dirtyRegions.forEach(region => this._brushRect(ctx, region));
+      ctx.clip();
+    }
+
     // todo 初始化LineWidth = 0;
-    elements.forEach(item => this.drawElement(ctx, item, false));
+    elements.forEach(item => this.drawElement(ctx, item, false, dirtyRegions));
     ctx.restore();
     console.timeEnd('paint');
   }
 
-  public drawElement(ctx: CanvasRenderingContext2D, item: Element, isInBatch: boolean = false) {
+  public drawElement(ctx: CanvasRenderingContext2D, item: Element, isInBatch: boolean = false, dirtyRegions?: BBox[]) {
     const { display } = item.attr;
 
     if (display === false) {
@@ -101,6 +133,14 @@ export default class CanvasPainter implements Painter {
       return;
     }
 
+    if (dirtyRegions) {
+      // todo 换成dirtyRect
+      const bbox = item.getClientBoundingRect();
+      const isDirty = dirtyRegions.some(region => bboxIntersect(region, bbox));
+      if (!isDirty) {
+        return;
+      }
+    }
     const fillAndStrokeStyle = item.getFillAndStrokeStyle();
     const {
       fill,
@@ -113,7 +153,7 @@ export default class CanvasPainter implements Painter {
       needFill,
       needStroke,
     } = fillAndStrokeStyle;
-   
+
     if (isInBatch) {
       if (item.isGroup) {
         console.warn('batch brush muse be shape element');
@@ -168,7 +208,7 @@ export default class CanvasPainter implements Painter {
       }
       // debugger, 显示包围盒
       if (this.render.isDebugMode && !this._isPixelPainter) {
-       this._brushBoundingBBox(item);
+        this._brushBoundingBBox(item);
       }
     } else {
       const current = item as Group;
@@ -176,8 +216,8 @@ export default class CanvasPainter implements Painter {
       if (batchBrush) {
         ctx.beginPath();
       }
-      current.children().forEach(child => this.drawElement(ctx, child, batchBrush));
-     
+      current.children().forEach(child => this.drawElement(ctx, child, batchBrush, dirtyRegions));
+
       if (batchBrush) {
         if (fill && fill !== 'none') {
           ctx.fill();
@@ -186,10 +226,10 @@ export default class CanvasPainter implements Painter {
           ctx.stroke();
         }
       }
-       // debugger, 显示包围盒
-       if (this.render.isDebugMode && !this._isPixelPainter) {
+      // debugger, 显示包围盒
+      if (this.render.isDebugMode && !this._isPixelPainter) {
         this._brushBoundingBBox(item);
-       }
+      }
     }
     if (hasSelfContext) {
       ctx.restore();
@@ -232,7 +272,7 @@ export default class CanvasPainter implements Painter {
       const canvas = document.createElement('canvas');
       // todo 考虑dpr < 1 (缩放的场景)
       const w = 1;
-      const h = 1
+      const h = 1;
       canvas.width = w * this.render.dpr;
       canvas.height = h * this.render.dpr;
       canvas.style.width = `${w}px`;
@@ -421,9 +461,9 @@ export default class CanvasPainter implements Painter {
   private _brushBoundingBBox(item: Element) {
     const clientBBox = true;
     const ctx = this._ctx;
-    const {x, y, width, height} = clientBBox ? item.getClientBoundingRect() : item.getBBox();
+    const bbox = clientBBox ? item.getClientBoundingRect() : item.getBBox();
     ctx.save();
-    if(clientBBox || item.isGroup) {
+    if (clientBBox || item.isGroup) {
       ctx.resetTransform();
       ctx.scale(this.dpr, this.dpr);
     }
@@ -431,12 +471,17 @@ export default class CanvasPainter implements Painter {
     ctx.lineWidth = 1;
     ctx.strokeStyle = 'red';
     ctx.beginPath();
+    this._brushRect(ctx,bbox);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private _brushRect(ctx: CanvasRenderingContext2D, rect: BBox) {
+    const { x, y, width, height } = rect;
     ctx.moveTo(x, y);
     ctx.lineTo(x + width, y);
     ctx.lineTo(x + width, y + height);
     ctx.lineTo(x, y + height);
     ctx.closePath();
-    ctx.stroke();
-    ctx.restore();
   }
 }

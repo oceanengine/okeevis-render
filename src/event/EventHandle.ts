@@ -6,8 +6,6 @@ import { inBBox } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from '../utils/vec2';
 
-import * as lodash from '../utils/lodash';
-
 export default class EventHandle {
   public render: Render;
 

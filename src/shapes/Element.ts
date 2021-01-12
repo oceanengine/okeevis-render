@@ -154,6 +154,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _clientBoundingRect: BBox;
 
   private _clientBoundingRectDirty: boolean = true;
+  
 
   private _lastFrameTime: number;
   
@@ -285,9 +286,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this.type === 'group';
   }
 
-  public dirty() {
+  public dirty(dirtyElement?: Element) {
     if (this.ownerRender) {
-      this.ownerRender.dirty(this);
+      this.ownerRender.dirty(dirtyElement || this);
     }
     this._mountClip();
     if (this.attr.ref) {
@@ -303,6 +304,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._bbox;
   }
   
+  // todo 计算boundRect同时计算dirtyRect
   public getClientBoundingRect(): BBox {
     if (this.attr.display === false) {
       return {x: 0, y: 0, width: 0, height: 0};
@@ -325,10 +327,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  public getDirtyRect(): BBox {
-    // todo
-    return this.getClientBoundingRect();
-    // 考虑尖角 阴影
+  public getDirtyRects(): [BBox] | [BBox, BBox] {
+    const prevBBox = this._clientBoundingRect;
+    const currentBBox = this.getClientBoundingRect();
+    if (prevBBox) {
+      return [prevBBox, currentBBox]
+    } 
+    return [currentBBox];
+    
+    // 考虑旧的尖角 阴影
     const lineWidth = this.getExtendAttr('lineWidth')
     const shadowBlur = this.getExtendAttr('shadowBlur');
     const shadowOffsetX = this.getExtendAttr('shadowOffsetX');

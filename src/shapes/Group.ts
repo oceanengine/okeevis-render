@@ -63,7 +63,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     item.ownerRender = this.ownerRender;
     item.parentNode = this;
     item.mounted();
-    this.dirty();
+    this.dirty(item);
     this.dirtyBBox();
     return this;
   }
@@ -76,7 +76,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public remove(element: T) {
     element.destroy();
     this._components = this._components.filter(item => item !== element);
-    this.dirty();
+    this.dirty(element);
     this.dirtyBBox();
   }
 
