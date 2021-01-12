@@ -6,7 +6,8 @@ import Element from '../shapes/Element';
 import * as lodash from '../utils/lodash';
 import { NAME_TRANSPARENT, RGBA_TRANSPARENT } from '../constant';
 
-export type ColorValue = string | LinearGradient | RadialGradient | Pattern;
+export type ColorValue = 'none' | string | LinearGradient | RadialGradient | Pattern | null;
+
 
 export { Gradient, LinearGradient, RadialGradient, Pattern };
 

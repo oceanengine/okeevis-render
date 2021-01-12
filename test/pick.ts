@@ -10,7 +10,7 @@ const ref = { current: null } as any;
 
 const group = new Group({
   fontSize: 12,
-  fill: 'blue',
+  // fill: 'blue',
   lineWidth: 2,
   stroke: 'blue',
   rotation: 0,
@@ -18,11 +18,11 @@ const group = new Group({
   // clip: new Rect({ref, fill: 'red', x: 50, y: 200, width: 100, height: 100})
 });
 
-// group.animateTo({rotation: 2}, 5000)
+// group.animateTo({rotation: 2}, 50000)
 
 // ref.current.animateTo({x: 500, height: 500}, 5000)
 
-group.addAll(makeRect(100));
+group.addAll(makeRect(10000));
 render.add(group);
 // group.updateAll(makeRect(3000));
 
@@ -44,7 +44,7 @@ function makeRect(count: number) {
       y: Math.random() * 480,
       width: 100,
       height: 100,
-      fill: '#' + Math.random().toString(16).substr(2, 6),
+      // fill: '#' + Math.random().toString(16).substr(2, 6),
     });
   });
 }
