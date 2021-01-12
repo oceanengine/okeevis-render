@@ -9,21 +9,33 @@ export interface BBox {
 }
 
 export function inBBox(x: number, y: number, bbox: BBox): boolean {
-  return x >= bbox.x && x <= (bbox.x + bbox.width) && y >= bbox.y && y <= (bbox.y + bbox.height);
+  return x >= bbox.x && x <= bbox.x + bbox.width && y >= bbox.y && y <= bbox.y + bbox.height;
+}
+
+/**
+ * 用来判断两个矩形是否相交
+ * @param a 相交矩形a
+ * @param b 相交矩形b
+ */
+export function bboxIntersect(a: BBox, b: BBox): boolean {
+  return (
+    Math.abs(a.x + a.width / 2 - (b.x + b.width / 2)) * 2 < a.width + b.width &&
+    Math.abs(a.y + a.height / 2) - (b.y + b.height / 2) * 2 < a.height + b.height
+  );
 }
 
 export function getOffsetBBox(bbox: BBox, offset: number): BBox {
   return {
     x: bbox.x - offset,
     y: bbox.y - offset,
-    width: bbox.width  + offset * 2,
+    width: bbox.width + offset * 2,
     height: bbox.height + offset * 2,
-  }
+  };
 }
 
 export function unionBBox(bboxList: BBox[]): BBox {
   if (bboxList.length === 0) {
-    return {x: 0, y :0, width: 0, height: 0};
+    return { x: 0, y: 0, width: 0, height: 0 };
   }
   let minX = Number.POSITIVE_INFINITY;
   let minY = Number.POSITIVE_INFINITY;
@@ -86,7 +98,7 @@ export function arcBBox(cx: number, cy: number, r: number, start: number, end: n
       y: cy,
       width: 0,
       height: 0,
-    }
+    };
   }
   // 找圆弧中心点切线平移形成包围盒
   const delta = Math.abs(end - start);
@@ -109,9 +121,9 @@ export function arcBBox(cx: number, cy: number, r: number, start: number, end: n
   ];
   const midSidePoints = [
     midPoint.clone().angleMoveTo(lineAngle, isLargeArc ? r : distance / 2),
-    midPoint.clone().angleMoveTo(lineAngle + Math.PI, isLargeArc ? r : distance / 2)
-  ]
-  const {x, y, width, height} =  polygonBBox([...mideArcSidePoints, ...midSidePoints]);
+    midPoint.clone().angleMoveTo(lineAngle + Math.PI, isLargeArc ? r : distance / 2),
+  ];
+  const { x, y, width, height } = polygonBBox([...mideArcSidePoints, ...midSidePoints]);
   const left = Math.max(xRange[0], x);
   const top = Math.max(yRange[0], y);
   const right = Math.min(xRange[1], x + width);
@@ -121,7 +133,7 @@ export function arcBBox(cx: number, cy: number, r: number, start: number, end: n
     y: top,
     width: right - left,
     height: bottom - top,
-  }
+  };
 }
 
 export function sectorBBox(

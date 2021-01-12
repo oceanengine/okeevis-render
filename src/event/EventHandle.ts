@@ -2,9 +2,9 @@ import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
-import {inBBox, } from '../utils/bbox';
+import { inBBox } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
-import {transformMat3, } from '../utils/vec2'
+import { transformMat3 } from '../utils/vec2';
 
 import * as lodash from '../utils/lodash';
 
@@ -41,29 +41,27 @@ export default class EventHandle {
 
   public pickTarget(x: number, y: number): Element {
     console.time('pick');
-    
+
     const pixelPainter = this._PixelPainter;
     const ignoreInvisibleNodes = true;
+    let target: Element;
     let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes).reverse();
 
     this.render.getRoot().resetPickRGB();
 
     // 初步过滤掉不显示和不触发事件的元素, 以及不在包围盒中的
     pickNodes = pickNodes.filter(
-      node => node.attr.display && node.getExtendAttr('pointerEvents') !== 'none' && inBBox(x, y, node.getClientBoundingRect())
+      node =>
+        node.attr.display &&
+        node.getExtendAttr('pointerEvents') !== 'none' &&
+        inBBox(x, y, node.getClientBoundingRect()),
     );
-
-    if (pickNodes.length === 0) {
-      console.timeEnd('pick');
-      return this.render.getRoot();
-    }
 
     // todo  自己几何检测 文本图像, 矩形, 圆等可以做的事
     // 倒排, 要考虑剪切, 逆矩阵坐标
 
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;
-    
 
     for (let i = 0; i < pickNodes.length; i++) {
       const node = pickNodes[i];
@@ -88,40 +86,32 @@ export default class EventHandle {
       item.pickRGB = valueToRgb(index + 1);
     });
 
-    
     console.log('gpu pick size ', gpuPickNodes.length);
 
-    if (gpuPickNodes.length === 0) {
-      console.log(pickNodes[geometryPickIndex])
-      pickNodes[geometryPickIndex]?.setAttr({fill: 'red'})
-      console.timeEnd('pick');
-      return pickNodes[geometryPickIndex] || this.render.getRoot();
-    }
+    if (gpuPickNodes.length > 0) {
+      pixelPainter.paintAt(x, y);
+      // todo 考虑小程序getImageData兼容
+      // const prevImageData = pixelPainter.getImageData(x, y);
+      const imageData = pixelPainter.getImageData(0, 0, 1, 1);
+      const pickValue = imageData.data;
+      const r0 = pickValue[0];
+      const g0 = pickValue[1];
+      const b0 = pickValue[2];
 
-    pixelPainter.paintAt(x, y);
-    // todo 考虑小程序getImageData兼容
-    // const prevImageData = pixelPainter.getImageData(x, y);
-    const imageData = pixelPainter.getImageData(0, 0, 1, 1);
-    const pickValue = imageData.data;
-    const r0 = pickValue[0];
-    const g0 = pickValue[1];
-    const b0 = pickValue[2];
-
-    let target: Element;
-
-    for (let i = 0; i < pickNodes.length; i++) {
-      const node = pickNodes[i];
-      if (!node.pickByGPU) {
-        continue;
-      }
-      const [r, g, b] = node.pickRGB;
-      const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
-      if (gap < 3) {
-        gpuPickIndex = i;
-        break;
+      for (let i = 0; i < pickNodes.length; i++) {
+        const node = pickNodes[i];
+        if (!node.pickByGPU) {
+          continue;
+        }
+        const [r, g, b] = node.pickRGB;
+        const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
+        if (gap < 3) {
+          gpuPickIndex = i;
+          break;
+        }
       }
     }
-    
+
     if (geometryPickIndex >= 0 || gpuPickIndex >= 0) {
       let pickIndex: number;
       if (geometryPickIndex === -1 || gpuPickIndex === -1) {
@@ -130,9 +120,9 @@ export default class EventHandle {
         pickIndex = Math.min(geometryPickIndex, gpuPickIndex);
       }
       target = pickNodes[pickIndex];
-      target.setAttr({fill: 'red', stroke: 'red'})
+      target.setAttr({ fill: 'red', stroke: 'red' });
     }
-    
+
     console.timeEnd('pick');
     return target || this.render.getRoot();
   }
