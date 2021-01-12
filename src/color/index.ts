@@ -43,9 +43,10 @@ export function getCtxColor(
 // 4时颜色空间约26w
 // 8时颜色空间32768
 
+const MAX_SIZE = 32 * 32 * 32;
 
 export function valueToRgb(index: number): [number, number, number] {
-  if (index >= 32 * 32 * 32) {
+  if (index >= MAX_SIZE) {
     console.warn('GPU pick element is larger than 32 * 32 * 32');
     return [0, 0, 0];
   }
