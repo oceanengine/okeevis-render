@@ -1,3 +1,4 @@
+import * as ES6Set from 'es6-set';
 import Painter from './abstract/Painter';
 import CanvasPainter from './painter/CanvasPainter';
 import EventHandle from './event/EventHandle';
@@ -6,6 +7,7 @@ import Group from './shapes/Group';
 import Element from './shapes/Element';
 import {getDomContentSize, } from './utils/dom';
 import requestAnimationFrame from './utils/requestAnimationFrame';
+
 
 export interface RenderOptions {
   dpr?: number;
@@ -31,6 +33,8 @@ export default class Render extends EventFul {
   private _requestAnimationFrameId: number;
   
   private _rootGroup: Group;
+
+  private _dirtyElements: ES6Set<Element> = new ES6Set();
 
   private _painter: Painter;
 
@@ -62,8 +66,9 @@ export default class Render extends EventFul {
     this._painter.resize(width, height);
   }
 
-  public dirty() {
+  public dirty(el?: Element) {
     this._needUpdate = true;
+    el && this._dirtyElements.add(el);
   }
 
   public debug(debugMode: boolean = true) {
@@ -101,6 +106,10 @@ export default class Render extends EventFul {
 
   public getRoot(): Group {
     return this._rootGroup;
+  }
+
+  public getDirtyElements(): ES6Set<Element> {
+    return this._dirtyElements;
   }
 
   public getBase64() {
@@ -147,6 +156,7 @@ export default class Render extends EventFul {
     this._painter.onFrame(now);
     this._eventHandle.onFrame();
     this._needUpdate = false;
+    this._dirtyElements.clear();
     requestAnimationFrame(this._onFrame)
   }
 
