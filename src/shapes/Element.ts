@@ -108,6 +108,12 @@ const extendAbleKeys = lodash.keys(defaultCanvasContext);
 
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
 
+const defaultTRansformConf: CommonAttr = {
+  origin: [0, 0],
+  position: [0, 0],
+  scale: [0, 0],
+};
+
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
   implements AnimateAble<T>, TransformAble, DragAndDrop {
@@ -185,10 +191,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       zIndex: 0,
       draggable: false,
       opacity: 1,
-      origin: [0, 0],
       rotation: 0,
-      position: [0, 0],
-      scale: [1, 1],
       strokeNoScale: false,
       pointerEvents: 'auto',
     } as T;
@@ -375,7 +378,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const shapeKeys = ['display' as keyof T, ...this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key]))];
 
     if (transformKeys.length) {
-      // todo 精确判断数组变化
       this.dirtyTransform();
     }
 
@@ -460,18 +462,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
       animationKeysMap[this.type] = animationKeys as Array<keyof ShapeConf>;
     }
     animationKeys = animationKeys.filter(key => {
-      const value = toAttr[key];
+      const toValue = toAttr[key];
       const fromValue = fromAttr[key];
-      return !(lodash.isNull(value) || lodash.isUndefined(value)) && fromValue !== value;
+      return !(lodash.isNull(toValue) || lodash.isUndefined(toValue)) && fromValue !== toValue;
     });
+
     const nonAnimateAttr = lodash.omit(toAttr, animationKeys) as T;
     const animateToAttr = lodash.pick(toAttr, animationKeys);
-    const animateFromAttr = lodash.pick(fromAttr, animationKeys);
+    const animateFromAttr = lodash.pick({...fromAttr, ...defaultTRansformConf}, animationKeys);
     this.setAttr(nonAnimateAttr);
     if (typeof duringOrConf === 'object') {
       this.addAnimation({
         stopped: false,
-        from: animateFromAttr,
+        from: animateFromAttr as T,
         to: animateToAttr,
         during: duringOrConf.during,
         ease,
@@ -480,7 +483,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       });
     } else {
       this.addAnimation({
-        from: animateFromAttr,
+        from: animateFromAttr as T,
         to: animateToAttr,
         during: duringOrConf,
         ease,
