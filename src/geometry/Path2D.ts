@@ -240,4 +240,18 @@ export default class Path2D {
       ...bboxList,
     ]);
   }
+
+  public getTotalLength(): number {
+    // todo
+    return 0
+  }
+
+  public getPointAtLength(len: number) {
+    // todo
+    return 0
+  }
+  public getPointAtPercent(percent: number): [number, number] {
+    // todo
+    return [0, 0];
+  }
 }

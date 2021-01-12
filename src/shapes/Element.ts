@@ -15,6 +15,7 @@ import * as mat3 from '../../js/mat3'
 import {Vec2, transformMat3, } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
 import {RGBA_TRANSPARENT, } from '../constant';
+import {BBox, ceilBBox, } from '../utils/bbox';
 
 export type Ref<T extends Element=Element> = {current?: T};
 
@@ -57,13 +58,6 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionEase?: EasingName;
   transitionDuration?: number;
   transitionDelay?: number;
-}
-
-export interface BBox {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 }
 
 export interface FillAndStrokeStyle {
@@ -335,7 +329,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     } 
     return [currentBBox];
     
-    // 考虑旧的尖角 阴影
+    // todo 考虑旧的尖角 阴影
     const lineWidth = this.getExtendAttr('lineWidth')
     const shadowBlur = this.getExtendAttr('shadowBlur');
     const shadowOffsetX = this.getExtendAttr('shadowOffsetX');

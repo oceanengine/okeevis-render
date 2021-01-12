@@ -8,6 +8,16 @@ export interface BBox {
   height: number;
 }
 
+export function ceilBBox(box: BBox): BBox {
+  const {x, y, width, height} = box;
+  return {
+    x: Math.floor(x),
+    y: Math.floor(y),
+    width: Math.ceil(x + width),
+    height: Math.ceil(y + height)
+  }
+}
+
 export function inBBox(x: number, y: number, bbox: BBox): boolean {
   return x >= bbox.x && x <= bbox.x + bbox.width && y >= bbox.y && y <= bbox.y + bbox.height;
 }
