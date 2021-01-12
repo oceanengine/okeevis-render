@@ -1,7 +1,7 @@
 import parsePath from './parsePath';
 import { BBox, unionBBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
 
-interface PathAction {
+export interface PathAction {
   action:
     | 'moveTo'
     | 'lineTo'
@@ -49,6 +49,15 @@ export default class Path2D {
     if (svgPath) {
       this._pathList = parsePath(svgPath) as PathAction[];
     }
+  }
+
+  public setPathList(pathList: PathAction[]) {
+    this._pathList = pathList;
+  }
+
+
+  public getPathList(): PathAction[] {
+    return this._pathList;
   }
 
   public closePath(): this {
