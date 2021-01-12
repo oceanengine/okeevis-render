@@ -160,8 +160,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   
   public constructor(attr: T = {} as T) {
     super();
-    const initAttr = { ...this.getDefaultAttr(), ...attr };
-    this.setAttr(initAttr);
+    this.attr = this.getDefaultAttr();
+    this.setAttr(attr);
     this.created();
   }
 
@@ -192,6 +192,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
       zIndex: 0,
       draggable: false,
       opacity: 1,
+      origin: [0, 0],
+      rotation: 0,
+      position: [0, 0],
+      scale: [1, 1],
       strokeNoScale: false,
       pointerEvents: 'auto',
     } as T;
@@ -260,16 +264,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getComputedAttr(): T {
+    // todo
     return {
       ...defaultCanvasContext,
       ...this.parentNode ? lodash.pick(this.parentNode.attr, extendAbleKeys) : null,
-      ...defaultTransformConf,
       ...this.attr,
     }
   }
 
   public setAttr(attr: T & CommonAttr= {} as T): this {
+    const keys = lodash.keys(attr) as Array<keyof T>;
     if (lodash.keys(attr).length === 0) {
+      return;
+    }
+    if (keys.every(key => attr[key] === this.attr[key])) {
       return;
     }
     this.prevProcessAttr(attr);
