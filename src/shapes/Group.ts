@@ -113,6 +113,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public updateAll(list: T[]) {
+    // todo 优化脏区策略, 只脏本group,不脏子元素
     const prevList = this._components;
     if (prevList.length === 0) {
       this.addAll(list);

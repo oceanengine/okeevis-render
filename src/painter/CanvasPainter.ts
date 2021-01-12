@@ -48,7 +48,8 @@ export default class CanvasPainter implements Painter {
     if (!this.render.needUpdate()) {
       return;
     }
-    if (!this._isFirstFrame) {
+    const maxDirtyRects = this.render.maxDirtyRects;
+    if (!this._isFirstFrame && this.render.enableDirtyRect && this.render.getDirtyElements().size < maxDirtyRects) {
       this.paintInDirtyRegion();
     } else {
       this.paint();
@@ -87,6 +88,7 @@ export default class CanvasPainter implements Painter {
     for (let i = 0; i < dirtyElements.length; i++) {
       const el = dirtyElements[i];
       dirtyRegions = mergeDirtyRect(dirtyRegions, el.getDirtyRects());
+      // todo 检测脏区面积占比, 提前return
     }
     this.paint(dirtyRegions);
     console.timeEnd('compute dirty rects');

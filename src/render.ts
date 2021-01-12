@@ -15,6 +15,10 @@ export interface RenderOptions {
 
 export default class Render extends EventFul {
   public dpr: number = 1;
+
+  public enableDirtyRect: boolean = true;
+
+  public maxDirtyRects: number = 128;
   
   public isDebugMode: boolean = false;
 
@@ -35,6 +39,8 @@ export default class Render extends EventFul {
   private _rootGroup: Group;
 
   private _dirtyElements: ES6Set<Element> = new ES6Set();
+
+  private _dirtyRegion: boolean = true;
 
   private _painter: Painter;
 
