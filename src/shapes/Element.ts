@@ -108,13 +108,6 @@ const extendAbleKeys = lodash.keys(defaultCanvasContext);
 
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
 
-const defaultTransformConf: CommonAttr = {
-  position: [0, 0],
-  rotation: 0,
-  scale: [1, 1],
-  origin: [0, 0],
-}
-
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
   implements AnimateAble<T>, TransformAble, DragAndDrop {
@@ -335,6 +328,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public getDirtyRect(): BBox {
     // todo
     return this.getClientBoundingRect();
+    // 考虑尖角 阴影
+    const lineWidth = this.getExtendAttr('lineWidth')
     const shadowBlur = this.getExtendAttr('shadowBlur');
     const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
     const shadowOffsetY = this.getExtendAttr('shadowOffsetY');        
