@@ -352,14 +352,16 @@ export default class CanvasPainter implements Painter {
       ctx.strokeStyle = getCtxColor(ctx, stroke, item);
     }
 
-    if (!stroke && isGradient(computedStroke) && item.type !== 'group') {
+    if (!stroke && stroke !== 'none' && isGradient(computedStroke) && item.type !== 'group') {
       ctx.strokeStyle = getCtxColor(ctx, computedStroke, item);
     }
 
-    if (fill && !(item.isGroup && isGradient(fill))) {
+    /** 渐变样式无法继承 */
+    if (fill && fill !== 'none' && !(item.isGroup && isGradient(fill))) {
       ctx.fillStyle = getCtxColor(ctx, fill, item);
     }
-
+    
+    /** 渐变样式无法继承 */
     if (!fill && isGradient(computedFill) && item.type !== 'group') {
       ctx.strokeStyle = getCtxColor(ctx, computedFill, item);
     }
