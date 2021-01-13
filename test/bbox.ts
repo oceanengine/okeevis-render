@@ -181,5 +181,4 @@ group.add(path)
 // }
 
 render.add(group)
-render.debug();
 render.resize(1200, 800);

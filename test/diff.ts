@@ -11,13 +11,27 @@ const ref = { current: null } as any;
 const group = new Group({
   fontSize: 12,
   fill: 'blue',
-  stroke: null,
+  // lineWidth: 2,
+  fontWeight: 'bold',
+  fontStyle: 'italic',
+  origin: [270, 220],
 });
 
-group.addAll(makeText(3000));
+group.addAll(makeText(1000));
 render.add(group);
-group.updateAll(makeText(3000));
-// render.debug();
+
+ // group.updateAll(makeText(3000));
+ //render.enableDirtyRect = false;
+document.onclick = e => {
+  group.add(new Rect({
+    x: Math.random() * 1920,
+    y: Math.random() * 1080,
+    width: 100,
+    height: 100,
+    fill: 'red',
+    cursor: 'pointer'
+  }))
+}
 
 function makeText(count: number) {
   return new Array(count).fill(0).map((value, index) => {
@@ -35,19 +49,24 @@ function makeRect(count: number) {
     return new Rect({
       x: Math.random() * 600,
       y: Math.random() * 480,
-      width: 100,
-      height: 100,
+      width: 50,
+      height: 50,
     });
   });
 }
 
 function makeLine(count: number) {
   return new Array(count).fill(0).map((value, index) => {
+    const x1= Math.random() * 1900;
+    const y1 =  Math.random() * 1080;
+    const x2 = x1  + Math.random() * 100;
+    const y2 = y1 + Math.random() * 100;
     return new Line({
-      x1: Math.random() * 600,
-      y1: Math.random() * 480,
-      x2: Math.random() * 600,
-      y2: Math.random() * 480,
+     x1,
+     y1,
+     x2,
+     y2,
     });
   });
 }
+render.resize(1900, 1080)

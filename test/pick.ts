@@ -44,7 +44,7 @@ function makeRect(count: number) {
       y: Math.random() * 480,
       width: 100,
       height: 100,
-      // fill: '#' + Math.random().toString(16).substr(2, 6),
+      fill: '#' + Math.random().toString(16).substr(2, 6),
     });
   });
 }
@@ -59,5 +59,3 @@ function makeLine(count: number) {
     });
   });
 }
-
-// render.debug()

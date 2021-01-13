@@ -104,5 +104,4 @@ render.add(path)
 
 
 
-render.debug();
 render.resize(1200, 800);

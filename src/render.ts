@@ -19,9 +19,13 @@ export default class Render extends EventFul {
   public enableDirtyRect: boolean = true;
 
   public maxDirtyRects: number = 128;
-  
-  public isDebugMode: boolean = false;
 
+  public showDirtyRect: boolean = false;
+
+  public showBoundingRect: boolean = false;
+
+  public showBBox: boolean = false;
+    
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
   private _width: number;
@@ -75,11 +79,6 @@ export default class Render extends EventFul {
   public dirty(el?: Element<any>) {
     this._needUpdate = true;
     el && this._dirtyElements.add(el);
-  }
-
-  public debug(debugMode: boolean = true) {
-    this.isDebugMode = debugMode;
-    this.dirty();
   }
 
   public getWidth(): number {
