@@ -48,10 +48,12 @@ export default class CanvasPainter implements Painter {
       return;
     }
     const maxDirtyRects = this.render.maxDirtyRects;
+    const dirytElementSize = this.render.getDirtyElements().size;
     if (
       !this._isFirstFrame &&
       this.render.enableDirtyRect &&
-      this.render.getDirtyElements().size < maxDirtyRects
+      dirytElementSize > 0 &&
+      dirytElementSize < maxDirtyRects
     ) {
       this.paintInDirtyRegion();
     } else {
@@ -236,7 +238,7 @@ export default class CanvasPainter implements Painter {
       }
     }
 
-    if (!this._isPixelPainter && (this.render.showBBox|| this.render.showBoundingRect)) {
+    if (!this._isPixelPainter && (this.render.showBBox || this.render.showBoundingRect)) {
       this._drawBBox(item);
     }
 
