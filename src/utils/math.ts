@@ -26,6 +26,8 @@ export function getPointOnPolar(cx: number, cy: number, r: number, angle: number
  * @param deg  angle in rad
  * @return angle in [0, Math.PI * 2)
  */
-export function normalizeAngle(deg: number): number {
-  return deg < 0 ? deg + PI2 : deg;
+export function normalizeAngle(angle: number): number {
+  let rad = angle % PI2;
+  rad =  rad < 0 ? rad + PI2 : rad;
+  return rad;
 }

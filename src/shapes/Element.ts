@@ -132,6 +132,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public parentNode: Group | undefined;
 
+  private _dirty: boolean = true;
+
   private _animations: AnimateOption<T>[] = [];
 
   private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
@@ -279,7 +281,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this.type === 'group';
   }
 
+  public isDirty(): boolean {
+    return this._dirty;
+  }
+
   public dirty(dirtyElement?: Element) {
+    this._dirty = true;
     if (this.ownerRender) {
       this.ownerRender.dirty(dirtyElement || this);
     }
@@ -287,6 +294,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.attr.ref) {
       this.attr.ref.current = this as Element<any>;
     }
+  }
+
+  public clearDirty() {
+    this._dirty = false;
   }
 
   public getBBox(): BBox {
