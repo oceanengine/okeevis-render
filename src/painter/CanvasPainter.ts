@@ -1,6 +1,6 @@
 import Painter from '../abstract/Painter';
 import Render from '../render';
-import Element, { CommonAttr, FillAndStrokeStyle, defaultCanvasContext } from '../shapes/Element';
+import Element, { FillAndStrokeStyle, defaultCanvasContext } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import * as lodash from '../utils/lodash';
@@ -9,7 +9,6 @@ import * as mat3 from '../../js/mat3';
 import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
 
-export interface RenderingContext extends CommonAttr {}
 const identityMat3 = mat3.create();
 
 export default class CanvasPainter implements Painter {
@@ -237,7 +236,7 @@ export default class CanvasPainter implements Painter {
       }
     }
 
-    if ((!this._isPixelPainter && this.render.showBBox) || this.render.showBoundingRect) {
+    if (!this._isPixelPainter && (this.render.showBBox|| this.render.showBoundingRect)) {
       this._drawBBox(item);
     }
 
@@ -326,10 +325,10 @@ export default class CanvasPainter implements Painter {
       strokeOpacity,
       fill: computedFill,
       stroke: computedStroke,
-      hasFill,
-      hasStroke,
-      needFill,
-      needStroke,
+      // hasFill,
+      // hasStroke,
+      //  needFill,
+      // needStroke,
     } = item.getFillAndStrokeStyle();
 
     const matrix3 = item.getTransform();

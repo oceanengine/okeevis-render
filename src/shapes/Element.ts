@@ -234,15 +234,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const opacity = this.getComputedOpacity();
     const fillOpacity = this.getExtendAttr('fillOpacity') * opacity;
     const strokeOpacity = this.getExtendAttr('strokeOpacity') * opacity;
-    const {fill, stroke, lineWidth,} =  {
-      fill: 'none',
-      stroke: 'none',
-      lineWidth: 0,
-      ...this.parentNode?.attr,
-      ...this.attr,
-    };
-    const hasFill = fill !== 'none' && fill !== null;
-    const hasStroke = stroke !== 'none' && fill !== null && lineWidth > 0;
+    const lineWidth = this.getExtendAttr('lineWidth');
+    const stroke = this.getExtendAttr('stroke');
+    const fill = this.getExtendAttr('fill');
+    const hasFill = fill && fill !== 'none';
+    const hasStroke = stroke && stroke !== 'none' && lineWidth > 0;
     return {
       fill,
       stroke,
