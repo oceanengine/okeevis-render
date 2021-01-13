@@ -11,18 +11,15 @@ const ref = { current: null } as any;
 const group = new Group({
   fontSize: 12,
   fill: 'blue',
-  // lineWidth: 2,
-  fontWeight: 'bold',
-  fontStyle: 'italic',
-  origin: [270, 220],
 });
 
-group.addAll(makeText(1000));
+group.addAll(makeText(3000));
 render.add(group);
-
- // group.updateAll(makeText(3000));
- //render.enableDirtyRect = false;
+group.updateAll(makeText(3000));
+render.showBBox = false;
+render.showDirtyRect = false;
 document.onclick = e => {
+  return
   group.add(new Rect({
     x: Math.random() * 1920,
     y: Math.random() * 1080,
@@ -69,4 +66,4 @@ function makeLine(count: number) {
     });
   });
 }
-render.resize(1900, 1080)
+// render.resize(1900, 1080)

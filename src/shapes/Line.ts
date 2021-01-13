@@ -35,9 +35,8 @@ export default class Line extends Shape<LineConf> {
     return [...super.getAnimationKeys(), 'x1', 'y1', 'x2', 'y2'];
   }
 
-  public isPointInStroke(x: number, y: number): boolean {
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
     const { x1, y1, x2, y2 } = this.attr;
-    const lineWidth = this.getExtendAttr('lineWidth');
     return pointInLineStroke(x1, y1, x2, y2, lineWidth, x, y);
   }
 

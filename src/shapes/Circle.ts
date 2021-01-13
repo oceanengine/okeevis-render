@@ -1,6 +1,7 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { BBox, circleBBox, } from '../utils/bbox';
+import {pointInCircle, pointInCircleStroke, } from '../geometry/contain/circle'
 
 export interface CircleConf extends CommonAttr {
   cx?: number;
@@ -30,6 +31,16 @@ export default class Circle extends Shape<CircleConf> {
   public brush(ctx: CanvasRenderingContext2D) {
     const { cx, cy, radius, } = this.attr;
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  }
+
+  public isPointInFill(x: number, y: number): boolean {
+    const {cx, cy, radius} = this.attr;
+    return pointInCircle(cx, cy, radius, x, y);
+  }
+
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
+    const {cx, cy, radius} = this.attr;
+    return pointInCircleStroke(cx, cy, radius, lineWidth, x, y);
   }
   
   protected computeBBox(): BBox {

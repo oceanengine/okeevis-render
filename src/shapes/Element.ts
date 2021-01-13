@@ -402,7 +402,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public isInShape(x: number, y: number): boolean {
     const hasFill = this.hasFill();
     const hasStroke = this.hasStroke();
-    return (hasFill && this.isPointInFill(x, y)) || (hasStroke && this.isPointInStroke(x, y));
+    const lineWidth = this.getExtendAttr('lineWidth');
+    return (hasFill && this.isPointInFill(x, y)) || (hasStroke && this.isPointInStroke(x, y, lineWidth));
   }
 
   public isInClip(x: number, y: number): boolean {
@@ -421,8 +422,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return clips;
   }
 
-  public isPointInStroke(x: number, y: number): boolean {
-    x && y;
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
+    x && y && lineWidth;
     return false;
   }
 

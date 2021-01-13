@@ -46,8 +46,7 @@ export default class Rect extends Shape<RectConf> {
     return inBBox(x, y, this.getBBox());
   }
 
-  public isPointInStroke(x: number, y: number): boolean {
-    const lineWidth = this.getExtendAttr('lineWidth');
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
     const outterBBox = getOffsetBBox(this.getBBox(), lineWidth / 2);
     const innerBBox = getOffsetBBox(this.getBBox(), -lineWidth / 2);
     return inBBox(x, y, outterBBox) && !inBBox(x, y, innerBBox);
