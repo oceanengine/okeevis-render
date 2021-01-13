@@ -2,9 +2,6 @@ import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { BBox, inBBox, } from '../utils/bbox';
 import measureText from '../utils/measureText';
-import LRUMap from '../utils/lru';
-
-const textSizeLRUMap = new LRUMap<TextMetrics>(3000);
 
 export interface TextConf extends CommonAttr {
   x?: number;
@@ -69,18 +66,9 @@ export default class Text extends Shape<TextConf> {
     }
   }
 
-  public measureText(ctx: CanvasRenderingContext2D): TextMetrics {
+  protected measureText(ctx: CanvasRenderingContext2D): TextMetrics {
     const textStyle = this.getTextStyle();
-    const {fontSize, fontFamily, fontWeight, } = textStyle;
-    const {text, } = this.attr;
-    const cacheKey = [text, fontSize, fontFamily, fontWeight].join('__$$__');
-    let size = textSizeLRUMap.get(cacheKey);
-    if (size) {
-      return size;
-    }
-    size = measureText(ctx, this.attr.text, textStyle);
-    textSizeLRUMap.set(cacheKey, size);
-    return size;
+    return measureText(ctx, this.attr.text, textStyle);
   }
 
   public getTextStyle(): TextConf {
