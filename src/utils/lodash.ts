@@ -37,7 +37,7 @@ import uniq = require('lodash/uniq');
 import orderBy = require('lodash/orderBy');
 import sum = require('lodash/sum');
 import trim = require('lodash/trim');
-import keys = require('lodash/keys');
+// import keys = require('lodash/keys');
 import intersection = require('lodash/intersection');
 import difference = require('lodash/difference');
 import sortBy = require('lodash/sortBy');
@@ -83,7 +83,7 @@ export {
   orderBy,
   sum,
   trim,
-  keys,
+  // keys,
   intersection,
   difference,
   sortBy,

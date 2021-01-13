@@ -101,7 +101,7 @@ export const defaultCanvasContext: ShapeConf = {
   cursor: 'auto',
 
 }
-const extendAbleKeys = lodash.keys(defaultCanvasContext);
+const extendAbleKeys = Object.keys(defaultCanvasContext);
 
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
 
@@ -263,7 +263,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public setAttr(attr: T & CommonAttr= {} as T): this {
-    const keys = lodash.keys(attr) as Array<keyof T>;
+    const keys = Object.keys(attr) as Array<keyof T>;
     if (keys.every(key => attr[key] === this.attr[key])) {
       return;
     }
