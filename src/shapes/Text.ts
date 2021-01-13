@@ -14,6 +14,7 @@ export interface TextConf extends CommonAttr {
   fontWeight?: string | number;
   fontFamily?: string;
   fontVariant?: string;
+  fontStyle?: 'normal' | 'italic' | 'oblique';
   textAlign?: CanvasTextAlign;
   textBaseline?: CanvasTextBaseline;
   lineHeight?: number;

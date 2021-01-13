@@ -294,6 +294,9 @@ export default class CanvasPainter implements Painter {
       fill,
       fontSize,
       fontFamily,
+      fontWeight,
+      fontVariant,
+      fontStyle,
       blendMode,
       lineCap,
       lineDashOffset,
@@ -366,9 +369,13 @@ export default class CanvasPainter implements Painter {
       ctx.strokeStyle = getCtxColor(ctx, computedFill, item);
     }
 
-    // todo faontStyle, fontVarient
-    if (fontSize || fontFamily) {
-      ctx.font = `${fontSize}px sans-serif`;
+    // todo 兼容小程序
+    if (fontSize > 0 || fontFamily || fontWeight || fontVariant || fontStyle) {
+      const _fontSize = item.getExtendAttr('fontSize');
+      const _fontFamily = item.getExtendAttr('fontFamily');
+      const _fontWeight = item.getExtendAttr('fontWeight');
+      const _fontStyle = item.getExtendAttr('fontStyle');
+      ctx.font = `${_fontStyle} ${_fontWeight} ${_fontSize}px ${_fontFamily}`;
     }
 
     if (textBaseline) {

@@ -89,6 +89,9 @@ export const defaultCanvasContext: ShapeConf = {
   blendMode: 'source-over',
   fontSize: 12, // 非canvas默认
   fontFamily: 'sans-serif',
+  fontWeight: 'normal',
+  fontStyle: 'normal',
+  fontVariant: 'normal',
   textAlign: 'start',
   textBaseline: 'bottom', // canvas默认值'alphabetic',
   shadowColor: RGBA_TRANSPARENT,
