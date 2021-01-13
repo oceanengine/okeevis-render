@@ -1,6 +1,6 @@
 import * as lodash from './lodash';
 import { TextConf } from '../shapes/Text';
-import LRUMap from './lru';
+import LRUMap from './LRU';
 
 const textSizeLRUMap = new LRUMap<TextMetrics>(3000);
 

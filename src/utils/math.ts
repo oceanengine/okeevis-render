@@ -20,3 +20,12 @@ export function getPointOnPolar(cx: number, cy: number, r: number, angle: number
     y: cy + Math.sin(angle) * r,
   };
 }
+
+/**
+ * 将角度统一处理,方便判断,避免负数场景
+ * @param deg  angle in rad
+ * @return angle in [0, Math.PI * 2)
+ */
+export function normalizeAngle(deg: number): number {
+  return deg < 0 ? deg + PI2 : deg;
+}

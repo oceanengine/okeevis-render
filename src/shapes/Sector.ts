@@ -1,7 +1,8 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { getPointOnPolar, } from '../utils/math';
+import { getPointOnPolar } from '../utils/math';
 import { BBox, sectorBBox } from '../utils/bbox';
+import { isPointInSector, isPointInSectorStroke } from '../geometry/contain/sector';
 
 export interface SectorConf extends CommonAttr {
   cx?: number;
@@ -57,6 +58,16 @@ export default class Sector extends Shape<SectorConf> {
     ctx.lineTo(p2.x, p2.y); // 为了转svg, canvas下不需要这个
     ctx.arc(cx, cy, radius, start, end, anticlockwise);
     ctx.closePath();
+  }
+
+  public isPointInFill(x: number, y: number): boolean {
+    const {cx, cy, radius, radiusI, start, end, } = this.attr;
+    return isPointInSector(cx, cy, radius, radiusI, start, end, x, y);
+  }
+
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
+    const {cx, cy, radius, radiusI, start, end, } = this.attr;
+    return isPointInSectorStroke(cx, cy, radius, radiusI, start, end, lineWidth, x, y);
   }
 
   protected computeBBox(): BBox {
