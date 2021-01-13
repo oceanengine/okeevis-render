@@ -6,10 +6,10 @@ export default function measureText<T extends string | string[]>(
   text: T,
   textStyle: TextConf = {},
 ): T extends string ? TextMetrics : TextMetrics[] {
-  const { fontFamily = 'sans-serif', fontSize = 10, fontWeight = 'normal' } = textStyle;
+  const { fontFamily = 'sans-serif', fontSize = 10, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;
   let ret: T extends string ? TextMetrics : TextMetrics[];
   ctx.save();
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
   if (lodash.isArray(text)) {
     ret = text.map(item => ctx.measureText(item)) as any;
   } else {

@@ -370,7 +370,7 @@ export default class CanvasPainter implements Painter {
     }
 
     // todo 兼容小程序
-    if (fontSize > 0 || fontFamily || fontWeight || fontVariant || fontStyle) {
+    if (fontSize >= 0 || fontFamily || fontWeight || fontVariant || fontStyle) {
       const _fontSize = item.getExtendAttr('fontSize');
       const _fontFamily = item.getExtendAttr('fontFamily');
       const _fontWeight = item.getExtendAttr('fontWeight');
