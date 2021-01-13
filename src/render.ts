@@ -44,8 +44,6 @@ export default class Render extends EventFul {
 
   private _dirtyElements: ES6Set<Element> = new ES6Set();
 
-  private _dirtyRegion: boolean = true;
-
   private _painter: Painter;
 
   private _eventHandle: EventHandle;

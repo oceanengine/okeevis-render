@@ -10,21 +10,5 @@ import * as lodash from '../utils/lodash';
 
 export function mergeDirtyRect(mergedRects: BBox[], dirtyRects: BBox[]): BBox[] {
   const regionList = [...mergedRects, ...dirtyRects];
-  const ret: BBox[] = [];
-  const mergedIndex: number[] = [];
-  for (let i = 0; i < regionList.length; i++) {
-    let region = regionList[i];
-    for (let j = i + 1; j < regionList.length; j++) {
-      if (lodash.includes(mergedIndex, j) || i === j) {
-        continue;
-      }
-      const nextRegion = regionList[j];
-      if (bboxIntersect(region, nextRegion)) {
-        mergedIndex.push(j);
-        region = unionBBox([region, nextRegion]);
-      }
-    }
-    ret.push(region);
-  }
-  return ret;
+  return [unionBBox(regionList)]
 }
