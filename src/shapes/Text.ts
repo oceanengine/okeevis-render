@@ -117,7 +117,7 @@ export default class Text extends Shape<TextConf> {
   }
 
   public isInShape(x: number, y: number): boolean {
-     return inBBox(x, y, this.getBBox()); 
+     return inBBox(this.getBBox(), x, y); 
   }
 
 }

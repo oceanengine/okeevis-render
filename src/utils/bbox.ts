@@ -22,7 +22,7 @@ export function ceilBBox(box: BBox): BBox {
   }
 }
 
-export function inBBox(x: number, y: number, bbox: BBox, lineWidth = 0): boolean {
+export function inBBox( bbox: BBox, x: number, y: number, lineWidth = 0): boolean {
   return x >= bbox.x - lineWidth / 2 && x <= bbox.x + bbox.width + lineWidth / 2 && y >= bbox.y  - lineWidth / 2 && y <= bbox.y + bbox.height + lineWidth / 2;
 }
 
@@ -72,10 +72,6 @@ export function unionBBox(bboxList: BBox[]): BBox {
     height: maxY - minY,
   };
 }
-
-// export function isPointInBBox(x: number, y: number, box: BBox): boolean {
-
-// }
 
 export function rectBBox(x: number, y: number, width: number, height: number): BBox {
   const x2 = x + width;

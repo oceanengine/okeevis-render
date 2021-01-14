@@ -52,7 +52,7 @@ export default class EventHandle {
       node =>
         node.attr.display &&
         node.getExtendAttr('pointerEvents') !== 'none' &&
-        inBBox(x, y, node.getClientBoundingRect()),
+        inBBox(node.getClientBoundingRect(), x, y),
     );
 
     // todo  自己几何检测 文本图像, 矩形, 圆等可以做的事
@@ -118,7 +118,7 @@ export default class EventHandle {
         pickIndex = Math.min(geometryPickIndex, gpuPickIndex);
       }
       target = pickNodes[pickIndex];
-      target.setAttr({ fill: 'red', stroke: 'red' });
+      target.setAttr({ fill: 'red', stroke: 'green', lineWidth: 0});
     }
 
     console.timeEnd('pick');

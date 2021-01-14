@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { BBox, rectBBox, inBBox, getOffsetBBox, } from '../utils/bbox';
+import { BBox, rectBBox, inBBox, getOffsetBBox } from '../utils/bbox';
 
 export interface RectConf extends CommonAttr {
   x?: number;
@@ -43,18 +43,17 @@ export default class Rect extends Shape<RectConf> {
   }
 
   public isPointInFill(x: number, y: number): boolean {
-    return inBBox(x, y, this.getBBox());
+    return inBBox(this.getBBox(), x, y);
   }
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
     const outterBBox = getOffsetBBox(this.getBBox(), lineWidth / 2);
     const innerBBox = getOffsetBBox(this.getBBox(), -lineWidth / 2);
-    return inBBox(x, y, outterBBox) && !inBBox(x, y, innerBBox);
+    return inBBox(outterBBox, x, y) && !inBBox(innerBBox, x, y);
   }
 
   protected computeBBox(): BBox {
     const { x, y, width, height } = this.attr;
     return rectBBox(x, y, width, height);
   }
-  
 }
