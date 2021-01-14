@@ -479,8 +479,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
     const nonAnimateAttr = lodash.omit(toAttr, animationKeys) as T;
     const animateToAttr = lodash.pick(toAttr, animationKeys);
-    // todo extendAttrAnimationKeys
     const animateFromAttr = lodash.pick({...defaultTRansformConf, ...fromAttr}, animationKeys);
+    animationKeys.forEach(key => {
+      if (animateFromAttr[key] === undefined) {
+       animateFromAttr[key] = this.getExtendAttr(key);
+      }
+    });
     this.setAttr(nonAnimateAttr);
     if (typeof duringOrConf === 'object') {
       this.addAnimation({
