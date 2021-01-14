@@ -48,18 +48,20 @@ export default class CanvasPainter implements Painter {
       return;
     }
     const maxDirtyRects = this.render.maxDirtyRects;
-    const dirytElementSize = this.render.getDirtyElements().size;
+    const dirtyElements = this.render.getDirtyElements();
+    const dirytCount = dirtyElements.size;
     if (
       !this._isFirstFrame &&
       this.render.enableDirtyRect &&
-      dirytElementSize > 0 &&
-      dirytElementSize < maxDirtyRects
+      dirytCount > 0 &&
+      dirytCount < maxDirtyRects
     ) {
       this.paintInDirtyRegion();
     } else {
       this.paint();
     }
     this._isFirstFrame = false;
+    dirtyElements.forEach(el => el.clearDirty());
   }
 
   public getImageData(x: number, y: number, width: number, height: number): ImageData {
