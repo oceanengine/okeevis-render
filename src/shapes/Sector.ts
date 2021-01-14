@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { getPointOnPolar, equalWithTolerance, PI2, } from '../utils/math';
+import { equalWithTolerance, PI2, } from '../utils/math';
 import { BBox, sectorBBox } from '../utils/bbox';
 import { isPointInSector, isPointInSectorStroke } from '../geometry/contain/sector';
 

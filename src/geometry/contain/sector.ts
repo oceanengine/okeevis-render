@@ -1,6 +1,9 @@
 import { pointInCircle } from './circle';
-import { equalWithTolerance, PI2, normalizeAngle, } from '../../utils/math';
+import { pointInLineStroke } from './line';
+import { pointInArcStroke } from './arc';
+import { equalWithTolerance, PI2, getPointOnPolar } from '../../utils/math';
 import Point from '../../utils/Point';
+import { Vec2, angle } from '../../utils/vec2';
 
 export function isPointInSector(
   cx: number,
@@ -12,23 +15,24 @@ export function isPointInSector(
   x: number,
   y: number,
 ): boolean {
-  const delta = Math.abs(startAngle - endAngle);
   const point = new Point(x, y);
   const distance = point.distanceTo(cx, cy);
+  const delta = Math.abs(startAngle - endAngle);
   if (distance > r || distance < ri) {
+    return false;
+  }
+  if (equalWithTolerance(startAngle, endAngle)) {
     return false;
   }
   if (equalWithTolerance(delta, PI2) || delta >= PI2) {
     return pointInCircle(cx, cy, r, x, y) && !pointInCircle(cx, cy, ri, x, y);
   }
-  const angle = normalizeAngle(point.getAngleFrom(cx, cy));
-
-  const start = normalizeAngle(startAngle);
-  const end = normalizeAngle(endAngle);
-  if (angle >= start && angle <= end) {
+  const midAngle = (startAngle + endAngle) / 2;
+  const midVec: Vec2 = [Math.cos(midAngle), Math.sin(midAngle)];
+  const rotate = angle(midVec, [x - cx, y - cy]);
+  if (Math.abs(rotate) < Math.abs(startAngle - endAngle) / 2) {
     return true;
   }
-  return false;
 }
 
 export function isPointInSectorStroke(
@@ -42,5 +46,14 @@ export function isPointInSectorStroke(
   x: number,
   y: number,
 ): boolean {
-  return isPointInSector(cx, cy, r + lineWidth / 2, ri + lineWidth / 2, startAngle, endAngle, x, y) && isPointInSector(cx, cy, r - lineWidth / 2, ri - lineWidth / 2, startAngle, endAngle, x, y);
+  const startInnter = getPointOnPolar(cx, cy, r, startAngle);
+  const startOuter = getPointOnPolar(cx, cy, ri, startAngle);
+  const endInnter = getPointOnPolar(cx, cy, r, endAngle);
+  const endOuter = getPointOnPolar(cx, cy, ri, endAngle);
+  return (
+    pointInArcStroke(cx, cy, r, startAngle, endAngle, lineWidth, x, y) ||
+    pointInArcStroke(cx, cy, ri, startAngle, endAngle, lineWidth, x, y) ||
+    pointInLineStroke(startInnter.x, startInnter.y, startOuter.x, startOuter.y, lineWidth, x, y) ||
+    pointInLineStroke(endInnter.x, endInnter.y, endOuter.x, endOuter.y, lineWidth, x, y)
+  );
 }

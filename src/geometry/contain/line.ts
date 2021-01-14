@@ -1,9 +1,14 @@
 
 import * as vec2 from '../../utils/vec2';
+import {lineBBox, inBBox, } from '../../utils/bbox';
 
 
 
 export function pointInLineStroke(x1: number, y1: number, x2: number, y2: number, lineWidth: number, x: number, y: number): boolean {
+  const bbox = lineBBox(x1, y1, x2, y2);
+  if (!inBBox(x, y, bbox, lineWidth)) {
+    return;
+  }
   return pointDistanceToLine(x1, y1, x2, y2, x, y) <= lineWidth / 2
 }
 

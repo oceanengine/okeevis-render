@@ -2,6 +2,7 @@ import Shape from './Shape';
 import { CommonAttr } from './Element';
 import {PI2, getPointOnPolar,  } from '../utils/math';
 import {arcBBox, BBox,} from '../utils/bbox';
+import {pointInArcStroke, } from '../geometry/contain/arc';
 
 export interface ArcConf extends CommonAttr {
   cx?: number;
@@ -40,6 +41,11 @@ export default class Arc extends Shape<ArcConf> {
     const p1 = getPointOnPolar(cx, cy, radius, start);
     ctx.moveTo(p1.x, p1.y);
     ctx.arc(cx, cy, radius, start, end, anticlockwise);
+  }
+
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
+    const {cx, cy, radius, start, end, } = this.attr;
+    return pointInArcStroke(cx, cy, radius, start, end, lineWidth, x, y);
   }
   
   protected computeBBox(): BBox {

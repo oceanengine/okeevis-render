@@ -8,12 +8,13 @@ const shape = new Sector({
   cx: 200,
   cy: 200,
   radius: 80,
-  start: 0,
-  end: Math.PI * 2 - 0.5,
+  start: -Math.PI / 2,
+  end: 1,
   radiusI:40,
-  fill: 'red',
+  fill: 'blue',
   stroke: 'blue',
-  lineWidth: 2,
+  lineWidth: 20,
+  lineJoin: 'round'
 })
 
 render.add(shape)
