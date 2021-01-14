@@ -15,7 +15,7 @@ import * as mat3 from '../../js/mat3'
 import {Vec2, transformMat3, } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
 import {RGBA_TRANSPARENT, } from '../constant';
-import {BBox, unionBBox, roundBBox, } from '../utils/bbox';
+import {BBox, unionBBox, ceilBBox, } from '../utils/bbox';
 
 export type Ref<T extends Element=Element> = {current?: T};
 
@@ -690,7 +690,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     // const lineJoin = this.getExtendAttr('lineJoin');
     const shadowBlur = this.getExtendAttr('shadowBlur');
     if (shadowBlur === 0) {
-      return roundBBox({x, y, width, height});
+      return ceilBBox({x, y, width, height});
     }
     const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
     const shadowOffsetY = this.getExtendAttr('shadowOffsetY');
@@ -700,7 +700,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       width: width + shadowBlur + shadowOffsetX,
       height: height + shadowBlur + shadowOffsetY,
     };
-    return roundBBox(unionBBox([
+    return ceilBBox(unionBBox([
       this._clientBoundingRect,
       shadowBBox,
     ]))

@@ -9,7 +9,7 @@ const shape = new Sector({
   cy: 200,
   radius: 80,
   start: 0,
-  end: Math.PI,
+  end: Math.PI * 2 - 0.5,
   radiusI:40,
   fill: 'red',
   stroke: 'blue',

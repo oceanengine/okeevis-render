@@ -8,7 +8,7 @@ export interface BBox {
   height: number;
 }
 
-export function roundBBox(box: BBox): BBox {
+export function ceilBBox(box: BBox): BBox {
   const {x, y, width, height} = box;
   const x1 = Math.floor(x - 0.5);
   const y1 = Math.floor(y - 0.5);
