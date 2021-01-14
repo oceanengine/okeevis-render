@@ -274,7 +274,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this.prevProcessAttr(attr);
     const prevAttr = this.attr;
-    if (!this.dirty && this._clientBoundingRect) {
+    if (!this._dirty && this._clientBoundingRect) {
       this._dirtyRect = this.computeDirtyRect();
     }
     this.attr = { ...this.attr, ...attr };
@@ -324,7 +324,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._clientBoundingRectDirty = false;
     }
     let {x, y, width, height}  =  this._clientBoundingRect;
-    const lineWidth = !this.isGroup ? this.getExtendAttr('lineWidth') : 0
+    const hasStroke = this.hasStroke();
+    const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0
     x -= lineWidth / 2;
     y -= lineWidth / 2;
     width += lineWidth;
