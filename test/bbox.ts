@@ -16,9 +16,8 @@ import {LinearGradient, RadialGradient, } from '../src/color';
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
-render.showBoundingRect = true;
-render.enableDirtyRect = false;
-render.showDirtyRect = true;
+render.showBBox = false;
+render.enableDirtyRect = true;
 
 function degToRad(a: number) {
   return a * Math.PI / 180;
@@ -79,10 +78,14 @@ const rect = new Rect({
   width: 100,
   height: 100,
   fillOpacity: 1,
-  lineWidth: 20,
+  lineWidth: 10,
   stroke: '#333',
   origin: [450, 450],
   rotation: 0.2,
+  shadowBlur: 20,
+  shadowColor: 'red',
+  shadowOffsetX: 20,
+  shadowOffsetY: 20,
   fill: new LinearGradient({
     x1: 0,
     y1: 0,

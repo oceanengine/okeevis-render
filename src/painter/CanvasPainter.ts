@@ -4,7 +4,7 @@ import Element, { FillAndStrokeStyle, defaultCanvasContext } from '../shapes/Ele
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import * as lodash from '../utils/lodash';
-import { BBox, bboxIntersect } from '../utils/bbox';
+import { BBox, bboxIntersect, } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
 import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
@@ -82,7 +82,8 @@ export default class CanvasPainter implements Painter {
       ctx.scale(dpr, dpr);
     }
     ctx.translate(-x, -y);
-    // todo 初始化LineWidth = 0;
+    ctx.lineJoin = defaultCanvasContext.lineJoin;
+
     elements.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
   }
@@ -119,7 +120,9 @@ export default class CanvasPainter implements Painter {
     }
     // 改变默认的canvas上下文
     ctx.font = `sans-serif ${defaultCanvasContext.fontSize}px`;
-    ctx.textBaseline = 'bottom';
+    ctx.textBaseline = defaultCanvasContext.textBaseline;
+    ctx.lineJoin = defaultCanvasContext.lineJoin;
+    // todo 初始化LineWidth = 0;
 
     if (dirtyRegions) {
       ctx.beginPath();
@@ -127,7 +130,6 @@ export default class CanvasPainter implements Painter {
       ctx.clip();
     }
 
-    // todo 初始化LineWidth = 0;
     elements.forEach(item => this.drawElement(ctx, item, false, dirtyRegions));
     ctx.restore();
     console.timeEnd('paint');

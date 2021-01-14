@@ -15,7 +15,7 @@ import * as mat3 from '../../js/mat3'
 import {Vec2, transformMat3, } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
 import {RGBA_TRANSPARENT, } from '../constant';
-import {BBox, ceilBBox, } from '../utils/bbox';
+import {BBox, unionBBox, roundBBox, } from '../utils/bbox';
 
 export type Ref<T extends Element=Element> = {current?: T};
 
@@ -81,7 +81,7 @@ export const defaultCanvasContext: ShapeConf = {
   lineWidth: 1,
   lineDash: null,
   lineDashOffset: 0,
-  lineJoin: 'miter',
+  lineJoin: 'bevel', // canvas默认miter
   lineCap: 'butt',
   miterLimit: 10,
   fillOpacity: 1,
@@ -133,6 +133,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public parentNode: Group | undefined;
 
+  protected hasMiterLimit: boolean = true;
+
   private _dirty: boolean = true;
 
   private _animations: AnimateOption<T>[] = [];
@@ -140,6 +142,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
 
   private _bboxDirty: boolean = true;
+
 
   private _transform: mat3 = identityTrasnform;
 
@@ -154,6 +157,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _clientBoundingRect: BBox;
 
   private _clientBoundingRectDirty: boolean = true;
+
+  private _dirtyRect: BBox;
   
 
   private _lastFrameTime: number;
@@ -271,6 +276,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this.prevProcessAttr(attr);
     const prevAttr = this.attr;
+    if (!this.dirty && this._clientBoundingRect) {
+      this._dirtyRect = this._computeDirtyRect();
+    }
     this.attr = { ...this.attr, ...attr };
     this.dirty();
     this.updated(prevAttr, attr);
@@ -332,18 +340,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getDirtyRects(): [BBox] | [BBox, BBox] {
-    const prevBBox = this._clientBoundingRect;
-    const currentBBox = this.getClientBoundingRect();
+    const prevBBox = this._dirtyRect;
+    const currentBBox = this._computeDirtyRect();
     if (prevBBox) {
       return [prevBBox, currentBBox]
     } 
-    return [currentBBox];
-    
-    // todo 考虑旧的尖角 阴影
-    const lineWidth = this.getExtendAttr('lineWidth')
-    const shadowBlur = this.getExtendAttr('shadowBlur');
-    const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
-    const shadowOffsetY = this.getExtendAttr('shadowOffsetY');        
+    return [currentBBox];   
   }
 
   protected computeBBox(): BBox {
@@ -679,6 +681,28 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const selfTransform = this.getTransform();
     return mat3.multiply(mat3.create(), parentTransform, selfTransform);
   }
-  
-  
+
+  private _computeDirtyRect(): BBox {
+    // 计算当前dirtyRect
+    const {x, y, width,  height, }  = this.getClientBoundingRect();
+    // 暂不考虑尖角影响
+    const miterLimit = this.getExtendAttr('miterLimit');
+    const lineJoin = this.getExtendAttr('lineJoin');
+    const shadowBlur = this.getExtendAttr('shadowBlur');
+    if (shadowBlur === 0) {
+      return roundBBox({x, y, width, height});
+    }
+    const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
+    const shadowOffsetY = this.getExtendAttr('shadowOffsetY');
+    const shadowBBox = {
+      x: x + shadowOffsetX - shadowBlur,
+      y: y + shadowOffsetY - shadowBlur,
+      width: width + shadowBlur + shadowOffsetX,
+      height: height + shadowBlur + shadowOffsetY,
+    };
+    return roundBBox(unionBBox([
+      this._clientBoundingRect,
+      shadowBBox,
+    ]))
+  }
 }
