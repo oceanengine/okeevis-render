@@ -143,7 +143,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _bboxDirty: boolean = true;
 
-
   private _transform: mat3 = identityTrasnform;
 
   private _absTransform: mat3;
@@ -159,7 +158,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _clientBoundingRectDirty: boolean = true;
 
   private _dirtyRect: BBox;
-  
 
   private _lastFrameTime: number;
   
