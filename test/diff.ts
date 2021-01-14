@@ -9,7 +9,6 @@ const render = new Render(dom);
 const ref = { current: null } as any;
 
 const group = new Group({
-  fontSize: 12,
   fill: 'blue',
 });
 
