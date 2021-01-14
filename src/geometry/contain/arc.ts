@@ -1,4 +1,5 @@
 import { pointInCircle } from './circle';
+import { pointInLineStroke } from './line';
 import { isPointInSector } from './sector';
 import { equalWithTolerance, PI2, getPointOnPolar } from '../../utils/math';
 import Point from '../../utils/Point';
@@ -44,13 +45,19 @@ export function pointInArcStroke(
   r: number,
   startAngle: number,
   endAngle: number,
+  closePath: boolean,
   lineWidth: number,
   x: number,
   y: number,
 ): boolean {
   const point = new Point(x, y);
   const distance = point.distanceTo(cx, cy);
+  const { x: startX, y: startY } = getPointOnPolar(cx, cy, r, startAngle);
+  const { x: endX, y: endY } = getPointOnPolar(cx, cy, r, endAngle);
   const delta = Math.abs(startAngle - endAngle);
+  if (closePath && pointInLineStroke(startX, startY, endX, endY, lineWidth, x, y)) {
+    return true;
+  }
   if (distance > r + lineWidth / 2 || distance < r - lineWidth / 2) {
     return false;
   }

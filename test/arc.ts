@@ -12,7 +12,8 @@ const shape = new Arc({
   stroke: 'blue',
   fill: 'blue',
   fillOpacity: 0.5,
-  lineWidth: 20,
+  lineWidth: 60,
+  closePath: true,
 })
 
 

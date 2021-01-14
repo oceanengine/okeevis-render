@@ -10,6 +10,7 @@ export interface ArcConf extends CommonAttr {
   radius?: number;
   start?: number;
   end?: number;
+  closePath?: boolean;
 }
 
 const shapeKeys: Array<keyof ArcConf> = ['cx', 'cy', 'radius', 'start', 'end'];
@@ -29,6 +30,7 @@ export default class Arc extends Shape<ArcConf> {
       radius: 0,
       start: 0,
       end: 0,
+      closePath: false,
     };
   }
 
@@ -38,11 +40,12 @@ export default class Arc extends Shape<ArcConf> {
 
   public brush(ctx: CanvasRenderingContext2D) {
     // TODO
-    const {cx, cy, radius, start, end,} = this.attr;
+    const {cx, cy, radius, start, end, closePath, } = this.attr;
     const anticlockwise = start > end;
     const p1 = getPointOnPolar(cx, cy, radius, start);
     ctx.moveTo(p1.x, p1.y);
     ctx.arc(cx, cy, radius, start, end, anticlockwise);
+    closePath && ctx.closePath();
   }
 
   public isPointInFill(x: number, y: number): boolean {
@@ -51,8 +54,8 @@ export default class Arc extends Shape<ArcConf> {
   }
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
-    const {cx, cy, radius, start, end, } = this.attr;
-    return pointInArcStroke(cx, cy, radius, start, end, lineWidth, x, y);
+    const {cx, cy, radius, start, end, closePath, } = this.attr;
+    return pointInArcStroke(cx, cy, radius, start, end, closePath, lineWidth, x, y);
   }
   
   protected computeBBox(): BBox {

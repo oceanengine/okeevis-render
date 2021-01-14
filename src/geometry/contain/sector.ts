@@ -52,8 +52,8 @@ export function isPointInSectorStroke(
   const endInnter = getPointOnPolar(cx, cy, r, endAngle);
   const endOuter = getPointOnPolar(cx, cy, ri, endAngle);
   return (
-    pointInArcStroke(cx, cy, r, startAngle, endAngle, lineWidth, x, y) ||
-    pointInArcStroke(cx, cy, ri, startAngle, endAngle, lineWidth, x, y) ||
+    pointInArcStroke(cx, cy, r, startAngle, endAngle, false, lineWidth, x, y) ||
+    pointInArcStroke(cx, cy, ri, startAngle, endAngle, false, lineWidth, x, y) ||
     pointInLineStroke(startInnter.x, startInnter.y, startOuter.x, startOuter.y, lineWidth, x, y) ||
     pointInLineStroke(endInnter.x, endInnter.y, endOuter.x, endOuter.y, lineWidth, x, y)
   );
