@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { getPointOnPolar, equalWithTolerance, } from '../utils/math';
+import { getPointOnPolar, equalWithTolerance, PI2, } from '../utils/math';
 import { BBox, sectorBBox } from '../utils/bbox';
 import { isPointInSector, isPointInSectorStroke } from '../geometry/contain/sector';
 
@@ -55,12 +55,17 @@ export default class Sector extends Shape<SectorConf> {
     if (equalWithTolerance(start, end)) {
       return;
     }
+    const delta = Math.abs(start - end);
+    if (equalWithTolerance(delta, PI2) || delta > PI2) {
+      ctx.arc(cx, cy, radiusI, 0, PI2, true);
+      ctx.moveTo(cx + radius, cy);
+      ctx.arc(cx, cy, radius, 0, PI2, false);
+      return;
+    }
     const anticlockwise = end < start;
-    const p1 = getPointOnPolar(cx, cy, radiusI, end);
-    const p2 = getPointOnPolar(cx, cy, radius, start);
-    ctx.moveTo(p1.x, p1.y); // 为了转svg, canvas下不需要这个
+    // const p1 = getPointOnPolar(cx, cy, radiusI, end);
+    // const p2 = getPointOnPolar(cx, cy, radius, start);
     ctx.arc(cx, cy, radiusI, end, start, !anticlockwise);
-    ctx.lineTo(p2.x, p2.y); // 为了转svg, canvas下不需要这个
     ctx.arc(cx, cy, radius, start, end, anticlockwise);
     ctx.closePath();
   }

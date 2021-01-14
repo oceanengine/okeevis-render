@@ -1,5 +1,5 @@
 import { pointInCircle } from './circle';
-import { equalWithTolerance, PI2, normalizeAngle } from '../../utils/math';
+import { equalWithTolerance, PI2, normalizeAngle, } from '../../utils/math';
 import Point from '../../utils/Point';
 
 export function isPointInSector(
@@ -41,8 +41,5 @@ export function isPointInSectorStroke(
   x: number,
   y: number,
 ): boolean {
-  return (
-    isPointInSector(cx, cy, r + lineWidth / 2, ri + lineWidth / 2, startAngle, endAngle, x, y) &&
-    isPointInSector(cx, cy, r - lineWidth / 2, ri - lineWidth / 2, startAngle, endAngle, x, y)
-  );
+  return isPointInSector(cx, cy, r + lineWidth / 2, ri + lineWidth / 2, startAngle, endAngle, x, y) && isPointInSector(cx, cy, r - lineWidth / 2, ri - lineWidth / 2, startAngle, endAngle, x, y);
 }
