@@ -17,7 +17,6 @@ group.addAll(makeText(3000));
 render.add(group);
 group.updateAll(makeText(3000));
 render.showBBox = false;
-render.showDirtyRect = false;
 document.onclick = e => {
   return
   group.add(new Rect({

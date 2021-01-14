@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { getPointOnPolar } from '../utils/math';
+import { getPointOnPolar, equalWithTolerance, } from '../utils/math';
 import { BBox, sectorBBox } from '../utils/bbox';
 import { isPointInSector, isPointInSectorStroke } from '../geometry/contain/sector';
 
@@ -28,6 +28,8 @@ const shapeKeys: Array<keyof SectorConf> = [
 export default class Sector extends Shape<SectorConf> {
   public type = 'sector';
 
+  public pickByGPU = false;
+
   public shapeKeys = shapeKeys;
 
   public getDefaultAttr(): SectorConf {
@@ -50,6 +52,9 @@ export default class Sector extends Shape<SectorConf> {
 
   public brush(ctx: CanvasRenderingContext2D) {
     const { cx, cy, radius, radiusI, start, end } = this.attr;
+    if (equalWithTolerance(start, end)) {
+      return;
+    }
     const anticlockwise = end < start;
     const p1 = getPointOnPolar(cx, cy, radiusI, end);
     const p2 = getPointOnPolar(cx, cy, radius, start);

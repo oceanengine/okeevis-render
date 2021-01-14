@@ -686,8 +686,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     // 计算当前dirtyRect
     const {x, y, width,  height, }  = this.getClientBoundingRect();
     // 暂不考虑尖角影响
-    const miterLimit = this.getExtendAttr('miterLimit');
-    const lineJoin = this.getExtendAttr('lineJoin');
+    // const miterLimit = this.getExtendAttr('miterLimit');
+    // const lineJoin = this.getExtendAttr('lineJoin');
     const shadowBlur = this.getExtendAttr('shadowBlur');
     if (shadowBlur === 0) {
       return roundBBox({x, y, width, height});
