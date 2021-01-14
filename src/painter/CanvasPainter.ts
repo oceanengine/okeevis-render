@@ -24,13 +24,18 @@ export default class CanvasPainter implements Painter {
 
   private _isPixelPainter: boolean = false;
 
+  // 首帧强制走全屏刷新逻辑
   private _isFirstFrame: boolean = true;
-
+  
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
     this._isPixelPainter = isPixelPainter;
     this.dpr = isPixelPainter ? 1 : render.dpr;
     isPixelPainter ? this._initPixelCanvas() : this._initCanvas();
+    if (this.render.isBrowser() && !isPixelPainter) {
+      // 浏览器窗口切换时, 脏矩形有点问题
+      document.addEventListener('visibilitychange', this._handleDocumentVisibilityChange);
+    }
   }
 
   public resize(width: number, height: number) {
@@ -254,6 +259,9 @@ export default class CanvasPainter implements Painter {
   public dispose() {
     if (this._canvasByCreated) {
       this._canvas.parentNode?.removeChild(this._canvas);
+    }
+    if (this.render.isBrowser()) {
+      document.removeEventListener('visibilitychange', this._handleDocumentVisibilityChange);
     }
     this._canvas = null;
     this.render = null;
@@ -515,5 +523,12 @@ export default class CanvasPainter implements Painter {
     ctx.lineTo(x + width, y + height);
     ctx.lineTo(x, y + height);
     ctx.closePath();
+  }
+
+  private _handleDocumentVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      // 在下一帧强制走全屏刷新逻辑
+      this._isFirstFrame = true;
+    }
   }
 }
