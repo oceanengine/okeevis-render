@@ -21,7 +21,8 @@ export function isPointInSector(
   if (equalWithTolerance(delta, PI2) || delta >= PI2) {
     return pointInCircle(cx, cy, r, x, y) && !pointInCircle(cx, cy, ri, x, y);
   }
-  const angle = normalizeAngle(point.getAngleFrom(0, 0));
+  const angle = normalizeAngle(point.getAngleFrom(cx, cy));
+
   const start = normalizeAngle(startAngle);
   const end = normalizeAngle(endAngle);
   if (angle >= start && angle <= end) {
