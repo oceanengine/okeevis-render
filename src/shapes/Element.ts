@@ -4,9 +4,9 @@ import Group, {GroupConf, } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue, isTransparent, } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
+import easingFunctions, {EasingName, } from '../animate/ease';
 import SyntheticDragEvent from '../event/SyntheticDragEvent';
 import DragAndDrop, {DragAndDropConf, } from '../abstract/DragAndDrop';
-import { EasingName } from '../animate/ease';
 import interpolateAttr from '../interpolate/interpolateAttr';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
@@ -535,13 +535,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     const animate = this._animations[0];
-    const { startTime, during, from, to, ease, callback, onFrame, delay } = animate;
+    const { startTime, during, from, to, ease = 'linear', callback, onFrame, delay = 0 } = animate;
     let progress = 0;
     if (startTime) {
       progress = Math.min((now - startTime) / during, 1);
     } else {
       animate.startTime = now;
     }
+    progress = typeof ease === 'function' ? ease(progress) : easingFunctions[ease](progress);
     const attr = interpolateAttr(from, to, progress) as T;
     if (progress === 1) {
       callback && callback();
