@@ -99,6 +99,7 @@ export const defaultCanvasContext: ShapeConf = {
   shadowOffsetX: 0,
   shadowOffsetY: 0,
   cursor: 'auto',
+  pointerEvents: 'auto',
 
 }
 const extendAbleKeys = Object.keys(defaultCanvasContext);
@@ -193,7 +194,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
       opacity: 1,
       rotation: 0,
       strokeNoScale: false,
-      pointerEvents: 'auto',
     } as T;
   }
 
