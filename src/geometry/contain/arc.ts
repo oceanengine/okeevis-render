@@ -3,6 +3,18 @@ import { equalWithTolerance, PI2 } from '../../utils/math';
 import Point from '../../utils/Point';
 import { Vec2, angle } from '../../utils/vec2';
 
+export function pointInArcFill(
+  cx: number,
+  cy: number,
+  r: number,
+  startAngle: number,
+  endAngle: number,
+  x: number,
+  y: number,
+): boolean {
+  // 叉乘法, 判断圆心与点在弦的异侧
+  return false;
+}
 
 export function pointInArcStroke(
   cx: number,
@@ -24,7 +36,10 @@ export function pointInArcStroke(
     return false;
   }
   if (equalWithTolerance(delta, PI2) || delta >= PI2) {
-    return pointInCircle(cx, cy, r + lineWidth / 2, x, y) && !pointInCircle(cx, cy, r - lineWidth / 2, x, y);
+    return (
+      pointInCircle(cx, cy, r + lineWidth / 2, x, y) &&
+      !pointInCircle(cx, cy, r - lineWidth / 2, x, y)
+    );
   }
   const midAngle = (startAngle + endAngle) / 2;
   const midVec: Vec2 = [Math.cos(midAngle), Math.sin(midAngle)];

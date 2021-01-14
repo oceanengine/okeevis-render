@@ -2,7 +2,7 @@ import Shape from './Shape';
 import { CommonAttr } from './Element';
 import {PI2, getPointOnPolar,  } from '../utils/math';
 import {arcBBox, BBox,} from '../utils/bbox';
-import {pointInArcStroke, } from '../geometry/contain/arc';
+import {pointInArcStroke, pointInArcFill, } from '../geometry/contain/arc';
 
 export interface ArcConf extends CommonAttr {
   cx?: number;
@@ -16,6 +16,8 @@ const shapeKeys: Array<keyof ArcConf> = ['cx', 'cy', 'radius', 'start', 'end'];
 
 export default class Arc extends Shape<ArcConf> {
   public type = 'arc';
+
+  public pickByGPU = false;
 
   public readonly shapeKeys = shapeKeys;
 
@@ -41,6 +43,11 @@ export default class Arc extends Shape<ArcConf> {
     const p1 = getPointOnPolar(cx, cy, radius, start);
     ctx.moveTo(p1.x, p1.y);
     ctx.arc(cx, cy, radius, start, end, anticlockwise);
+  }
+
+  public isPointInFill(x: number, y: number): boolean {
+    const {cx, cy, radius, start, end, } = this.attr;
+    return pointInArcFill(cx, cy, radius, start, end, x, y); 
   }
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
