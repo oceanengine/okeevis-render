@@ -8,6 +8,8 @@ const shape = new Circle({
   cy: 150,
   radius: 50,
   fill: 'blue',
-  stroke: 'red'
+  stroke: 'red',
+  lineWidth: 20,
+  fillOpacity: 0.5,
 })
 render.add(shape);

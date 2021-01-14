@@ -1,7 +1,8 @@
 import { pointInCircle } from './circle';
-import { equalWithTolerance, PI2 } from '../../utils/math';
+import { isPointInSector } from './sector';
+import { equalWithTolerance, PI2, getPointOnPolar } from '../../utils/math';
 import Point from '../../utils/Point';
-import { Vec2, angle } from '../../utils/vec2';
+import { Vec2, angle, cross } from '../../utils/vec2';
 
 export function pointInArcFill(
   cx: number,
@@ -12,8 +13,29 @@ export function pointInArcFill(
   x: number,
   y: number,
 ): boolean {
-  // 叉乘法, 判断圆心与点在弦的异侧
-  return false;
+  const inSector = isPointInSector(cx, cy, r, 0, startAngle, endAngle, x, y);
+  const isLargeArc = Math.abs(endAngle - startAngle) > Math.PI;
+  const delta = Math.abs(startAngle - endAngle);
+  const midAngle = (startAngle + endAngle) / 2;
+  const oppositeMidAngle = midAngle + Math.PI;
+
+  if (equalWithTolerance(delta, PI2) || delta > PI2) {
+    return pointInCircle(cx, cy, r, x, y);
+  }
+
+  const { x: startX, y: startY } = getPointOnPolar(cx, cy, r, startAngle);
+  const { x: endX, y: endY } = getPointOnPolar(cx, cy, r, endAngle);
+  const { x: midX, y: midY } = getPointOnPolar(cx, cy, r, oppositeMidAngle);
+  const lineVec = [endX - startX, endY - startY] as Vec2;
+  // 寻找一个在图形外部的参考点, 判断同侧关系
+  const outSideVec: Vec2 = !isLargeArc
+    ? [cx - startX, cy - startY]
+    : [midX - startX, midY - startY];
+  const pointStartVec = [x - startX, y - startY] as Vec2;
+  const crossCenter = cross([] as any, lineVec, outSideVec)[2];
+  const crossStart = cross([] as any, lineVec, pointStartVec)[2];
+  const isSameSide = crossCenter * crossStart > 0;
+  return isLargeArc ? pointInCircle(cx, cy, r, x, y) && !isSameSide : inSector && !isSameSide;
 }
 
 export function pointInArcStroke(

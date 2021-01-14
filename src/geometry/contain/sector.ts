@@ -29,10 +29,11 @@ export function isPointInSector(
   }
   const midAngle = (startAngle + endAngle) / 2;
   const midVec: Vec2 = [Math.cos(midAngle), Math.sin(midAngle)];
-  const rotate = angle(midVec, [x - cx, y - cy]);
-  if (Math.abs(rotate) < Math.abs(startAngle - endAngle) / 2) {
+  const rotate = Math.abs(angle(midVec, [x - cx, y - cy]));
+  if (rotate < delta / 2 || equalWithTolerance(rotate, delta / 2)) {
     return true;
   }
+  return false;
 }
 
 export function isPointInSectorStroke(

@@ -16,7 +16,8 @@ import {LinearGradient, RadialGradient, } from '../src/color';
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
-render.showBBox = false;
+render.showBBox = false
+render.showBoundingRect = false;
 render.enableDirtyRect = true;
 
 function degToRad(a: number) {
@@ -154,15 +155,13 @@ const path = new Path({
   origin:[100, 80],
 })
 
-
-
 const group = new Group({
   origin: [300, 300],
   rotation: degToRad(0)
 });
 
 
-// group.animateTo({rotation: degToRad(360)}, 50000)
+group.animateTo({rotation: degToRad(360)}, 50000)
 
 group.add(arc);
 group.add(circle)

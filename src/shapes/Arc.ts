@@ -28,7 +28,7 @@ export default class Arc extends Shape<ArcConf> {
       cy: 0,
       radius: 0,
       start: 0,
-      end: PI2,
+      end: 0,
     };
   }
 
