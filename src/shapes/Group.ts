@@ -2,7 +2,8 @@ import { diff } from '@egjs/list-differ';
 import Element from './Element';
 import Shape from './Shape';
 import {TextConf, } from './Text';
-import { BBox, unionBBox, } from '../utils/bbox';
+import { BBox, unionBBox, ceilBBox, } from '../utils/bbox';
+import * as lodash from '../utils/lodash';
 
 export interface GroupConf extends TextConf {
   /**
@@ -41,6 +42,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   protected computeBBox(): BBox {
     const bboxList = this._components.filter(item => item.attr.display).map(child => child.getClientBoundingRect());
     return unionBBox(bboxList);
+  }
+  
+  protected computeDirtyRect(): BBox {
+    const bboxList =  lodash.flatten(this._components.filter(item => item.attr.display).map(child => child.getDirtyRects()));
+    return ceilBBox(unionBBox(bboxList));
   }
 
   public mounted() {

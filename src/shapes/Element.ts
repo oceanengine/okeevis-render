@@ -277,7 +277,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.prevProcessAttr(attr);
     const prevAttr = this.attr;
     if (!this.dirty && this._clientBoundingRect) {
-      this._dirtyRect = this._computeDirtyRect();
+      this._dirtyRect = this.computeDirtyRect();
     }
     this.attr = { ...this.attr, ...attr };
     this.dirty();
@@ -341,7 +341,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public getDirtyRects(): [BBox] | [BBox, BBox] {
     const prevBBox = this._dirtyRect;
-    const currentBBox = this._computeDirtyRect();
+    const currentBBox = this.computeDirtyRect();
     if (prevBBox) {
       return [prevBBox, currentBBox]
     } 
@@ -682,10 +682,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return mat3.multiply(mat3.create(), parentTransform, selfTransform);
   }
 
-  private _computeDirtyRect(): BBox {
+  protected computeDirtyRect(): BBox {
     // 计算当前dirtyRect
     const {x, y, width,  height, }  = this.getClientBoundingRect();
-    // 暂不考虑尖角影响
+    // 暂不考虑miter尖角影响, 默认使用了bevel
     // const miterLimit = this.getExtendAttr('miterLimit');
     // const lineJoin = this.getExtendAttr('lineJoin');
     const shadowBlur = this.getExtendAttr('shadowBlur');
