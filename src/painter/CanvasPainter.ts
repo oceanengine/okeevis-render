@@ -358,7 +358,7 @@ export default class CanvasPainter implements Painter {
     }
 
     if (lineWidth >= 0) {
-      ctx.lineWidth = lineWidth;
+      ctx.lineWidth = !item.attr.strokeNoScale ? lineWidth : item.getExtendAttr('lineWidth');
     }
 
     // 文本和图像自己检测, 不走gpu,不故考虑fontSize

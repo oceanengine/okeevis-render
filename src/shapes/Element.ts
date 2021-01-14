@@ -222,6 +222,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
       node = node.parentNode;
     }
+    if (key === 'lineWidth' && this.attr.strokeNoScale) {
+      const globalTransform = this.getGlobalTransform();
+      const scale = globalTransform[0];
+      return (value as any as number) / scale as any;
+    }
     return value;
   }
 
@@ -323,19 +328,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._clientBoundingRect = this.computClientBoundingRect();
       this._clientBoundingRectDirty = false;
     }
-    let {x, y, width, height}  =  this._clientBoundingRect;
-    const hasStroke = this.hasStroke();
-    const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0
-    x -= lineWidth / 2;
-    y -= lineWidth / 2;
-    width += lineWidth;
-    height += lineWidth;
-    return {
-      x,
-      y,
-      width,
-      height,
-    }
+    return this._clientBoundingRect;
+
   }
 
   public getDirtyRects(): [BBox] | [BBox, BBox] {
@@ -352,7 +346,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   protected computClientBoundingRect(): BBox {
-    const {x, y, width, height, } = this.getBBox();
+    let {x, y, width, height, } = this.getBBox();
+    const hasStroke = this.hasStroke();
+    const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0
+    x -= lineWidth / 2;
+    y -= lineWidth / 2;
+    width += lineWidth;
+    height += lineWidth;
     const vectors: Vec2[] = [
       [x, y],
       [x + width, y],
@@ -360,6 +360,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       [x, y + height],
     ];
     const matrix = this.getGlobalTransform();
+   
     vectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
     const xCoords =  vectors.map(vec2 => vec2[0]);
     const yCoords = vectors.map(vec2 => vec2[1]);
