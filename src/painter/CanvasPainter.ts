@@ -78,7 +78,6 @@ export default class CanvasPainter implements Painter {
       this.paint();
     }
     this._isFirstFrame = false;
-    dirtyElements.forEach(el => el.clearDirty());
     showFPS && this._drawFPS();
   }
 
@@ -267,6 +266,7 @@ export default class CanvasPainter implements Painter {
     if (hasSelfContext) {
       ctx.restore();
     }
+    item.clearDirty();
   }
 
   public dispose() {
