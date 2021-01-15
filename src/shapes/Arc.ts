@@ -1,8 +1,8 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import {PI2, getPointOnPolar,  } from '../utils/math';
-import {arcBBox, BBox,} from '../utils/bbox';
-import {pointInArcStroke, pointInArcFill, } from '../geometry/contain/arc';
+import { getPointOnPolar } from '../utils/math';
+import { arcBBox, BBox } from '../utils/bbox';
+import { pointInArcStroke, pointInArcFill } from '../geometry/contain/arc';
 
 export interface ArcConf extends CommonAttr {
   cx?: number;
@@ -39,8 +39,7 @@ export default class Arc extends Shape<ArcConf> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    // TODO
-    const {cx, cy, radius, start, end, closePath, } = this.attr;
+    const { cx, cy, radius, start, end, closePath } = this.attr;
     const anticlockwise = start > end;
     const p1 = getPointOnPolar(cx, cy, radius, start);
     ctx.moveTo(p1.x, p1.y);
@@ -49,17 +48,17 @@ export default class Arc extends Shape<ArcConf> {
   }
 
   public isPointInFill(x: number, y: number): boolean {
-    const {cx, cy, radius, start, end, } = this.attr;
-    return pointInArcFill(cx, cy, radius, start, end, x, y); 
+    const { cx, cy, radius, start, end } = this.attr;
+    return pointInArcFill(cx, cy, radius, start, end, x, y);
   }
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
-    const {cx, cy, radius, start, end, closePath, } = this.attr;
+    const { cx, cy, radius, start, end, closePath } = this.attr;
     return pointInArcStroke(cx, cy, radius, start, end, closePath, lineWidth, x, y);
   }
-  
+
   protected computeBBox(): BBox {
-    const {cx, cy, radius, start, end,} = this.attr;
+    const { cx, cy, radius, start, end } = this.attr;
     return arcBBox(cx, cy, radius, start, end);
   }
 }
