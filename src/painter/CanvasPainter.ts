@@ -11,6 +11,7 @@ import * as mat3 from '../../js/mat3';
 import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
 
+// todo 使用相同单位矩阵实例, 加快比较速度
 const identityMat3 = mat3.create();
 
 export default class CanvasPainter implements Painter {
@@ -298,6 +299,10 @@ export default class CanvasPainter implements Painter {
       ctx.restore();
     }
     item.clearDirty();
+  }
+
+  public noDirtyRectNextFrame() {
+    this._isFirstFrame = true;
   }
 
   public dispose() {

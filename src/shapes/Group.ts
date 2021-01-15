@@ -1,4 +1,5 @@
 import { diff } from '@egjs/list-differ';
+import CanvasPainter from '../painter/CanvasPainter';
 import Element from './Element';
 import Shape from './Shape';
 import {TextConf, } from './Text';
@@ -136,7 +137,13 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public clear() {
-    this._components.forEach(item => item.destroy());
+    const childSize = this._components.length;
+    if (childSize > 128 && this.ownerRender) {
+      (this.ownerRender.getPainter() as CanvasPainter).noDirtyRectNextFrame();
+      this._components.forEach(item => item.destroy());
+    } else {
+      this._components.forEach(item => this.remove(item));
+    }
     this._components = [];
     this._chunks = [];
     this.dirty();
@@ -166,6 +173,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       item.destroy();
     });
     this._components = [];
+    this._chunks = [];
   }
 
   public updateAll(list: T[]) {
