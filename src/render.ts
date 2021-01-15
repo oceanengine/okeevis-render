@@ -3,7 +3,7 @@ import Painter from './abstract/Painter';
 import CanvasPainter from './painter/CanvasPainter';
 import EventHandle from './event/EventHandle';
 import EventFul from './utils/Eventful';
-import Group from './shapes/Group';
+import Group, {ChunkItem, } from './shapes/Group';
 import Element from './shapes/Element';
 import {getDomContentSize, } from './utils/dom';
 import requestAnimationFrame from './utils/requestAnimationFrame';
@@ -146,6 +146,10 @@ export default class Render extends EventFul {
   
   public getAllElements(): Element[] {
     return this._rootGroup.children();
+  }
+
+  public getAllChunks(): ChunkItem[] {
+    return this._rootGroup.getAllChunks();
   }
 
   public isBrowser() {

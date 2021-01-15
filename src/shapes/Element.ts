@@ -387,7 +387,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       key => !lodash.isUndefined((nextAttr as any)[key]),
     ) as any;
     const shapeKeys = ['display' as keyof T, ...this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key]))];
-
+      
     if (transformKeys.length) {
       this.dirtyTransform();
     }
@@ -395,11 +395,18 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (shapeKeys.some(key => prevAttr[key] !== nextAttr[key])) {
       this.dirtyBBox();
     }
+    
+    if (nextAttr.zIndex !== undefined) {
+      this.parentNode.dirtyZIndex();
+    }
   }
 
   public mounted() {
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
+    }
+    if (this.attr.zIndex !== undefined) {
+      this.parentNode.dirtyZIndex();
     }
     this._mountClip();
   }

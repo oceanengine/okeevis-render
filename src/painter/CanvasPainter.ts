@@ -54,28 +54,34 @@ export default class CanvasPainter implements Painter {
 
   public onFrame(now: number) {
     const showFPS = this.render.showFPS;
+    const needUpdate = this.render.needUpdate();
     if (showFPS) {
       this._frameTimes.push(now);
       if (this._frameTimes.length > 60) {
         this._frameTimes.shift();
       }
     }
-    if (!this.render.needUpdate()) {
-      showFPS && this._drawFPS();
-      return;
-    }
+
     const maxDirtyRects = this.render.maxDirtyRects;
     const dirtyElements = this.render.getDirtyElements();
     const dirytCount = dirtyElements.size;
-    if (
-      !this._isFirstFrame &&
-      this.render.enableDirtyRect &&
-      dirytCount > 0 &&
-      dirytCount < maxDirtyRects
-    ) {
-      this.paintInDirtyRegion();
-    } else {
-      this.paint();
+    const allChunks = this.render.getAllChunks();
+    if (needUpdate) {
+      if (
+        !this._isFirstFrame &&
+        this.render.enableDirtyRect &&
+        dirytCount > 0 &&
+        dirytCount < maxDirtyRects
+      ) {
+        this.paintInDirtyRegion();
+      } else {
+        // 全屏刷新 
+        this.paint();
+      }
+    }
+    if (allChunks.length > 0 && !this._isPixelPainter) {
+      const {parent, chunks } = allChunks[0];
+      this.paintChunk(parent, chunks[0]);
     }
     this._isFirstFrame = false;
     showFPS && this._drawFPS();
@@ -117,6 +123,31 @@ export default class CanvasPainter implements Painter {
     }
     this.paint(dirtyRegions);
     console.timeEnd('compute dirty rects');
+  }
+
+  public paintChunk(parent: Group, chunk: Element[]) {
+    parent.mountChunk(chunk);
+    const parentList: Element[] = [];
+    let node = parent;
+    while (node) {
+      parentList.push(node);
+      if (!node.attr.display) {
+        return;
+      }
+      node = node.parentNode;
+    }
+    const ctx = this._ctx;
+    const dpr = this.dpr;
+    ctx.save();
+    if (dpr !== 1) {
+      ctx.scale(dpr, dpr);
+    }
+    ctx.font = `sans-serif ${defaultCanvasContext.fontSize}px`;
+    ctx.textBaseline = defaultCanvasContext.textBaseline;
+    ctx.lineJoin = defaultCanvasContext.lineJoin;
+    parentList.forEach(current => this._setElementCanvasContext(ctx, current));
+    chunk.forEach(item => this.drawElement(ctx, item, false));
+    ctx.restore();
   }
 
   public paint(dirtyRegions?: BBox[]) {

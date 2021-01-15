@@ -12,14 +12,23 @@ export interface GroupConf extends TextConf {
   _batchBrush?: boolean;
 }
 
+export interface ChunkItem {
+  parent: Group;
+  chunks: Element[][];
+}
+
 export default class Group<T extends Element = Element> extends Element<GroupConf> {
   public type = 'group';
 
   public fillAble = false;
 
   public strokeAble = false;
-
+  
   protected _components: T[] = [];
+
+  protected _chunks: T[][] = [];
+
+  private _zindexDirty: boolean = true;
 
   public getDefaultAttr(): GroupConf {
     return {
@@ -79,6 +88,46 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return this;
   }
 
+  public addChunk(items: T[] = []): this {
+    if (items.length === 0) {
+      return;
+    }
+    this._chunks.push(items);
+    return this;
+  }
+
+  public getChunks(): T[][] {
+    return this._chunks;
+  }
+
+  // 递归获取chunks
+  public getAllChunks(out: ChunkItem[] = []): ChunkItem[] {
+    if (this._chunks.length > 0) {
+      out.push({
+        parent: this,
+        chunks: this._chunks,
+      });
+    }
+    this.children().forEach(child => {
+      if (child.isGroup) {
+        const childGroup = child as any as Group;
+        childGroup.getAllChunks(out);
+      }
+    })
+    return out;
+  }
+  
+  public mountChunk(chunkItems: T[]) {
+    this._chunks = this._chunks.filter(chunk => chunk !== chunkItems);
+    chunkItems.forEach(item => item.clearDirty());
+    chunkItems.forEach(item => {
+      item.parentNode = this;
+      item.mounted();
+    });
+    this.dirtyBBox();
+    this._components = this._components.concat(chunkItems);
+  }
+
   public remove(element: T) {
     element.destroy();
     this._components = this._components.filter(item => item !== element);
@@ -89,6 +138,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public clear() {
     this._components.forEach(item => item.destroy());
     this._components = [];
+    this._chunks = [];
     this.dirty();
     this.dirtyBBox();
   }
@@ -120,11 +170,13 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public updateAll(list: T[]) {
     // todo 优化脏区策略, 只脏本group,不脏子元素
+    // todo 同步chunks
     const prevList = this._components;
     if (prevList.length === 0) {
       this.addAll(list);
       return;
     }
+
     const result = diff(prevList, list, (item, index) => {
       const attr = item.attr;
       const key = attr.key ? (item.type + attr.key) : `auto-key-${item.type}-${index}`;
@@ -151,7 +203,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         nextElement.attr.ref.current = prevElement;
       }
       if (prevElement.isGroup) {
-        (prevElement as unknown as Group).updateAll((nextElement as any as Group).children())
+        (prevElement as unknown as Group).updateAll((nextElement as any as Group).children());
+        const chunks = (nextElement as any as Group).getChunks();
+        chunks.forEach(chunk => (prevElement as any as Group).addChunk(chunk));
       }
       prevElement.setBaseTransform(nextElement.getBaseTransform());
       prevElement.stopAllAnimation().animateTo(nextElement.attr, 10000);
@@ -186,12 +240,20 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._components.forEach(child => child.resetPickRGB());
   }
 
+  public dirtyZIndex() {
+    this._zindexDirty = true;
+  }
+
   public sortByZIndex() {
-    this._components = this._components.sort((a, b) => b.attr.zIndex - a.attr.zIndex);
+    // todo 未改变的情况下不排序;
+    if (this._zindexDirty) {
+      this._components = this._components.sort((a, b) => b.attr.zIndex - a.attr.zIndex);
+    }
     this._components.forEach((item) => {
       if (item.isGroup) {
         (item as any as Group).sortByZIndex();
       }
-    })
+    });
+    this._zindexDirty = false;
   }
 }
