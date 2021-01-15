@@ -405,7 +405,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
     }
-    if (this.attr.zIndex !== undefined) {
+    if (this.attr.zIndex > 0) {
       this.parentNode.dirtyZIndex();
     }
     this._mountClip();
