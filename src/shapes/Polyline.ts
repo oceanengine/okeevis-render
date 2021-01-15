@@ -1,15 +1,22 @@
-import Shape from './Shape'
-import  {CommonAttr, } from './Element'
-import { BBox, polygonBBox, } from '../utils/bbox';
+import Shape from './Shape';
+import { CommonAttr } from './Element';
+import { BBox, polygonBBox } from '../utils/bbox';
+import { pointInPolygonFill, pointInPolygonStroke } from '../geometry/contain/polygon';
 
 export interface PolylineConf extends CommonAttr {
-  pointList?: Array<{x: number;y:number}>;
+  pointList?: Array<{ x: number; y: number }>;
   smooth?: boolean;
   smoothType?: 'bezier' | 'spline';
-  smoothConstraint?: {x: number; y: number; width: number; height: number};
+  smoothConstraint?: { x: number; y: number; width: number; height: number };
   smoothMonotone?: 'x' | 'y';
 }
-const shapeKeys: Array<keyof PolylineConf> = ['pointList', 'smooth', 'smoothConstraint', 'smoothMonotone', 'smoothType'];
+const shapeKeys: Array<keyof PolylineConf> = [
+  'pointList',
+  'smooth',
+  'smoothConstraint',
+  'smoothMonotone',
+  'smoothType',
+];
 
 export default class Polyline extends Shape<PolylineConf> {
   public type = 'polyline';
@@ -26,14 +33,11 @@ export default class Polyline extends Shape<PolylineConf> {
   }
 
   public getAnimationKeys(): Array<keyof PolylineConf> {
-    return [
-      ...super.getAnimationKeys(),
-      'pointList',
-    ];
+    return [...super.getAnimationKeys(), 'pointList'];
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const {pointList, } = this.attr;
+    const { pointList } = this.attr;
     if (!pointList || pointList.length === 0) {
       return;
     }
@@ -43,7 +47,15 @@ export default class Polyline extends Shape<PolylineConf> {
 
   protected computeBBox(): BBox {
     return polygonBBox(this.attr.pointList || []);
-    
   }
-  
+
+  public isPointInFill(x: number, y: number): boolean {
+    const points = this.attr.pointList;
+    return pointInPolygonFill(points, x, y);
+  }
+
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
+    const points = this.attr.pointList;
+    return pointInPolygonStroke(points, false, lineWidth, x, y);
+  }
 }
