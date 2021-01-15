@@ -540,7 +540,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     const animate = this._animations[0];
-    const { startTime, during, from, to, ease = 'linear', callback, onFrame, delay = 0 } = animate;
+    const { startTime, during, from, to, ease = 'Linear', callback, onFrame, delay = 0 } = animate;
     let progress = 0;
     if (startTime) {
       progress = Math.min((now - startTime) / during, 1);

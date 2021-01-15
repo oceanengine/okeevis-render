@@ -4,6 +4,7 @@ import LRUMap from './LRU';
 
 const textSizeLRUMap = new LRUMap<TextMetrics>(3000);
 
+// todo 拆分measureText measureTextList
 export default function measureText<T extends string | string[]>(
   ctx: CanvasRenderingContext2D,
   text: T,
