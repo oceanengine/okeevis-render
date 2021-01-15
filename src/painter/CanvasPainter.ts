@@ -6,7 +6,7 @@ import Group, { GroupConf } from '../shapes/Group';
 import Rect from '../shapes/Rect';
 import Text from '../shapes/Text';
 import * as lodash from '../utils/lodash';
-import { BBox, bboxIntersect, } from '../utils/bbox';
+import { BBox, bboxIntersect } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
 import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
@@ -30,7 +30,7 @@ export default class CanvasPainter implements Painter {
   private _isFirstFrame: boolean = true;
 
   private _frameTimes: number[] = [];
-  
+
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
     this._isPixelPainter = isPixelPainter;
@@ -374,6 +374,18 @@ export default class CanvasPainter implements Painter {
       ctx.lineWidth = !item.attr.strokeNoScale ? lineWidth : item.getExtendAttr('lineWidth');
     }
 
+    if (lineCap) {
+      ctx.lineCap = lineCap;
+    }
+
+    if (lineJoin) {
+      ctx.lineJoin = lineJoin;
+    }
+
+    if (miterLimit >= 0) {
+      ctx.miterLimit = miterLimit;
+    }
+
     // 文本和图像自己检测, 不走gpu,不故考虑fontSize
     if (this._isPixelPainter && item.type !== 'group') {
       const rgb = item.pickRGB;
@@ -429,20 +441,8 @@ export default class CanvasPainter implements Painter {
       ctx.globalCompositeOperation = blendMode;
     }
 
-    if (lineCap) {
-      ctx.lineCap = lineCap;
-    }
-
     if (lineDashOffset) {
       ctx.lineDashOffset = lineDashOffset;
-    }
-
-    if (lineJoin) {
-      ctx.lineJoin = lineJoin;
-    }
-
-    if (miterLimit >= 0) {
-      ctx.miterLimit = miterLimit;
     }
 
     if (shadowBlur > 0 && !isTransparent(shadowColor)) {
@@ -543,7 +543,7 @@ export default class CanvasPainter implements Painter {
       // 在下一帧强制走全屏刷新逻辑
       this._isFirstFrame = true;
     }
-  }
+  };
 
   private _drawFPS() {
     const frameTimes = this._frameTimes;
@@ -552,7 +552,7 @@ export default class CanvasPainter implements Painter {
     if (endTime === startTime) {
       return;
     }
-    const fps = Math.floor(frameTimes.length * 1000 / (endTime - startTime));
+    const fps = Math.floor((frameTimes.length * 1000) / (endTime - startTime));
     const rect = new Rect({
       x: 0,
       y: 0,
@@ -568,7 +568,7 @@ export default class CanvasPainter implements Painter {
       fontWeight: 'bold',
       text: fps + ' fps',
       textBaseline: 'top',
-    })
+    });
     this.drawElement(this._ctx, rect, false);
     this.drawElement(this._ctx, text, false);
   }
