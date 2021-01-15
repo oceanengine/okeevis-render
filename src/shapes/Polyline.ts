@@ -20,6 +20,8 @@ const shapeKeys: Array<keyof PolylineConf> = [
 
 export default class Polyline extends Shape<PolylineConf> {
   public type = 'polyline';
+  
+  public pickByGPU = true;
 
   public shapeKeys = shapeKeys;
 
