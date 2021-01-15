@@ -348,11 +348,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
   protected computClientBoundingRect(): BBox {
     let {x, y, width, height, } = this.getBBox();
     const hasStroke = this.hasStroke();
-    const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0
-    x -= lineWidth / 2;
-    y -= lineWidth / 2;
-    width += lineWidth;
-    height += lineWidth;
+    const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
+    const offsetLineWidth = Math.sqrt(2) / 2 * lineWidth;
+    x -= offsetLineWidth
+    y -= offsetLineWidth
+    width += offsetLineWidth * 2;
+    height += offsetLineWidth * 2;
     const vectors: Vec2[] = [
       [x, y],
       [x + width, y],
