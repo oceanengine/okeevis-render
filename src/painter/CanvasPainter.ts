@@ -3,6 +3,8 @@ import Render from '../render';
 import Element, { FillAndStrokeStyle, defaultCanvasContext } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
+import Rect from '../shapes/Rect';
+import Text from '../shapes/Text';
 import * as lodash from '../utils/lodash';
 import { BBox, bboxIntersect, } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
@@ -26,6 +28,8 @@ export default class CanvasPainter implements Painter {
 
   // 首帧强制走全屏刷新逻辑
   private _isFirstFrame: boolean = true;
+
+  private _frameTimes: number[] = [];
   
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
@@ -48,8 +52,16 @@ export default class CanvasPainter implements Painter {
     this.render.dirty();
   }
 
-  public onFrame() {
+  public onFrame(now: number) {
+    const showFPS = this.render.showFPS;
+    if (showFPS) {
+      this._frameTimes.push(now);
+      if (this._frameTimes.length > 60) {
+        this._frameTimes.shift();
+      }
+    }
     if (!this.render.needUpdate()) {
+      showFPS && this._drawFPS();
       return;
     }
     const maxDirtyRects = this.render.maxDirtyRects;
@@ -67,6 +79,7 @@ export default class CanvasPainter implements Painter {
     }
     this._isFirstFrame = false;
     dirtyElements.forEach(el => el.clearDirty());
+    showFPS && this._drawFPS();
   }
 
   public getImageData(x: number, y: number, width: number, height: number): ImageData {
@@ -530,5 +543,33 @@ export default class CanvasPainter implements Painter {
       // 在下一帧强制走全屏刷新逻辑
       this._isFirstFrame = true;
     }
+  }
+
+  private _drawFPS() {
+    const frameTimes = this._frameTimes;
+    const startTime = frameTimes[0];
+    const endTime = frameTimes[frameTimes.length - 1];
+    if (endTime === startTime) {
+      return;
+    }
+    const fps = Math.floor(frameTimes.length * 1000 / (endTime - startTime));
+    const rect = new Rect({
+      x: 0,
+      y: 0,
+      width: 88,
+      height: 40,
+      fill: '#000',
+    });
+    const text = new Text({
+      x: 8,
+      y: 6,
+      fill: '#fff',
+      fontSize: 24,
+      fontWeight: 'bold',
+      text: fps + ' fps',
+      textBaseline: 'top',
+    })
+    this.drawElement(this._ctx, rect, false);
+    this.drawElement(this._ctx, text, false);
   }
 }

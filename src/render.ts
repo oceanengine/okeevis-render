@@ -20,11 +20,13 @@ export default class Render extends EventFul {
 
   public maxDirtyRects: number = 128;
 
-  public showDirtyRect: boolean = false;
+  // public showDirtyRect: boolean = false;
 
   public showBoundingRect: boolean = false;
 
   public showBBox: boolean = false;
+
+  public showFPS: boolean = true;
     
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
