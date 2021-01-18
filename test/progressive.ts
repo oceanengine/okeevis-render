@@ -15,12 +15,14 @@ const group = new Group({
   fill: 'blue',
 });
 
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 25; i++) {
   group.addChunk(makeText(2000))
 }
+(window as any).render = render
 
 render.add(group);
 document.onclick = e => {
+  group.updateAll(makeRect(1000))
   return
   group.add(new Rect({
     x: Math.random() * 1920,
@@ -39,6 +41,8 @@ function makeText(count: number) {
       x: Math.random() * 1920,
       y: Math.random() * 1080,
       text: index + '',
+      //fill: '#' + Math.random().toString(16).substr(2, 6)
+
     });
   });
 }

@@ -128,6 +128,7 @@ export default class CanvasPainter implements Painter {
 
   public paintChunk(parent: Group, chunk: Element[]) {
     parent.mountChunk(chunk);
+    chunk.forEach(item => item.clearDirty());
     const parentList: Element[] = [];
     let node = parent;
     while (node) {
@@ -190,6 +191,9 @@ export default class CanvasPainter implements Painter {
     isInBatch: boolean = false,
     dirtyRegions?: BBox[],
   ) {
+    
+    item.clearDirty();
+
     const { display } = item.attr;
 
     if (display === false) {
@@ -298,7 +302,6 @@ export default class CanvasPainter implements Painter {
     if (hasSelfContext) {
       ctx.restore();
     }
-    item.clearDirty();
   }
 
   public noDirtyRectNextFrame() {

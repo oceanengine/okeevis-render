@@ -118,7 +118,7 @@ export default class EventHandle {
         pickIndex = Math.min(geometryPickIndex, gpuPickIndex);
       }
       target = pickNodes[pickIndex];
-      target.setAttr({ fill: 'red', stroke: 'green', lineWidth: 0});
+      target.setAttr({ fill: 'red', stroke: 'red', lineWidth: 2});
     }
 
     console.timeEnd('pick');

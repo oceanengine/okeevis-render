@@ -96,7 +96,7 @@ path.animateTo({
     ctx.arc(200, 200, 80 , 0, Math.PI, false);
     ctx.closePath();
   },
-}, 1000, 'linear')
+}, 1000)
 
 render.add(path1);
 render.add(path2);

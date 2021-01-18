@@ -17,7 +17,8 @@ const shape = new Arc({
   origin: [250, 270],
   strokeNoScale: false,
   lineJoin: 'round',
-  lineCap: 'butt'
+  lineCap: 'butt',
+  scale: [2, 2,]
 })
 
 render.showBoundingRect = true;

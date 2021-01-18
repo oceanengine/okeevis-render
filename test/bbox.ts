@@ -106,7 +106,7 @@ const rect = new Rect({
 })
 
 
-rect.animateTo({rotation: degToRad(360)}, 5000, 'linear')
+rect.animateTo({rotation: degToRad(360)}, 5000)
 
 const polygon = new Polygon({
   fill: 'blue',

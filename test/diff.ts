@@ -6,6 +6,9 @@ import Line from '../src/shapes/Line';
 
 const dom = document.getElementById('root') as HTMLDivElement;
 const render = new Render(dom);
+render.showFPS = true;
+render.showBBox = false;
+
 const ref = { current: null } as any;
 
 const group = new Group({
@@ -15,7 +18,6 @@ const group = new Group({
 group.addAll(makeText(3000));
 render.add(group);
 group.updateAll(makeText(3000));
-render.showBBox = false;
 document.onclick = e => {
   return
   group.add(new Rect({

@@ -3,14 +3,21 @@ import Line from '../src/shapes/line'
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom)
-
+render.showFPS = true;
 const line = new Line({
-  x1: 0,
-  y1: 0,
-  x2: 100,
-  y2: 100,
-  stroke: 'red',
-  lineWidth: 1,
+  x1: 200,
+  y1: 200,
+  x2: 300,
+  y2: 300,
+  stroke: 'blue',
+  lineWidth: 60,
+  lineCap: 'square',
+  origin: [300, 300]
 })
+
+line.animateTo({
+  rotation: Math.PI * 2
+}, 10000)
+
 render.add(line)
-setTimeout(() => line.setAttr({stroke: 'blue'}), 1000)
+render.showBoundingRect = true;

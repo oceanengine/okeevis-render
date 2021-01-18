@@ -405,7 +405,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       'position',
       'rotation',
       'scale',
-    ].filter(key => !lodash.isUndefined((nextAttr as any)[key])) as any;
+    ].filter(key => (nextAttr as any)[key] !== undefined) as any;
     const shapeKeys = [
       'display' as keyof T,
       ...this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key])),

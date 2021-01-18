@@ -1,5 +1,4 @@
 import { diff } from '@egjs/list-differ';
-import CanvasPainter from '../painter/CanvasPainter';
 import Element from './Element';
 import Shape from './Shape';
 import {TextConf, } from './Text';
@@ -24,13 +23,16 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public fillAble = false;
 
   public strokeAble = false;
-  
-  protected _components: T[] = [];
+
+  private _length: number = 0;
 
   protected _chunks: T[][] = [];
   
-
   private _zindexDirty: boolean = true;
+
+  public get size(): number{
+    return this._length;
+  }
 
   public getDefaultAttr(): GroupConf {
     return {
@@ -51,32 +53,37 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   protected computeBBox(): BBox {
-    const bboxList = this._components.filter(item => item.attr.display).map(child => child.getClientBoundingRect());
+    const bboxList = this.children().filter(item => item.attr.display).map(child => child.getClientBoundingRect());
     return unionBBox(bboxList);
   }
   
   protected computeDirtyRect(): BBox {
-    const bboxList =  lodash.flatten(this._components.filter(item => item.attr.display).map(child => child.getDirtyRects()));
+    const bboxList =  lodash.flatten(this.children().filter(item => item.attr.display).map(child => child.getDirtyRects()));
     return ceilBBox(unionBBox(bboxList));
   }
 
   public mounted() {
     super.mounted();
-    this._components.forEach(item => item.mounted());
+    this.children().forEach(item => item.mounted());
   }
 
   public dirtyTransform() {
     super.dirtyTransform();
-    if (this._components) {
-      this._components.forEach(child => child.dirtyAbsTransform());
-    }
+    this.children().forEach(child => child.dirtyAbsTransform());
   }
 
   public add(item: Element): this {
     if (!item) {
       return;
     }
-    this._components.push(item as T);
+    if (this._length === 0) {
+      this.firstChild = this.lastChild = item;
+    } else {
+      item.prevSibling = this.lastChild;
+      this.lastChild.nextSibling = item;
+      this.lastChild = item;
+    }
+    this._length += 1;
     item.ownerRender = this.ownerRender;
     item.parentNode = this;
     item.mounted();
@@ -84,6 +91,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this.dirtyBBox();
     return this;
   }
+  
   
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
@@ -125,34 +133,57 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   
   public mountChunk(chunkItems: T[]) {
     this._chunks = this._chunks.filter(chunk => chunk !== chunkItems);
-    chunkItems.forEach(item => item.clearDirty());
-    chunkItems.forEach(item => {
-      item.parentNode = this;
-      item.mounted();
-    });
-    this.dirtyBBox();
-    this._components = this._components.concat(chunkItems);
+    chunkItems.forEach(item => this.add(item));
   }
 
   public remove(element: T) {
+    if (element.parentNode !== this) {
+      return;
+    }
+    if (element === this.firstChild) {
+      this.firstChild = element.nextSibling;
+    }
+    if (element.prevSibling) {
+      element.prevSibling.nextSibling = element.nextSibling;
+    }
+    if (element.nextSibling) {
+      element.nextSibling.prevSibling = element.prevSibling;
+    }
+    element.prevSibling = null;
+    element.nextSibling = null;
+    this._length--;
     element.destroy();
-    this._components = this._components.filter(item => item !== element);
     this.dirty(element);
     this.dirtyBBox();
   }
 
   public clear() {
-    const childSize = this._components.length;
-    if (childSize > 128 && this.ownerRender) {
-      (this.ownerRender.getPainter() as CanvasPainter).noDirtyRectNextFrame();
-      this._components.forEach(item => item.destroy());
-    } else {
-      this._components.forEach(item => this.remove(item));
-    }
-    this._components = [];
+    this.firstChild = this.lastChild = null;
+    this._length = 0;
     this._chunks = [];
     this.dirty();
     this.dirtyBBox();
+  }
+
+  public item(position: number): T {
+    if (position < 0 || position >= this._length) {
+      return null;
+    }
+    let current: Element = null;
+    let index = 0;
+    if (this._length / 2 > position) {
+      current = this.firstChild;
+      while (index++ < position) {
+        current = current.nextSibling;
+      }
+    } else {
+      current = this.lastChild;
+      index = this._length - 1;
+      while (index-- > position) {
+        current = current.prevSibling;
+      }
+    }
+    return current as T;
   }
 
   public contain(child: Element): boolean {
@@ -169,22 +200,22 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public onFrame(now: number) {
     super.onFrame(now);
     this.sortByZIndex();
-    this._components.forEach(item => item.onFrame(now));
+    this.children().forEach(item => item.onFrame(now));
   }
 
   public destroy() {
     super.destroy();
-    this._components.forEach(item => {
+    this.children().forEach(item => {
       item.destroy();
     });
-    this._components = [];
+    this.firstChild = this.lastChild = null;
     this._chunks = [];
   }
 
   public updateAll(list: T[]) {
     // todo 优化脏区策略, 只脏本group,不脏子元素
     // todo 同步chunks
-    const prevList = this._components;
+    const prevList = this.children();
     if (prevList.length === 0) {
       this.addAll(list);
       return;
@@ -206,12 +237,22 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     });
 
     result.ordered.forEach(([from, to], i) => {
-      this._components.splice(from, 1)
-      this._components.splice(to, 0, list[result.pureChanged[i][1]]);
+      // todo 实现位置移动
+      if (from === to) {
+        return;
+      }
+      if (from > to) {
+
+      }
+      if (from < to) {
+
+      }
+      // this._components.splice(from, 1)
+      // this._components.splice(to, 0, list[result.pureChanged[i][1]]);
     });
 
     result.maintained.forEach(([from, to]) => {
-      const prevElement = this._components[from];
+      const prevElement = this.item(from);
       const nextElement = list[to];
       // 相同实例
       if (prevElement === nextElement) {
@@ -236,12 +277,26 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     
   }
 
+  public eachChild(callback: (child: T) => void) {
+    let node = this.firstChild as T;
+    while (node) {
+      callback(node);
+      node = node.nextSibling as T;
+    }
+  }
+
   public children(): T[] {
-    return this._components.slice();
+    const ret: T[] = [];
+    let node = this.firstChild as T;
+    while (node) {
+      ret.push(node);
+      node = node.nextSibling as T;
+    }
+    return ret;
   }
 
   public getAllLeafNodes(ret: Shape[] = [], ignoreInvisible = false): Shape[] {
-    this._components.forEach(item => {
+    this.children().forEach(item => {
       if (item.attr.display === false) {
         return;
       }
@@ -256,7 +311,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public resetPickRGB() {
     super.resetPickRGB();
-    this._components.forEach(child => child.resetPickRGB());
+    this.children().forEach(child => child.resetPickRGB());
   }
 
   public dirtyZIndex() {
@@ -265,14 +320,15 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public sortByZIndex() {
     // todo 未改变的情况下不排序;
-    if (this._zindexDirty) {
-      this._components = this._components.sort((a, b) => b.attr.zIndex - a.attr.zIndex);
-    }
-    this._components.forEach((item) => {
-      if (item.isGroup) {
-        (item as any as Group).sortByZIndex();
-      }
-    });
-    this._zindexDirty = false;
+    return;
+    // if (this._zindexDirty) {
+    //   this._components = this._components.sort((a, b) => b.attr.zIndex - a.attr.zIndex);
+    // }
+    // this._components.forEach((item) => {
+    //   if (item.isGroup) {
+    //     (item as any as Group).sortByZIndex();
+    //   }
+    // });
+    // this._zindexDirty = false;
   }
 }
