@@ -2,16 +2,19 @@ import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
-import { SyntheticEvent, SyntheticMouseEvent, SyntheticTouchEvent, SyntheticDragEvent, EventConf, } from '../event';
+import {
+  // SyntheticEvent,
+  SyntheticMouseEvent,
+  // SyntheticTouchEvent,
+  SyntheticDragEvent,
+  EventConf,
+} from '../event';
+import { SyntheticDragEventParams } from "./SyntheticDragEvent";
+import { SyntheticMouseEventParams } from "./SyntheticMouseEvent";
+
 import { inBBox } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from '../utils/vec2';
-
-interface EventDetail {
-  x: number;
-  y: number;
-  detail: any;
-}
 
 // 给touches使用
 const tempPickingCache: Record<string, Element> = {};
@@ -19,13 +22,17 @@ const tempPickingCache: Record<string, Element> = {};
 export default class EventHandle {
   public render: Render;
 
-  private _currentMousePosition: { x: number; y: number } | null;
+  private _currentMousePosition: { x: number; y: number } | null = null;
 
-  private _draggingTarget: Element;
+  private _draggingTarget: Element | null = null;
 
-  private _prevMouseTarget: Element;
+  private _prevMouseTarget: Element | null = null;
 
-  private _prevTouchTarget: Record<number, Element>;
+  private _prevMousePosition: { x: number; y: number } | null = null;
+
+  private _dragStartMouse: { x: number; y: number } | null = null;
+
+  private _prevTouchTarget: Record<number, Element> | null = null;
 
   private _PixelPainter: CanvasPainter;
 
@@ -52,8 +59,9 @@ export default class EventHandle {
 
     const pixelPainter = this._PixelPainter;
     const ignoreInvisibleNodes = true;
+    const ignoreMute = true;
     let target: Element;
-    let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes).reverse();
+    let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes, ignoreMute).reverse();
 
     this.render.getRoot().resetPickRGB();
 
@@ -147,39 +155,37 @@ export default class EventHandle {
 
   private _syntheticMouseEvent = (nativeEvent: MouseEvent) => {
     // todo统一mousewheel事件
-    const {x, y} = this._getMousePosition(nativeEvent);
+    const { x, y } = this._getMousePosition(nativeEvent);
     const target = this.pickTarget(x, y);
     const prevMouseTarget = this._prevMouseTarget;
-    const draggingTarget = this._draggingTarget;
     const isRoot = this.render.getRoot() === target;
-    const event: SyntheticMouseEvent = new SyntheticMouseEvent(nativeEvent.type, {
+    const mouseEventParam: SyntheticMouseEventParams = {
       x,
       y,
       detail: nativeEvent.detail,
       bubbles: nativeEvent.bubbles,
       original: nativeEvent,
-      timeStamp: Date.now(),
-    });
+      timeStamp: nativeEvent.timeStamp,
+    };
+    const event: SyntheticMouseEvent = new SyntheticMouseEvent(nativeEvent.type, mouseEventParam);
     this._dispatchSyntheticMouseEvent(event, target);
-    
-    if (event.type === 'mouseup' || event.type === 'mousedown' || event.type === 'mousemove') {
-      if (draggingTarget) {
+
+    if (event.type === 'mousedown' || event.type === 'mousemove') {
+      if (event.type === 'mousedown' && target.attr.draggable) {
+        this._draggingTarget = target;
+        this._dragStartMouse = { x, y };
+      }
+      if (this._draggingTarget) {
         const eventMap = {
           mousedown: 'dragstart',
           mousemove: 'drag',
-          mouseup: 'dragend'
         };
         const eventType = eventMap[event.type];
         const onDragEvent = new SyntheticDragEvent(eventType, {
-          ...event,
-          startX: 0,
-          startY: 0,
-          offsetX: 0,
-          offsetY: 0,
-          dx: 0,
-          dy: 0,
-        })
-        this._dispatchSyntheticMouseEvent(onDragEvent, draggingTarget);
+          ...mouseEventParam,
+          ...this._getDragParam(mouseEventParam),
+        });
+        this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
       }
     }
 
@@ -194,13 +200,15 @@ export default class EventHandle {
         this._dispatchSyntheticMouseEvent(mouseoutEvent, prevMouseTarget);
         this._dispatchSyntheticMouseEvent(mouseoverEvent, target);
         const containSelf = true;
-        const prevTargetParentNodes = prevMouseTarget ? prevMouseTarget.getAncestorNodes(containSelf) : [];
+        const prevTargetParentNodes = prevMouseTarget
+          ? prevMouseTarget.getAncestorNodes(containSelf)
+          : [];
         const currentTargetParentNodes = target.getAncestorNodes(containSelf);
         prevTargetParentNodes.forEach(prevNode => {
           if (!prevNode.contains(target)) {
             const mouseleaveEvent = new SyntheticMouseEvent('mouseleave', {
-              ...event,
-              bubbles:false,
+              ...mouseEventParam,
+              bubbles: false,
             });
             this._dispatchSyntheticMouseEvent(mouseleaveEvent, prevNode);
           }
@@ -208,36 +216,102 @@ export default class EventHandle {
         currentTargetParentNodes.forEach(currentNode => {
           if (!currentNode.contains(prevMouseTarget)) {
             const mouseenterEvent = new SyntheticMouseEvent('mouseenter', {
-              ...event,
-              bubbles:false,
+              ...mouseEventParam,
+              bubbles: false,
             });
             this._dispatchSyntheticMouseEvent(mouseenterEvent, currentNode);
           }
-        })
+        });
       }
     }
 
-  }
-
-  private _syntheticTouchEvent = (nativeEvent: TouchEvent) => {
-
-  }
-
-  private _handleMouseLeave = (event: WheelEvent) => {
-    // todo
-    this._currentMousePosition = null;
+    this._prevMousePosition = { x, y };
+    this._prevMouseTarget = target;
   };
 
-  private _handleMouseEnter = (event: WheelEvent) => {
+  private _syntheticTouchEvent = (nativeEvent: TouchEvent) => {
+    nativeEvent;
+  };
+
+  private _handleMouseLeave = (nativeEvent: WheelEvent) => {
     // todo
+    this._currentMousePosition = null;
+    const { x, y } = this._getMousePosition(nativeEvent);
+    const target = this._prevMouseTarget;
+    const eventParam = {
+      x,
+      y,
+      detail: nativeEvent.detail,
+      bubbles: nativeEvent.bubbles,
+      original: nativeEvent,
+      timeStamp: nativeEvent.timeStamp,
+    };
+    const mouseoutEvent = new SyntheticMouseEvent('mouseout', {
+      ...eventParam,
+      bubbles: true,
+    });
+    this._prevMousePosition = null;
+    this._dispatchSyntheticMouseEvent(mouseoutEvent, target);
+    const parentNodes = target.getAncestorNodes(true);
+    parentNodes.forEach(node => {
+      const mouseEnterEvent: SyntheticMouseEvent = new SyntheticMouseEvent(
+        'mouseleave',
+        eventParam,
+      );
+      this._dispatchSyntheticMouseEvent(mouseEnterEvent, node);
+    });
+  };
+
+  private _handleMouseEnter = (nativeEvent: WheelEvent) => {
+    // todo
+    this._currentMousePosition = null;
+    const { x, y } = this._getMousePosition(nativeEvent);
+    const target = this.pickTarget(x, y);
+    const eventParam = {
+      x,
+      y,
+      detail: nativeEvent.detail,
+      bubbles: nativeEvent.bubbles,
+      original: nativeEvent,
+      timeStamp: nativeEvent.timeStamp,
+    };
+    const mouseoverEvent = new SyntheticMouseEvent('mouseover', {
+      ...eventParam,
+      bubbles: true,
+    });
+    this._dispatchSyntheticMouseEvent(mouseoverEvent, target);
+    // 触发当前对象的mouseover, mouseenter事件
+    const parentNodes = target.getAncestorNodes(true);
+    parentNodes.forEach(node => {
+      const mouseEnterEvent = new SyntheticMouseEvent('mouseenter', {
+        ...eventParam,
+        bubbles: true,
+      });
+      this._dispatchSyntheticMouseEvent(mouseEnterEvent, node);
+    });
   };
 
   private _handleDocumentTouchEnd = (event: MouseEvent) => {
     // todo
   };
 
-  private _handleDocumentMouseUp = (event: MouseEvent) => {
-    // todo
+  private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
+    const { x, y } = this._getMousePosition(nativeEvent);
+    const mouseEventParam: SyntheticMouseEventParams = {
+      x,
+      y,
+      detail: nativeEvent.detail,
+      bubbles: nativeEvent.bubbles,
+      original: nativeEvent,
+      timeStamp: nativeEvent.timeStamp,
+    };
+    if (this._draggingTarget) {
+      const onDragEvent = new SyntheticDragEvent('dragend', {
+        ...mouseEventParam,
+        ...this._getDragParam(mouseEventParam),
+      });
+      this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
+    }
   };
 
   private _getMousePosition(event: MouseEvent): { x: number; y: number } {
@@ -292,8 +366,10 @@ export default class EventHandle {
       event.target = target;
     }
     event.currentTarget = target;
-    const {bubbles, isPropagationStopped, } = event;
-    const eventKey = Object.keys(target.attr).filter(key => key.toLowerCase() === ('on' + event.type))[0]  as keyof EventConf;
+    const { bubbles, isPropagationStopped } = event;
+    const eventKey = Object.keys(target.attr).filter(
+      key => key.toLowerCase() === 'on' + event.type,
+    )[0] as keyof EventConf;
     if (target.attr[eventKey]) {
       target.attr[eventKey](event as any);
     }
@@ -301,6 +377,26 @@ export default class EventHandle {
       count++;
       this._dispatchSyntheticMouseEvent(event, target.parentNode, count);
     }
+    // todo 拖动行为
+  }
+
+  private _getDragParam(
+    event: SyntheticMouseEventParams,
+  ): Pick<SyntheticDragEventParams, 'startX' | 'startY' | 'offsetX' | 'offsetY' | 'dx' | 'dy'> {
+    const { x: startX, y: startY } = this._dragStartMouse;
+    const { x: prevX, y: prevY } = this._prevMousePosition;
+    const { x, y } = event;
+    const offsetX = x - startX;
+    const offsetY = y - startY;
+    const dx = x - prevX;
+    const dy = y - prevY;
+    return {
+      startX,
+      startY,
+      offsetX,
+      offsetY,
+      dx,
+      dy,
+    };
   }
 }
-

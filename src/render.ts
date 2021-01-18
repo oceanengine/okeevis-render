@@ -140,8 +140,8 @@ export default class Render extends EventFul {
     this._dom = undefined;
   }
 
-  public getAllLeafNodes(ignoreInvisible = false): Element[] {
-    return this._rootGroup.getAllLeafNodes([], ignoreInvisible);
+  public getAllLeafNodes(ignoreInvisible = false, ignoreMute = false): Element[] {
+    return this._rootGroup.getAllLeafNodes([], ignoreInvisible, ignoreMute);
   }
   
   public getAllElements(): Element[] {
