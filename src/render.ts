@@ -166,11 +166,19 @@ export default class Render extends EventFul {
     this._eventHandle.onFrame();
     this._needUpdate = false;
     this._dirtyElements.clear();
-    requestAnimationFrame(this._onFrame)
+    const currentTime = (typeof window !== 'undefined' && window.performance) ? window.performance.now() : Date.now();
+    const timeRemaining = 16 - (currentTime - now);
+    if (timeRemaining > 6) {
+      this._rootGroup.getClientBoundingRect();
+    }
+    requestAnimationFrame(this._onFrame);
   }
 
   private _loop() {
     this._requestAnimationFrameId = requestAnimationFrame(this._onFrame);
+    // this._requiestIdleCallbackId = (window as any).requestIdleCallback(() => {
+    //   this._rootGroup.computClientBoundingRect();
+    // });
   }
   
 }
