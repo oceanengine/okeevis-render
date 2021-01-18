@@ -15,7 +15,7 @@ const group = new Group({
   fill: 'blue',
 });
 
-for (let i = 0; i < 25; i++) {
+for (let i = 0; i < 5; i++) {
   group.addChunk(makeText(2000))
 }
 (window as any).render = render

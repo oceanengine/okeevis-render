@@ -27,6 +27,14 @@ const shape2 = new Polyline({
     {x: 100, y: 200}
   ]
 })
+const shape3 = new Polyline({
+  pointList: [
+    {x: 200, y: 200},
+    {x: 200, y: 450},
+    {x:100, y: 450},
+    {x: 100, y: 200}
+  ]
+})
 
 const shape = new CompoundPath({
   shapes: [shape1, shape2],
@@ -36,4 +44,9 @@ const shape = new CompoundPath({
   lineWidth: 5,
 })
 
+shape.animateTo({
+  shapes: [shape1, shape3],
+})
+
 render.add(shape)
+shape

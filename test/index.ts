@@ -1,1 +1,1 @@
-import './diff'
+import './mutipath'
