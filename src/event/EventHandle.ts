@@ -9,8 +9,8 @@ import {
   SyntheticDragEvent,
   EventConf,
 } from '../event';
-import { SyntheticDragEventParams } from "./SyntheticDragEvent";
-import { SyntheticMouseEventParams } from "./SyntheticMouseEvent";
+import { SyntheticDragEventParams } from './SyntheticDragEvent';
+import { SyntheticMouseEventParams } from './SyntheticMouseEvent';
 
 import { inBBox } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
@@ -59,22 +59,17 @@ export default class EventHandle {
 
     const pixelPainter = this._PixelPainter;
     const ignoreInvisibleNodes = true;
-    const ignoreMute = true;
+    const ignoreMute = true; // pointerevent none
     let target: Element;
+    // 初步过滤掉不显示和不触发事件的元素, 
     let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes, ignoreMute).reverse();
 
     this.render.getRoot().resetPickRGB();
 
-    // 初步过滤掉不显示和不触发事件的元素, 以及不在包围盒中的
+    // 过渡掉不在包围盒中的
     pickNodes = pickNodes.filter(
-      node =>
-        node.attr.display &&
-        node.getExtendAttr('pointerEvents') !== 'none' &&
-        inBBox(node.getClientBoundingRect(), x, y),
+      node => node.attr.display && inBBox(node.getClientBoundingRect(), x, y),
     );
-
-    // todo  自己几何检测 文本图像, 矩形, 圆等可以做的事
-    // 倒排, 要考虑剪切, 逆矩阵坐标
 
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;
