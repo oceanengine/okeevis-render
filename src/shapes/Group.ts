@@ -28,6 +28,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   protected _components: T[] = [];
 
   protected _chunks: T[][] = [];
+  
 
   private _zindexDirty: boolean = true;
 
@@ -95,6 +96,10 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     }
     this._chunks.push(items);
     return this;
+  }
+
+  public clearChunks() {
+    this._chunks = [];
   }
 
   public getChunks(): T[][] {
@@ -217,6 +222,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       }
       if (prevElement.isGroup) {
         (prevElement as unknown as Group).updateAll((nextElement as any as Group).children());
+        (prevElement as unknown as Group).clearChunks();
         const chunks = (nextElement as any as Group).getChunks();
         chunks.forEach(chunk => (prevElement as any as Group).addChunk(chunk));
       }
