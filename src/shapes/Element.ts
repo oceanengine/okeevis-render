@@ -1,23 +1,23 @@
 import Eventful from '../utils/Eventful';
 import Render from '../render';
-import Group, {GroupConf, } from './Group';
+import Group, { GroupConf } from './Group';
 import * as lodash from '../utils/lodash';
-import { ColorValue, isTransparent, } from '../color';
+import { ColorValue, isTransparent } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
-import easingFunctions, {EasingName, } from '../animate/ease';
+import easingFunctions, { EasingName } from '../animate/ease';
 import SyntheticDragEvent from '../event/SyntheticDragEvent';
-import DragAndDrop, {DragAndDropConf, } from '../abstract/DragAndDrop';
+import DragAndDrop, { DragAndDropConf } from '../abstract/DragAndDrop';
 import interpolateAttr from '../interpolate/interpolateAttr';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
-import Shape, {ShapeConf, } from './Shape';
-import * as mat3 from '../../js/mat3'
-import {Vec2, transformMat3, } from '../utils/vec2';
+import Shape, { ShapeConf } from './Shape';
+import * as mat3 from '../../js/mat3';
+import { Vec2, transformMat3 } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
-import {RGBA_TRANSPARENT, } from '../constant';
-import {BBox, unionBBox, ceilBBox, } from '../utils/bbox';
+import { RGBA_TRANSPARENT } from '../constant';
+import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 
-export type Ref<T extends Element=Element> = {current?: T};
+export type Ref<T extends Element = Element> = { current?: T };
 
 export type ElementAttr = GroupConf & ShapeConf;
 
@@ -40,7 +40,18 @@ export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
   opacity?: number;
   fillOpacity?: number;
   strokeOpacity?: number;
-  blendMode?: 'source-over' | 'source-atop' | 'source-in' | 'source-out' | 'destination-over' | 'destination-atop' | 'destination-in' | 'destination-out' | 'lighter' | 'copy' | 'xor';
+  blendMode?:
+    | 'source-over'
+    | 'source-atop'
+    | 'source-in'
+    | 'source-out'
+    | 'destination-over'
+    | 'destination-atop'
+    | 'destination-in'
+    | 'destination-out'
+    | 'lighter'
+    | 'copy'
+    | 'xor';
 
   clip?: Shape | Ref<Shape>;
 
@@ -61,10 +72,10 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
 }
 
 export interface FillAndStrokeStyle {
-  fill: ColorValue, 
-  stroke: ColorValue, 
-  lineWidth: number, 
-  hasFill: boolean; 
+  fill: ColorValue;
+  stroke: ColorValue;
+  lineWidth: number;
+  hasFill: boolean;
   hasStroke: boolean;
   needFill: boolean;
   needStroke: boolean;
@@ -100,8 +111,7 @@ export const defaultCanvasContext: ShapeConf = {
   shadowOffsetY: 0,
   cursor: 'auto',
   pointerEvents: 'auto',
-
-}
+};
 const extendAbleKeys = Object.keys(defaultCanvasContext);
 
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
@@ -115,9 +125,21 @@ const defaultTRansformConf: CommonAttr = {
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
   implements AnimateAble<T>, TransformAble, DragAndDrop {
-  public attr: T & CommonAttr = {} as T ;
+  public attr: T & CommonAttr = {} as T;
 
   public type: string;
+
+  public parentNode: Group | undefined;
+
+  public firstChild: Element;
+
+  public lastChild: Element;
+
+  public prevSibling: Element;
+
+  public nextSibling: Element;
+
+  public ownerRender: Render | undefined;
 
   public pickByGPU: boolean = true;
 
@@ -128,10 +150,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public fillAble: boolean = true;
 
   public strokeAble: boolean = true;
-
-  public ownerRender: Render | undefined;
-
-  public parentNode: Group | undefined;
 
   protected hasMiterLimit: boolean = true;
 
@@ -160,7 +178,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _dirtyRect: BBox;
 
   private _lastFrameTime: number;
-  
+
   public constructor(attr: T = {} as T) {
     super();
     this.attr = this.getDefaultAttr();
@@ -204,7 +222,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let node: Element<any> = this;
     let opacity = 1;
     // 透明度有继承叠加效果
-    while(node) {
+    while (node) {
       opacity *= node.attr.opacity;
       node = node.parentNode;
     }
@@ -215,7 +233,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let value: T[U] = (defaultCanvasContext as T)[key];
     // 透明度有继承叠加效果
     let node: Element<any> = this;
-    while(node) {
+    while (node) {
       if (typeof node.attr[key] !== 'undefined') {
         value = node.attr[key];
         break;
@@ -225,13 +243,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (key === 'lineWidth' && this.attr.strokeNoScale) {
       const globalTransform = this.getGlobalTransform();
       const scale = globalTransform[0];
-      return (value as any as number) / scale as any;
+      return (((value as any) as number) / scale) as any;
     }
     return value;
   }
 
   public hasFill(): boolean {
-    const fill = this.getExtendAttr('fill')
+    const fill = this.getExtendAttr('fill');
     return fill && fill !== 'none';
   }
 
@@ -258,21 +276,21 @@ export default class Element<T extends CommonAttr = ElementAttr>
       lineWidth,
       hasFill,
       hasStroke,
-      needFill: hasFill &&  fillOpacity !== 0 && !isTransparent(fill),
+      needFill: hasFill && fillOpacity !== 0 && !isTransparent(fill),
       needStroke: hasStroke && strokeOpacity !== 0 && !isTransparent(stroke),
-    }
+    };
   }
 
   public getComputedAttr(): T {
     // todo
     return {
       ...defaultCanvasContext,
-      ...this.parentNode ? lodash.pick(this.parentNode.attr, extendAbleKeys) : null,
+      ...(this.parentNode ? lodash.pick(this.parentNode.attr, extendAbleKeys) : null),
       ...this.attr,
-    }
+    };
   }
 
-  public setAttr(attr: T & CommonAttr= {} as T): this {
+  public setAttr(attr: T & CommonAttr = {} as T): this {
     const keys = Object.keys(attr) as Array<keyof T>;
     if (keys.every(key => attr[key] === this.attr[key])) {
       return;
@@ -288,7 +306,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this;
   }
 
-  public  get isGroup(): boolean {
+  public get isGroup(): boolean {
     return this.type === 'group';
   }
 
@@ -318,27 +336,26 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     return this._bbox;
   }
-  
+
   // todo 计算boundRect同时计算dirtyRect
   public getClientBoundingRect(): BBox {
     if (this.attr.display === false) {
-      return {x: 0, y: 0, width: 0, height: 0};
+      return { x: 0, y: 0, width: 0, height: 0 };
     }
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
       this._clientBoundingRect = this.computClientBoundingRect();
       this._clientBoundingRectDirty = false;
     }
     return this._clientBoundingRect;
-
   }
 
   public getDirtyRects(): [BBox] | [BBox, BBox] {
     const prevBBox = this._dirtyRect;
     const currentBBox = this.computeDirtyRect();
     if (prevBBox) {
-      return [prevBBox, currentBBox]
-    } 
-    return [currentBBox];   
+      return [prevBBox, currentBBox];
+    }
+    return [currentBBox];
   }
 
   protected computeBBox(): BBox {
@@ -346,12 +363,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   protected computClientBoundingRect(): BBox {
-    let {x, y, width, height, } = this.getBBox();
+    let { x, y, width, height } = this.getBBox();
     const hasStroke = this.hasStroke();
     const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
-    const offsetLineWidth = Math.sqrt(2) / 2 * lineWidth;
-    x -= offsetLineWidth
-    y -= offsetLineWidth
+    const offsetLineWidth = (Math.sqrt(2) / 2) * lineWidth;
+    x -= offsetLineWidth;
+    y -= offsetLineWidth;
     width += offsetLineWidth * 2;
     height += offsetLineWidth * 2;
     const vectors: Vec2[] = [
@@ -361,9 +378,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       [x, y + height],
     ];
     const matrix = this.getGlobalTransform();
-   
+
     vectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
-    const xCoords =  vectors.map(vec2 => vec2[0]);
+    const xCoords = vectors.map(vec2 => vec2[0]);
     const yCoords = vectors.map(vec2 => vec2[1]);
     const minX = lodash.min(xCoords);
     const maxX = lodash.max(xCoords);
@@ -375,7 +392,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       y: minY,
       width: maxX - minX,
       height: maxY - minY,
-    }
+    };
   }
 
   public created() {
@@ -383,11 +400,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public updated(prevAttr: T, nextAttr: T) {
-    const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation', 'scale'].filter(
-      key => !lodash.isUndefined((nextAttr as any)[key]),
-    ) as any;
-    const shapeKeys = ['display' as keyof T, ...this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key]))];
-      
+    const transformKeys: Array<keyof CommonAttr> = [
+      'origin',
+      'position',
+      'rotation',
+      'scale',
+    ].filter(key => !lodash.isUndefined((nextAttr as any)[key])) as any;
+    const shapeKeys = [
+      'display' as keyof T,
+      ...this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key])),
+    ];
+
     if (transformKeys.length) {
       this.dirtyTransform();
     }
@@ -395,7 +418,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (shapeKeys.some(key => prevAttr[key] !== nextAttr[key])) {
       this.dirtyBBox();
     }
-    
+
     if (nextAttr.zIndex !== undefined) {
       this.parentNode.dirtyZIndex();
     }
@@ -416,7 +439,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   /**
-   * 
+   *
    * @param x inverted x
    * @param y inverted y
    */
@@ -424,14 +447,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const hasFill = this.hasFill();
     const hasStroke = this.hasStroke();
     const lineWidth = this.getExtendAttr('lineWidth');
-    return (hasFill && this.isPointInFill(x, y)) || (hasStroke && this.isPointInStroke(x, y, lineWidth));
+    return (
+      (hasFill && this.isPointInFill(x, y)) || (hasStroke && this.isPointInStroke(x, y, lineWidth))
+    );
   }
 
   public isInClip(x: number, y: number): boolean {
     const clips = this.getClipList();
     return clips.every(clip => clip.isPointInFill(x, y));
   }
-  
+
   public getClipList(): Element[] {
     const clips: Element[] = [];
     let node: any = this;
@@ -488,10 +513,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
     const nonAnimateAttr = lodash.omit(toAttr, animationKeys) as T;
     const animateToAttr = lodash.pick(toAttr, animationKeys);
-    const animateFromAttr = lodash.pick({...defaultTRansformConf, ...fromAttr}, animationKeys);
+    const animateFromAttr = lodash.pick({ ...defaultTRansformConf, ...fromAttr }, animationKeys);
     animationKeys.forEach(key => {
       if (animateFromAttr[key] === undefined) {
-       animateFromAttr[key] = this.getExtendAttr(key);
+        animateFromAttr[key] = this.getExtendAttr(key);
       }
     });
     this.setAttr(nonAnimateAttr);
@@ -534,14 +559,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public onFrame(now: number) {
     // clip element maybe usesed for muti component
-    
+
     if (this._lastFrameTime === now) {
       return;
     }
     this._lastFrameTime = now;
     const clipElement = this.getClipElement();
     clipElement && clipElement.onFrame(now);
-    
+
     if (!this._animations.length) {
       return;
     }
@@ -566,14 +591,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getClipElement(): Shape {
-    const {clip, } = this.attr;
+    const { clip } = this.attr;
     if (!clip) {
       return;
     }
     if (clip instanceof Element) {
       return clip;
-    } 
-    if (clip.current instanceof  Element) {
+    }
+    if (clip.current instanceof Element) {
       return clip.current;
     }
   }
@@ -671,7 +696,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._transformDirty = true;
     this.dirtyAbsTransform();
   }
-  
+
   public dirtyAbsTransform() {
     this._absTransformDirty = true;
     this.dirtyClientBoundingRect();
@@ -697,13 +722,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected computeDirtyRect(): BBox {
     // 计算当前dirtyRect
-    const {x, y, width,  height, }  = this.getClientBoundingRect();
+    const { x, y, width, height } = this.getClientBoundingRect();
     // 暂不考虑miter尖角影响, 默认使用了bevel
     // const miterLimit = this.getExtendAttr('miterLimit');
     // const lineJoin = this.getExtendAttr('lineJoin');
     const shadowBlur = this.getExtendAttr('shadowBlur');
     if (shadowBlur === 0) {
-      return ceilBBox({x, y, width, height});
+      return ceilBBox({ x, y, width, height });
     }
     const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
     const shadowOffsetY = this.getExtendAttr('shadowOffsetY');
@@ -713,9 +738,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
       width: width + shadowBlur + shadowOffsetX,
       height: height + shadowBlur + shadowOffsetY,
     };
-    return ceilBBox(unionBBox([
-      this._clientBoundingRect,
-      shadowBBox,
-    ]))
+    return ceilBBox(unionBBox([this._clientBoundingRect, shadowBBox]));
   }
 }
