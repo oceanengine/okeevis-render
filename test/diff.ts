@@ -15,9 +15,9 @@ const group = new Group({
   fill: 'blue',
 });
 
-group.addAll(makeText(3000));
+group.addAll(makeText(2500));
 render.add(group);
-group.updateAll(makeText(3000));
+group.updateAll(makeText(2500));
 document.onclick = e => {
   return
   group.add(new Rect({

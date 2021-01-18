@@ -1,7 +1,7 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { BBox, inBBox, } from '../utils/bbox';
-import measureText from '../utils/measureText';
+import {measureText, } from '../utils/measureText';
 
 export interface TextConf extends CommonAttr {
   x?: number;
@@ -68,7 +68,7 @@ export default class Text extends Shape<TextConf> {
 
   protected measureText(ctx: CanvasRenderingContext2D): TextMetrics {
     const textStyle = this.getTextStyle();
-    return measureText(ctx, this.attr.text, textStyle);
+    return measureText(this.attr.text, textStyle, ctx);
   }
 
   public getTextStyle(): TextConf {
