@@ -1,7 +1,16 @@
+import SyntheticEvent from  './SyntheticEvent';
 import SyntheticMouseEvent from './SyntheticMouseEvent';
 import SyntheticDragEvent from './SyntheticDragEvent';
 import SyntheticTouchEvent from  './SyntheticTouchEvent'
 
+export {
+  SyntheticEvent,
+  SyntheticMouseEvent,
+  SyntheticDragEvent,
+  SyntheticTouchEvent,
+}
+
+// todo 和react一致
 export interface EventConf {
   onMouseMove?: (event: SyntheticMouseEvent) => void;
   onMouseDown?: (event: SyntheticMouseEvent) => void;

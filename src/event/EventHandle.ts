@@ -2,9 +2,19 @@ import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
+import { SyntheticEvent, SyntheticMouseEvent, SyntheticTouchEvent, SyntheticDragEvent, EventConf, } from '../event';
 import { inBBox } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from '../utils/vec2';
+
+interface EventDetail {
+  x: number;
+  y: number;
+  detail: any;
+}
+
+// 给touches使用
+const tempPickingCache: Record<string, Element> = {};
 
 export default class EventHandle {
   public render: Render;
@@ -118,7 +128,6 @@ export default class EventHandle {
         pickIndex = Math.min(geometryPickIndex, gpuPickIndex);
       }
       target = pickNodes[pickIndex];
-      target.setAttr({ fill: 'red', stroke: 'red', lineWidth: 2});
     }
 
     console.timeEnd('pick');
@@ -129,53 +138,90 @@ export default class EventHandle {
     if (this.render.isBrowser()) {
       this._detachEvents();
     }
+    this._PixelPainter.dispose();
   }
 
-  public setCurosr(item: Element) {
-    const cursor = item.getExtendAttr('cursor');
-    this.render.getDom().style.cursor = cursor;
+  // public dispatchEvent(event: string, detail: EventDetail) {
+  //   // todo 用户自定义事件
+  // }
+
+  private _syntheticMouseEvent = (nativeEvent: MouseEvent) => {
+    // todo统一mousewheel事件
+    const {x, y} = this._getMousePosition(nativeEvent);
+    const target = this.pickTarget(x, y);
+    const prevMouseTarget = this._prevMouseTarget;
+    const draggingTarget = this._draggingTarget;
+    const isRoot = this.render.getRoot() === target;
+    const event: SyntheticMouseEvent = new SyntheticMouseEvent(nativeEvent.type, {
+      x,
+      y,
+      detail: nativeEvent.detail,
+      bubbles: nativeEvent.bubbles,
+      original: nativeEvent,
+      timeStamp: Date.now(),
+    });
+    this._dispatchSyntheticMouseEvent(event, target);
+    
+    if (event.type === 'mouseup' || event.type === 'mousedown' || event.type === 'mousemove') {
+      if (draggingTarget) {
+        const eventMap = {
+          mousedown: 'dragstart',
+          mousemove: 'drag',
+          mouseup: 'dragend'
+        };
+        const eventType = eventMap[event.type];
+        const onDragEvent = new SyntheticDragEvent(eventType, {
+          ...event,
+          startX: 0,
+          startY: 0,
+          offsetX: 0,
+          offsetY: 0,
+          dx: 0,
+          dy: 0,
+        })
+        this._dispatchSyntheticMouseEvent(onDragEvent, draggingTarget);
+      }
+    }
+
+    if (event.type === 'mousemove') {
+      if (this.render.isBrowser()) {
+        const cursor = target.getExtendAttr('cursor');
+        this.render.getDom().style.cursor = cursor;
+      }
+      if (prevMouseTarget !== target) {
+        const mouseoutEvent = new SyntheticMouseEvent('mouseout', event);
+        const mouseoverEvent = new SyntheticMouseEvent('mouseover', event);
+        this._dispatchSyntheticMouseEvent(mouseoutEvent, prevMouseTarget);
+        this._dispatchSyntheticMouseEvent(mouseoverEvent, target);
+        const containSelf = true;
+        const prevTargetParentNodes = prevMouseTarget ? prevMouseTarget.getAncestorNodes(containSelf) : [];
+        const currentTargetParentNodes = target.getAncestorNodes(containSelf);
+        prevTargetParentNodes.forEach(prevNode => {
+          if (!prevNode.contains(target)) {
+            const mouseleaveEvent = new SyntheticMouseEvent('mouseleave', {
+              ...event,
+              bubbles:false,
+            });
+            this._dispatchSyntheticMouseEvent(mouseleaveEvent, prevNode);
+          }
+        });
+        currentTargetParentNodes.forEach(currentNode => {
+          if (!currentNode.contains(prevMouseTarget)) {
+            const mouseenterEvent = new SyntheticMouseEvent('mouseenter', {
+              ...event,
+              bubbles:false,
+            });
+            this._dispatchSyntheticMouseEvent(mouseenterEvent, currentNode);
+          }
+        })
+      }
+    }
+
   }
 
-  public dispatchEvent(event: string) {}
+  private _syntheticTouchEvent = (nativeEvent: TouchEvent) => {
 
-  private _handleMouseWheel = (event: WheelEvent) => {
-    // todo https://github.com/facebookarchive/fixed-data-table/blob/master/src/vendor_upstream/dom/normalizeWheel.js
-  };
-
-  private _handleMouseDown = (event: MouseEvent) => {
-    // todo
-  };
-
-  private _handleMouseUp = (event: MouseEvent) => {
-    // todo
-  };
-
-  private _handleMouseMove = (event: MouseEvent) => {
-    // return;
-    this._currentMousePosition = { x: event.offsetX, y: event.offsetY };
-    const target = this.pickTarget(event.offsetX, event.offsetY);
-    this.setCurosr(target);
-  };
-
-  private _handleClick = (event: WheelEvent) => {
-    this.pickTarget(event.offsetX, event.offsetY);
-  };
-
-  private _handleDblClick = (event: WheelEvent) => {
-    // todo
-  };
-
-  private _handleTouchStart = (event: WheelEvent) => {
-    // todo
-  };
-
-  private _handleTouchMove = (event: WheelEvent) => {
-    // todo
-  };
-
-  private _handleTouchEnd = (event: WheelEvent) => {
-    // todo
-  };
+  }
 
   private _handleMouseLeave = (event: WheelEvent) => {
     // todo
@@ -194,20 +240,24 @@ export default class EventHandle {
     // todo
   };
 
+  private _getMousePosition(event: MouseEvent): { x: number; y: number } {
+    return { x: event.offsetX, y: event.offsetY };
+  }
+
   private _detachEvents() {
     if (!this.render.isBrowser()) {
       return;
     }
     const dom = this.render.getDom();
-    dom.removeEventListener('wheel', this._handleMouseWheel);
-    dom.removeEventListener('mousedown', this._handleMouseDown);
-    dom.removeEventListener('mouseup', this._handleMouseUp);
-    dom.removeEventListener('mousemove', this._handleMouseMove);
-    dom.removeEventListener('click', this._handleClick);
-    dom.removeEventListener('dblclick', this._handleDblClick);
-    dom.removeEventListener('touchstart', this._handleTouchStart);
-    dom.removeEventListener('touchmove', this._handleTouchMove);
-    dom.removeEventListener('touchend', this._handleTouchEnd);
+    dom.removeEventListener('wheel', this._syntheticMouseEvent);
+    dom.removeEventListener('mousedown', this._syntheticMouseEvent);
+    dom.removeEventListener('mouseup', this._syntheticMouseEvent);
+    dom.removeEventListener('mousemove', this._syntheticMouseEvent);
+    dom.removeEventListener('click', this._syntheticMouseEvent);
+    dom.removeEventListener('dblclick', this._syntheticMouseEvent);
+    dom.removeEventListener('touchstart', this._syntheticTouchEvent);
+    dom.removeEventListener('touchmove', this._syntheticTouchEvent);
+    dom.removeEventListener('touchend', this._syntheticTouchEvent);
     dom.removeEventListener('mouseleave', this._handleMouseLeave);
     dom.removeEventListener('mouseenter', this._handleMouseEnter);
     document.removeEventListener('touchend', this._handleDocumentTouchEnd);
@@ -219,18 +269,38 @@ export default class EventHandle {
       return;
     }
     const dom = this.render.getDom();
-    dom.addEventListener('wheel', this._handleMouseWheel);
-    dom.addEventListener('mousedown', this._handleMouseDown);
-    dom.addEventListener('mouseup', this._handleMouseUp);
-    dom.addEventListener('mousemove', this._handleMouseMove);
-    dom.addEventListener('click', this._handleClick);
-    dom.addEventListener('dblclick', this._handleDblClick);
-    dom.addEventListener('touchstart', this._handleTouchStart);
-    dom.addEventListener('touchmove', this._handleTouchMove);
-    dom.addEventListener('touchend', this._handleTouchEnd);
+    dom.addEventListener('wheel', this._syntheticMouseEvent);
+    dom.addEventListener('mousedown', this._syntheticMouseEvent);
+    dom.addEventListener('mouseup', this._syntheticMouseEvent);
+    dom.addEventListener('mousemove', this._syntheticMouseEvent);
+    dom.addEventListener('click', this._syntheticMouseEvent);
+    dom.addEventListener('dblclick', this._syntheticMouseEvent);
+    dom.addEventListener('touchstart', this._syntheticTouchEvent);
+    dom.addEventListener('touchmove', this._syntheticTouchEvent);
+    dom.addEventListener('touchend', this._syntheticTouchEvent);
     dom.addEventListener('mouseleave', this._handleMouseLeave);
     dom.addEventListener('mouseenter', this._handleMouseEnter);
     document.addEventListener('touchend', this._handleDocumentTouchEnd);
     document.addEventListener('mouseup', this._handleDocumentMouseUp);
   }
+
+  private _dispatchSyntheticMouseEvent(event: SyntheticMouseEvent, target: Element, count = 0) {
+    if (!target) {
+      return;
+    }
+    if (count === 0) {
+      event.target = target;
+    }
+    event.currentTarget = target;
+    const {bubbles, isPropagationStopped, } = event;
+    const eventKey = Object.keys(target.attr).filter(key => key.toLowerCase() === ('on' + event.type))[0]  as keyof EventConf;
+    if (target.attr[eventKey]) {
+      target.attr[eventKey](event as any);
+    }
+    if (bubbles && !isPropagationStopped && target.parentNode) {
+      count++;
+      this._dispatchSyntheticMouseEvent(event, target.parentNode, count);
+    }
+  }
 }
+

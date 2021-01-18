@@ -281,6 +281,27 @@ export default class Element<T extends CommonAttr = ElementAttr>
     };
   }
 
+  public contains(child: Element): boolean {
+    let node = child;
+    while (node) {
+      if ((node as any) === this) {
+        return true;
+      }
+      node = node.parentNode;
+    }
+    return false;
+  }
+
+  public getAncestorNodes(containSelf: boolean = true): Element[] {
+    let node = containSelf ? this : this.parentNode;
+    const out: Element[] = [];
+    while (node) {
+      out.push(node as Element);
+      node = node.parentNode;
+    }
+    return out;
+  }
+
   public getComputedAttr(): T {
     // todo
     return {
