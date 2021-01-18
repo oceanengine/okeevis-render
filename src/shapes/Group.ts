@@ -110,6 +110,10 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._chunks = chunks;
   }
 
+  public clearChunks() {
+    this._chunks = [];
+  }
+
   public getChunks(): T[][] {
     return this._chunks;
   }
@@ -213,8 +217,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public updateAll(list: T[]) {
-    // todo 优化脏区策略, 只脏本group,不脏子元素
-    // todo 同步chunks
+    this._chunks = [];
     const prevList = this.children();
     if (prevList.length === 0) {
       this.addAll(list);
