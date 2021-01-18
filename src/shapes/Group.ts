@@ -106,7 +106,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return this;
   }
 
-  public relplaceChunks(chunks: T[][]) {
+  public replaceChunks(chunks: T[][]) {
     this._chunks = chunks;
   }
 
@@ -259,7 +259,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       if (prevElement.isGroup) {
         (prevElement as unknown as Group).updateAll((nextElement as any as Group).children());
         const chunks = (nextElement as any as Group).getChunks();
-        (prevElement as unknown as Group).relplaceChunks(chunks);
+        (prevElement as unknown as Group).replaceChunks(chunks);
         chunks.forEach(chunk => (prevElement as any as Group).addChunk(chunk));
       }
       prevElement.setBaseTransform(nextElement.getBaseTransform());
