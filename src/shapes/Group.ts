@@ -158,7 +158,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public clear() {
-    this.firstChild = this.lastChild = null;
+    this.children().forEach(item => this.remove(item));
     this._length = 0;
     this._chunks = [];
     this.dirty();
@@ -218,11 +218,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     const prevList = this.children();
     if (prevList.length === 0) {
       this.addAll(list);
-      return;
-    }
-
-    if (list.length === 0) {
-      this.clear();
       return;
     }
 
