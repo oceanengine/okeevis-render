@@ -42,7 +42,7 @@ const shape2 = new Circle({
   onDragLeave: e => e.target.setAttr({fill: 'green'})
 });
 setTimeout(() => {
-  shape1.setAttr({display: false})
+  shape2.setAttr({display: false})
 }, 5000)
 const shape3 = new Circle({
 

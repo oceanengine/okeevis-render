@@ -422,7 +422,7 @@ export default class EventHandle {
     }
 
     if (target.attr[eventKey]) {
-      target.attr[eventKey](event as any);
+      (target.attr[eventKey] as Function)(event as any);
     }
     target.dispatch(event.type, event);
     if (bubbles && !isPropagationStopped && target.parentNode) {

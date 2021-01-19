@@ -12,6 +12,7 @@ export {
 
 // todo 和react一致
 export interface EventConf {
+  draggable?: boolean;
   onMouseMove?: (event: SyntheticMouseEvent) => void;
   onMouseDown?: (event: SyntheticMouseEvent) => void;
   onMouseUp?: (event: SyntheticMouseEvent) => void;
@@ -22,12 +23,12 @@ export interface EventConf {
   onMouseLeave?: (event: SyntheticMouseEvent) => void;
   onMouseEnter?: (event: SyntheticMouseEvent) => void;
   onWheel?: (event: SyntheticMouseEvent) => void;
-  onDrag?: (event: SyntheticDragEvent) => void;
-  onDragOver?: (event: SyntheticDragEvent) => void;
-  onDragLeave?: (event: SyntheticDragEvent) => void;
+  onDragStart?: (event: SyntheticDragEvent) => void;
   onDrop?: (event: SyntheticDragEvent) => void;
   onDragEnd?: (event: SyntheticDragEvent) => void;
-  onDragStart?: (event: SyntheticDragEvent) => void;
+  onDragOver?: (event: SyntheticDragEvent) => void;
+  onDragLeave?: (event: SyntheticDragEvent) => void;
+  getDragOffset?: (event: SyntheticDragEvent) => {x: number, y: number};
   onTouchMove?: (event: SyntheticTouchEvent) => void;
   onTouchStart?: (event: SyntheticTouchEvent) => void;
   onTouchEnd?: (event: SyntheticTouchEvent) => void;

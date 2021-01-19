@@ -5,7 +5,6 @@ import * as lodash from '../utils/lodash';
 import { ColorValue, isTransparent } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
 import easingFunctions, { EasingName } from '../animate/ease';
-import { DragAndDropConf } from '../abstract/DragAndDrop';
 import interpolateAttr from '../interpolate/interpolateAttr';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
@@ -20,7 +19,7 @@ export type Ref<T extends Element = Element> = { current?: T };
 
 export type ElementAttr = GroupConf & ShapeConf;
 
-export interface BaseAttr extends TransformConf, EventConf, DragAndDropConf {
+export interface BaseAttr extends TransformConf, EventConf {
   key?: string;
   ref?: Ref;
   display?: boolean;
