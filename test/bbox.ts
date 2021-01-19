@@ -17,8 +17,8 @@ import {LinearGradient, RadialGradient, } from '../src/color';
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
 render.showBBox = false
-render.showBoundingRect = true;
-render.enableDirtyRect = false;
+render.showBoundingRect = false;
+render.enableDirtyRect = true;
 render.showFPS = true;
 
 function degToRad(a: number) {
@@ -107,7 +107,7 @@ const rect = new Rect({
 })
 
 
-rect.animateTo({rotation: degToRad(360)}, 5000)
+// rect.animateTo({rotation: degToRad(360)}, 5000)
 
 const polygon = new Polygon({
   fill: 'blue',
@@ -142,6 +142,7 @@ const text = new Text({
 })
 
 const path = new Path({
+  draggable: true,
   fill: 'blue',
   lineWidth: 4,
   stroke: '#333',
@@ -162,7 +163,7 @@ const group = new Group({
 });
 
 
-group.animateTo({rotation: degToRad(360)}, 50000)
+// group.animateTo({rotation: degToRad(360)}, 50000)
 
 group.add(arc);
 group.add(circle)
@@ -187,4 +188,4 @@ group.add(path)
 // }
 
 render.add(group)
-render.resize(1200, 800);
+// render.resize(1200, 800);

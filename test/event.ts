@@ -10,7 +10,6 @@ import Rect from '../src/shapes/Rect';
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
 render.showBoundingRect = false;
-render.enableDirtyRect = true;
 
 const shape1 = new Circle({
   cx: 200,
