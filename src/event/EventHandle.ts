@@ -166,9 +166,16 @@ export default class EventHandle {
     this._dispatchSyntheticMouseEvent(event, target);
 
     if (event.type === 'mousedown' || event.type === 'mousemove') {
-      if (event.type === 'mousedown' && target.attr.draggable) {
-        this._draggingTarget = target;
-        this._dragStartMouse = { x, y };
+      // todo 父元素也可以拖动
+      if (event.type === 'mousedown') {
+        const parentNodes = target.getAncestorNodes(true);
+        for (let i = 0; i < parentNodes.length; i++) {
+          if (parentNodes[i].attr.draggable) {
+            this._draggingTarget = target;
+            this._dragStartMouse = { x, y };
+            break;
+          }
+        }
       }
       if (this._draggingTarget) {
         const eventMap = {
