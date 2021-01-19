@@ -2,6 +2,7 @@
  * @desc lodash import
  */
 /* tslint:disable:no-require-imports */
+import '../../js/lodash/_root';
 import isNull = require('lodash/isNull');
 import isUndefined = require('lodash/isUndefined');
 import isBoolean = require('lodash/isBoolean');
