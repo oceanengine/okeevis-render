@@ -162,13 +162,13 @@ export default class Render extends EventFul {
 
   private _onFrame = (now: number) => {
     this._rootGroup.onFrame(now);
-    this._painter.onFrame(now);
     this._eventHandle.onFrame();
+    this._painter.onFrame(now);
     this._needUpdate = false;
     this._dirtyElements.clear();
     const currentTime = (typeof window !== 'undefined' && window.performance) ? window.performance.now() : Date.now();
     const timeRemaining = 16 - (currentTime - now);
-    if (timeRemaining > 6) {
+    if (timeRemaining > 5) {
       this._rootGroup.getClientBoundingRect();
     }
     requestAnimationFrame(this._onFrame);

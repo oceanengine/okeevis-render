@@ -239,7 +239,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     });
 
     result.maintained.forEach(([from, to]) => {
-      const prevElement = this.item(from);
+      const prevElement = prevList[from];
       const nextElement = list[to];
       // 相同实例
       if (prevElement === nextElement) {

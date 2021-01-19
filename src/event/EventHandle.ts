@@ -49,6 +49,9 @@ export default class EventHandle {
   }
 
   public onRenderDirty = () => {
+    if (!this._prevMouseTarget) {
+      return;
+    }
     const { x, y } = this._prevMousePosition;
     this._syntheticMouseEvent({
       type: 'mousemove',

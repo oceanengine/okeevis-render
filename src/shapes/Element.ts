@@ -149,8 +149,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public strokeAble: boolean = true;
 
-  protected hasMiterLimit: boolean = true;
-
   private _dirty: boolean = true;
 
   private _animations: AnimateOption<T>[] = [];

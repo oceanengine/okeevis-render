@@ -43,7 +43,7 @@ const shape2 = new Circle({
 });
 setTimeout(() => {
   shape2.setAttr({display: false})
-}, 5000)
+}, 3000)
 const shape3 = new Circle({
 
 })
