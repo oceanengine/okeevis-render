@@ -30,6 +30,8 @@ export default class CanvasPainter implements Painter {
   // 首帧强制走全屏刷新逻辑
   private _isFirstFrame: boolean = true;
 
+  private _paintPosition: [number, number];
+
   private _frameTimes: number[] = [];
 
   public constructor(render: Render, isPixelPainter: boolean = false) {
@@ -97,6 +99,7 @@ export default class CanvasPainter implements Painter {
   }
 
   public paintAt(x: number, y: number) {
+    this._paintPosition = [x, y];
     const ctx = this._canvas.getContext('2d');
     const elements = this.render.getAllElements();
     ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
@@ -402,6 +405,12 @@ export default class CanvasPainter implements Painter {
     if (!mat3.exactEquals(selfTransform, identityMat3) || !mat3.exactEquals(baseMatrix, identityMat3)) {
       const matrix3 = item.getGlobalTransform();
       ctx.resetTransform();
+      if (this._isPixelPainter) {
+        if (this.dpr !== 1) {
+          ctx.scale(this.dpr, this.dpr);
+        }
+        ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
+      }
       ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
     }
 
