@@ -18,7 +18,7 @@ const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
 render.showBBox = false
 render.showBoundingRect = true;
-render.enableDirtyRect = true;
+render.enableDirtyRect = false;
 render.showFPS = true;
 
 function degToRad(a: number) {

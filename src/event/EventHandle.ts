@@ -69,8 +69,8 @@ export default class EventHandle {
     const ignoreInvisibleNodes = true;
     const ignoreMute = true; // pointerevent none
     let target: Element;
-    // 初步过滤掉不显示和不触发事件的元素,
-    let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes, ignoreMute).reverse();
+    // 初步过滤掉不显示和不触发事件的元素, 过滤掉拖拽中的
+    let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes, ignoreMute).reverse().filter(item => item !== this._draggingTarget);
 
     this.render.getRoot().resetPickRGB();
 
@@ -221,7 +221,7 @@ export default class EventHandle {
 
     if (event.type === 'mousemove' || event.type === 'wheel') {
       if (this.render.isBrowser()) {
-        const cursor = target.getExtendAttr('cursor');
+        const cursor = this._draggingTarget ? this._draggingTarget.getExtendAttr('cursor') : target.getExtendAttr('cursor');
         this.render.getDom().style.cursor = cursor;
       }
       if (prevMouseTarget !== target) {

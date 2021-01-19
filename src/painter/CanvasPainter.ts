@@ -397,8 +397,11 @@ export default class CanvasPainter implements Painter {
       // needStroke,
     } = item.getFillAndStrokeStyle();
 
-    const matrix3 = item.getTransform();
-    if (!mat3.exactEquals(matrix3, identityMat3)) {
+    const selfTransform = item.getTransform();
+    const baseMatrix = item.getBaseTransform();
+    if (!mat3.exactEquals(selfTransform, identityMat3) || !mat3.exactEquals(baseMatrix, identityMat3)) {
+      const matrix3 = item.getGlobalTransform();
+      ctx.resetTransform();
       ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
     }
 
@@ -535,7 +538,12 @@ export default class CanvasPainter implements Painter {
     }
 
     const matrix3 = item.getTransform();
+    const baseTransform = item.getBaseTransform();
     if (!mat3.exactEquals(matrix3, identityMat3)) {
+      return true;
+    }
+    
+    if (!mat3.exactEquals(baseTransform, identityMat3)) {
       return true;
     }
 

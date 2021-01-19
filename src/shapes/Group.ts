@@ -71,6 +71,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     super.dirtyTransform();
     this.children().forEach(child => child.dirtyAbsTransform());
   }
+  
+  public dirtyAbsTransform() {
+    super.dirtyAbsTransform();
+    this.children().forEach(child => child.dirtyAbsTransform());
+  }
 
   public add(item: Element): this {
     if (!item) {

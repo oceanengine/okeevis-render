@@ -5,10 +5,12 @@ import Circle from '../src/shapes/Circle';
 import Polyline from '../src/shapes/Polyline';
 import Path from '../src/shapes/Path';
 import Line from '../src/shapes/Line';
+import Rect from '../src/shapes/Rect';
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
-
+render.showBoundingRect = false;
+render.enableDirtyRect = true;
 
 const shape1 = new Circle({
   cx: 200,
@@ -41,8 +43,20 @@ const shape2 = new Circle({
   onDragOver: e => e.target.setAttr({fill: 'red'}),
   onDragLeave: e => e.target.setAttr({fill: 'green'})
 });
+
+const rect = new Rect({
+  x: 300,
+  y: 300,
+  width: 40,
+  height: 80,
+  fill: 'blue',
+  origin: [300, 300],
+  rotation: 45 * Math.PI / 180,
+  draggable: true,
+})
+
 setTimeout(() => {
-  shape2.setAttr({display: false})
+  // shape2.setAttr({display: false})
 }, 3000)
 const shape3 = new Circle({
 
@@ -66,6 +80,6 @@ group1.add(shape2)
 
 render.add(group1)
 render.add(group2)
-
+render.add(rect)
 render.on('mouseenter', (e: any) => console.log('canvas mouseenter'))
 render.on('mouseleave', (e: any) => console.log('canvas mouseleave'))

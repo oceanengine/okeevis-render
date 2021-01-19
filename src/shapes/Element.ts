@@ -429,8 +429,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     ].filter(key => (nextAttr as any)[key] !== undefined) as any;
     const shapeKeys = [
       'display' as keyof T,
-      ...this.shapeKeys.filter(key => !lodash.isUndefined(nextAttr[key])),
-    ];
+      ...this.shapeKeys].filter(key => !lodash.isUndefined(nextAttr[key]));
 
     if (transformKeys.length) {
       this.dirtyTransform();
@@ -642,7 +641,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public getGlobalTransform(): mat3 {
     if (!this._absTransform || this._absTransformDirty) {
-      this._absTransform = this._computeAbsTransform();
+      this._absTransform = this._computeGlobalTransform();
       this._absTransformDirty = false;
     }
     return this._absTransform;
@@ -652,35 +651,35 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._baseMatrix = mat3.create();
     this.beforeDirty();
     this.dirty();
-    this.dirtyTransform();
+    this.dirtyAbsTransform();
   }
 
   public setBaseTransform(matrix: mat3) {
     this._baseMatrix = matrix;
     this.beforeDirty();
     this.dirty();
-    this.dirtyTransform();
+    this.dirtyAbsTransform();
   }
 
   public translate(dx: number, dy: number) {
     this._baseMatrix = mat3.translate(this._baseMatrix, this._baseMatrix, [dx, dy]);
     this.beforeDirty();
     this.dirty();
-    this.dirtyTransform();
+    this.dirtyAbsTransform();
   }
 
   public scale(sx: number, sy: number = sx) {
     this._baseMatrix = mat3.scale(this._baseMatrix, this._baseMatrix, [sx, sy]);
     this.beforeDirty();
     this.dirty();
-    this.dirtyTransform();
+    this.dirtyAbsTransform();
   }
 
   public rotate(rad: number) {
     this._baseMatrix = mat3.rotate(this._baseMatrix, this._baseMatrix, rad);
     this.beforeDirty();
     this.dirty();
-    this.dirtyTransform();
+    this.dirtyAbsTransform();
   }
 
   public dirtyClientBoundingRect() {
@@ -696,7 +695,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     mat3.translate(out, out, position);
     transformUtils.rotate(out, rotation, origin[0], origin[1]);
     transformUtils.scale(out, sx, sy, origin[0], origin[1]);
-    mat3.multiply(out, out, this._baseMatrix);
     return out;
   }
 
@@ -722,10 +720,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  private _computeAbsTransform(): mat3 {
+  private _computeGlobalTransform(): mat3 {
     const parentTransform = this.parentNode ? this.parentNode.getGlobalTransform() : mat3.create();
     const selfTransform = this.getTransform();
-    return mat3.multiply(mat3.create(), parentTransform, selfTransform);
+    const out = mat3.create();
+    mat3.multiply(out, this._baseMatrix, parentTransform);
+    return mat3.multiply(out, out, selfTransform);
   }
 
   protected computeDirtyRect(): BBox {
