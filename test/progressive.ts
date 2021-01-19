@@ -13,9 +13,10 @@ const ref = { current: null } as any;
 
 const group = new Group({
   fill: 'blue',
+  onMouseOver: e => e.target.setAttr({fill: 'red', fontSize: 24})
 });
 
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < 50; i++) {
   group.addChunk(makeText(2000))
 }
 (window as any).render = render

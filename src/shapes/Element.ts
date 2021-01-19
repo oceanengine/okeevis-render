@@ -5,8 +5,7 @@ import * as lodash from '../utils/lodash';
 import { ColorValue, isTransparent } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
 import easingFunctions, { EasingName } from '../animate/ease';
-import SyntheticDragEvent from '../event/SyntheticDragEvent';
-import DragAndDrop, { DragAndDropConf } from '../abstract/DragAndDrop';
+import { DragAndDropConf } from '../abstract/DragAndDrop';
 import interpolateAttr from '../interpolate/interpolateAttr';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
@@ -124,7 +123,7 @@ const defaultTRansformConf: CommonAttr = {
 
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
-  implements AnimateAble<T>, TransformAble, DragAndDrop {
+  implements AnimateAble<T>, TransformAble {
   public attr: T & CommonAttr = {} as T;
 
   public type: string;
@@ -318,9 +317,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this.prevProcessAttr(attr);
     const prevAttr = this.attr;
-    if (!this._dirty && this._clientBoundingRect) {
-      this._dirtyRect = this.computeDirtyRect();
-    }
+    this.beforeDirty();
     this.attr = { ...this.attr, ...attr };
     this.dirty();
     this.updated(prevAttr, attr);
@@ -329,6 +326,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public get isGroup(): boolean {
     return this.type === 'group';
+  }
+
+  public beforeDirty() {
+    if (!this._dirty && this._clientBoundingRect) {
+      this._dirtyRect = this.computeDirtyRect();
+    }
   }
 
   public isDirty(): boolean {
@@ -650,51 +653,38 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public resetTransform() {
     this._baseMatrix = mat3.create();
+    this.beforeDirty();
     this.dirty();
     this.dirtyTransform();
   }
 
   public setBaseTransform(matrix: mat3) {
     this._baseMatrix = matrix;
+    this.beforeDirty();
+    this.dirty();
+    this.dirtyTransform();
   }
 
   public translate(dx: number, dy: number) {
     this._baseMatrix = mat3.translate(this._baseMatrix, this._baseMatrix, [dx, dy]);
+    this.beforeDirty();
     this.dirty();
     this.dirtyTransform();
   }
 
   public scale(sx: number, sy: number = sx) {
     this._baseMatrix = mat3.scale(this._baseMatrix, this._baseMatrix, [sx, sy]);
+    this.beforeDirty();
     this.dirty();
     this.dirtyTransform();
   }
 
   public rotate(rad: number) {
     this._baseMatrix = mat3.rotate(this._baseMatrix, this._baseMatrix, rad);
+    this.beforeDirty();
     this.dirty();
     this.dirtyTransform();
   }
-
-  /* ************ DragAndDrop Begin ******************* */
-
-  public onDragStart(event: SyntheticDragEvent) {
-    // todo
-  }
-
-  public onDragMove(event: SyntheticDragEvent) {
-    // todo
-  }
-
-  public onDragEnd(event: SyntheticDragEvent) {}
-
-  public onDragEnter(event: SyntheticDragEvent) {}
-
-  public onDragLeave(event: SyntheticDragEvent) {}
-
-  public onDrop(event: SyntheticDragEvent) {}
-
-  /* ************ DragAndDrop End ******************* */
 
   public dirtyClientBoundingRect() {
     this._clientBoundingRectDirty = true;

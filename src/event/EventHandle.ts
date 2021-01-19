@@ -8,7 +8,7 @@ import {
   // SyntheticTouchEvent,
   SyntheticDragEvent,
   EventConf,
-} from '../event';
+} from './index';
 import { SyntheticDragEventParams } from './SyntheticDragEvent';
 import { SyntheticMouseEventParams } from './SyntheticMouseEvent';
 
@@ -17,12 +17,10 @@ import * as mat3 from '../../js/mat3';
 import { transformMat3 } from '../utils/vec2';
 
 // 给touches使用
-const tempPickingCache: Record<string, Element> = {};
+// const tempPickingCache: Record<string, Element> = {};
 
 export default class EventHandle {
   public render: Render;
-
-  private _currentMousePosition: { x: number; y: number } | null = null;
 
   private _draggingTarget: Element | null = null;
 
@@ -43,25 +41,18 @@ export default class EventHandle {
   }
 
   public onFrame() {
-    // todo
-    // 检测currentTarget的状态(是否挂载, 是否仍然在图形中, 否则更新事件).
-    // 优化手段, 检测上次对象是否依然挂载, 包围盒是否依然包含该点
-    // 优化手段2: 增加debounce或throttle
-
-    if (this._currentMousePosition) {
-      const { x, y } = this._currentMousePosition;
-      // this.pickTarget(x, y);
-    }
+    // render dirty时, 需要根据上次鼠标位置重新合成事件
+    // 增加debounce或throttle
   }
 
   public pickTarget(x: number, y: number): Element {
-    console.time('pick');
+    // console.time('pick');
 
     const pixelPainter = this._PixelPainter;
     const ignoreInvisibleNodes = true;
     const ignoreMute = true; // pointerevent none
     let target: Element;
-    // 初步过滤掉不显示和不触发事件的元素, 
+    // 初步过滤掉不显示和不触发事件的元素,
     let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes, ignoreMute).reverse();
 
     this.render.getRoot().resetPickRGB();
@@ -97,7 +88,7 @@ export default class EventHandle {
       item.pickRGB = valueToRgb(index + 1);
     });
 
-    console.log('gpu pick size ', gpuPickNodes.length);
+    // console.log('gpu pick size ', gpuPickNodes.length);
 
     if (gpuPickNodes.length > 0) {
       pixelPainter.paintAt(x, y);
@@ -133,7 +124,7 @@ export default class EventHandle {
       target = pickNodes[pickIndex];
     }
 
-    console.timeEnd('pick');
+    // console.timeEnd('pick');
     return target || this.render.getRoot();
   }
 
@@ -153,7 +144,6 @@ export default class EventHandle {
     const { x, y } = this._getMousePosition(nativeEvent);
     const target = this.pickTarget(x, y);
     const prevMouseTarget = this._prevMouseTarget;
-    const isRoot = this.render.getRoot() === target;
     const mouseEventParam: SyntheticMouseEventParams = {
       x,
       y,
@@ -171,7 +161,7 @@ export default class EventHandle {
         const parentNodes = target.getAncestorNodes(true);
         for (let i = 0; i < parentNodes.length; i++) {
           if (parentNodes[i].attr.draggable) {
-            this._draggingTarget = target;
+            this._draggingTarget = parentNodes[i];
             this._dragStartMouse = { x, y };
             break;
           }
@@ -183,15 +173,36 @@ export default class EventHandle {
           mousemove: 'drag',
         };
         const eventType = eventMap[event.type];
-        const onDragEvent = new SyntheticDragEvent(eventType, {
+        const dragParam = {
           ...mouseEventParam,
           ...this._getDragParam(mouseEventParam),
-        });
+        };
+        const onDragEvent = new SyntheticDragEvent(eventType, dragParam);
         this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
+        if (prevMouseTarget !== target) {
+          const onDragLeaveEvent = new SyntheticDragEvent('dragleave', dragParam);
+          const onDragOverEvent = new SyntheticDragEvent('dragover', dragParam);
+          this._dispatchSyntheticMouseEvent(onDragLeaveEvent, prevMouseTarget);
+          this._dispatchSyntheticMouseEvent(onDragOverEvent, target);
+        }
       }
     }
 
-    if (event.type === 'mousemove') {
+    if (
+      event.type === 'mouseup' &&
+      this._draggingTarget &&
+      !this._draggingTarget.contains(target)
+    ) {
+      const dragParam = {
+        ...mouseEventParam,
+        bubbles: true,
+        ...this._getDragParam(mouseEventParam),
+      };
+      const dropEvent = new SyntheticDragEvent('drop', dragParam);
+      this._dispatchSyntheticMouseEvent(dropEvent, target);
+    }
+
+    if (event.type === 'mousemove' || event.type === 'wheel') {
       if (this.render.isBrowser()) {
         const cursor = target.getExtendAttr('cursor');
         this.render.getDom().style.cursor = cursor;
@@ -237,9 +248,8 @@ export default class EventHandle {
 
   private _handleMouseLeave = (nativeEvent: WheelEvent) => {
     // todo
-    this._currentMousePosition = null;
     const { x, y } = this._getMousePosition(nativeEvent);
-    const target = this._prevMouseTarget;
+    const target = this._prevMouseTarget || this.render.getRoot();
     const eventParam = {
       x,
       y,
@@ -253,22 +263,26 @@ export default class EventHandle {
       bubbles: true,
     });
     this._prevMousePosition = null;
+    this._prevMouseTarget = null;
     this._dispatchSyntheticMouseEvent(mouseoutEvent, target);
     const parentNodes = target.getAncestorNodes(true);
     parentNodes.forEach(node => {
-      const mouseEnterEvent: SyntheticMouseEvent = new SyntheticMouseEvent(
+      const mouseLeaveEvent: SyntheticMouseEvent = new SyntheticMouseEvent(
         'mouseleave',
         eventParam,
       );
-      this._dispatchSyntheticMouseEvent(mouseEnterEvent, node);
+      this._dispatchSyntheticMouseEvent(mouseLeaveEvent, node);
     });
   };
 
   private _handleMouseEnter = (nativeEvent: WheelEvent) => {
     // todo
-    this._currentMousePosition = null;
     const { x, y } = this._getMousePosition(nativeEvent);
     const target = this.pickTarget(x, y);
+    if (this.render.isBrowser()) {
+      const cursor = target.getExtendAttr('cursor');
+      this.render.getDom().style.cursor = cursor;
+    }
     const eventParam = {
       x,
       y,
@@ -291,10 +305,12 @@ export default class EventHandle {
       });
       this._dispatchSyntheticMouseEvent(mouseEnterEvent, node);
     });
+    this._prevMousePosition = { x, y };
+    this._prevMouseTarget = target;
   };
 
   private _handleDocumentTouchEnd = (event: MouseEvent) => {
-    // todo
+    event;
   };
 
   private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
@@ -314,6 +330,7 @@ export default class EventHandle {
       });
       this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
     }
+    this._draggingTarget = null;
   };
 
   private _getMousePosition(event: MouseEvent): { x: number; y: number } {
@@ -364,17 +381,36 @@ export default class EventHandle {
     if (!target) {
       return;
     }
+    const isRoot = this.render.getRoot() === target;
+    if (isRoot) {
+      this.render.dispatch(event.type, event);
+    }
     if (count === 0) {
       event.target = target;
     }
     event.currentTarget = target;
     const { bubbles, isPropagationStopped } = event;
+
     const eventKey = Object.keys(target.attr).filter(
       key => key.toLowerCase() === 'on' + event.type,
     )[0] as keyof EventConf;
+
+    if (event.type === 'drag' && count === 0) {
+      const dragEvent = event as SyntheticDragEvent;
+      let dx = dragEvent.dx;
+      let dy = dragEvent.dy;
+      if (target.attr.getDragOffset) {
+        const offset = target.attr.getDragOffset(dragEvent);
+        dx = offset.x;
+        dy = offset.y;
+      }
+      target.translate(dx, dy);
+    }
+
     if (target.attr[eventKey]) {
       target.attr[eventKey](event as any);
     }
+    target.dispatch(event.type, event);
     if (bubbles && !isPropagationStopped && target.parentNode) {
       count++;
       this._dispatchSyntheticMouseEvent(event, target.parentNode, count);
@@ -386,7 +422,7 @@ export default class EventHandle {
     event: SyntheticMouseEventParams,
   ): Pick<SyntheticDragEventParams, 'startX' | 'startY' | 'offsetX' | 'offsetY' | 'dx' | 'dy'> {
     const { x: startX, y: startY } = this._dragStartMouse;
-    const { x: prevX, y: prevY } = this._prevMousePosition;
+    const { x: prevX, y: prevY } = this._prevMousePosition || { x: startX, y: startY };
     const { x, y } = event;
     const offsetX = x - startX;
     const offsetY = y - startY;
