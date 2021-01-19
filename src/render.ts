@@ -162,8 +162,8 @@ export default class Render extends EventFul {
 
   private _onFrame = (now: number) => {
     this._rootGroup.onFrame(now);
-    this._eventHandle.onFrame();
     this._painter.onFrame(now);
+    this._eventHandle.onFrame();
     this._needUpdate = false;
     this._dirtyElements.clear();
     const currentTime = (typeof window !== 'undefined' && window.performance) ? window.performance.now() : Date.now();
