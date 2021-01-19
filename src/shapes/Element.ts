@@ -314,9 +314,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this.prevProcessAttr(attr);
     const prevAttr = this.attr;
-    this.beforeDirty();
-    this.attr = { ...this.attr, ...attr };
     this.dirty();
+    this.attr = { ...this.attr, ...attr };
     this.updated(prevAttr, attr);
     return this;
   }
@@ -336,6 +335,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public dirty(dirtyElement?: Element) {
+    this.beforeDirty();
     this._dirty = true;
     if (this.ownerRender) {
       this.ownerRender.dirty(dirtyElement || this);
@@ -648,37 +648,32 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public resetTransform() {
-    this._baseMatrix = mat3.create();
-    this.beforeDirty();
     this.dirty();
+    this._baseMatrix = mat3.create();
     this.dirtyAbsTransform();
   }
 
   public setBaseTransform(matrix: mat3) {
-    this._baseMatrix = matrix;
-    this.beforeDirty();
     this.dirty();
+    this._baseMatrix = matrix;
     this.dirtyAbsTransform();
   }
 
   public translate(dx: number, dy: number) {
-    this._baseMatrix = mat3.translate(this._baseMatrix, this._baseMatrix, [dx, dy]);
-    this.beforeDirty();
     this.dirty();
+    this._baseMatrix = mat3.translate(this._baseMatrix, this._baseMatrix, [dx, dy]);
     this.dirtyAbsTransform();
   }
 
   public scale(sx: number, sy: number = sx) {
-    this._baseMatrix = mat3.scale(this._baseMatrix, this._baseMatrix, [sx, sy]);
-    this.beforeDirty();
     this.dirty();
+    this._baseMatrix = mat3.scale(this._baseMatrix, this._baseMatrix, [sx, sy]);
     this.dirtyAbsTransform();
   }
 
   public rotate(rad: number) {
-    this._baseMatrix = mat3.rotate(this._baseMatrix, this._baseMatrix, rad);
-    this.beforeDirty();
     this.dirty();
+    this._baseMatrix = mat3.rotate(this._baseMatrix, this._baseMatrix, rad);
     this.dirtyAbsTransform();
   }
 
