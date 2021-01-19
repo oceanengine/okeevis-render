@@ -69,8 +69,8 @@ export default class EventHandle {
     const ignoreInvisibleNodes = true;
     const ignoreMute = true; // pointerevent none
     let target: Element;
-    // 初步过滤掉不显示和不触发事件的元素, 过滤掉拖拽中的
-    let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes, ignoreMute).reverse().filter(item => item !== this._draggingTarget);
+    // 初步过滤掉不显示和不触发事件的元素
+    let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes, ignoreMute).reverse();
 
     this.render.getRoot().resetPickRGB();
 
