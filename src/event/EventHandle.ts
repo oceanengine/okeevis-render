@@ -15,6 +15,7 @@ import { SyntheticMouseEventParams } from './SyntheticMouseEvent';
 import { inBBox } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from '../utils/vec2';
+import * as lodash from '../utils/lodash';
 
 // 给touches使用
 // const tempPickingCache: Record<string, Element> = {};
@@ -38,12 +39,25 @@ export default class EventHandle {
     this.render = render;
     this._PixelPainter = new CanvasPainter(render, true);
     this._initEvents();
+    this.onRenderDirty = lodash.throttle(this.onRenderDirty, 100);
   }
 
   public onFrame() {
-    // render dirty时, 需要根据上次鼠标位置重新合成事件
-    // 增加debounce或throttle
+    if (this.render.needUpdate() && this._prevMousePosition) {
+      this.onRenderDirty();
+    }
   }
+
+  public onRenderDirty = () => {
+    const { x, y } = this._prevMousePosition;
+    this._syntheticMouseEvent({
+      type: 'mousemove',
+      x,
+      y,
+      bubbles: true,
+      timeStamp: Date.now(),
+    } as any, false);
+  };
 
   public pickTarget(x: number, y: number): Element {
     // console.time('pick');
@@ -139,9 +153,9 @@ export default class EventHandle {
   //   // todo 用户自定义事件
   // }
 
-  private _syntheticMouseEvent = (nativeEvent: MouseEvent) => {
+  private _syntheticMouseEvent = (nativeEvent: MouseEvent, isNative: boolean = true) => {
     // todo统一mousewheel事件
-    const { x, y } = this._getMousePosition(nativeEvent);
+    const { x, y } = isNative ? this._getMousePosition(nativeEvent) : nativeEvent;
     const target = this.pickTarget(x, y);
     const prevMouseTarget = this._prevMouseTarget;
     const mouseEventParam: SyntheticMouseEventParams = {

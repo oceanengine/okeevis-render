@@ -41,7 +41,9 @@ const shape2 = new Circle({
   onDragOver: e => e.target.setAttr({fill: 'red'}),
   onDragLeave: e => e.target.setAttr({fill: 'green'})
 });
-
+setTimeout(() => {
+  shape1.setAttr({display: false})
+}, 5000)
 const shape3 = new Circle({
 
 })
