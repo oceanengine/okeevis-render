@@ -244,7 +244,7 @@ export default class CanvasPainter implements Painter {
       ctx.save();
     }
 
-    hasSelfContext && this._setElementCanvasContext(ctx, item);
+    hasSelfContext && this._setElementCanvasContext(ctx, item, fillAndStrokeStyle);
     if (item.type !== 'group') {
       const current = item as Shape;
       if (item.fillAble && needFill && !this._isPixelPainter) {
@@ -359,7 +359,7 @@ export default class CanvasPainter implements Painter {
     this._ctx = this._canvas.getContext('2d');
   }
 
-  protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
+  protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, fillAndStrokeStyle?: FillAndStrokeStyle) {
     const {
       stroke,
       fill,
@@ -393,13 +393,13 @@ export default class CanvasPainter implements Painter {
       // hasStroke,
       //  needFill,
       // needStroke,
-    } = item.getFillAndStrokeStyle();
+    } =  fillAndStrokeStyle || item.getFillAndStrokeStyle();
 
     const selfMatrix = item.getTransform();
     const baseMatrix = item.getBaseTransform();
     if (baseMatrix !== IDENTRY_MATRIX || selfMatrix !== IDENTRY_MATRIX) {
       if (baseMatrix !== IDENTRY_MATRIX) {
-        const matrix3 = item.getGlobalTransform();
+        const globalMatrix = item.getGlobalTransform();
         ctx.resetTransform();
         if (this.dpr !== 1) {
           ctx.scale(this.dpr, this.dpr);
@@ -407,10 +407,9 @@ export default class CanvasPainter implements Painter {
         if (this._isPixelPainter) {
           ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
         }
-        ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]); 
+        ctx.transform(globalMatrix[0], globalMatrix[1], globalMatrix[3], globalMatrix[4], globalMatrix[6], globalMatrix[7]); 
       } else  if (selfMatrix !== IDENTRY_MATRIX) {
-        const matrix3 = item.getTransform();
-        ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]); 
+        ctx.transform(selfMatrix[0], selfMatrix[1], selfMatrix[3], selfMatrix[4], selfMatrix[6], selfMatrix[7]); 
       }
     }
 
@@ -546,16 +545,13 @@ export default class CanvasPainter implements Painter {
       return true;
     }
 
-    const matrix3 = item.getTransform();
+    const selfMatrix = item.getTransform();
     const baseTransform = item.getBaseTransform();
-    if (matrix3 !== IDENTRY_MATRIX) {
+
+    if (baseTransform !== IDENTRY_MATRIX || selfMatrix !== IDENTRY_MATRIX) {
       return true;
     }
     
-    if (baseTransform !== IDENTRY_MATRIX) {
-      return true;
-    }
-
     return false;
   }
 
