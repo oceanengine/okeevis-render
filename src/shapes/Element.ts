@@ -339,7 +339,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.ownerRender) {
       this.ownerRender.dirty(dirtyElement || this);
     }
-    this._mountClip();
+    if (this.attr.clip) {
+      this._mountClip();
+    }
     if (this.attr.ref) {
       this.attr.ref.current = this as Element<any>;
     }
@@ -449,7 +451,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     ].filter(key => (nextAttr as any)[key] !== undefined) as any;
     const shapeKeys = [
       'display' as keyof T,
-      ...this.shapeKeys].filter(key => !lodash.isUndefined(nextAttr[key]));
+      ...this.shapeKeys].filter(key => nextAttr[key] !== undefined);
 
     if (transformKeys.length) {
       this.dirtyTransform();
@@ -612,23 +614,23 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
 
-    const animate = this._animations[0];
-    const { startTime, during, from, to, ease = 'Linear', callback, onFrame, delay = 0 } = animate;
+    let animate = this._animations[0];
     let progress = 0;
-    if (startTime) {
-      progress = Math.min((now - startTime) / during, 1);
+    if (animate.startTime) {
+      progress = Math.min((now - animate.startTime) / animate.during, 1);
     } else {
       animate.startTime = now;
     }
-    progress = typeof ease === 'function' ? ease(progress) : easingFunctions[ease](progress);
-    const attr = interpolateAttr(from, to, progress) as T;
+    progress = typeof animate.ease === 'function' ? animate.ease(progress) : easingFunctions[animate.ease || 'Linear'](progress);
+    const attr = interpolateAttr(animate.from, animate.to, progress) as T;
     if (progress === 1) {
-      callback && callback();
+      animate.callback && animate.callback();
       animate.stopped = true;
     }
     this.setAttr(attr);
-    onFrame && onFrame(progress);
+    animate.onFrame && animate.onFrame(progress);
     this._animations = this._animations.filter(item => !item.stopped);
+    animate = null;
   }
 
   public getClipElement(): Shape {
