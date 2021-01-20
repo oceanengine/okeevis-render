@@ -333,7 +333,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._dirty;
   }
 
-  public dirty(dirtyElement?: Element) {
+  public dirty(dirtyElement: Element = null) {
     this.beforeDirty();
     this._dirty = true;
     if (this.ownerRender) {
@@ -583,8 +583,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   protected prevProcessAttr(attr: T) {
-    attr;
+    // attr;
   }
 
   public addAnimation(option: AnimateOption<T>) {
