@@ -3,6 +3,7 @@ import Text from '../src/shapes/Text';
 import Group from '../src/shapes/Group';
 import Rect from '../src/shapes/Rect';
 import Line from '../src/shapes/Line';
+import Circle from '../src/shapes/Circle';
 
 const dom = document.getElementById('root') as HTMLDivElement;
 const render = new Render(dom);
@@ -15,9 +16,11 @@ const group = new Group({
   fill: 'blue',
 });
 
-group.addAll(makeText(3000));
+group.addAll(makeCircle(5000));
 render.add(group);
-group.updateAll(makeText(3000));
+group.children().forEach(item => item.animateTo({
+  position: [Math.random() * 640, Math.random()*480],
+}, 20000))
 document.onclick = e => {
   return
   group.add(new Rect({
@@ -66,4 +69,18 @@ function makeLine(count: number) {
     });
   });
 }
-// render.resize(1900, 1080)
+
+
+function makeCircle(count: number) {
+  return new Array(count).fill(0).map((value, index) => {
+    return new Circle({
+      cx: 10,
+      cy: 10,
+      radius: 5 + Math.random() * 10,
+      position: [Math.random() * 1000, Math.random()*600],
+      fill: '#' + Math.random().toString(16).substr(2, 6),
+    })
+  });
+}
+
+render.resize(1000, 600)

@@ -75,6 +75,7 @@ const line = new Line({
 })
 
 const rect = new Rect({
+  draggable: true,
   x: 400,
   y: 400,
   width: 100,
@@ -164,7 +165,6 @@ const group = new Group({
 
 
 // group.animateTo({rotation: degToRad(360)}, 50000)
-
 group.add(arc);
 group.add(circle)
 group.add(image);
@@ -189,3 +189,13 @@ group.add(path)
 
 render.add(group)
 // render.resize(1200, 800);
+function makeText(count: number) {
+  return new Array(count).fill(0).map((value, index) => {
+    return new Text({
+      x: Math.random() * 400,
+      y: Math.random() * 600,
+      fill: 'blue',
+      text: index + '',
+    });
+  });
+}
