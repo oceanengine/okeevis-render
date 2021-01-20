@@ -176,9 +176,6 @@ export default class Render extends EventFul {
 
   private _loop() {
     this._requestAnimationFrameId = requestAnimationFrame(this._onFrame);
-    // this._requiestIdleCallbackId = (window as any).requestIdleCallback(() => {
-    //   this._rootGroup.computClientBoundingRect();
-    // });
   }
   
 }

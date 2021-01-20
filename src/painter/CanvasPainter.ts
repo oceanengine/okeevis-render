@@ -194,9 +194,8 @@ export default class CanvasPainter implements Painter {
     
     item.clearDirty();
 
-    const { display } = item.attr;
 
-    if (display === false) {
+    if (!item.attr.display) {
       return;
     }
 
@@ -214,8 +213,8 @@ export default class CanvasPainter implements Painter {
     }
     const fillAndStrokeStyle = item.getFillAndStrokeStyle();
     const {
-      fill,
-      stroke,
+      // fill,
+      // stroke,
       opacity,
       fillOpacity,
       strokeOpacity,
