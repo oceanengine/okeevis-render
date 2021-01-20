@@ -119,6 +119,8 @@ const defaultTRansformConf: CommonAttr = {
   scale: [0, 0],
 };
 
+const styleReceiver: Partial<FillAndStrokeStyle> = Object.create(null);
+
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
   implements AnimateAble<T>, TransformAble {
@@ -263,18 +265,18 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const fill = this.getExtendAttr('fill');
     const hasFill = fill && fill !== 'none';
     const hasStroke = stroke && stroke !== 'none' && lineWidth > 0;
-    return {
-      fill,
-      stroke,
-      opacity,
-      fillOpacity,
-      strokeOpacity,
-      lineWidth,
-      hasFill,
-      hasStroke,
-      needFill: hasFill && fillOpacity !== 0 && !isTransparent(fill),
-      needStroke: hasStroke && strokeOpacity !== 0 && !isTransparent(stroke),
-    };
+    const receiver = styleReceiver;
+    receiver.fill = fill;
+    receiver.stroke = stroke;
+    receiver.opacity = opacity;
+    receiver.fillOpacity = fillOpacity;
+    receiver.strokeOpacity = strokeOpacity;
+    receiver.lineWidth = lineWidth;
+    receiver.hasFill = hasFill;
+    receiver.hasStroke = hasFill;
+    receiver.needFill =  hasFill && fillOpacity !== 0 && !isTransparent(fill);
+    receiver.needStroke = hasStroke && strokeOpacity !== 0 && !isTransparent(stroke);
+    return receiver as FillAndStrokeStyle;
   }
 
   public contains(child: Element): boolean {
