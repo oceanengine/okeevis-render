@@ -12,7 +12,7 @@ import Shape, { ShapeConf } from './Shape';
 import * as mat3 from '../../js/mat3';
 import { Vec2, transformMat3 } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
-import { RGBA_TRANSPARENT } from '../constant';
+import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 
 export type Ref<T extends Element = Element> = { current?: T };
@@ -82,7 +82,6 @@ export interface FillAndStrokeStyle {
   strokeOpacity: number;
 }
 
-const identityTrasnform = mat3.create();
 // 可继承(不可跨级)
 export const defaultCanvasContext: ShapeConf = {
   fill: 'none',
@@ -157,7 +156,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _bboxDirty: boolean = true;
 
-  private _transform: mat3 = identityTrasnform;
+  private _transform: mat3 = IDENTRY_MATRIX;
 
   private _absTransform: mat3;
 
