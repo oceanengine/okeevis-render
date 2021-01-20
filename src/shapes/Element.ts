@@ -325,7 +325,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public beforeDirty() {
     if (!this._dirty && this._clientBoundingRect) {
-      this._dirtyRect = this.computeDirtyRect();
+      this._dirtyRect = this.getCurrentDirtyRect();
     }
   }
 
@@ -371,11 +371,32 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public getDirtyRects(): [BBox] | [BBox, BBox] {
     const prevBBox = this._dirtyRect;
-    const currentBBox = this.computeDirtyRect();
+    const currentBBox = this.getCurrentDirtyRect();
     if (prevBBox) {
       return [prevBBox, currentBBox];
     }
     return [currentBBox];
+  }
+
+  public getCurrentDirtyRect(): BBox {
+    // 计算当前dirtyRect
+    const { x, y, width, height } = this.getClientBoundingRect();
+    // 暂不考虑miter尖角影响, 默认使用了bevel
+    // const miterLimit = this.getExtendAttr('miterLimit');
+    // const lineJoin = this.getExtendAttr('lineJoin');
+    const shadowBlur = this.getExtendAttr('shadowBlur');
+    if (shadowBlur === 0) {
+      return ceilBBox({ x, y, width, height });
+    }
+    const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
+    const shadowOffsetY = this.getExtendAttr('shadowOffsetY');
+    const shadowBBox = {
+      x: x + shadowOffsetX - shadowBlur,
+      y: y + shadowOffsetY - shadowBlur,
+      width: width + shadowBlur + shadowOffsetX,
+      height: height + shadowBlur + shadowOffsetY,
+    };
+    return ceilBBox(unionBBox([this._clientBoundingRect, shadowBBox]));
   }
 
   protected computeBBox(): BBox {
@@ -720,25 +741,5 @@ export default class Element<T extends CommonAttr = ElementAttr>
     mat3.multiply(out, this._baseMatrix, parentTransform);
     return mat3.multiply(out, out, selfTransform);
   }
-
-  protected computeDirtyRect(): BBox {
-    // 计算当前dirtyRect
-    const { x, y, width, height } = this.getClientBoundingRect();
-    // 暂不考虑miter尖角影响, 默认使用了bevel
-    // const miterLimit = this.getExtendAttr('miterLimit');
-    // const lineJoin = this.getExtendAttr('lineJoin');
-    const shadowBlur = this.getExtendAttr('shadowBlur');
-    if (shadowBlur === 0) {
-      return ceilBBox({ x, y, width, height });
-    }
-    const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
-    const shadowOffsetY = this.getExtendAttr('shadowOffsetY');
-    const shadowBBox = {
-      x: x + shadowOffsetX - shadowBlur,
-      y: y + shadowOffsetY - shadowBlur,
-      width: width + shadowBlur + shadowOffsetX,
-      height: height + shadowBlur + shadowOffsetY,
-    };
-    return ceilBBox(unionBBox([this._clientBoundingRect, shadowBBox]));
-  }
+  
 }

@@ -421,7 +421,9 @@ export default class EventHandle {
         dx = offset.x;
         dy = offset.y;
       }
+
       target.translate(dx, dy);
+      this.render.getPainter().onFrame();
     }
 
     if (target.attr[eventKey]) {
@@ -430,7 +432,7 @@ export default class EventHandle {
     target.dispatch(event.type, event);
     if (bubbles && !isPropagationStopped && target.parentNode) {
       count++;
-      this._dispatchSyntheticMouseEvent(event, target.parentNode, count);
+      this._dispatchSyntheticMouseEvent(event, target.parentNode as  any as Element, count);
     }
     // todo 拖动行为
   }

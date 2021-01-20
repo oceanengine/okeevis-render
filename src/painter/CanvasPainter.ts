@@ -53,10 +53,10 @@ export default class CanvasPainter implements Painter {
     this.render.dirty();
   }
 
-  public onFrame(now: number) {
+  public onFrame(now?: number) {
     const showFPS = this.render.showFPS;
     const needUpdate = this.render.needUpdate();
-    if (showFPS) {
+    if (showFPS && now) {
       this._frameTimes.push(now);
       if (this._frameTimes.length > 60) {
         this._frameTimes.shift();
@@ -204,8 +204,7 @@ export default class CanvasPainter implements Painter {
     }
 
     if (dirtyRegions) {
-      // todo 换成dirtyRect
-      const bbox = item.getClientBoundingRect();
+      const bbox = item.getCurrentDirtyRect();
       const isDirty = dirtyRegions.some(region => bboxIntersect(region, bbox));
       if (!isDirty) {
         return;

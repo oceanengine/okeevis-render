@@ -52,16 +52,16 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return this.getBBox();
   }
 
+  public getCurrentDirtyRect(): BBox {
+    const bboxList =  lodash.flatten(this.children().filter(item => item.attr.display).map(child => child.getDirtyRects()));
+    return ceilBBox(unionBBox(bboxList));
+  }
+
   protected computeBBox(): BBox {
     const bboxList = this.children().filter(item => item.attr.display).map(child => child.getClientBoundingRect());
     return unionBBox(bboxList);
   }
   
-  protected computeDirtyRect(): BBox {
-    const bboxList =  lodash.flatten(this.children().filter(item => item.attr.display).map(child => child.getDirtyRects()));
-    return ceilBBox(unionBBox(bboxList));
-  }
-
   public mounted() {
     super.mounted();
     this.children().forEach(item => item.mounted());
