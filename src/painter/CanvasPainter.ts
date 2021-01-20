@@ -5,7 +5,6 @@ import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import Rect from '../shapes/Rect';
 import Text from '../shapes/Text';
-import * as lodash from '../utils/lodash';
 import { BBox, bboxIntersect } from '../utils/bbox';
 import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
@@ -502,8 +501,8 @@ export default class CanvasPainter implements Painter {
       ctx.shadowOffsetY = shadowOffsetY;
     }
 
-    if (!lodash.isUndefined(lineDash)) {
-      ctx.setLineDash(lineDash || []);
+    if (lineDash) {
+      ctx.setLineDash(lineDash);
     }
   }
 
