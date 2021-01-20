@@ -10,9 +10,8 @@ import { BBox, bboxIntersect } from '../utils/bbox';
 import * as mat3 from '../../js/mat3';
 import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
+import { IDENTRY_MATRIX, } from '../constant';
 
-// todo 使用相同单位矩阵实例, 加快比较速度
-const identityMat3 = mat3.create();
 
 export default class CanvasPainter implements Painter {
   public render: Render;
@@ -402,13 +401,13 @@ export default class CanvasPainter implements Painter {
 
     const selfTransform = item.getTransform();
     const baseMatrix = item.getBaseTransform();
-    if (!mat3.exactEquals(selfTransform, identityMat3) || !mat3.exactEquals(baseMatrix, identityMat3)) {
+    if (!mat3.exactEquals(selfTransform, IDENTRY_MATRIX) || !mat3.exactEquals(baseMatrix, IDENTRY_MATRIX)) {
       const matrix3 = item.getGlobalTransform();
       ctx.resetTransform();
+      if (this.dpr !== 1) {
+        ctx.scale(this.dpr, this.dpr);
+      }
       if (this._isPixelPainter) {
-        if (this.dpr !== 1) {
-          ctx.scale(this.dpr, this.dpr);
-        }
         ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
       }
       ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
@@ -492,7 +491,7 @@ export default class CanvasPainter implements Painter {
       ctx.globalCompositeOperation = blendMode;
     }
 
-    if (lineDashOffset) {
+    if (lineDashOffset !== undefined) {
       ctx.lineDashOffset = lineDashOffset;
     }
 
@@ -548,11 +547,11 @@ export default class CanvasPainter implements Painter {
 
     const matrix3 = item.getTransform();
     const baseTransform = item.getBaseTransform();
-    if (!mat3.exactEquals(matrix3, identityMat3)) {
+    if (!mat3.exactEquals(matrix3, IDENTRY_MATRIX)) {
       return true;
     }
     
-    if (!mat3.exactEquals(baseTransform, identityMat3)) {
+    if (!mat3.exactEquals(baseTransform, IDENTRY_MATRIX)) {
       return true;
     }
 
