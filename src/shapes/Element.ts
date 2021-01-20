@@ -164,7 +164,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _absTransformDirty: boolean = false; // 自身或祖先矩阵变化
 
-  private _baseMatrix: mat3 = mat3.create();
+  private _baseMatrix: mat3 = IDENTRY_MATRIX;
 
   private _clientBoundingRect: BBox;
 
@@ -660,19 +660,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public translate(dx: number, dy: number) {
     this.dirty();
-    this._baseMatrix = mat3.translate(this._baseMatrix, this._baseMatrix, [dx, dy]);
+    this._baseMatrix = mat3.translate(mat3.create(), this._baseMatrix, [dx, dy]);
     this.dirtyAbsTransform();
   }
 
   public scale(sx: number, sy: number = sx) {
     this.dirty();
-    this._baseMatrix = mat3.scale(this._baseMatrix, this._baseMatrix, [sx, sy]);
+    this._baseMatrix = mat3.scale(mat3.create(), this._baseMatrix, [sx, sy]);
     this.dirtyAbsTransform();
   }
 
   public rotate(rad: number) {
     this.dirty();
-    this._baseMatrix = mat3.rotate(this._baseMatrix, this._baseMatrix, rad);
+    this._baseMatrix = mat3.rotate(mat3.create(), this._baseMatrix, rad);
     this.dirtyAbsTransform();
   }
 
@@ -715,7 +715,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeGlobalTransform(): mat3 {
-    const parentTransform = this.parentNode ? this.parentNode.getGlobalTransform() : mat3.create();
+    const parentTransform = this.parentNode ? this.parentNode.getGlobalTransform() : IDENTRY_MATRIX;
     const selfTransform = this.getTransform();
     const out = mat3.create();
     mat3.multiply(out, this._baseMatrix, parentTransform);

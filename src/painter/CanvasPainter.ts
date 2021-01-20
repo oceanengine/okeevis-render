@@ -115,7 +115,7 @@ export default class CanvasPainter implements Painter {
   }
 
   public paintInDirtyRegion() {
-    console.time('compute dirty rects');
+    // console.time('compute dirty rects');
     const dirtyElements: Element[] = [];
     let dirtyRegions: BBox[] = [];
     this.render.getDirtyElements().forEach(el => dirtyElements.push(el));
@@ -125,7 +125,7 @@ export default class CanvasPainter implements Painter {
       // todo 检测脏区面积占比, 提前return
     }
     this.paint(dirtyRegions);
-    console.timeEnd('compute dirty rects');
+    // console.timeEnd('compute dirty rects');
   }
 
   public paintChunk(parent: Group, chunk: Element[]) {
@@ -155,7 +155,7 @@ export default class CanvasPainter implements Painter {
   }
 
   public paint(dirtyRegions?: BBox[]) {
-    console.time('paint');
+    // console.time('paint');
     const ctx = this._canvas.getContext('2d');
     const dpr = this.dpr;
     const elements = this.render.getAllElements();
@@ -184,7 +184,7 @@ export default class CanvasPainter implements Painter {
 
     elements.forEach(item => this.drawElement(ctx, item, false, dirtyRegions));
     ctx.restore();
-    console.timeEnd('paint');
+    // console.timeEnd('paint');
   }
 
   public drawElement(
@@ -399,18 +399,23 @@ export default class CanvasPainter implements Painter {
       // needStroke,
     } = item.getFillAndStrokeStyle();
 
-    const selfTransform = item.getTransform();
+    const selfMatrix = item.getTransform();
     const baseMatrix = item.getBaseTransform();
-    if (!mat3.exactEquals(selfTransform, IDENTRY_MATRIX) || !mat3.exactEquals(baseMatrix, IDENTRY_MATRIX)) {
-      const matrix3 = item.getGlobalTransform();
-      ctx.resetTransform();
-      if (this.dpr !== 1) {
-        ctx.scale(this.dpr, this.dpr);
+    if (baseMatrix !== IDENTRY_MATRIX || selfMatrix !== IDENTRY_MATRIX) {
+      if (baseMatrix !== IDENTRY_MATRIX) {
+        const matrix3 = item.getGlobalTransform();
+        ctx.resetTransform();
+        if (this.dpr !== 1) {
+          ctx.scale(this.dpr, this.dpr);
+        }
+        if (this._isPixelPainter) {
+          ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
+        }
+        ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]); 
+      } else  if (selfMatrix !== IDENTRY_MATRIX) {
+        const matrix3 = item.getTransform();
+        ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]); 
       }
-      if (this._isPixelPainter) {
-        ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
-      }
-      ctx.transform(matrix3[0], matrix3[1], matrix3[3], matrix3[4], matrix3[6], matrix3[7]);
     }
 
     if (clip) {
@@ -547,11 +552,11 @@ export default class CanvasPainter implements Painter {
 
     const matrix3 = item.getTransform();
     const baseTransform = item.getBaseTransform();
-    if (!mat3.exactEquals(matrix3, IDENTRY_MATRIX)) {
+    if (matrix3 !== IDENTRY_MATRIX) {
       return true;
     }
     
-    if (!mat3.exactEquals(baseTransform, IDENTRY_MATRIX)) {
+    if (baseTransform !== IDENTRY_MATRIX) {
       return true;
     }
 
