@@ -685,10 +685,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const out = mat3.create();
     const { rotation = 0, origin = [0, 0], position = [0, 0], scale = [1, 1] } = this.attr;
     const [sx, sy] = scale;
-    // todo 旋转为0时不旋转, position[0,0]是不位移,scale[1, 1]时不计算, 避免相关计算
-    mat3.translate(out, out, position);
-    transformUtils.rotate(out, rotation, origin[0], origin[1]);
-    transformUtils.scale(out, sx, sy, origin[0], origin[1]);
+    (position[0] !== 0 || position[1] !== 0) && mat3.translate(out, out, position);
+    rotation !== 0 && transformUtils.rotate(out, rotation, origin[0], origin[1]);
+    (sx !== 1 || sy !== 1) && transformUtils.scale(out, sx, sy, origin[0], origin[1]);
     return out;
   }
 
