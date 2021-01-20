@@ -7,7 +7,6 @@ import Rect from '../shapes/Rect';
 import Text from '../shapes/Text';
 import * as lodash from '../utils/lodash';
 import { BBox, bboxIntersect } from '../utils/bbox';
-import * as mat3 from '../../js/mat3';
 import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
 import { IDENTRY_MATRIX, } from '../constant';
@@ -150,7 +149,7 @@ export default class CanvasPainter implements Painter {
     ctx.textBaseline = defaultCanvasContext.textBaseline;
     ctx.lineJoin = defaultCanvasContext.lineJoin;
     parentList.forEach(current => this._setElementCanvasContext(ctx, current));
-    chunk.forEach(item => this.drawElement(ctx, item, false));
+    chunk.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
   }
 
@@ -182,7 +181,7 @@ export default class CanvasPainter implements Painter {
       ctx.clip();
     }
 
-    elements.forEach(item => this.drawElement(ctx, item, false, dirtyRegions));
+    elements.forEach(item => this.drawElement(ctx, item, dirtyRegions));
     ctx.restore();
     // console.timeEnd('paint');
   }
@@ -190,7 +189,6 @@ export default class CanvasPainter implements Painter {
   public drawElement(
     ctx: CanvasRenderingContext2D,
     item: Element,
-    isInBatch: boolean = false,
     dirtyRegions?: BBox[],
   ) {
     
@@ -227,15 +225,15 @@ export default class CanvasPainter implements Painter {
       needStroke,
     } = fillAndStrokeStyle;
 
-    if (isInBatch) {
-      if (item.isGroup) {
-        console.warn('batch brush muse be shape element');
-        return;
-      }
-      const shape = item as Shape;
-      shape.brush(ctx);
-      return;
-    }
+    // if (isInBatch) {
+    //   if (item.isGroup) {
+    //     console.warn('batch brush muse be shape element');
+    //     return;
+    //   }
+    //   const shape = item as Shape;
+    //   shape.brush(ctx);
+    //   return;
+    // }
 
     if (opacity === 0 && !this._isPixelPainter) {
       return;
@@ -281,20 +279,20 @@ export default class CanvasPainter implements Painter {
       }
     } else {
       const current = item as Group;
-      const batchBrush = current.attr._batchBrush;
-      if (batchBrush) {
-        ctx.beginPath();
-      }
-      current.children().forEach(child => this.drawElement(ctx, child, batchBrush, dirtyRegions));
+      // const batchBrush = current.attr._batchBrush;
+      // if (batchBrush) {
+      //   ctx.beginPath();
+      // }
+      current.children().forEach(child => this.drawElement(ctx, child, dirtyRegions));
 
-      if (batchBrush) {
-        if (fill && fill !== 'none') {
-          ctx.fill();
-        }
-        if (stroke && stroke !== 'none') {
-          ctx.stroke();
-        }
-      }
+      // if (batchBrush) {
+      //   if (fill && fill !== 'none') {
+      //     ctx.fill();
+      //   }
+      //   if (stroke && stroke !== 'none') {
+      //     ctx.stroke();
+      //   }
+      // }
     }
 
     if (!this._isPixelPainter && (this.render.showBBox || this.render.showBoundingRect)) {
@@ -629,7 +627,7 @@ export default class CanvasPainter implements Painter {
       text: fps + ' fps',
       textBaseline: 'top',
     });
-    this.drawElement(this._ctx, rect, false);
-    this.drawElement(this._ctx, text, false);
+    this.drawElement(this._ctx, rect);
+    this.drawElement(this._ctx, text);
   }
 }
