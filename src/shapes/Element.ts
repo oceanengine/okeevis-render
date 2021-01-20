@@ -240,6 +240,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       const scale = globalTransform[0];
       return (((value as any) as number) / scale) as any;
     }
+    node = null;
     return value;
   }
 
@@ -707,11 +708,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _computeTransform(): mat3 {
     const out = mat3.create();
-    const { rotation = 0, origin = [0, 0], position = [0, 0], scale = [1, 1] } = this.attr;
+    let { rotation = 0, origin = [0, 0], position = [0, 0], scale = [1, 1] } = this.attr;
     const [sx, sy] = scale;
     (position[0] !== 0 || position[1] !== 0) && mat3.translate(out, out, position);
     rotation !== 0 && transformUtils.rotate(out, rotation, origin[0], origin[1]);
     (sx !== 1 || sy !== 1) && transformUtils.scale(out, sx, sy, origin[0], origin[1]);
+    rotation = origin = position = scale = null;
     return out;
   }
 
