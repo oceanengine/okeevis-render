@@ -8,8 +8,44 @@ import Text from '../shapes/Text';
 import { BBox, bboxIntersect } from '../utils/bbox';
 import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent } from '../color';
-import { IDENTRY_MATRIX, } from '../constant';
+import { IDENTRY_MATRIX } from '../constant';
 
+const contextKeys: Array<keyof ShapeConf> = [
+  'fill',
+  'fontSize',
+  'blendMode',
+  'lineCap',
+  'fillOpacity',
+  'strokeOpacity',
+  'lineDashOffset',
+  'lineJoin',
+  'lineWidth',
+  'miterLimit',
+  'shadowBlur',
+  'shadowColor',
+  'shadowOffsetX',
+  'shadowOffsetY',
+  'stroke',
+  'textAlign',
+  'textBaseline',
+  'lineDash',
+  'clip',
+];
+const fpsRect = new Rect({
+  x: 0,
+  y: 0,
+  width: 88,
+  height: 40,
+  fill: '#000',
+});
+const fpsText = new Text({
+  x: 8,
+  y: 6,
+  fill: '#fff',
+  fontSize: 24,
+  fontWeight: 'bold',
+  textBaseline: 'top',
+});
 
 export default class CanvasPainter implements Painter {
   public render: Render;
@@ -75,12 +111,12 @@ export default class CanvasPainter implements Painter {
       ) {
         this.paintInDirtyRegion();
       } else {
-        // 全屏刷新 
+        // 全屏刷新
         this.paint();
       }
     }
     if (allChunks.length > 0 && !this._isPixelPainter) {
-      const {parent, chunks } = allChunks[0];
+      const { parent, chunks } = allChunks[0];
       this.paintChunk(parent, chunks[0]);
     }
     this._isFirstFrame = false;
@@ -185,14 +221,8 @@ export default class CanvasPainter implements Painter {
     // console.timeEnd('paint');
   }
 
-  public drawElement(
-    ctx: CanvasRenderingContext2D,
-    item: Element,
-    dirtyRegions?: BBox[],
-  ) {
-    
+  public drawElement(ctx: CanvasRenderingContext2D, item: Element, dirtyRegions?: BBox[]) {
     item.clearDirty();
-
 
     if (!item.attr.display) {
       return;
@@ -358,7 +388,11 @@ export default class CanvasPainter implements Painter {
     this._ctx = this._canvas.getContext('2d');
   }
 
-  protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, fillAndStrokeStyle?: FillAndStrokeStyle) {
+  protected _setElementCanvasContext(
+    ctx: CanvasRenderingContext2D,
+    item: Element<GroupConf>,
+    fillAndStrokeStyle?: FillAndStrokeStyle,
+  ) {
     const {
       stroke,
       fill,
@@ -392,7 +426,7 @@ export default class CanvasPainter implements Painter {
       // hasStroke,
       //  needFill,
       // needStroke,
-    } =  fillAndStrokeStyle || item.getFillAndStrokeStyle();
+    } = fillAndStrokeStyle || item.getFillAndStrokeStyle();
 
     const selfMatrix = item.getTransform();
     const baseMatrix = item.getBaseTransform();
@@ -406,9 +440,23 @@ export default class CanvasPainter implements Painter {
         if (this._isPixelPainter) {
           ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
         }
-        ctx.transform(globalMatrix[0], globalMatrix[1], globalMatrix[3], globalMatrix[4], globalMatrix[6], globalMatrix[7]); 
-      } else  if (selfMatrix !== IDENTRY_MATRIX) {
-        ctx.transform(selfMatrix[0], selfMatrix[1], selfMatrix[3], selfMatrix[4], selfMatrix[6], selfMatrix[7]); 
+        ctx.transform(
+          globalMatrix[0],
+          globalMatrix[1],
+          globalMatrix[3],
+          globalMatrix[4],
+          globalMatrix[6],
+          globalMatrix[7],
+        );
+      } else if (selfMatrix !== IDENTRY_MATRIX) {
+        ctx.transform(
+          selfMatrix[0],
+          selfMatrix[1],
+          selfMatrix[3],
+          selfMatrix[4],
+          selfMatrix[6],
+          selfMatrix[7],
+        );
       }
     }
 
@@ -510,47 +558,22 @@ export default class CanvasPainter implements Painter {
     item: Element<ShapeConf>,
     fillAndStrokeStyle: FillAndStrokeStyle,
   ): boolean {
-    const { fill, stroke, fillOpacity, strokeOpacity } = fillAndStrokeStyle;
-    const contextKeys: Array<keyof ShapeConf> = [
-      'fill',
-      'fontSize',
-      'blendMode',
-      'lineCap',
-      'fillOpacity',
-      'strokeOpacity',
-      'lineDashOffset',
-      'lineJoin',
-      'lineWidth',
-      'miterLimit',
-      'shadowBlur',
-      'shadowColor',
-      'shadowOffsetX',
-      'shadowOffsetY',
-      'stroke',
-      'textAlign',
-      'textBaseline',
-      'lineDash',
-      'clip',
-    ];
 
     if (contextKeys.some(key => item.attr[key] !== undefined)) {
       return true;
     }
-    if (isGradient(fill) || isGradient(stroke)) {
+    if (isGradient(fillAndStrokeStyle.fill) || isGradient(fillAndStrokeStyle.stroke)) {
       return true;
     }
 
-    if (fillOpacity !== 1 || strokeOpacity !== 1) {
+    if (fillAndStrokeStyle.fillOpacity !== 1 || fillAndStrokeStyle.strokeOpacity !== 1) {
       return true;
     }
 
-    const selfMatrix = item.getTransform();
-    const baseTransform = item.getBaseTransform();
-
-    if (baseTransform !== IDENTRY_MATRIX || selfMatrix !== IDENTRY_MATRIX) {
+    if (item.getBaseTransform() !== IDENTRY_MATRIX || item.getTransform() !== IDENTRY_MATRIX) {
       return true;
     }
-    
+
     return false;
   }
 
@@ -604,23 +627,10 @@ export default class CanvasPainter implements Painter {
       return;
     }
     const fps = Math.floor((frameTimes.length * 1000) / (endTime - startTime));
-    const rect = new Rect({
-      x: 0,
-      y: 0,
-      width: 88,
-      height: 40,
-      fill: '#000',
+    fpsText.setAttr({
+      text: fps + ' fps'
     });
-    const text = new Text({
-      x: 8,
-      y: 6,
-      fill: '#fff',
-      fontSize: 24,
-      fontWeight: 'bold',
-      text: fps + ' fps',
-      textBaseline: 'top',
-    });
-    this.drawElement(this._ctx, rect);
-    this.drawElement(this._ctx, text);
+    this.drawElement(this._ctx, fpsRect);
+    this.drawElement(this._ctx, fpsText);
   }
 }

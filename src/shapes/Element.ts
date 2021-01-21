@@ -130,7 +130,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public type: string;
 
-  public parentNode: Group | undefined;
+  public parentNode: Group | null;
 
   public firstChild: Element;
 
@@ -140,7 +140,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public nextSibling: Element;
 
-  public ownerRender: Render | undefined;
+  public ownerRender: Render | null;
 
   public pickByGPU: boolean = true;
 
@@ -312,8 +312,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public setAttr(attr: T & CommonAttr = {} as T): this {
-    const keys = Object.keys(attr) as Array<keyof T>;
-    if (keys.every(key => attr[key] === this.attr[key])) {
+    if ((Object.keys(attr) as Array<keyof T>).every(key => attr[key] === this.attr[key])) {
       return;
     }
     this.prevProcessAttr(attr);
@@ -386,12 +385,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getCurrentDirtyRect(): BBox {
+    const shadowBlur = this.getExtendAttr('shadowBlur');
+    if (shadowBlur === 0) {
+      return ceilBBox(this.getClientBoundingRect());
+    }
     // 计算当前dirtyRect
     const { x, y, width, height } = this.getClientBoundingRect();
     // 暂不考虑miter尖角影响, 默认使用了bevel
     // const miterLimit = this.getExtendAttr('miterLimit');
     // const lineJoin = this.getExtendAttr('lineJoin');
-    const shadowBlur = this.getExtendAttr('shadowBlur');
     if (shadowBlur === 0) {
       return ceilBBox({ x, y, width, height });
     }
@@ -411,6 +413,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   protected computClientBoundingRect(): BBox {
+    // todo gc optimize
     let { x, y, width, height } = this.getBBox();
     const hasStroke = this.hasStroke();
     const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
@@ -448,7 +451,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public updated(prevAttr: T, nextAttr: T) {
-
+    let key: keyof T;
     for (let i = 0; i < transformKeys.length; i++) {
       if (nextAttr[transformKeys[i]] !== undefined) {
         this.dirtyTransform();
@@ -457,7 +460,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     for (let i = 0; i < this.shapeKeys.length; i++) {
-      const key = this.shapeKeys[i];
+      key = this.shapeKeys[i];
       if (nextAttr[key] !== undefined && nextAttr[key] !== prevAttr[key]) {
         this.dirtyBBox();
         break;
@@ -469,8 +472,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (nextAttr.zIndex !== undefined) {
-      this.parentNode.dirtyZIndex();
+      this.parentNode?.dirtyZIndex();
     }
+    prevAttr = null;
+    nextAttr = null;
   }
 
   public mounted() {
@@ -614,8 +619,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
     this._lastFrameTime = now;
-    const clipElement = this.getClipElement();
-    clipElement && clipElement.onFrame(now);
+
+    if (this.attr.clip) {
+      const clipElement = this.getClipElement();
+      clipElement && clipElement.onFrame(now);
+    }
 
     if (!this._animations.length) {
       return;
@@ -632,12 +640,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
       typeof animate.ease === 'function'
         ? animate.ease(progress)
         : easingFunctions[animate.ease || 'Linear'](progress);
-    const attr = interpolateAttr(animate.from, animate.to, progress) as T;
+    this.setAttr(interpolateAttr(animate.from, animate.to, progress) as T);
     if (progress === 1) {
       animate.callback && animate.callback();
       animate.stopped = true;
     }
-    this.setAttr(attr);
     animate.onFrame && animate.onFrame(progress);
     this._animations = this._animations.filter(item => !item.stopped);
     animate = null;
