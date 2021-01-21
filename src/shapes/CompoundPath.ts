@@ -29,6 +29,7 @@ export default class CompoundPath extends Shape<CompoundPathConf> {
   }
 
   public prevProcessAttr(attr: CompoundPathConf) {
+    super.prevProcessAttr(attr);
     if (attr.shapes && attr.shapes.length > 0) {
       const path = new Path2D();
       attr.shapes.forEach(shape => shape.brush(path as any));

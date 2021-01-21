@@ -55,6 +55,7 @@ module.exports = {
     },
   ],
   rules: {
+    'guard-for-in': 0,
     'react/jsx-one-expression-per-line': 0,
     'react/prop-types': 0,
     'react/forbid-prop-types': 0,

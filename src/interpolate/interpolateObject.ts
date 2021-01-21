@@ -1,15 +1,13 @@
 
-import {InterpolateFunction, interpolate, } from './index';
+import { interpolate, } from './index';
 
-function interpolateObject<T>(from: T, to: T, k: number, interpolateMap:Record<keyof T, InterpolateFunction<any>>={} as any):T {
+function interpolateObject<T>(from: T, to: T, k: number):T {
   if (!from || !to) {
     return to;
   }
   const ret = Object.create(null) as any;
-  // eslint-disable-next-line guard-for-in
   for(const key in from) {
-    const fn = interpolateMap[key] || interpolate;
-    ret[key] = fn(from[key], to[key], k);
+    ret[key] = interpolate(from[key], to[key], k);
   }
   return ret;
 }

@@ -41,6 +41,7 @@ export default class Path extends Shape<PathConf> {
   }
 
   protected prevProcessAttr(attr: PathConf) {
+    super.prevProcessAttr(attr);
     this._setAttrPathData(attr);
   }
 

@@ -5,7 +5,9 @@ import * as lodash from '../utils/lodash';
 import { ColorValue, isTransparent } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
 import easingFunctions, { EasingName } from '../animate/ease';
-import interpolateAttr from '../interpolate/interpolateAttr';
+import {interpolate, } from '../interpolate';
+import interpolatePath from '../interpolate/interpolatePath';
+import interpolateColor from '../interpolate/interpolateColor';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, { ShapeConf } from './Shape';
@@ -310,18 +312,25 @@ export default class Element<T extends CommonAttr = ElementAttr>
     };
   }
 
-  public setAttr(attr: T & CommonAttr): this {
+  public setAttr<U extends keyof T | T >(attr: U, value?: U extends keyof T ? T[U] :undefined ): this {
     if (!attr) {
-      return;
+      return this;
     }
-    if ((Object.keys(attr) as Array<keyof T>).every(key => attr[key] === this.attr[key])) {
-      return;
+    if (typeof attr === 'string') {
+      this.dirty();
+      this.onAttrChange(attr as keyof T, value, this.attr[attr as keyof T]);
+      this.attr[attr as keyof T] = value;
+    } else if (typeof attr === 'object') {
+      this.prevProcessAttr(attr as T);
+      this.dirty();
+      for (const key in attr as T) {
+        if (this.attr[key as keyof T] !== (attr as T)[key]) {
+            this.onAttrChange(key as keyof T, (attr as T)[key], this.attr[key])
+        }
+      }
+      this.attr = { ...this.attr, ...attr as T};
     }
-    this.prevProcessAttr(attr);
-    const prevAttr = this.attr;
-    this.dirty();
-    this.attr = { ...this.attr, ...attr };
-    this.updated(prevAttr, attr);
+   
     return this;
   }
 
@@ -452,32 +461,22 @@ export default class Element<T extends CommonAttr = ElementAttr>
     // do nothing
   }
 
-  public updated(prevAttr: T, nextAttr: T) {
-    let key: keyof T;
-    for (let i = 0; i < transformKeys.length; i++) {
-      if (nextAttr[transformKeys[i]] !== undefined) {
-        this.dirtyTransform();
-        break;
-      }
+  public onAttrChange<U extends keyof T>(key: U , newValue: T[U], oldValue: T[U]) {
+    if (newValue === oldValue) {
+      return;
     }
-
-    for (let i = 0; i < this.shapeKeys.length; i++) {
-      key = this.shapeKeys[i];
-      if (nextAttr[key] !== undefined && nextAttr[key] !== prevAttr[key]) {
-        this.dirtyBBox();
-        break;
-      }
+    if (transformKeys.indexOf(key as keyof CommonAttr) !== -1) {
+      this.dirtyTransform();
     }
-
-    if (nextAttr.display !== undefined && nextAttr.display !== prevAttr.display) {
+    if (key === 'display') {
       this.dirtyBBox();
     }
-
-    if (nextAttr.zIndex !== undefined) {
+    if(this.shapeKeys.indexOf(key) !== -1) {
+      this.dirtyBBox();
+    }
+    if (key === 'zIndex') {
       this.parentNode?.dirtyZIndex();
     }
-    prevAttr = null;
-    nextAttr = null;
   }
 
   public mounted() {
@@ -642,7 +641,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
       typeof animate.ease === 'function'
         ? animate.ease(progress)
         : easingFunctions[animate.ease || 'Linear'](progress);
-    this.setAttr(interpolateAttr(animate.from, animate.to, progress) as T);
+    let fn: Function = interpolate;
+    for (const key in animate.to) {
+      if (key === 'fill' || key === 'stroke' || key === 'shadowColor') {
+        fn = interpolateColor;
+      }
+      if (key === 'pathData') {
+        fn = interpolatePath;
+      }
+      this.setAttr(key, fn(animate.from[key], animate.to[key], progress))
+    }
     if (progress === 1) {
       animate.callback && animate.callback();
       animate.stopped = true;
