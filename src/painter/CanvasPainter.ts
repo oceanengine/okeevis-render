@@ -7,7 +7,7 @@ import Rect from '../shapes/Rect';
 import Text from '../shapes/Text';
 import { BBox, bboxIntersect } from '../utils/bbox';
 import { mergeDirtyRect } from './dirtyRect';
-import { getCtxColor, isGradient, isTransparent, ColorValue, } from '../color';
+import { getCtxColor, isGradient, isTransparent, } from '../color';
 import { IDENTRY_MATRIX } from '../constant';
 
 const contextKeys: Array<keyof ShapeConf> = [
@@ -391,35 +391,6 @@ export default class CanvasPainter implements Painter {
     ctx: CanvasRenderingContext2D,
     item: Element<GroupConf>,
   ) {
-    const {
-      stroke,
-      fill,
-      fontSize,
-      fontFamily,
-      fontWeight,
-      fontVariant,
-      fontStyle,
-      blendMode,
-      lineCap,
-      lineDashOffset,
-      lineJoin,
-      lineWidth,
-      miterLimit,
-      shadowBlur,
-      shadowColor,
-      shadowOffsetX,
-      shadowOffsetY,
-      textAlign,
-      textBaseline,
-      lineDash,
-      clip,
-    } = item.attr;
-
-    const computedFill = item.getExtendAttr('fill');
-    const computedStroke = item.getExtendAttr('stroke');
-    const opacity = item.getComputedOpacity();
-    const fillOpacity = item.getExtendAttr('fillOpacity') * opacity;
-    const strokeOpacity = item.getExtendAttr('strokeOpacity') * opacity;
 
     const selfMatrix = item.getTransform();
     const baseMatrix = item.getBaseTransform();
@@ -452,28 +423,33 @@ export default class CanvasPainter implements Painter {
         );
       }
     }
+    
+    const computedFill = item.getExtendAttr('fill');
+    const computedStroke = item.getExtendAttr('stroke');
+    const opacity = item.getComputedOpacity();
+    const fillOpacity = item.getExtendAttr('fillOpacity') * opacity;
+    const strokeOpacity = item.getExtendAttr('strokeOpacity') * opacity;
 
-    if (clip) {
-      const clipElement = item.getClipElement();
+    if (item.attr.clip) {
       ctx.beginPath();
-      clipElement.brush(ctx);
+      item.getClipElement().brush(ctx);
       ctx.clip();
     }
 
-    if (lineWidth >= 0) {
-      ctx.lineWidth = !item.attr.strokeNoScale ? lineWidth : item.getExtendAttr('lineWidth');
+    if (item.attr.lineWidth >= 0) {
+      ctx.lineWidth = !item.attr.strokeNoScale ? item.attr.lineWidth : item.getExtendAttr('lineWidth');
     }
 
-    if (lineCap) {
-      ctx.lineCap = lineCap;
+    if (item.attr.lineCap) {
+      ctx.lineCap = item.attr.lineCap;
     }
 
-    if (lineJoin) {
-      ctx.lineJoin = lineJoin;
+    if (item.attr.lineJoin) {
+      ctx.lineJoin = item.attr.lineJoin;
     }
 
-    if (miterLimit >= 0) {
-      ctx.miterLimit = miterLimit;
+    if (item.attr.miterLimit >= 0) {
+      ctx.miterLimit = item.attr.miterLimit;
     }
 
     // 文本和图像自己检测, 不走gpu,不故考虑fontSize
@@ -487,26 +463,26 @@ export default class CanvasPainter implements Painter {
 
     // group只支持color string, pattern,不支持渐变
     // todo 考虑小程序api setXXXX
-    if (stroke && !(item.isGroup && isGradient(stroke))) {
-      ctx.strokeStyle = getCtxColor(ctx, stroke, item);
+    if (item.attr.stroke && !(item.isGroup && isGradient(item.attr.stroke))) {
+      ctx.strokeStyle = getCtxColor(ctx, item.attr.stroke, item);
     }
 
-    if (!stroke && stroke !== 'none' && isGradient(computedStroke) && item.type !== 'group') {
+    if (!item.attr.stroke && item.attr.stroke !== 'none' && isGradient(computedStroke) && item.type !== 'group') {
       ctx.strokeStyle = getCtxColor(ctx, computedStroke, item);
     }
 
     /** 渐变样式无法继承 */
-    if (fill && fill !== 'none' && !(item.isGroup && isGradient(fill))) {
-      ctx.fillStyle = getCtxColor(ctx, fill, item);
+    if (item.attr.fill && item.attr.fill !== 'none' && !(item.isGroup && isGradient(item.attr.fill))) {
+      ctx.fillStyle = getCtxColor(ctx, item.attr.fill, item);
     }
 
     /** 渐变样式无法继承 */
-    if (!fill && isGradient(computedFill) && item.type !== 'group') {
+    if (!item.attr.fill && isGradient(computedFill) && item.type !== 'group') {
       ctx.strokeStyle = getCtxColor(ctx, computedFill, item);
     }
 
     // todo 兼容小程序
-    if (fontSize >= 0 || fontFamily || fontWeight || fontVariant || fontStyle) {
+    if (item.attr.fontSize >= 0 || item.attr.fontFamily || item.attr.fontWeight || item.attr.fontVariant || item.attr.fontStyle) {
       const _fontSize = item.getExtendAttr('fontSize');
       const _fontFamily = item.getExtendAttr('fontFamily');
       const _fontWeight = item.getExtendAttr('fontWeight');
@@ -514,12 +490,12 @@ export default class CanvasPainter implements Painter {
       ctx.font = `${_fontStyle} ${_fontWeight} ${_fontSize}px ${_fontFamily}`;
     }
 
-    if (textBaseline) {
-      ctx.textBaseline = textBaseline;
+    if (item.attr.textBaseline) {
+      ctx.textBaseline = item.attr.textBaseline;
     }
 
-    if (textAlign) {
-      ctx.textAlign = textAlign;
+    if (item.attr.textAlign) {
+      ctx.textAlign = item.attr.textAlign;
     }
 
     // 透明度相同时不用复用alpha
@@ -527,23 +503,23 @@ export default class CanvasPainter implements Painter {
       ctx.globalAlpha = fillOpacity;
     }
 
-    if (blendMode) {
-      ctx.globalCompositeOperation = blendMode;
+    if (item.attr.blendMode) {
+      ctx.globalCompositeOperation = item.attr.blendMode;
     }
 
-    if (lineDashOffset !== undefined) {
-      ctx.lineDashOffset = lineDashOffset;
+    if (item.attr.lineDashOffset !== undefined) {
+      ctx.lineDashOffset = item.attr.lineDashOffset;
     }
 
-    if (shadowBlur > 0 && !isTransparent(shadowColor)) {
-      ctx.shadowBlur = shadowBlur;
-      ctx.shadowColor = shadowColor;
-      ctx.shadowOffsetX = shadowOffsetX;
-      ctx.shadowOffsetY = shadowOffsetY;
+    if (item.attr.shadowBlur > 0 && !isTransparent(item.attr.shadowColor)) {
+      ctx.shadowBlur = item.attr.shadowBlur;
+      ctx.shadowColor = item.attr.shadowColor;
+      ctx.shadowOffsetX = item.attr.shadowOffsetX;
+      ctx.shadowOffsetY = item.attr.shadowOffsetY;
     }
 
-    if (lineDash) {
-      ctx.setLineDash(lineDash);
+    if (item.attr.lineDash) {
+      ctx.setLineDash(item.attr.lineDash);
     }
   }
 

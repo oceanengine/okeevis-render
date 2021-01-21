@@ -721,7 +721,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeTransform(): mat3 {
-    const out = mat3.create();
+    const out =  this._transform === IDENTRY_MATRIX ? mat3.create() : mat3.identity(this._transform);
     let { rotation = 0, origin = [0, 0], position = [0, 0], scale = [1, 1] } = this.attr;
     const [sx, sy] = scale;
     (position[0] !== 0 || position[1] !== 0) && mat3.translate(out, out, position);
@@ -756,7 +756,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _computeGlobalTransform(): mat3 {
     const parentTransform = this.parentNode ? this.parentNode.getGlobalTransform() : IDENTRY_MATRIX;
     const selfTransform = this.getTransform();
-    const out = mat3.create();
+    const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.create();
     mat3.multiply(out, this._baseMatrix, parentTransform);
     return mat3.multiply(out, out, selfTransform);
   }
