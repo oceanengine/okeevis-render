@@ -121,7 +121,6 @@ const defaultTRansformConf: CommonAttr = {
   scale: [0, 0],
 };
 
-const styleReceiver: Partial<FillAndStrokeStyle> = Object.create(null);
 
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
@@ -258,7 +257,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return stroke && stroke !== 'none';
   }
 
-  public getFillAndStrokeStyle(): FillAndStrokeStyle {
+  public getFillAndStrokeStyle(receiver: FillAndStrokeStyle = {} as FillAndStrokeStyle): FillAndStrokeStyle {
     const opacity = this.getComputedOpacity();
     const fillOpacity = this.getExtendAttr('fillOpacity') * opacity;
     const strokeOpacity = this.getExtendAttr('strokeOpacity') * opacity;
@@ -267,7 +266,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const fill = this.getExtendAttr('fill');
     const hasFill = fill && fill !== 'none';
     const hasStroke = stroke && stroke !== 'none' && lineWidth > 0;
-    const receiver = styleReceiver;
     receiver.fill = fill;
     receiver.stroke = stroke;
     receiver.opacity = opacity;

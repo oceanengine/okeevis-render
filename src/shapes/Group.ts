@@ -64,7 +64,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   
   public mounted() {
     super.mounted();
-    this.children().forEach(item => item.mounted());
+    this.eachChild(child => child.mounted());
   }
 
   public dirtyTransform() {
@@ -122,6 +122,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public getChunks(): T[][] {
     return this._chunks;
   }
+  
 
   // 递归获取chunks
   public getAllChunks(out: ChunkItem[] = []): ChunkItem[] {
@@ -198,7 +199,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public onFrame(now: number) {
     super.onFrame(now);
     this.sortByZIndex();
-    this.children().forEach(item => item.onFrame(now));
+    this.eachChild(child => child.onFrame(now));
   }
 
   public destroy() {
@@ -275,6 +276,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       callback(node);
       node = node.nextSibling as T;
     }
+    node = null;
   }
 
   public children(): T[] {
@@ -284,6 +286,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       ret.push(node);
       node = node.nextSibling as T;
     }
+    node = null;
     return ret;
   }
 
