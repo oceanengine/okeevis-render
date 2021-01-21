@@ -5,7 +5,7 @@ function interpolateObject<T>(from: T, to: T, k: number, interpolateMap:Record<k
   if (!from || !to) {
     return to;
   }
-  const ret = {} as any;
+  const ret = Object.create(null) as any;
   // eslint-disable-next-line guard-for-in
   for(const key in from) {
     const fn = interpolateMap[key] || interpolate;

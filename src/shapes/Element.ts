@@ -113,6 +113,7 @@ const extendAbleKeys = Object.keys(defaultCanvasContext);
 
 const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation', 'scale'];
 
+
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
 
 const defaultTRansformConf: CommonAttr = {
@@ -177,10 +178,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _lastFrameTime: number;
 
-  public constructor(attr: T = {} as T) {
+  public constructor(attr?: T) {
     super();
     this.attr = this.getDefaultAttr();
-    this.setAttr(attr);
+    attr && this.setAttr(attr);
     this.created();
   }
 
@@ -309,7 +310,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     };
   }
 
-  public setAttr(attr: T & CommonAttr = {} as T): this {
+  public setAttr(attr: T & CommonAttr): this {
+    if (!attr) {
+      return;
+    }
     if ((Object.keys(attr) as Array<keyof T>).every(key => attr[key] === this.attr[key])) {
       return;
     }
