@@ -111,6 +111,8 @@ export const defaultCanvasContext: ShapeConf = {
 };
 const extendAbleKeys = Object.keys(defaultCanvasContext);
 
+const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation', 'scale'];
+
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
 
 const defaultTRansformConf: CommonAttr = {
@@ -274,7 +276,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     receiver.lineWidth = lineWidth;
     receiver.hasFill = hasFill;
     receiver.hasStroke = hasFill;
-    receiver.needFill =  hasFill && fillOpacity !== 0 && !isTransparent(fill);
+    receiver.needFill = hasFill && fillOpacity !== 0 && !isTransparent(fill);
     receiver.needStroke = hasStroke && strokeOpacity !== 0 && !isTransparent(stroke);
     return receiver as FillAndStrokeStyle;
   }
@@ -446,21 +448,23 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public updated(prevAttr: T, nextAttr: T) {
-    const transformKeys: Array<keyof CommonAttr> = [
-      'origin',
-      'position',
-      'rotation',
-      'scale',
-    ].filter(key => (nextAttr as any)[key] !== undefined) as any;
-    const shapeKeys = [
-      'display' as keyof T,
-      ...this.shapeKeys].filter(key => nextAttr[key] !== undefined);
 
-    if (transformKeys.length) {
-      this.dirtyTransform();
+    for (let i = 0; i < transformKeys.length; i++) {
+      if (nextAttr[transformKeys[i]] !== undefined) {
+        this.dirtyTransform();
+        break;
+      }
     }
 
-    if (shapeKeys.some(key => prevAttr[key] !== nextAttr[key])) {
+    for (let i = 0; i < this.shapeKeys.length; i++) {
+      const key = this.shapeKeys[i];
+      if (nextAttr[key] !== undefined && nextAttr[key] !== prevAttr[key]) {
+        this.dirtyBBox();
+        break;
+      }
+    }
+
+    if (nextAttr.display !== undefined && nextAttr.display !== prevAttr.display) {
       this.dirtyBBox();
     }
 
@@ -624,7 +628,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     } else {
       animate.startTime = now;
     }
-    progress = typeof animate.ease === 'function' ? animate.ease(progress) : easingFunctions[animate.ease || 'Linear'](progress);
+    progress =
+      typeof animate.ease === 'function'
+        ? animate.ease(progress)
+        : easingFunctions[animate.ease || 'Linear'](progress);
     const attr = interpolateAttr(animate.from, animate.to, progress) as T;
     if (progress === 1) {
       animate.callback && animate.callback();
@@ -748,5 +755,4 @@ export default class Element<T extends CommonAttr = ElementAttr>
     mat3.multiply(out, this._baseMatrix, parentTransform);
     return mat3.multiply(out, out, selfTransform);
   }
-  
 }
