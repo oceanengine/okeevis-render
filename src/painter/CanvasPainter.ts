@@ -392,11 +392,19 @@ export default class CanvasPainter implements Painter {
     ctx: CanvasRenderingContext2D,
     item: Element<GroupConf>,
   ) {
-
     const selfMatrix = item.getTransform();
     const baseMatrix = item.getBaseTransform();
     if (baseMatrix !== IDENTRY_MATRIX || selfMatrix !== IDENTRY_MATRIX) {
-      if (baseMatrix !== IDENTRY_MATRIX) {
+      if (baseMatrix === IDENTRY_MATRIX) {
+        ctx.transform(
+          selfMatrix[0],
+          selfMatrix[1],
+          selfMatrix[3],
+          selfMatrix[4],
+          selfMatrix[6],
+          selfMatrix[7],
+        );
+      } else {
         const globalMatrix = item.getGlobalTransform();
         ctx.resetTransform();
         if (this.dpr !== 1) {
@@ -413,18 +421,8 @@ export default class CanvasPainter implements Painter {
           globalMatrix[6],
           globalMatrix[7],
         );
-      } else if (selfMatrix !== IDENTRY_MATRIX) {
-        ctx.transform(
-          selfMatrix[0],
-          selfMatrix[1],
-          selfMatrix[3],
-          selfMatrix[4],
-          selfMatrix[6],
-          selfMatrix[7],
-        );
       }
     }
-    
     const {fill: computedFill, stroke: computedStroke, fillOpacity, strokeOpacity,} = renderingContext;
 
     if (item.attr.clip) {
