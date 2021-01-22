@@ -159,6 +159,9 @@ export default class CanvasPainter implements Painter {
 
     this.render.getRoot().eachChild(item => this.drawElement(ctx, item));
     ctx.restore();
+    if (ctx.draw) {
+      ctx.draw();
+    }
   }
 
   public paintInDirtyRegion() {
@@ -202,6 +205,7 @@ export default class CanvasPainter implements Painter {
     });
     chunk.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
+    ctx.draw(true);
   }
 
   public paint(dirtyRegions?: BBox[]) {
@@ -232,6 +236,9 @@ export default class CanvasPainter implements Painter {
     }
     this.render.getRoot().eachChild(item => this.drawElement(ctx, item, dirtyRegions));
     ctx.restore();
+    if (ctx.draw) {
+      ctx.draw();
+    }
     // console.timeEnd('paint');
   }
 
