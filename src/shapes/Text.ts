@@ -26,10 +26,11 @@ const shapeKeys: Array<keyof TextConf> = [
   'x',
   'y',
   'text',
+  'fontSize',
+  'fontFamily',
   'truncate',
   'textAlign',
   'textBaseline',
-  'fontFamily',
   'fontWeight',
 ];
 
