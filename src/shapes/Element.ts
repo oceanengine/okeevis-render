@@ -538,6 +538,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public destroy() {
     this.parentNode = null;
     this.ownerRender = null;
+    this.prevSibling = this.nextSibling = null;
     this._transformDirty = true;
     this._absTransformDirty = true;
     this._clientBoundingRectDirty = true;
