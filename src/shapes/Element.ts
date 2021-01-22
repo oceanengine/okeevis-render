@@ -21,6 +21,8 @@ export type Ref<T extends Element = Element> = { current?: T };
 
 export type ElementAttr = GroupConf & ShapeConf;
 
+const defaultStyleReciver = {} as any as FillAndStrokeStyle;
+
 export interface BaseAttr extends TransformConf, EventConf {
   key?: string;
   ref?: Ref;
@@ -260,7 +262,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return stroke && stroke !== 'none';
   }
 
-  public getFillAndStrokeStyle(receiver: FillAndStrokeStyle = {} as FillAndStrokeStyle): FillAndStrokeStyle {
+  public getFillAndStrokeStyle(receiver: FillAndStrokeStyle = defaultStyleReciver): FillAndStrokeStyle {
     const opacity = this.getComputedOpacity();
     const fillOpacity = this.getExtendAttr('fillOpacity') * opacity;
     const strokeOpacity = this.getExtendAttr('strokeOpacity') * opacity;
