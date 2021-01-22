@@ -736,11 +736,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _computeTransform(): mat3 {
     const out =  this._transform === IDENTRY_MATRIX ? mat3.create() : mat3.identity(this._transform);
-    let { rotation = 0, origin = [0, 0], position = [0, 0], scale = [1, 1] } = this.attr;
-    const [sx, sy] = scale;
-    (position[0] !== 0 || position[1] !== 0) && mat3.translate(out, out, position);
-    rotation !== 0 && transformUtils.rotate(out, rotation, origin[0], origin[1]);
-    (sx !== 1 || sy !== 1) && transformUtils.scale(out, sx, sy, origin[0], origin[1]);
+    let { rotation, origin, position, scale } = this.attr;
+    const originX = origin ? origin[0] : 0;
+    const originY = origin ? origin[1] : 0;
+    position && (position[0] !== 0 || position[1] !== 0) && mat3.translate(out, out, position);
+    rotation !== 0 && transformUtils.rotate(out, rotation || 0, originX, originY);
+    scale && (scale[0] !== 1 || scale[1] !== 1) && transformUtils.scale(out, scale[0], scale[1],originX, originY);
     rotation = origin = position = scale = null;
     return out;
   }

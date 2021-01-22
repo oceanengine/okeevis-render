@@ -69,12 +69,12 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public dirtyTransform() {
     super.dirtyTransform();
-    this.children().forEach(child => child.dirtyAbsTransform());
+    this.eachChild(child => child.dirtyAbsTransform());
   }
   
   public dirtyAbsTransform() {
     super.dirtyAbsTransform();
-    this.children().forEach(child => child.dirtyAbsTransform());
+    this.eachChild(child => child.dirtyAbsTransform());
   }
 
   public add(item: Element): this {
@@ -132,7 +132,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         chunks: this._chunks,
       });
     }
-    this.children().forEach(child => {
+    this.eachChild(child => {
       if (child.isGroup) {
         const childGroup = child as any as Group;
         childGroup.getAllChunks(out);
@@ -204,7 +204,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public destroy() {
     super.destroy();
-    this.children().forEach(item => {
+    this.eachChild(item => {
       item.destroy();
     });
     this.firstChild = this.lastChild = null;
@@ -291,7 +291,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public getAllLeafNodes(ret: Shape[] = [], ignoreInvisible = false, ignoreMute = false): Shape[] {
-    this.children().forEach(item => {
+    this.eachChild(item => {
       if (item.attr.display === false && ignoreInvisible) {
         return;
       }
@@ -306,7 +306,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public resetPickRGB() {
     super.resetPickRGB();
-    this.children().forEach(child => child.resetPickRGB());
+    this.eachChild(child => child.resetPickRGB());
   }
 
   public dirtyZIndex() {
