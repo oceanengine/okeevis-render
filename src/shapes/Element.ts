@@ -5,7 +5,7 @@ import * as lodash from '../utils/lodash';
 import { ColorValue, isTransparent } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
 import easingFunctions, { EasingName } from '../animate/ease';
-import {interpolate, } from '../interpolate';
+import { interpolate } from '../interpolate';
 import interpolatePath from '../interpolate/interpolatePath';
 import interpolateColor from '../interpolate/interpolateColor';
 import TransformAble, { TransformConf } from '../abstract/TransformAble';
@@ -21,7 +21,7 @@ export type Ref<T extends Element = Element> = { current?: T };
 
 export type ElementAttr = GroupConf & ShapeConf;
 
-const defaultStyleReciver = {} as any as FillAndStrokeStyle;
+const defaultStyleReciver = ({} as any) as FillAndStrokeStyle;
 
 export interface BaseAttr extends TransformConf, EventConf {
   key?: string;
@@ -117,7 +117,6 @@ const extendAbleKeys = Object.keys(defaultCanvasContext);
 
 const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation', 'scale'];
 
-
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
 
 const defaultTRansformConf: CommonAttr = {
@@ -125,7 +124,6 @@ const defaultTRansformConf: CommonAttr = {
   position: [0, 0],
   scale: [0, 0],
 };
-
 
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
@@ -243,13 +241,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
       node = node.parentNode;
     }
-    if (key === 'lineWidth' && this.attr.strokeNoScale) {
-      const globalTransform = this.getGlobalTransform();
-      const scale = globalTransform[0];
-      return (((value as any) as number) / scale) as any;
+    if (key !== 'lineWidth' || !this.attr.strokeNoScale) {
+      return value;
     }
-    node = null;
-    return value;
+    const globalTransform = this.getGlobalTransform();
+    const scale = globalTransform[0];
+    return (((value as any) as number) / scale) as any;
   }
 
   public hasFill(): boolean {
@@ -262,7 +259,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return stroke && stroke !== 'none';
   }
 
-  public getFillAndStrokeStyle(receiver: FillAndStrokeStyle = defaultStyleReciver): FillAndStrokeStyle {
+  public getFillAndStrokeStyle(
+    receiver: FillAndStrokeStyle = defaultStyleReciver,
+  ): FillAndStrokeStyle {
     const opacity = this.getComputedOpacity();
     const fillOpacity = this.getExtendAttr('fillOpacity') * opacity;
     const strokeOpacity = this.getExtendAttr('strokeOpacity') * opacity;
@@ -314,7 +313,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     };
   }
 
-  public setAttr<U extends keyof T | T >(attr: U, value?: U extends keyof T ? T[U] :undefined ): this {
+  public setAttr<U extends keyof T | T>(
+    attr: U,
+    value?: U extends keyof T ? T[U] : undefined,
+  ): this {
     if (!attr) {
       return this;
     }
@@ -327,12 +329,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this.dirty();
       for (const key in attr as T) {
         if (this.attr[key as keyof T] !== (attr as T)[key]) {
-            this.onAttrChange(key as keyof T, (attr as T)[key], this.attr[key])
+          this.onAttrChange(key as keyof T, (attr as T)[key], this.attr[key]);
         }
       }
-      this.attr = { ...this.attr, ...attr as T};
+      this.attr = { ...this.attr, ...(attr as T) };
     }
-   
+
     return this;
   }
 
@@ -463,7 +465,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     // do nothing
   }
 
-  public onAttrChange<U extends keyof T>(key: U , newValue: T[U], oldValue: T[U]) {
+  public onAttrChange<U extends keyof T>(key: U, newValue: T[U], oldValue: T[U]) {
     if (newValue === oldValue) {
       return;
     }
@@ -473,7 +475,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (key === 'display') {
       this.dirtyBBox();
     }
-    if(this.shapeKeys.indexOf(key) !== -1) {
+    if (this.shapeKeys.indexOf(key) !== -1) {
       this.dirtyBBox();
     }
     if (key === 'zIndex') {
@@ -652,7 +654,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       if (key === 'pathData') {
         fn = interpolatePath;
       }
-      this.setAttr(key, fn(animate.from[key], animate.to[key], progress))
+      this.setAttr(key, fn(animate.from[key], animate.to[key], progress));
     }
     if (progress === 1) {
       animate.callback && animate.callback();
@@ -736,13 +738,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeTransform(): mat3 {
-    const out =  this._transform === IDENTRY_MATRIX ? mat3.create() : mat3.identity(this._transform);
+    const out = this._transform === IDENTRY_MATRIX ? mat3.create() : mat3.identity(this._transform);
     const { rotation = 0, origin, position, scale } = this.attr;
     const originX = origin ? origin[0] : 0;
     const originY = origin ? origin[1] : 0;
     position && (position[0] !== 0 || position[1] !== 0) && mat3.translate(out, out, position);
     rotation !== 0 && transformUtils.rotate(out, rotation, originX, originY);
-    scale && (scale[0] !== 1 || scale[1] !== 1) && transformUtils.scale(out, scale[0], scale[1],originX, originY);
+    scale &&
+      (scale[0] !== 1 || scale[1] !== 1) &&
+      transformUtils.scale(out, scale[0], scale[1], originX, originY);
     return out;
   }
 
