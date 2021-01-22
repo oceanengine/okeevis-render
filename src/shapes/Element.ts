@@ -277,7 +277,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     receiver.strokeOpacity = strokeOpacity;
     receiver.lineWidth = lineWidth;
     receiver.hasFill = hasFill;
-    receiver.hasStroke = hasFill;
+    receiver.hasStroke = hasStroke;
     receiver.needFill = hasFill && fillOpacity !== 0 && !isTransparent(fill);
     receiver.needStroke = hasStroke && strokeOpacity !== 0 && !isTransparent(stroke);
     return receiver as FillAndStrokeStyle;
