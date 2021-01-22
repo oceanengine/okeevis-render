@@ -37,12 +37,12 @@ const fpsRect = new Rect({
   y: 0,
   width: 88,
   height: 40,
-  fill: '#000',
+  fill: '#000000',
 });
 const fpsText = new Text({
   x: 8,
   y: 6,
-  fill: '#fff',
+  fill: '#ffffff',
   fontSize: 24,
   fontWeight: 'bold',
   textBaseline: 'top',
