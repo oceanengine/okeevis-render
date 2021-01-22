@@ -658,7 +658,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       animate.stopped = true;
     }
     animate.onFrame && animate.onFrame(progress);
-    this._animations = this._animations.filter(item => !item.stopped);
+    progress >= 1 && this._animations.shift();
     animate = null;
   }
 
@@ -736,11 +736,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _computeTransform(): mat3 {
     const out =  this._transform === IDENTRY_MATRIX ? mat3.create() : mat3.identity(this._transform);
-    let { rotation, origin, position, scale } = this.attr;
+    let { rotation = 0, origin, position, scale } = this.attr;
     const originX = origin ? origin[0] : 0;
     const originY = origin ? origin[1] : 0;
     position && (position[0] !== 0 || position[1] !== 0) && mat3.translate(out, out, position);
-    rotation !== 0 && transformUtils.rotate(out, rotation || 0, originX, originY);
+    rotation !== 0 && transformUtils.rotate(out, rotation, originX, originY);
     scale && (scale[0] !== 1 || scale[1] !== 1) && transformUtils.scale(out, scale[0], scale[1],originX, originY);
     rotation = origin = position = scale = null;
     return out;
