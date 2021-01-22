@@ -135,6 +135,9 @@ export default class CanvasPainter implements Painter {
     }
     this._isFirstFrame = false;
     showFPS && this._drawFPS();
+    if (this._ctx.draw) {
+      this._ctx.draw(true);
+    }
   }
 
   public getImageData(x: number, y: number, width: number, height: number): ImageData {
@@ -160,7 +163,7 @@ export default class CanvasPainter implements Painter {
     this.render.getRoot().eachChild(item => this.drawElement(ctx, item));
     ctx.restore();
     if (ctx.draw) {
-      ctx.draw();
+      ctx.draw(true);
     }
   }
 
@@ -205,7 +208,6 @@ export default class CanvasPainter implements Painter {
     });
     chunk.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
-    ctx.draw(true);
   }
 
   public paint(dirtyRegions?: BBox[]) {
@@ -236,9 +238,6 @@ export default class CanvasPainter implements Painter {
     }
     this.render.getRoot().eachChild(item => this.drawElement(ctx, item, dirtyRegions));
     ctx.restore();
-    if (ctx.draw) {
-      ctx.draw();
-    }
     // console.timeEnd('paint');
   }
 
