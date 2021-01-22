@@ -195,7 +195,10 @@ export default class CanvasPainter implements Painter {
     ctx.font = `sans-serif ${defaultCanvasContext.fontSize}px`;
     ctx.textBaseline = defaultCanvasContext.textBaseline;
     ctx.lineJoin = defaultCanvasContext.lineJoin;
-    parentList.forEach(current => this._setElementCanvasContext(ctx, current));
+    parentList.forEach(current => {
+      current.getFillAndStrokeStyle(renderingContext);
+      this._setElementCanvasContext(ctx, current);
+    });
     chunk.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
   }
@@ -272,8 +275,7 @@ export default class CanvasPainter implements Painter {
     }
 
     hasSelfContext && this._setElementCanvasContext(ctx, item);
-    if (item.type !== 'group') {
-      const current = item as Shape;
+    if (!item.isGroup) {
       if (item.fillAble && renderingContext.needFill && !this._isPixelPainter) {
         if (renderingContext.fillOpacity !== renderingContext.strokeOpacity) {
           ctx.globalAlpha = renderingContext.fillOpacity;
@@ -282,7 +284,7 @@ export default class CanvasPainter implements Painter {
       if (item.fillAble || (item.strokeAble && item.type !== 'text')) {
         ctx.beginPath();
       }
-      current.brush(ctx);
+      (item as Shape).brush(ctx);
       if (
         item.fillAble &&
         (renderingContext.needFill || (this._isPixelPainter && renderingContext.hasFill)) &&
@@ -303,13 +305,12 @@ export default class CanvasPainter implements Painter {
         ctx.stroke();
       }
     } else {
-      const current = item as Group;
       // const batchBrush = current.attr._batchBrush;
       // if (batchBrush) {
       //   ctx.beginPath();
       // }
       
-      current.eachChild(child => this.drawElement(ctx, child, dirtyRegions));
+      (item as Group).eachChild(child => this.drawElement(ctx, child, dirtyRegions));
     
       // if (batchBrush) {
       //   if (fill && fill !== 'none') {
@@ -424,11 +425,7 @@ export default class CanvasPainter implements Painter {
       }
     }
     
-    const computedFill = item.getExtendAttr('fill');
-    const computedStroke = item.getExtendAttr('stroke');
-    const opacity = item.getComputedOpacity();
-    const fillOpacity = item.getExtendAttr('fillOpacity') * opacity;
-    const strokeOpacity = item.getExtendAttr('strokeOpacity') * opacity;
+    const {fill: computedFill, stroke: computedStroke, fillOpacity, strokeOpacity,} = renderingContext;
 
     if (item.attr.clip) {
       ctx.beginPath();
