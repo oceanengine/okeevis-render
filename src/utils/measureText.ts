@@ -1,5 +1,6 @@
 import { TextConf } from '../shapes/Text';
 import LRUMap from './LRU';
+import * as styleHelper from '../canvas/style';
 
 const textSizeLRUMap = new LRUMap<TextMetrics>(3000);
 
@@ -27,7 +28,12 @@ export  function measureText(text: string, textStyle: TextConf = {}, ctx: Canvas
 
 function initTextContext(ctx: CanvasRenderingContext2D, textStyle: TextConf = {}) {
   const { fontFamily = 'sans-serif', fontSize = 12, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;
-  ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+  styleHelper.setFontStyle(ctx, {
+    fontFamily,
+    fontWeight,
+    fontSize,
+    fontStyle,
+  })
 }
 function getCacheKey(text: string, textStyle: TextConf): string {
   const { fontFamily = 'sans-serif', fontSize = 10, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;

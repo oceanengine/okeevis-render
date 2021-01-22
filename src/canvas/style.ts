@@ -1,17 +1,18 @@
 import {TextConf, } from '../shapes/Text';
 
-export function setFillStyle(ctx: CanvasRenderingContext2D, fill: string | CanvasGradient) {
+export function setFillStyle(ctx: CanvasRenderingContext2D, fill: string | CanvasGradient | CanvasPattern) {
   if (!ctx.setFillStyle) {
     ctx.fillStyle = fill;
   } else {
     ctx.setFillStyle(fill);
   }
 }
-export function setFontStyle(ctx: CanvasRenderingContext2D, fontStyle: TextConf): void {
+export function setFontStyle(ctx: CanvasRenderingContext2D, textStyle: TextConf): void {
+  const { fontFamily = 'sans-serif', fontSize = 12, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;
   if (!ctx.setFontSize) {
-      ctx.font = ''
+    ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
   } else {
-    ctx.setFontSize(fontStyle.fontSize);
+    ctx.setFontSize(textStyle.fontSize);
   }
 }
 export function setGlobalAlpha(ctx: CanvasRenderingContext2D, alpha: number): void {
@@ -52,7 +53,7 @@ export function setShadow(ctx: CanvasRenderingContext2D, offsetX: number, offset
     ctx.setShadow(offsetX, offsetY, blur, color);
   }
 }
-export function setStrokeStyle(ctx: CanvasRenderingContext2D, stroke: string | CanvasGradient): void {
+export function setStrokeStyle(ctx: CanvasRenderingContext2D, stroke: string | CanvasGradient | CanvasPattern): void {
   if (!ctx.setStrokeStyle) {
     ctx.strokeStyle = stroke;
   } else {

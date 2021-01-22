@@ -7,14 +7,14 @@ declare global {
     
     // https://developers.weixin.qq.com/miniprogram/dev/api/canvas/CanvasContext.setFillStyle.html
     export interface CanvasRenderingContext2D extends CanvasRenderingContext2D {
-        setFillStyle(fill: string | CanvasGradient): void;
+        setFillStyle(fill: string | CanvasGradient | CanvasPattern): void;
         setFontSize(fontSize: number): void;
         setGlobalAlpha(alpha: number): void;
         setLineCap(lineCap: string): void;
         setLineJoin(lineJoin: string): void;
         setMiterLimit(miterLimit: number): void;
         setShadow(offsetX: number, offsetY: number, blur: number, color: string): void;
-        setStrokeStyle(stroke: string | CanvasGradient): void;
+        setStrokeStyle(stroke: string | CanvasGradient | CanvasPattern | CanvasPattern): void;
         setTextAlign(textAlign: string): void;
         setTextBaseline(textBaseline: string): void;
         draw(reverse?: boolean, callback?: Function): void;

@@ -17,7 +17,7 @@ import {LinearGradient, RadialGradient, } from '../src/color';
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
 render.showBBox = false
-render.showBoundingRect = false;
+render.showBoundingRect = true;
 render.enableDirtyRect = true;
 render.showFPS = true;
 
@@ -108,7 +108,7 @@ const rect = new Rect({
 })
 
 
-// rect.animateTo({rotation: degToRad(360)}, 5000)
+rect.animateTo({rotation: degToRad(360)}, 5000)
 
 const polygon = new Polygon({
   fill: 'blue',
