@@ -1,5 +1,13 @@
 import {TextConf, } from '../shapes/Text';
 
+export function resetTransform(ctx: CanvasRenderingContext2D): void {
+  if (ctx.resetTransform) {
+    ctx.resetTransform();
+  } else {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+}
+
 export function setFillStyle(ctx: CanvasRenderingContext2D, fill: string | CanvasGradient | CanvasPattern) {
   if (!ctx.setFillStyle) {
     ctx.fillStyle = fill;
