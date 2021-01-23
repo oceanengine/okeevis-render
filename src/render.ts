@@ -78,7 +78,9 @@ export default class Render extends EventFul {
 
   public dirty(el?: Element<any>) {
     this._needUpdate = true;
-    el && this._dirtyElements.add(el);
+    if (el && this.enableDirtyRect) {
+      this._dirtyElements.add(el);
+    }
   }
 
   public getWidth(): number {
