@@ -121,7 +121,7 @@ export default class CanvasPainter implements Painter {
         !this._isFirstFrame &&
         this.render.enableDirtyRect &&
         dirytCount > 0 &&
-        dirytCount < maxDirtyRects
+        dirytCount <= maxDirtyRects
       ) {
         this.paintInDirtyRegion();
       } else {

@@ -78,7 +78,7 @@ export default class Render extends EventFul {
 
   public dirty(el?: Element<any>) {
     this._needUpdate = true;
-    if (el && this.enableDirtyRect) {
+    if (el && this.enableDirtyRect && this._dirtyElements.size <= this.maxDirtyRects) {
       this._dirtyElements.add(el);
     }
   }
