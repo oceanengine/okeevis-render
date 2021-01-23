@@ -12,10 +12,10 @@ import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, { ShapeConf } from './Shape';
 import * as mat3 from '../../js/mat3';
-import { Vec2, transformMat3, vec2BBox, } from '../utils/vec2';
+import { Vec2, transformMat3, vec2BBox } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
-import { RGBA_TRANSPARENT, IDENTRY_MATRIX, } from '../constant';
-import { BBox, unionBBox, ceilBBox, createZeroBBox, } from '../utils/bbox';
+import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
+import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
 
 export type Ref<T extends Element = Element> = { current?: T };
 
@@ -24,7 +24,13 @@ export type ElementAttr = GroupConf & ShapeConf;
 const defaultStyleReciver = ({} as any) as FillAndStrokeStyle;
 
 // 对象重用
-const reuseBBoxVectors: Vec2[] = [[0, 0], [0, 0], [0, 0], [0, 0]];
+const reusePositionVec2: Vec2= [0, 0];
+const reuseBBoxVectors: Vec2[] = [
+  [0, 0],
+  [0, 0],
+  [0, 0],
+  [0, 0],
+];
 
 export interface BaseAttr extends TransformConf, EventConf {
   key?: string;
@@ -118,11 +124,17 @@ export const defaultCanvasContext: ShapeConf = {
 };
 const extendAbleKeys = Object.keys(defaultCanvasContext);
 
-const transformKeys: Array<keyof CommonAttr> = ['origin', 'position', 'rotation', 'scale'];
+const transformKeys: Array<keyof CommonAttr> = ['rotation', 'scaleX', 'scaleY', 'translateX', 'translateY', 'originX', 'originY'];
 
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
 
 const defaultTRansformConf: CommonAttr = {
+  originX: 0,
+  originY: 0,
+  translateX: 0,
+  translateY: 0,
+  scaleX: 0,
+  scaleY: 0,
   origin: [0, 0],
   position: [0, 0],
   scale: [0, 0],
@@ -201,9 +213,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
       'fillOpacity',
       'strokeOpacity',
       'rotation',
-      'position',
-      'scale',
-      'origin',
+      'translateX',
+      'translateY',
+      'scaleX',
+      'scaleY',
+      'originX',
+      'originY',
       'shadowColor',
       'shadowBlur',
       'shadowOffsetX',
@@ -387,7 +402,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return createZeroBBox();
     }
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
-      this._clientBoundingRect = this.computClientBoundingRect(this._clientBoundingRect || createZeroBBox());
+      this._clientBoundingRect = this.computClientBoundingRect(
+        this._clientBoundingRect || createZeroBBox()
+      );
       this._clientBoundingRectDirty = false;
     }
     return this._clientBoundingRect;
@@ -603,7 +620,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   // eslint-disable-next-line no-unused-vars
   protected prevProcessAttr(attr: T) {
-    // attr;
+    if (attr.position) {
+      attr.translateX = attr.position[0];
+      attr.translateY = attr.position[1];
+    }
+
+    if (attr.scale) {
+      attr.scaleX = attr.scale[0];
+      attr.scaleY = attr.scale[1];
+    }
+
+    if (attr.origin) {
+      attr.originX = attr.origin[0];
+      attr.originY = attr.origin[1];
+    }
   }
 
   public addAnimation(option: AnimateOption<T>) {
@@ -737,14 +767,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _computeTransform(): mat3 {
     const out = this._transform === IDENTRY_MATRIX ? mat3.create() : mat3.identity(this._transform);
-    const { rotation = 0, origin, position, scale } = this.attr;
-    const originX = origin ? origin[0] : 0;
-    const originY = origin ? origin[1] : 0;
-    position && (position[0] !== 0 || position[1] !== 0) && mat3.translate(out, out, position);
+    const {
+      rotation = 0,
+      originX = 0,
+      originY = 0,
+      scaleX = 1,
+      scaleY = 1,
+      translateX = 0,
+      translateY = 0,
+    } = this.attr;
+    reusePositionVec2[0] = translateX;
+    reusePositionVec2[1] = translateY;
+    (translateX !== 0 || translateY !== 0) && mat3.translate(out, out, reusePositionVec2);
     rotation !== 0 && transformUtils.rotate(out, rotation, originX, originY);
-    scale &&
-      (scale[0] !== 1 || scale[1] !== 1) &&
-      transformUtils.scale(out, scale[0], scale[1], originX, originY);
+    (scaleX !== 1 || scaleY !== 1) && transformUtils.scale(out, scaleX, scaleY, originX, originY);
     return out;
   }
 
