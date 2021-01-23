@@ -1,5 +1,6 @@
 import {TextConf, } from '../shapes/Text';
 
+// todo 小程序下绘制时dpr是1:1(小程序会自动加上缩放效果), 但是resetTransform会导致被缩小
 export function resetTransform(ctx: CanvasRenderingContext2D): void {
   if (ctx.resetTransform) {
     ctx.resetTransform();
