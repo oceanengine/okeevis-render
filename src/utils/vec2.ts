@@ -1,4 +1,7 @@
-export type Vec2 = [number, number] | Uint32Array;
+import {BBox, } from './bbox';
+
+
+export type Vec2 = [number, number];
 
 // http://glmatrix.net/docs/vec2.js.html
 
@@ -49,4 +52,22 @@ export function angle(a: Vec2, b: Vec2) {
   const cosine = mag && (x1 * x2 + y1 * y2) / mag;
   // Math.min(Math.max(cosine, -1), 1) clamps the cosine between -1 and 1
   return Math.acos(Math.min(Math.max(cosine, -1), 1));
+}
+
+export function vec2BBox(vectors: [number, number][], out: BBox): BBox {
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+  for (let i = 0; i < vectors.length; i++) {
+    minX = Math.min(vectors[i][0], minX);
+    maxX = Math.max(vectors[i][0], maxX);
+    minY = Math.min(vectors[i][1], minY);
+    maxY = Math.max(vectors[i][1], maxY);
+  }
+  out.x = minX;
+  out.y = minY;
+  out.width = maxX - minX;
+  out.height = maxY - minY;
+  return out;
 }

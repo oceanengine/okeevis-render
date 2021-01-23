@@ -8,6 +8,10 @@ export interface BBox {
   height: number;
 }
 
+export function createZeroBBox(): BBox {
+  return {x: 0, y: 0, width: 0, height: 0};
+}
+
 export function ceilBBox(box: BBox): BBox {
   const {x, y, width, height} = box;
   const x1 = Math.floor(x - 0.5);

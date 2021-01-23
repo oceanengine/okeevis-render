@@ -12,16 +12,19 @@ import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, { ShapeConf } from './Shape';
 import * as mat3 from '../../js/mat3';
-import { Vec2, transformMat3 } from '../utils/vec2';
+import { Vec2, transformMat3, vec2BBox, } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
-import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
-import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
+import { RGBA_TRANSPARENT, IDENTRY_MATRIX, } from '../constant';
+import { BBox, unionBBox, ceilBBox, createZeroBBox, } from '../utils/bbox';
 
 export type Ref<T extends Element = Element> = { current?: T };
 
 export type ElementAttr = GroupConf & ShapeConf;
 
 const defaultStyleReciver = ({} as any) as FillAndStrokeStyle;
+
+// 对象重用
+const reuseBBoxVectors: Vec2[] = [[0, 0], [0, 0], [0, 0], [0, 0]];
 
 export interface BaseAttr extends TransformConf, EventConf {
   key?: string;
@@ -158,7 +161,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _animations: AnimateOption<T>[] = [];
 
-  private _bbox: BBox = { x: 0, y: 0, width: 0, height: 0 };
+  private _bbox: BBox;
 
   private _bboxDirty: boolean = true;
 
@@ -381,10 +384,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
   // todo 计算boundRect同时计算dirtyRect
   public getClientBoundingRect(): BBox {
     if (this.attr.display === false) {
-      return { x: 0, y: 0, width: 0, height: 0 };
+      return createZeroBBox();
     }
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
-      this._clientBoundingRect = this.computClientBoundingRect();
+      this._clientBoundingRect = this.computClientBoundingRect(this._clientBoundingRect || createZeroBBox());
       this._clientBoundingRectDirty = false;
     }
     return this._clientBoundingRect;
@@ -427,7 +430,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return { x: 0, y: 0, width: 0, height: 0 };
   }
 
-  protected computClientBoundingRect(): BBox {
+  protected computClientBoundingRect(out: BBox): BBox {
     // todo gc optimize
     let { x, y, width, height } = this.getBBox();
     const hasStroke = this.hasStroke();
@@ -437,28 +440,23 @@ export default class Element<T extends CommonAttr = ElementAttr>
     y -= offsetLineWidth;
     width += offsetLineWidth * 2;
     height += offsetLineWidth * 2;
-    const vectors: Vec2[] = [
-      [x, y],
-      [x + width, y],
-      [x + width, y + height],
-      [x, y + height],
-    ];
+    reuseBBoxVectors[0][0] = x;
+    reuseBBoxVectors[0][1] = y;
+    reuseBBoxVectors[1][0] = x + width;
+    reuseBBoxVectors[1][1] = y;
+    reuseBBoxVectors[2][0] = x + width;
+    reuseBBoxVectors[2][1] = y + height;
+    reuseBBoxVectors[3][0] = x;
+    reuseBBoxVectors[3][1] = y + height;
+    // const vectors: Vec2[] = [
+    //   [x, y],
+    //   [x + width, y],
+    //   [x + width, y + height],
+    //   [x, y + height],
+    // ];
     const matrix = this.getGlobalTransform();
-
-    vectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
-    const xCoords = vectors.map(vec2 => vec2[0]);
-    const yCoords = vectors.map(vec2 => vec2[1]);
-    const minX = lodash.min(xCoords);
-    const maxX = lodash.max(xCoords);
-    const minY = lodash.min(yCoords);
-    const maxY = lodash.max(yCoords);
-
-    return {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY,
-    };
+    reuseBBoxVectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
+    return vec2BBox(reuseBBoxVectors, out);
   }
 
   public created() {
