@@ -18,3 +18,4 @@ export { default as RadialGradient } from './color/RadialGradient';
 export { default as Patttern } from './color/Pattern';
 export { default as PathShape } from './geometry/Path2D';
 export { setCanvasCreator } from './canvas/createCanvas';
+export { setImageLoader } from './utils/imageLoader';
