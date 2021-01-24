@@ -58,6 +58,7 @@ const circle = new Circle({
 
 
 const image = new Image({
+  draggable: true,
   src: 'https://lf1-hscdn-tos.pstatp.com/obj/developer-baas/baas/ttkw6x/1ddf8408cdd9f7e0_1600424925672.png',
   x: 250,
   y: 200,

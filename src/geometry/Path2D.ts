@@ -279,6 +279,11 @@ export default class Path2D {
     this._pathList = pathList.filter((path, index) => mergeIndex.indexOf(index) === -1);
   }
 
+  public getSVGPathString(): string {
+    // todo svg
+    return '';
+  }
+
   public getTotalLength(): number {
     // todo
     return 0;

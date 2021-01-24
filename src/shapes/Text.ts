@@ -1,7 +1,7 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { BBox, inBBox, } from '../utils/bbox';
-import {measureText, } from '../utils/measureText';
+import { BBox, inBBox } from '../utils/bbox';
+import { measureText } from '../utils/measureText';
 
 export interface TextConf extends CommonAttr {
   x?: number;
@@ -36,6 +36,8 @@ const shapeKeys: Array<keyof TextConf> = [
 
 export default class Text extends Shape<TextConf> {
   public type = 'text';
+
+  public svgTagName = 'text';
 
   public pickByGPU = false;
 
@@ -118,7 +120,13 @@ export default class Text extends Shape<TextConf> {
   }
 
   public isInShape(x: number, y: number): boolean {
-     return inBBox(this.getBBox(), x, y); 
+    return inBBox(this.getBBox(), x, y);
   }
 
+  public getSVGShapeAttributes() {
+    return {
+      x: this.attr.x,
+      y: this.attr.y,
+    };
+  }
 }

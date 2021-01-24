@@ -17,6 +17,8 @@ const shapeKeys: Array<keyof ImageConf> = ['x', 'y', 'width', 'height', 'src'];
 export default class Image extends Shape<ImageConf> {
   public type = 'image';
 
+  public svgTagName = 'image';
+
   public pickByGPU = false;
 
   public fillAble = false;
@@ -61,6 +63,16 @@ export default class Image extends Shape<ImageConf> {
     return inBBox(this.getBBox(), x, y);
   }
 
+  public getSVGShapeAttributes(): any {
+    return {
+      x: this.attr.x,
+      y: this.attr.y,
+      width: this.attr.width,
+      height: this.attr.height,
+      "xlink:href": this.attr.src,
+    }
+  }
+
   protected computeBBox(): BBox {
     const { src, x, y, width, height } = this.attr;
     const image = getImage(src);
@@ -68,5 +80,6 @@ export default class Image extends Shape<ImageConf> {
     const sh = height > 0 ? height : image?.height || 0;
     return rectBBox(x, y, sw, sh);
   }
+  
   
 }

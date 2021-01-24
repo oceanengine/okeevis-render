@@ -147,6 +147,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public type: string;
 
+  public svgTagName: string = 'path';
+
   public parentNode: Group | null;
 
   public firstChild: Element;
@@ -445,6 +447,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected computeBBox(): BBox {
     return { x: 0, y: 0, width: 0, height: 0 };
+  }
+
+  public getSVGStyleAttributes() {
+    // todo
+  }
+
+  public getSVGShapeAttributes() {
+    // todo
   }
 
   protected computClientBoundingRect(out: BBox): BBox {

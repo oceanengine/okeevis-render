@@ -50,4 +50,5 @@ export default class CompoundPath extends Shape<CompoundPathConf> {
   protected computeBBox(): BBox {
     return unionBBox(this.attr.shapes.map(path => path.getBBox()));
   }
+  
 }
