@@ -30,9 +30,13 @@ export function getImage(src: string, callback?: (image: HTMLImageElement) => vo
   if (loadedImage[src]) {
     return loadedImage[src]
   }
+  try {
   imageLoader(src, (image: HTMLImageElement) => {
     loadedImage[src] = image;
     callback && callback(image);
   })
+  } catch(err) {
+    loadedImage[src] = src as any;
+  }
   return loadedImage[src]
 }
