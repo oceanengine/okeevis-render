@@ -379,8 +379,8 @@ export default class EventHandle {
     }
 
     if (nativeEvent.type === 'touchend') {
-      const touch = this._findTouch(touchesList, dragStartTouchId);
-      if (this._draggingTarget) {
+      const touch = this._findTouch(synthetichTouches, dragStartTouchId);
+      if (this._draggingTarget && !touch) {
         const dragParam = {
           ...dragEventParam,
           x: touch.x,
@@ -389,11 +389,12 @@ export default class EventHandle {
         };
         const onDragEvent = new SyntheticDragEvent('dragend', dragParam);
         this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
+        this._draggingTarget = null;
+        this._dragStartTouchId = null;
+        this._dragStartMouse = null;
+        this._prevMousePosition = null;
       }
-      this._draggingTarget = null;
-      this._dragStartTouchId = null;
-      this._dragStartMouse = null;
-      this._prevMousePosition = null;
+      
     }
   };
 
