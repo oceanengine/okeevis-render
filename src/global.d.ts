@@ -17,6 +17,7 @@ declare global {
         setStrokeStyle(stroke: string | CanvasGradient | CanvasPattern | CanvasPattern): void;
         setTextAlign(textAlign: string): void;
         setTextBaseline(textBaseline: string): void;
+        createCircularGradient(cx: number, cy: number, r: number): CanvasGradient;
         draw(reverse?: boolean, callback?: Function): void;
     }
 }
