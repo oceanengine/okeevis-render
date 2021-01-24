@@ -378,14 +378,11 @@ export default class EventHandle {
       }
     }
 
-    if (nativeEvent.type === 'touchend') {
+    if (nativeEvent.type === 'touchend' || nativeEvent.type === 'touchcancel') {
       const touch = this._findTouch(synthetichTouches, dragStartTouchId);
       if (this._draggingTarget && !touch) {
         const dragParam = {
-          ...dragEventParam,
-          x: touch.x,
-          y: touch.y,
-          ...this._getDragParam(this._findTouch(touchesList, dragStartTouchId)),
+          ...dragEventParam
         };
         const onDragEvent = new SyntheticDragEvent('dragend', dragParam);
         this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
@@ -510,6 +507,7 @@ export default class EventHandle {
     dom.removeEventListener('touchstart', this._syntheticTouchEvent);
     dom.removeEventListener('touchmove', this._syntheticTouchEvent);
     dom.removeEventListener('touchend', this._syntheticTouchEvent);
+    dom.removeEventListener('touchcancel', this._syntheticTouchEvent);
     dom.removeEventListener('mouseleave', this._handleMouseLeave);
     dom.removeEventListener('mouseenter', this._handleMouseEnter);
     document.removeEventListener('touchend', this._handleDocumentTouchEnd);
@@ -530,6 +528,7 @@ export default class EventHandle {
     dom.addEventListener('touchstart', this._syntheticTouchEvent);
     dom.addEventListener('touchmove', this._syntheticTouchEvent);
     dom.addEventListener('touchend', this._syntheticTouchEvent);
+    dom.addEventListener('touchcancel', this._syntheticTouchEvent);
     dom.addEventListener('mouseleave', this._handleMouseLeave);
     dom.addEventListener('mouseenter', this._handleMouseEnter);
     document.addEventListener('touchend', this._handleDocumentTouchEnd);
