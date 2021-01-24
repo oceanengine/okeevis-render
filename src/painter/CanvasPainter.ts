@@ -414,7 +414,7 @@ export default class CanvasPainter implements Painter {
       } else {
         const globalMatrix = item.getGlobalTransform();
         styleHelper.resetTransform(ctx);
-        if (this.dpr !== 1) {
+        if (this.dpr !== 1 || this.render.resetTransformDpr) {
           ctx.scale(this.render.resetTransformDpr || this.dpr, this.render.resetTransformDpr || this.dpr);
         }
         if (this._isPixelPainter) {

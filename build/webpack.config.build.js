@@ -29,15 +29,15 @@ var prodWebpackConfig = {
                 NODE_ENV: '"production"',
             },
         }),
-        new UglifyJsPlugin({
-            uglifyOptions: {
-                compress: {
-                    warnings: false,
-                },
-            },
-            sourceMap: false,
-            parallel: true,
-        }),
+        // new UglifyJsPlugin({
+        //     uglifyOptions: {
+        //         compress: {
+        //             warnings: false,
+        //         },
+        //     },
+        //     sourceMap: false,
+        //     parallel: true,
+        // }),
     ],
 };
 
