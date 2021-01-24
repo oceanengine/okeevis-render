@@ -14,7 +14,7 @@ export interface ImageConf extends CommonAttr {
 }
 const shapeKeys: Array<keyof ImageConf> = ['x', 'y', 'width', 'height', 'src'];
 
-export default class Rect extends Shape<ImageConf> {
+export default class Image extends Shape<ImageConf> {
   public type = 'image';
 
   public pickByGPU = false;
