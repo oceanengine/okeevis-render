@@ -607,7 +607,7 @@ export default class EventHandle {
   }
 
   private _onRenderDirty = () => {
-    if (!this._prevMouseTarget) {
+    if (!this._prevMousePosition) {
       return;
     }
     const { x, y } = this._prevMousePosition;
