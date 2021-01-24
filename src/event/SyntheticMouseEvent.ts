@@ -10,7 +10,11 @@ export interface SyntheticMouseEventParams extends SyntheticEventParams {
   y: number;
   detail?: any;
 }
+
 export default class SyntheticMouseEvent extends SyntheticEvent<MouseEvent> {
+
+  public syntheticType = 'mouse';
+
   public x: number;
 
   public y: number;

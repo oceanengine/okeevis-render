@@ -12,6 +12,8 @@ export interface SyntheticDragEventParams extends SyntheticMouseEventParams {
 export default class SyntheticDragEvent extends SyntheticMouseEvent {
   public startX: number;
 
+  public syntheticType = 'dnd';
+
   public startY: number;
 
   public offsetX: number;

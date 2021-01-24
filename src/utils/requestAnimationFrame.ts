@@ -19,6 +19,6 @@ export default (typeof window !== 'undefined' &&
       window.webkitRequestAnimationFrame)) ||
   // tslint:disable-next-line:no-function-expression
   function (func: Function): void {
-      setTimeout(func, 16);
+      setTimeout(() => func(Date.now()), 16);
   };
 // todo cancel request

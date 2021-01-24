@@ -24,10 +24,11 @@ export interface EventConf {
   onMouseEnter?: (event: SyntheticMouseEvent) => void;
   onWheel?: (event: SyntheticMouseEvent) => void;
   onDragStart?: (event: SyntheticDragEvent) => void;
-  onDrop?: (event: SyntheticDragEvent) => void;
+  onDrag?: (event: SyntheticDragEvent) => void;
   onDragEnd?: (event: SyntheticDragEvent) => void;
   onDragOver?: (event: SyntheticDragEvent) => void;
   onDragLeave?: (event: SyntheticDragEvent) => void;
+  onDrop?: (event: SyntheticDragEvent) => void;
   getDragOffset?: (event: SyntheticDragEvent) => {x: number, y: number};
   onTouchMove?: (event: SyntheticTouchEvent) => void;
   onTouchStart?: (event: SyntheticTouchEvent) => void;

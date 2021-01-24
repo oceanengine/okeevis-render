@@ -1,13 +1,15 @@
 
 export interface SyntheticEventParams {
-  original: any;
+  original?: any;
   bubbles: boolean;
   timeStamp?: number;
 }
 
 
-export default class  SyntheticEvent<T extends MouseEvent | TouchEvent> {
+export default class  SyntheticEvent<T extends MouseEvent | TouchEvent = MouseEvent | TouchEvent> {
   public type: string;
+
+  public syntheticType: string;
 
   public original: T;
 

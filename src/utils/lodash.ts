@@ -18,6 +18,7 @@ import find = require('lodash/find');
 import last = require('lodash/last');
 import first = require('lodash/first');
 import includes = require('lodash/includes');
+import uniq = require('lodash/uniq');
 import clamp = require('lodash/clamp');
 import pick = require('lodash/pick');
 import omit = require('lodash/omit');
@@ -41,6 +42,7 @@ export {
   last,
   first,
   includes,
+  uniq,
   clamp,
   pick,
   omit,
