@@ -10,6 +10,7 @@ import { mergeDirtyRect } from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent, } from '../color';
 import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
+import { getCanvasCreator } from '../canvas/createCanvas';
 
 const contextKeys: Array<keyof ShapeConf> = [
   'fill',
@@ -390,7 +391,12 @@ export default class CanvasPainter implements Painter {
       // document.body.appendChild(canvas);
       // canvas.style.cssText = 'margin: 20px;'
     } else {
-      this._canvas = this.render.getDom() as HTMLCanvasElement;
+      try {
+        const canvasCreator = getCanvasCreator();
+        this._canvas = canvasCreator(this.render.dpr, this.render.dpr);
+      } catch(err) {
+        this._canvas = this.render.getDom() as HTMLCanvasElement;
+      }
     }
     this._ctx = this._canvas.getContext('2d');
   }
