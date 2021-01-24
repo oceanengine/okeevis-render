@@ -164,6 +164,10 @@ export default class Render extends EventFul {
     return this._painter;
   }
 
+  public getEventHandle(): EventHandle {
+    return this._eventHandle;
+  }
+
   private _onFrame = (now: number) => {
     this._rootGroup.onFrame(now);
     this._painter.onFrame(now);
