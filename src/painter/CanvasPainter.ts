@@ -415,7 +415,7 @@ export default class CanvasPainter implements Painter {
         const globalMatrix = item.getGlobalTransform();
         styleHelper.resetTransform(ctx);
         if (this.dpr !== 1) {
-          ctx.scale(this.dpr, this.dpr);
+          ctx.scale(this.render.resetTransformDpr || this.dpr, this.render.resetTransformDpr || this.dpr);
         }
         if (this._isPixelPainter) {
           ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
@@ -565,7 +565,7 @@ export default class CanvasPainter implements Painter {
     ctx.save();
     if (isClientBBox || item.isGroup) {
       styleHelper.resetTransform(ctx);
-      ctx.scale(this.dpr, this.dpr);
+      ctx.scale(this.render.resetTransformDpr || this.dpr, this.render.resetTransformDpr || this.dpr);
     }
     styleHelper.setGlobalAlpha(ctx, 1);
     ctx.lineWidth = 1;

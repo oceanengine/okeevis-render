@@ -27,6 +27,8 @@ export default class Render extends EventFul {
   public showBBox: boolean = false;
 
   public showFPS: boolean = false;
+
+  public resetTransformDpr: number;
     
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
