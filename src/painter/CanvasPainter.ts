@@ -152,11 +152,20 @@ export default class CanvasPainter implements Painter {
   public paintAt(x: number, y: number) {
     this._paintPosition = [x, y];
     const ctx = this._canvas.getContext('2d');
-    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    if (this._canvas === this.render.getDom()) {
+      ctx.clearRect(0, 0, 1, 1);
+    } else {
+      ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    }
     const dpr = this.dpr;
     ctx.save();
     if (dpr !== 1) {
       ctx.scale(dpr, dpr);
+    }
+    if (this._canvas === this.render.getDom()) {
+      ctx.beginPath();
+      this._brushRect(ctx, {x: 0, y: 0, width: 1, height: 1});
+      ctx.clip();
     }
     ctx.translate(-x, -y);
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
