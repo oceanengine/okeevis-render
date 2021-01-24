@@ -379,10 +379,14 @@ export default class EventHandle {
     }
 
     if (nativeEvent.type === 'touchend' || nativeEvent.type === 'touchcancel') {
-      const touch = this._findTouch(synthetichTouches, dragStartTouchId);
-      if (this._draggingTarget && !touch) {
+      const inTouch = !!this._findTouch(synthetichTouches, dragStartTouchId);
+      const touch = this._findTouch(synthetichChangedTouches, dragStartTouchId);
+      if (this._draggingTarget && !inTouch) {
         const dragParam = {
-          ...dragEventParam
+          ...dragEventParam,
+          x: touch.x,
+          y: touch.y,
+          ...this._getDragParam(touch),
         };
         const onDragEvent = new SyntheticDragEvent('dragend', dragParam);
         this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
