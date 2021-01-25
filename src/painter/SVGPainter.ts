@@ -102,6 +102,12 @@ export default class SVGPainter implements Painter {
 
   public dispose() {
     delete this._loadedSVGElements;
+    delete this._svgDefElement;
+    delete this._loadedSVGElements;
+    delete this._defsClipElements;
+    delete this._defsGradientsAndPatterns;
+    delete this._dfsShadows;
+    delete this._canvas;
     this._svgRoot.parentNode.removeChild(this._svgRoot);
     this._canvas = null;
   }
