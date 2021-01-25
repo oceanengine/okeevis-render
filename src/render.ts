@@ -14,6 +14,8 @@ import './painter/SVGPainter';
 export interface RenderOptions {
   dpr?: number;
   renderer?: 'canvas' | 'svg';
+  width?: number;
+  height?: number;
 }
 
 export default class Render extends EventFul {
@@ -54,25 +56,33 @@ export default class Render extends EventFul {
   private _painter: Painter;
 
   private _eventHandle: EventHandle;
+
+  private _disposed: boolean = false;
   
-  public constructor(dom: HTMLDivElement | HTMLCanvasElement, option: RenderOptions = {}) {
+  public constructor(dom?: HTMLDivElement | HTMLCanvasElement, option: RenderOptions = {}) {
     super();
-    this._dom = dom;
-    if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
-      this._width =  (dom as HTMLCanvasElement).width;
-      this._height = (dom as HTMLCanvasElement).height;
-    } else {
-      const[width, height] = getDomContentSize(dom);
-      this._width = width;
-      this._height = height;
-    }
+    
     this._rootGroup = new Group();
     this._rootGroup.ownerRender = this;
     this._isBrowser =   /html.*?element/gi.test(Object.prototype.toString.call(dom));
     this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio : 1);
     this._renderer = option.renderer || 'canvas';
-    const UsedPainter = getPainter(this._renderer);
-    this._painter= new UsedPainter(this);
+    this._dom = dom;
+    if (dom) {
+      if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
+        this._width =  (dom as HTMLCanvasElement).width;
+        this._height = (dom as HTMLCanvasElement).height;
+      } else {
+        const[width, height] = getDomContentSize(dom);
+        this._width = width;
+        this._height = height;
+      }
+      const UsedPainter = getPainter(this._renderer);
+      this._painter= new UsedPainter(this)
+    } else {
+      this._width = option.width || 300;
+      this._height = option.height || 150;
+    }
     this._eventHandle = new EventHandle(this);
     this._loop();
   }
@@ -80,7 +90,7 @@ export default class Render extends EventFul {
   public resize(width: number, height: number) {
     this._width = width;
     this._height = height;
-    this._painter.resize(width, height);
+    this._painter?.resize(width, height);
   }
 
   public dirty(el?: Element<any>) {
@@ -148,10 +158,11 @@ export default class Render extends EventFul {
     // todo polyfill
     cancelAnimationFrame(this._requestAnimationFrameId);
     this._eventHandle.dispose();
-    this._painter.dispose();
+    this._painter?.dispose();
     this._rootGroup.clear();
     this._rootGroup = null;
     this._dom = undefined;
+    this._disposed = true;
   }
 
   public getAllLeafNodes(ignoreInvisible = false, ignoreMute = false): Element[] {
@@ -179,8 +190,11 @@ export default class Render extends EventFul {
   }
 
   private _onFrame = (now: number) => {
+    if (this._disposed) {
+      return;
+    }
     this._rootGroup.onFrame(now);
-    this._painter.onFrame(now);
+    this._painter?.onFrame(now);
     this._eventHandle.onFrame();
     this._needUpdate = false;
     this._dirtyElements.clear();
