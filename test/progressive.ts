@@ -5,7 +5,7 @@ import Rect from '../src/shapes/Rect';
 import Line from '../src/shapes/Line';
 
 const dom = document.getElementById('root') as HTMLDivElement;
-const render = new Render(dom);
+const render = new Render(dom, {renderer: 'svg'});
 render.showFPS = true;
 render.showBBox = false;
 
@@ -16,8 +16,8 @@ const group = new Group({
   onMouseOver: e => e.target.setAttr({fill: 'red', fontSize: 24})
 });
 
-for (let i = 0; i < 20; i++) {
-  group.addChunk(makeText(2000))
+for (let i = 0; i < 5; i++) {
+  group.addChunk(makeText(100))
 }
 (window as any).render = render
 

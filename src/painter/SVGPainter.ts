@@ -5,6 +5,7 @@ import Group from '../shapes/Group';
 import Element, { defaultCanvasContext } from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
 import { fpsRect, fpsText } from './fps';
+import { LinearGradient, RadialGradient, } from '../color';
 
 // todo 支持渐变, 剪切, 阴影
 
@@ -20,6 +21,12 @@ export default class SVGPainter implements Painter {
   private _canvas: HTMLCanvasElement;
 
   private _frameTimes: number[] = [];
+
+  private _defsClipElements: Element[];
+
+  private _defsGradients: Array<LinearGradient | RadialGradient>;
+
+  private _dfsShadows: string[];
 
   public constructor(render: Render) {
     this.render = render;
@@ -108,6 +115,9 @@ export default class SVGPainter implements Painter {
     if (node.type === 'text') {
       svgDom.textContent = node.attr.text;
     }
+    if (node.attr.display && svgDom.getAttribute('display') === 'none') {
+      svgDom.setAttribute('display', '');
+    }
     node.clearDirty();
   }
 
@@ -158,6 +168,8 @@ export default class SVGPainter implements Painter {
   }
 
   private _drawFPS() {
+    fpsText.setAttr('display', this.render.showFPS);
+    fpsRect.setAttr('display', this.render.showFPS);
     const frameTimes = this._frameTimes;
     const startTime = frameTimes[0];
     const endTime = frameTimes[frameTimes.length - 1];
@@ -170,6 +182,7 @@ export default class SVGPainter implements Painter {
       this._svgRoot.appendChild(this._loadedSVGElements[fpsRect.id]);
       this._svgRoot.appendChild(this._loadedSVGElements[fpsText.id])
     }
+    this._updateNode(fpsRect);
     this._updateNode(fpsText);
   }
 }

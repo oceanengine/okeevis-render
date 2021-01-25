@@ -618,6 +618,8 @@ export default class CanvasPainter implements Painter {
   };
 
   private _drawFPS() {
+    fpsText.setAttr('display', this.render.showFPS);
+    fpsRect.setAttr('display', this.render.showFPS);
     const frameTimes = this._frameTimes;
     const startTime = frameTimes[0];
     const endTime = frameTimes[frameTimes.length - 1];

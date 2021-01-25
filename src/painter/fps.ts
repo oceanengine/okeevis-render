@@ -2,6 +2,7 @@ import Rect from '../shapes/Rect';
 import Text from '../shapes/Text';
 
 export const fpsRect = new Rect({
+  display: false,
   x: 0,
   y: 0,
   width: 88,
@@ -10,6 +11,7 @@ export const fpsRect = new Rect({
 });
 
 export const fpsText = new Text({
+  display: false,
   x: 8,
   y: 6,
   fill: '#ffffff',
