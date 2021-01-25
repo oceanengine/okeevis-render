@@ -34,10 +34,11 @@ export default class Shape<T extends CommonAttr = ShapeConf> extends Element<T> 
     ctx;
   }
 
-  public getSVGShapeAttributes(): any {
+  public getSvgAttributes(): any {
     const path = new Path2D();
     this.brush(path as any);
     return {
+      ...super.getSvgAttributes(),
       path: path.getSVGPathString(),
     };
   }

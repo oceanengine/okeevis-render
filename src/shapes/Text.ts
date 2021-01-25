@@ -123,8 +123,9 @@ export default class Text extends Shape<TextConf> {
     return inBBox(this.getBBox(), x, y);
   }
 
-  public getSVGShapeAttributes() {
+  public getSvgAttributes() {
     return {
+      ...super.getSvgAttributes(),
       x: this.attr.x,
       y: this.attr.y,
     };

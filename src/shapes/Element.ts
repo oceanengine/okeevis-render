@@ -139,10 +139,13 @@ const defaultTRansformConf: CommonAttr = {
   position: [0, 0],
   scale: [0, 0],
 };
-
+let nodeId = 1;
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
   implements AnimateAble<T>, TransformAble {
+  
+  public id: number;
+
   public attr: T & CommonAttr = {} as T;
 
   public type: string;
@@ -196,9 +199,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _dirtyRect: BBox;
 
   private _lastFrameTime: number;
+  
 
   public constructor(attr?: T) {
     super();
+    this.id = nodeId++;
     this.attr = this.getDefaultAttr();
     attr && this.setAttr(attr);
     this.created();
@@ -449,11 +454,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return { x: 0, y: 0, width: 0, height: 0 };
   }
 
-  public getSVGStyleAttributes() {
-    // todo
-  }
-
-  public getSVGShapeAttributes() {
+  public getSvgAttributes(): any {
     // todo
   }
 

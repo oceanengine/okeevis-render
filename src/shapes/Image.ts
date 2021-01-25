@@ -63,8 +63,9 @@ export default class Image extends Shape<ImageConf> {
     return inBBox(this.getBBox(), x, y);
   }
 
-  public getSVGShapeAttributes(): any {
+  public getSvgAttributes(): any {
     return {
+      ...super.getSvgAttributes(),
       x: this.attr.x,
       y: this.attr.y,
       width: this.attr.width,
