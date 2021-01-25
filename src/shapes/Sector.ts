@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { equalWithTolerance, PI2, } from '../utils/math';
+import { equalWithTolerance, PI2, getPointOnPolar } from '../utils/math';
 import { BBox, sectorBBox } from '../utils/bbox';
 import { isPointInSector, isPointInSectorStroke } from '../geometry/contain/sector';
 
@@ -63,8 +63,6 @@ export default class Sector extends Shape<SectorConf> {
       return;
     }
     const anticlockwise = end < start;
-    // const p1 = getPointOnPolar(cx, cy, radiusI, end);
-    // const p2 = getPointOnPolar(cx, cy, radius, start);
     ctx.arc(cx, cy, radiusI, end, start, !anticlockwise);
     ctx.arc(cx, cy, radius, start, end, anticlockwise);
     ctx.closePath();

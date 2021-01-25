@@ -36,6 +36,7 @@ const arc = new Arc({
 });
 
 const circle = new Circle({
+  cursor: 'pointer',
   cx: 100,
   cy: 100,
   radius: 50,
@@ -121,13 +122,14 @@ const polygon = new Polygon({
 })
 
 const sector = new Sector({
+  draggable: true,
   cx: 500,
   cy: 255,
   radius: 100,
+  radiusI: 20,
   start: degToRad(-30),
   end: degToRad(27),
   fill: 'blue',
-  radiusI: 0
 })
 
 

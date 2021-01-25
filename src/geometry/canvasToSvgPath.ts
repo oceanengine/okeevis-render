@@ -23,7 +23,7 @@ export default function canvasToSvgPath(pathList: PathAction[]): string {
       const endPoint = getPointOnPolar(cx, cy, r, endPointAngle);
       const isLargeArc = Math.abs(startAngle - endAngle) > Math.PI;
       const isClockWise = endAngle > startAngle;
-      out += `M${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${isLargeArc ? 1 : 0} ${isClockWise ? 1 : 0} ${endPoint.x} ${
+      out += `${i > 0 ? 'L' : "M"}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${isLargeArc ? 1 : 0} ${isClockWise ? 1 : 0} ${endPoint.x} ${
         endPoint.y
       }`;
     } else if (action === 'arcTo') {
