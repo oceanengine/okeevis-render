@@ -16,15 +16,14 @@ import { Vec2, transformMat3, vec2BBox } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
-
-export type Ref<T extends Element = Element> = { current?: T };
+import { Ref } from '../utils/ref';
 
 export type ElementAttr = GroupConf & ShapeConf;
 
 const defaultStyleReciver = ({} as any) as FillAndStrokeStyle;
 
 // 对象重用
-const reusePositionVec2: Vec2= [0, 0];
+const reusePositionVec2: Vec2 = [0, 0];
 const reuseBBoxVectors: Vec2[] = [
   [0, 0],
   [0, 0],
@@ -34,7 +33,7 @@ const reuseBBoxVectors: Vec2[] = [
 
 export interface BaseAttr extends TransformConf, EventConf {
   key?: string;
-  ref?: Ref;
+  ref?: Ref<Element>;
   display?: boolean;
   zIndex?: number;
 
@@ -124,7 +123,15 @@ export const defaultCanvasContext: ShapeConf = {
 };
 const extendAbleKeys = Object.keys(defaultCanvasContext);
 
-const transformKeys: Array<keyof CommonAttr> = ['rotation', 'scaleX', 'scaleY', 'translateX', 'translateY', 'originX', 'originY'];
+const transformKeys: Array<keyof CommonAttr> = [
+  'rotation',
+  'scaleX',
+  'scaleY',
+  'translateX',
+  'translateY',
+  'originX',
+  'originY',
+];
 
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
 
@@ -139,11 +146,11 @@ const defaultTRansformConf: CommonAttr = {
   position: [0, 0],
   scale: [0, 0],
 };
+
 let nodeId = 1;
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
   implements AnimateAble<T>, TransformAble {
-  
   public id: number;
 
   public attr: T & CommonAttr = {} as T;
@@ -199,7 +206,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _dirtyRect: BBox;
 
   private _lastFrameTime: number;
-  
 
   public constructor(attr?: T) {
     super();
@@ -410,7 +416,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
       this._clientBoundingRect = this.computClientBoundingRect(
-        this._clientBoundingRect || createZeroBBox()
+        this._clientBoundingRect || createZeroBBox(),
       );
       this._clientBoundingRectDirty = false;
     }
