@@ -86,6 +86,10 @@ export default class Render extends EventFul {
   public dirty(el?: Element<any>) {
     this._needUpdate = true;
     // todo svg下不能限制dirtyElements数量
+    if (el && this._renderer === 'svg') {
+      this._dirtyElements.add(el);
+      return;
+    }
     if (el && this.enableDirtyRect && this._dirtyElements.size <= this.maxDirtyRects) {
       this._dirtyElements.add(el);
     }

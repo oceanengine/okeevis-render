@@ -133,6 +133,8 @@ export default class SVGPainter implements Painter {
   }
 
   private _paintChunk(parent: Group, chunk: Element[]) {
+    parent.mountChunk(chunk);
+    chunk.forEach(item => item.clearDirty());
     const svgElement = this._loadedSVGElements[parent.id];
     chunk.forEach(item => this._mountNode(svgElement, item));
   }
