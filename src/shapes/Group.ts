@@ -20,7 +20,7 @@ export interface ChunkItem {
 export default class Group<T extends Element = Element> extends Element<GroupConf> {
   public type = 'group';
 
-  public svgTagName = 'group';
+  public svgTagName = 'g';
 
   public fillAble = false;
 

@@ -91,6 +91,7 @@ export default class SVGPainter implements Painter {
     const svgDom = this._createSVGElement(tagName, attributes);
     if (tagName === 'text') {
       const textNode = document.createTextNode(node.attr.text);
+      svgDom.setAttribute('paint-order', 'stroke');
       svgDom.appendChild(textNode)
     }
     this._loadedSVGElements[id] = svgDom;
@@ -120,9 +121,10 @@ export default class SVGPainter implements Painter {
   private _initSVGRoot() {
     const width = this.render.getWidth();
     const height = this.render.getHeight();
-    const svgRoot = this._createSVGElement('svg', {width, height, xmlns: SVG_NAMESPACE}) as any;
+    const svgRoot = this._createSVGElement('svg', {width, height, xmlns: SVG_NAMESPACE});
+    svgRoot.setAttribute('style', `font-size:${defaultCanvasContext.fontSize + 'px'}; font-family: ${defaultCanvasContext.fontFamily}`);
     const rootId = this.render.getRoot().id;
-    this._svgRoot = svgRoot;
+    this._svgRoot = svgRoot as any;
     this.render.getDom().appendChild(svgRoot);
     this._loadedSVGElements[rootId] = svgRoot;
     this._mountNode(svgRoot, fpsRect);
@@ -162,8 +164,10 @@ export default class SVGPainter implements Painter {
     }
     const fps = Math.floor((frameTimes.length * 1000) / (endTime - startTime));
     fpsText.setAttr('text', fps + ' pfs');
-    // this._svgRoot.appendChild(this._loadedSVGElements[fpsRect.id]);
-    // this._svgRoot.appendChild(this._loadedSVGElements[fpsText.id])
+    if (this._svgRoot.lastChild !== this._loadedSVGElements[fpsText.id]) {
+      this._svgRoot.appendChild(this._loadedSVGElements[fpsRect.id]);
+      this._svgRoot.appendChild(this._loadedSVGElements[fpsText.id])
+    }
     this._updateNode(fpsText);
   }
 }

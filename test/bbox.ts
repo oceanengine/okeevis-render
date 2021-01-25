@@ -17,7 +17,7 @@ import {LinearGradient, RadialGradient, } from '../src/color';
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom, {renderer: 'svg'});
 render.showBBox = false
-render.showBoundingRect = true;
+render.showBoundingRect = false;
 render.enableDirtyRect = true;
 render.showFPS = true;
 
