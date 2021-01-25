@@ -8,11 +8,14 @@ import { NAME_TRANSPARENT, RGBA_TRANSPARENT } from '../constant';
 
 export type ColorValue = 'none' | string | LinearGradient | RadialGradient | Pattern | null;
 
-
 export { Gradient, LinearGradient, RadialGradient, Pattern };
 
 export function isGradient(color: ColorValue) {
   return color instanceof LinearGradient || color instanceof RadialGradient;
+}
+
+export function isPattern(color: ColorValue): boolean {
+  return color instanceof Pattern;
 }
 
 export function isTransparent(color: ColorValue) {
@@ -40,6 +43,19 @@ export function getCtxColor(
   }
 }
 
+export function getSVGColor(color: ColorValue): string {
+  if (lodash.isString(color)) {
+    return color;
+  }
+  if (
+    color instanceof LinearGradient ||
+    color instanceof RadialGradient ||
+    color instanceof Pattern
+  ) {
+    return `url(#${color.id})`;
+  }
+}
+
 // 4时颜色空间约26w
 // 8时颜色空间32768
 
@@ -55,5 +71,5 @@ export function valueToRgb(index: number): [number, number, number] {
   // eslint-disable-next-line no-bitwise
   const g = (index >> 5) % 32;
   const b = index % 32;
-  return [r * 8, g * 8, b * 8]
+  return [r * 8, g * 8, b * 8];
 }

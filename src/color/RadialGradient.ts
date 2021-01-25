@@ -14,13 +14,13 @@ const defaultOption: RadialGradientOption = {
   stops: [],
 };
 
-export default class RadialGradient implements Gradient<RadialGradientOption> {
+export default class RadialGradient extends Gradient<RadialGradientOption> {
   public type = 'radialGradient';
 
   public option: RadialGradientOption;
 
   public constructor(option: RadialGradientOption) {
-    this.option = { ...defaultOption, ...option };
+    super({ ...defaultOption, ...option });
   }
 
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {

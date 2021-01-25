@@ -12,10 +12,10 @@ import POlyline from '../src/shapes/Polyline'
 import Rect from '../src/shapes/Rect'
 import Sector from '../src/shapes/Sector'
 import Text from '../src/shapes/Text'
-import {LinearGradient, RadialGradient, } from '../src/color';
+import {LinearGradient, RadialGradient, Pattern,  } from '../src/color';
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {renderer: 'svg'});
+const render = new Render(dom, {renderer: 'canvas'});
 render.showBBox = false
 render.showBoundingRect = false;
 render.enableDirtyRect = true;
@@ -40,6 +40,7 @@ const circle = new Circle({
   cx: 100,
   cy: 100,
   radius: 50,
+  clip: new Rect({x: 0, y: 0, width: 100, height: 100}),
   fill: new RadialGradient({
     cx: 0.5,
     cy: 0.5,
@@ -91,6 +92,11 @@ const rect = new Rect({
   shadowColor: 'red',
   shadowOffsetX: 20,
   shadowOffsetY: 20,
+  onClick: e => {
+    e.target.setAttr('fill', 'red')
+    circle.setAttr('clip', null)
+    group.firstChild.setAttr({fill: 'gray'})
+  },
   fill: new LinearGradient({
     x1: 0,
     y1: 0,
@@ -177,6 +183,21 @@ group.add(polygon)
 group.add(sector)
 group.add(text)
 group.add(path)
+
+const patternImage = new window.Image();
+patternImage.width = 50;
+patternImage.height = 50;
+patternImage.src = 'https://lf1-hscdn-tos.pstatp.com/obj/developer-baas/baas/ttkw6x/1ddf8408cdd9f7e0_1600424925672.png'
+group.prevpend(new Rect({
+  x: 0,
+  y: 0,
+  width: 600,
+  height: 600,
+  fill: new Pattern({
+    image: patternImage,
+    repeat: 'repeat',
+  })
+}))
 
 // document.onclick = () => {
 //   group.add(new Rect({

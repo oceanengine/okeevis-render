@@ -1,10 +1,11 @@
 import Element from '../shapes/Element';
 import * as mat3 from '../../js/mat3';
+import { isGradient, Gradient, LinearGradient, RadialGradient, getSVGColor,} from '../color';
 
-const identity_matrix = mat3.create();
+const identityMatrix = mat3.create();
 
 export interface SVGElementStyle {
-  clip: string;
+  'clip-path': string;
   fill: string;
   stroke: string;
   'stroke-width': string;
@@ -44,17 +45,22 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   } = node.attr;
   const ret: Partial<SVGElementStyle> = {};
   const matrix = node.getGlobalTransform();
+  const clip = node.getClipElement();
 
-  if (!mat3.exactEquals(matrix, identity_matrix)) {
+  if (clip) {
+    ret['clip-path'] = `url(#clip-${clip.id})`;
+  }
+
+  if (!mat3.exactEquals(matrix, identityMatrix)) {
     const transform = [matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]];
     ret.transform = `matrix(${transform.join(' ')})`;
   }
 
   if (fill) {
-    ret.fill = fill as any;
+    ret.fill = getSVGColor(fill);
   }
   if (stroke) {
-    ret.stroke = stroke as any;
+    ret.stroke = getSVGColor(stroke);
   }
   if (lineWidth !== undefined && lineWidth >= 0) {
     ret['stroke-width'] = lineWidth + '';
@@ -80,6 +86,18 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
 
   if (fontSize !== undefined) {
     ret['font-size'] = fontSize + '';
+  }
+
+  if (fontWeight !== undefined) {
+    ret['font-weight'] = fontWeight + '';
+  }
+
+  if (fontFamily !== undefined) {
+    ret['font-size'] = fontFamily;
+  }
+
+  if (fontStyle !== undefined) {
+    ret['font-style'] = fontStyle;
   }
 
   return ret;

@@ -1,8 +1,8 @@
 import { diff } from '@egjs/list-differ';
 import Element from './Element';
 import Shape from './Shape';
-import {TextConf, } from './Text';
-import { BBox, unionBBox, ceilBBox, } from '../utils/bbox';
+import { TextConf } from './Text';
+import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 
 export interface GroupConf extends TextConf {
@@ -29,10 +29,10 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   private _length: number = 0;
 
   protected _chunks: T[][] = [];
-  
+
   private _zindexDirty: boolean = true;
 
-  public get size(): number{
+  public get size(): number {
     return this._length;
   }
 
@@ -40,14 +40,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return {
       ...super.getDefaultAttr(),
       _batchBrush: false,
-    }
+    };
   }
 
   public getAnimationKeys(): Array<keyof GroupConf> {
-    return [
-      ...super.getAnimationKeys(),
-      'fontSize'
-    ]
+    return [...super.getAnimationKeys(), 'fontSize'];
   }
 
   public computClientBoundingRect(): BBox {
@@ -55,15 +52,21 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public getCurrentDirtyRect(): BBox {
-    const bboxList =  lodash.flatten(this.children().filter(item => item.attr.display).map(child => child.getDirtyRects()));
+    const bboxList = lodash.flatten(
+      this.children()
+        .filter(item => item.attr.display)
+        .map(child => child.getDirtyRects()),
+    );
     return ceilBBox(unionBBox(bboxList));
   }
 
   protected computeBBox(): BBox {
-    const bboxList = this.children().filter(item => item.attr.display).map(child => child.getClientBoundingRect());
+    const bboxList = this.children()
+      .filter(item => item.attr.display)
+      .map(child => child.getClientBoundingRect());
     return unionBBox(bboxList);
   }
-  
+
   public mounted() {
     super.mounted();
     this.eachChild(child => child.mounted());
@@ -73,17 +76,22 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     super.dirtyTransform();
     this.eachChild(child => child.dirtyAbsTransform());
   }
-  
+
   public dirtyAbsTransform() {
     super.dirtyAbsTransform();
     this.eachChild(child => child.dirtyAbsTransform());
   }
 
-  public add(item: Element): this {
+  public add(item: T): this {
     if (!item) {
       return;
     }
-    if (this._length === 0) {
+    if (item.parentNode === this) {
+      this._moveToTail(item);
+      item.dirty();
+      return this;
+    }
+    if (!this.firstChild) {
       this.firstChild = this.lastChild = item;
     } else {
       item.prevSibling = this.lastChild;
@@ -91,15 +99,21 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       this.lastChild = item;
     }
     this._length += 1;
-    item.ownerRender = this.ownerRender;
-    item.parentNode = this;
-    item.mounted();
-    this.dirty(item);
-    this.dirtyBBox();
+    this._mountNode(item);
     return this;
   }
-  
-  
+
+  public prevpend(item: T) {
+    if (!this.firstChild) {
+      return this.add(item);
+    }
+    item.nextSibling = this.firstChild;
+    this.firstChild.prevSibling = item;
+    this.firstChild = item;
+    this._length += 1;
+    this._mountNode(item);
+  }
+
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
     return this;
@@ -124,7 +138,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public getChunks(): T[][] {
     return this._chunks;
   }
-  
 
   // 递归获取chunks
   public getAllChunks(out: ChunkItem[] = []): ChunkItem[] {
@@ -136,13 +149,13 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     }
     this.eachChild(child => {
       if (child.isGroup) {
-        const childGroup = child as any as Group;
+        const childGroup = (child as any) as Group;
         childGroup.getAllChunks(out);
       }
-    })
+    });
     return out;
   }
-  
+
   public mountChunk(chunkItems: T[]) {
     this._chunks = this._chunks.filter(chunk => chunk !== chunkItems);
     chunkItems.forEach(item => this.add(item));
@@ -220,7 +233,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
     const result = diff(prevList, list, (item, index) => {
       const attr = item.attr;
-      const key = attr.key ? (item.type + attr.key) : `auto-key-${item.type}-${index}`;
+      const key = attr.key ? item.type + attr.key : `auto-key-${item.type}-${index}`;
       return key;
     });
 
@@ -234,10 +247,8 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         return;
       }
       if (from > to) {
-
       }
       if (from < to) {
-
       }
       // this._components.splice(from, 1)
       // this._components.splice(to, 0, list[result.pureChanged[i][1]]);
@@ -254,10 +265,10 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         nextElement.attr.ref.current = prevElement;
       }
       if (prevElement.isGroup) {
-        (prevElement as unknown as Group).updateAll((nextElement as any as Group).children());
-        const chunks = (nextElement as any as Group).getChunks();
-        (prevElement as unknown as Group).replaceChunks(chunks);
-        chunks.forEach(chunk => (prevElement as any as Group).addChunk(chunk));
+        ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children());
+        const chunks = ((nextElement as any) as Group).getChunks();
+        ((prevElement as unknown) as Group).replaceChunks(chunks);
+        chunks.forEach(chunk => ((prevElement as any) as Group).addChunk(chunk));
       }
       prevElement.setBaseTransform(nextElement.getBaseTransform());
       prevElement.stopAllAnimation().animateTo(nextElement.attr, 10000);
@@ -266,7 +277,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     result.added.forEach(index => {
       this.add(list[index]);
     });
-    
   }
 
   public eachChild(callback: (child: T) => void) {
@@ -294,12 +304,12 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       if (item.attr.display === false && ignoreInvisible) {
         return;
       }
-      if (!item.isGroup && !((item.getExtendAttr('pointerEvents') === 'none' && ignoreMute))) {
-        ret.push(item as any as Shape);
+      if (!item.isGroup && !(item.getExtendAttr('pointerEvents') === 'none' && ignoreMute)) {
+        ret.push((item as any) as Shape);
       } else {
-        (item as any as Group).getAllLeafNodes(ret, ignoreInvisible);
+        ((item as any) as Group).getAllLeafNodes(ret, ignoreInvisible);
       }
-    })
+    });
     return ret;
   }
 
@@ -314,7 +324,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public sortByZIndex() {
     // todo 未改变的情况下不排序;
-    return;
     // if (this._zindexDirty) {
     //   this._components = this._components.sort((a, b) => b.attr.zIndex - a.attr.zIndex);
     // }
@@ -324,5 +333,33 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     //   }
     // });
     // this._zindexDirty = false;
+  }
+
+  private _mountNode(item: T) {
+    item.ownerRender = this.ownerRender;
+    item.parentNode = this;
+    item.mounted();
+    this.dirty(item);
+    this.dirtyBBox();
+  }
+
+  private _moveToTail(item: T) {
+    if (this.lastChild === item) {
+      return;
+    }
+    if (this.firstChild === item) {
+      this.firstChild = item.nextSibling;
+      this.firstChild.prevSibling = null;
+      const last = this.lastChild;
+      item.prevSibling = this.lastChild;
+      this.lastChild = last.nextSibling = item;
+      item.nextSibling = null;
+    } else { // 中间节点
+      item.prevSibling.nextSibling = item.nextSibling;
+      item.prevSibling = this.lastChild;
+      this.lastChild.nextSibling = item;
+      item.nextSibling = null;
+      this.lastChild = item;
+    }
   }
 }
