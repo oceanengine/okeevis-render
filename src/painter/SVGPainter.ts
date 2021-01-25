@@ -31,7 +31,7 @@ export default class SVGPainter implements Painter {
 
   private _svgDefElement: SVGDefsElement;
 
-  private loadedDefsElements: Record<string, SVGGradientElement> = {};
+  private _loadedDefsElements: Record<string, SVGGradientElement> = {};
 
   private _defsClipElements: Es6Set<Element> = new Es6Set();
 
@@ -78,7 +78,7 @@ export default class SVGPainter implements Painter {
             } else {
               this._removeNode(dirtyNode);
             }
-          } else {
+          } else  {
             const parentNode = dirtyNode.parentNode;
             this._mountNode(this._loadedSVGElements[parentNode.id], dirtyNode);
           }
@@ -125,14 +125,14 @@ export default class SVGPainter implements Painter {
         this._svgDefElement,
         gradientOrPattern.getSVGNode(),
       ) as any;
-      this.loadedDefsElements[gradientOrPattern.id] = defsGradientPatterNode;
+      this._loadedDefsElements[gradientOrPattern.id] = defsGradientPatterNode;
     });
 
     diffResult.removed.forEach(index => {
       const gradient = prevGradients[index];
-      const el = this.loadedDefsElements[gradient.id];
+      const el = this._loadedDefsElements[gradient.id];
       el.parentNode.removeChild(el);
-      delete this.loadedDefsElements[gradient.id];
+      delete this._loadedDefsElements[gradient.id];
     });
   }
 
@@ -168,7 +168,7 @@ export default class SVGPainter implements Painter {
       clip.appendChild(svgDom);
       appendNode = clip;
     }
-    this._loadedSVGElements[id] = appendNode;
+    this._loadedSVGElements[id] = svgDom;
 
     if (node.isGroup) {
       (node as Group).eachChild(child => this._mountNode(svgDom, child));
@@ -205,7 +205,11 @@ export default class SVGPainter implements Painter {
 
   private _removeNode(node: Element) {
     const el = this._loadedSVGElements[node.id];
-    el.parentNode.removeChild(el);
+    if (node.isClip) {
+      el.parentNode.parentNode.removeChild(el.parentNode);
+    } else {
+      el.parentNode.removeChild(el);
+    }
     delete this._loadedSVGElements[node.id];
     node.clearDirty();
   }
@@ -254,7 +258,7 @@ export default class SVGPainter implements Painter {
   private _getAllDfsClips(group: Group) {
     group.eachChild(child => {
       const clip = child.getClipElement();
-      if (clip && !clip.parentNode) {
+      if (clip) {
         this._defsClipElements.add(clip);
       }
       if (child.isGroup) {

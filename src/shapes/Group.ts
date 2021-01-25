@@ -322,6 +322,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._zindexDirty = true;
   }
 
+  public dirtyClipTarget(clip: Element) {
+    super.dirtyClipTarget(clip);
+    this.eachChild(child => child.dirtyClipTarget(clip));
+  }
+
   public sortByZIndex() {
     // todo 未改变的情况下不排序;
     // if (this._zindexDirty) {

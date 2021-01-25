@@ -370,6 +370,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this;
   }
 
+  public get isClip(): boolean {
+    return this.ownerRender && !this.parentNode;
+  }
+
   public get isGroup(): boolean {
     return this.type === 'group';
   }
@@ -525,6 +529,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (key === 'zIndex') {
       this.parentNode?.dirtyZIndex();
     }
+    if (key === 'clip' && this.attr.clip) {
+      const clip = this.getClipElement();
+      if (!clip.parentNode) {
+        clip.destroy();
+      }
+    }
   }
 
   public mounted() {
@@ -560,6 +570,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return clips.every(clip => clip.isPointInFill(x, y));
   }
 
+  public dirtyClipTarget(clip: Element) {
+    const myclip = this.getClipElement();
+    if (myclip && myclip === clip) {
+      this.dirty();
+    }
+  }
+
   public getClipList(): Element[] {
     const clips: Element[] = [];
     let node: any = this;
@@ -584,11 +601,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public destroy() {
     this.parentNode = null;
     this.ownerRender = null;
-    this.prevSibling = this.nextSibling = null;
+    this.prevSibling = this.nextSibling = this.firstChild = this.lastChild = null;
     this._transformDirty = true;
     this._absTransformDirty = true;
     this._clientBoundingRectDirty = true;
     this._bboxDirty = true;
+    const clip = this.getClipElement();
+    if (clip && !clip.parentNode) {
+      clip.destroy();
+    }
     this.stopAllAnimation();
     this.removeAllListeners();
   }

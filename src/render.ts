@@ -101,6 +101,10 @@ export default class Render extends EventFul {
       this._dirtyElements.add(el);
       return;
     }
+    if (el && el.isClip) {
+      this._rootGroup.dirtyClipTarget(el);
+      return;
+    }
     if (el && this.enableDirtyRect && this._dirtyElements.size <= this.maxDirtyRects) {
       this._dirtyElements.add(el);
     }
