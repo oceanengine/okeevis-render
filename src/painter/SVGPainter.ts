@@ -122,7 +122,7 @@ export default class SVGPainter implements Painter {
     const width = this.render.getWidth();
     const height = this.render.getHeight();
     const svgRoot = this._createSVGElement('svg', {width, height, xmlns: SVG_NAMESPACE});
-    svgRoot.setAttribute('style', `font-size:${defaultCanvasContext.fontSize + 'px'}; font-family: ${defaultCanvasContext.fontFamily}`);
+    svgRoot.setAttribute('style', `cursor: default;font-size:${defaultCanvasContext.fontSize + 'px'}; font-family: ${defaultCanvasContext.fontFamily}`);
     const rootId = this.render.getRoot().id;
     this._svgRoot = svgRoot as any;
     this.render.getDom().appendChild(svgRoot);
