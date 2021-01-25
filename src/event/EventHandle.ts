@@ -193,7 +193,7 @@ export default class EventHandle {
 
     if (event.type === 'mousedown' || event.type === 'mousemove') {
       // todo 父元素也可以拖动
-      if (event.type === 'mousedown') {
+      if (event.type === 'mousedown' && nativeEvent.button !== 2) {
         const parentNodes = target.getAncestorNodes(true);
         for (let i = 0; i < parentNodes.length; i++) {
           if (parentNodes[i].attr.draggable) {
