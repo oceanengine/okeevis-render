@@ -51,7 +51,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     ret['clip-path'] = `url(#clip-${clip.id})`;
   }
 
-  if (!mat3.exactEquals(matrix, identityMatrix)) {
+  if (!mat3.exactEquals(matrix, identityMatrix) && !node.isGroup) {
     const transform = [matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]];
     ret.transform = `matrix(${transform.join(' ')})`;
   }
@@ -59,6 +59,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   if (fill) {
     ret.fill = getSVGColor(fill);
   }
+
   if (stroke) {
     ret.stroke = getSVGColor(stroke);
   }
