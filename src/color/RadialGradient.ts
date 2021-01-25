@@ -1,5 +1,7 @@
 import Gradient, { GradientOption } from '../abstract/Gradient';
 import { BBox } from '../utils/bbox';
+import SVGNode from '../abstract/Node';
+
 
 export interface RadialGradientOption extends GradientOption {
   cx?: number;
@@ -22,6 +24,7 @@ export default class RadialGradient extends Gradient<RadialGradientOption> {
   public constructor(option: RadialGradientOption) {
     super({ ...defaultOption, ...option });
   }
+  
 
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {
     const option = this.option;
@@ -36,6 +39,28 @@ export default class RadialGradient extends Gradient<RadialGradientOption> {
       gradient.addColorStop(stop.offset, stop.color);
     });
     return gradient;
+  }
+
+  public getSVGNode(): SVGNode {
+    const {cx, cy, r, stops, } = this.option;
+    return {
+      svgTagName: 'radialGradient',
+      svgAttr: {
+        id: this.id,
+        cx,
+        cy,
+        r,
+      },
+      childNodes: stops.map(stop => {
+        return {
+          svgTagName: 'stop',
+          svgAttr: {
+            offset: stop.offset * 100 + '%',
+            'stop-color': stop.color,
+          }
+        }
+      })
+    }
   }
 
   public toCssString(): string {

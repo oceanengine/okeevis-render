@@ -7,6 +7,7 @@ import Element from './shapes/Element';
 import {getDomContentSize, } from './utils/dom';
 import requestAnimationFrame from './utils/requestAnimationFrame';
 import { getPainter } from './painter';
+import { renderToSVGString } from './svg/renderToSVGString';
 
 import './painter/CanvasPainter';
 import './painter/SVGPainter';
@@ -172,10 +173,6 @@ export default class Render extends EventFul {
   public getAllLeafNodes(ignoreInvisible = false, ignoreMute = false): Element[] {
     return this._rootGroup.getAllLeafNodes([], ignoreInvisible, ignoreMute);
   }
-  
-  public getAllElements(): Element[] {
-    return this._rootGroup.children();
-  }
 
   public getAllChunks(): ChunkItem[] {
     return this._rootGroup.getAllChunks();
@@ -187,6 +184,10 @@ export default class Render extends EventFul {
 
   public getPainter(): Painter {
     return this._painter;
+  }
+
+  public renderToSVGString(): string {
+    return renderToSVGString(this.getRoot(), this._width, this._height);
   }
 
   public getEventHandle(): EventHandle {

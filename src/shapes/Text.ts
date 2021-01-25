@@ -149,6 +149,7 @@ export default class Text extends Shape<TextConf> {
       y: this.attr.y,
       dy,
       anchor,
+      "paint-order": 'stroke',
     };
   }
 }

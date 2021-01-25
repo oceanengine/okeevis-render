@@ -1,5 +1,6 @@
 import Gradient, { GradientOption } from '../abstract/Gradient';
 import { BBox } from '../utils/bbox';
+import SVGNode from '../abstract/Node';
 
 export interface LinearGradientOption extends GradientOption {
   x1?: number;
@@ -35,6 +36,29 @@ export default class LinearGradient extends Gradient<LinearGradientOption> {
       gradient.addColorStop(stop.offset, stop.color);
     });
     return gradient;
+  }
+
+  public getSVGNode(): SVGNode {
+    const {x1, y1, x2, y2, stops, } = this.option;
+    return {
+      svgTagName: 'linearGradient',
+      svgAttr: {
+        id: this.id,
+        x1: x1 * 100 + '%',
+        y1: y1 * 100 + '%',
+        x2: x2 * 100 + '%',
+        y2: y2 * 100 + '%',
+      },
+      childNodes: stops.map(stop => {
+        return {
+          svgTagName: 'stop',
+          svgAttr: {
+            offset: stop.offset * 100 + '%',
+            'stop-color': stop.color,
+          }
+        }
+      })
+    }
   }
 
   public toCssString(): string {

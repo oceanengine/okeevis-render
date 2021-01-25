@@ -6,17 +6,18 @@ import Line from '../src/shapes/Line';
 import Circle from '../src/shapes/Circle';
 
 const dom = document.getElementById('root') as HTMLDivElement;
-const render = new Render(dom);
+const render = new Render(dom, {renderer: 'svg'});
 render.showFPS = true;
 render.showBBox = false;
 
 const ref = { current: null } as any;
+(window as any).render = render;
 
 const group = new Group({
   fill: 'blue',
 });
 
-group.addAll(makeCircle(3000));
+group.addAll(makeCircle(1000));
 render.add(group);
 group.children().forEach(item => item.animateTo({
   position: [Math.random() * 640, Math.random()*480],

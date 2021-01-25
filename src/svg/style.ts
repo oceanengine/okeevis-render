@@ -1,10 +1,22 @@
-import Element from '../shapes/Element';
+import Element, { defaultCanvasContext } from '../shapes/Element';
+import Group from '../shapes/Group';
 import * as mat3 from '../../js/mat3';
-import { isGradient, Gradient, LinearGradient, RadialGradient, getSVGColor,} from '../color';
+import { SVG_NAMESPACE, XLINK_NAMESPACE, } from '../constant';
+
+import {
+  getSVGColor,
+  Gradient,
+  LinearGradient,
+  RadialGradient,
+  Pattern,
+  isGradient,
+  isPattern,
+} from '../color';
 
 const identityMatrix = mat3.create();
 
 export interface SVGElementStyle {
+  id: string;
   'clip-path': string;
   fill: string;
   stroke: string;
@@ -28,6 +40,18 @@ export interface SVGElementStyle {
   cursor: string;
 }
 
+export function getSVGRootAttributes(width: number, height: number): any {
+  return {
+    width,
+    height,
+    xmlns: SVG_NAMESPACE,
+    'xmlns:xlink': XLINK_NAMESPACE,
+    style: `user-select: none;cursor: default;font-size:${
+      defaultCanvasContext.fontSize + 'px'
+    }; font-family: ${defaultCanvasContext.fontFamily}`,
+  };
+}
+
 export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   const {
     fill,
@@ -47,8 +71,10 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   const matrix = node.getGlobalTransform();
   const clip = node.getClipElement();
 
+  ret.id = 'node-' + node.id;
+
   if (clip) {
-    ret['clip-path'] = `url(#clip-${clip.id})`;
+    ret['clip-path'] = `url(#node-${clip.id})`;
   }
 
   if (!mat3.exactEquals(matrix, identityMatrix) && !node.isGroup) {
@@ -102,4 +128,36 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   }
 
   return ret;
+}
+
+export function getAllDefsClips(group: Group, out: Element[] = []): Element[] {
+  group.eachChild(child => {
+    const clip = child.getClipElement();
+    if (clip && !clip.parentNode && out.indexOf(clip) === -1) {
+      out.push(clip);
+    }
+    if (child.isGroup) {
+      getAllDefsClips(child as Group, out);
+    }
+  });
+  return out;
+}
+
+export function getAllDefsGradientAndPattern(
+  group: Group,
+  out: Array<LinearGradient | RadialGradient | Pattern> = [],
+): Array<LinearGradient | RadialGradient | Pattern> {
+  group.eachChild(child => {
+    const { fill, stroke } = child.attr;
+    if (isGradient(fill) || isPattern(fill)) {
+      out.indexOf(fill as Gradient) === -1 && out.push(fill as Gradient);
+    }
+    if (isGradient(stroke) || isPattern(stroke)) {
+      out.indexOf(stroke as Gradient) === -1 && out.push(stroke as Gradient);
+    }
+    if (child.isGroup) {
+      getAllDefsGradientAndPattern(child as Group, out);
+    }
+  });
+  return out;
 }

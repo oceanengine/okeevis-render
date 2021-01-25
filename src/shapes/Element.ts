@@ -402,6 +402,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._dirty = false;
   }
 
+  public children(): Element[] {
+    const ret: Element[] = [];
+    let node = this.firstChild
+    while (node) {
+      ret.push(node);
+      node = node.nextSibling
+    }
+    node = null;
+    return ret;
+  }
+
   public getBBox(): BBox {
     if (!this._bbox || this._bboxDirty) {
       this._bbox = this.computeBBox();

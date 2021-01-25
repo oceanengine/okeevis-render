@@ -1,4 +1,5 @@
 import { getImage } from '../utils/imageLoader';
+import SVGNode from '../abstract/Node';
 
 export interface PatternOption {
   image: CanvasImageSource | string;
@@ -17,21 +18,23 @@ export default class Pattern {
   public id: string;
 
   private _pattern: CanvasPattern;
-  
 
   public constructor(conf: PatternOption) {
     this.option = conf;
     this.id = 'pattern-' + id++;
   }
 
-  public  getCanvasContextStyle(ctx: CanvasRenderingContext2D, onPatternReady: Function): CanvasPattern {
-    const {image, repeat} = this.option;
+  public getCanvasContextStyle(
+    ctx: CanvasRenderingContext2D,
+    onPatternReady: Function,
+  ): CanvasPattern {
+    const { image, repeat } = this.option;
     if (!this._pattern) {
       if (typeof image === 'string') {
         const result = getImage(image, ret => {
           this._pattern = ctx.createPattern(ret, repeat);
           onPatternReady();
-        })
+        });
         if (result) {
           this._pattern = ctx.createPattern(result, repeat);
           onPatternReady();
@@ -42,15 +45,43 @@ export default class Pattern {
         } else {
           image.onload = () => {
             try {
-            this._pattern = ctx.createPattern(image, repeat);
-            onPatternReady();
-            } catch(err) {
+              this._pattern = ctx.createPattern(image, repeat);
+              onPatternReady();
+            } catch (err) {
               onPatternReady();
             }
-          }
+          };
         }
       }
     }
     return this._pattern;
+  }
+
+  public getSVGNode(): SVGNode {
+    const { image, repeat } = this.option;
+    const { width, height, src } = image as HTMLImageElement;
+    return {
+      svgTagName: 'pattern',
+      svgAttr: {
+        id: this.id,
+        x: 0,
+        y: 0,
+        width,
+        height,
+        patternUnits: 'userSpaceOnUse', // 'objectBoundingBox',
+      },
+      childNodes: [
+        {
+          svgTagName: 'image',
+          svgAttr: {
+            'xlink:href': src,
+            x: 0,
+            y: 0,
+            width,
+            height,
+          },
+        },
+      ],
+    };
   }
 }

@@ -4,10 +4,11 @@ import Painter from '../abstract/Painter';
 import { registerPainter } from './index';
 import Render from '../render';
 import Group from '../shapes/Group';
-import Element, { defaultCanvasContext } from '../shapes/Element';
+import Element from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
 import { fpsRect, fpsText } from './fps';
-import { getImage } from '../utils/imageLoader';
+import SVGNode from '../abstract/Node';
+import { getSVGRootAttributes } from '../svg/style';
 
 import { Gradient, LinearGradient, RadialGradient, Pattern, isGradient, isPattern } from '../color';
 
@@ -119,65 +120,12 @@ export default class SVGPainter implements Painter {
     const currentGradients = setToArray(this._defsGradientsAndPatterns) as any[];
     const diffResult = diff(prevGradients, currentGradients, (gradient: Gradient) => gradient.id);
     diffResult.added.forEach(index => {
-      const gradient = currentGradients[index];
-      let gradientElement: SVGGradientElement;
-      if (gradient instanceof RadialGradient) {
-        const { cx, cy, r, stops } = (gradient as RadialGradient).option;
-        gradientElement = this._createSVGElement('radialGradient', {
-          id: gradient.id,
-          cx,
-          cy,
-          r,
-        }) as any;
-        stops.forEach(stop => {
-          const { offset, color } = stop;
-          const stopElement = this._createSVGElement('stop', {
-            offset: offset * 100 + '%',
-            'stop-color': color,
-          });
-          gradientElement.appendChild(stopElement);
-        });
-      } else if (gradient instanceof LinearGradient) {
-        const { x1, y1, x2, y2, stops } = (gradient as LinearGradient).option;
-        gradientElement = this._createSVGElement('linearGradient', {
-          id: gradient.id,
-          x1: x1 * 100 + '%',
-          y1: y1 * 100 + '%',
-          x2: x2 * 100 + '%',
-          y2: y2 * 100 + '%',
-        }) as any;
-        stops.forEach(stop => {
-          const { offset, color } = stop;
-          const stopElement = this._createSVGElement('stop', {
-            offset: offset * 100 + '%',
-            'stop-color': color,
-          });
-          gradientElement.appendChild(stopElement);
-        });
-      } else if (gradient instanceof Pattern) {
-        const { image } = (gradient as Pattern).option;
-        // todo 支持字符串image加载
-        const { src, width, height } = image as HTMLImageElement;
-        // https://www.w3cplus.com/svg/svg-pattern-element.html
-        gradientElement = this._createSVGElement('pattern', {
-          id: gradient.id,
-          x: 0,
-          y: 0,
-          width,
-          height,
-          patternUnits: 'userSpaceOnUse', // 'objectBoundingBox',
-        }) as any;
-        const svgImage = this._createSVGElement('image', {
-          'xlink:href': src,
-          x: 0,
-          y: 0,
-          width,
-          height,
-        }) as SVGImageElement;
-        gradientElement.appendChild(svgImage);
-      }
-      this.loadedDefsElements[gradient.id] = gradientElement;
-      this._svgDefElement.appendChild(gradientElement);
+      const gradientOrPattern = currentGradients[index] as Gradient | Pattern;
+      const defsGradientPatterNode = this._mountDataNode(
+        this._svgDefElement,
+        gradientOrPattern.getSVGNode(),
+      ) as any;
+      this.loadedDefsElements[gradientOrPattern.id] = defsGradientPatterNode;
     });
 
     diffResult.removed.forEach(index => {
@@ -210,25 +158,33 @@ export default class SVGPainter implements Painter {
     const attributes = node.getSvgAttributes();
     const id = node.id;
     const svgDom = this._createSVGElement(tagName, attributes);
+    let appendNode = svgDom;
     if (tagName === 'text') {
       const textNode = document.createTextNode(node.attr.text);
-      svgDom.setAttribute('paint-order', 'stroke');
       svgDom.appendChild(textNode);
     }
     if (isClip) {
-      const clip = this._createSVGElement('clipPath', { id: 'clip-' + node.id });
+      const clip = this._createSVGElement('clipPath', { id: 'node-' + node.id });
       clip.appendChild(svgDom);
-      this._loadedSVGElements[id] = clip;
-      parent.appendChild(clip);
-    } else {
-      this._loadedSVGElements[id] = svgDom;
-      parent.appendChild(svgDom);
+      appendNode = clip;
     }
+    this._loadedSVGElements[id] = appendNode;
 
     if (node.isGroup) {
       (node as Group).eachChild(child => this._mountNode(svgDom, child));
     }
+
+    parent.appendChild(appendNode);
+
     node.clearDirty();
+  }
+
+  private _mountDataNode(parent: SVGElement, node: SVGNode): SVGElement {
+    const { svgTagName, svgAttr, childNodes } = node;
+    const svgDom = this._createSVGElement(svgTagName, svgAttr);
+    childNodes && childNodes.forEach(child => this._mountDataNode(svgDom, child));
+    parent.appendChild(svgDom);
+    return svgDom;
   }
 
   private _updateNode(node: Element) {
@@ -257,13 +213,7 @@ export default class SVGPainter implements Painter {
   private _initSVGRoot() {
     const width = this.render.getWidth();
     const height = this.render.getHeight();
-    const svgRoot = this._createSVGElement('svg', { width, height, xmlns: SVG_NAMESPACE });
-    svgRoot.setAttribute(
-      'style',
-      `user-select: none;cursor: default;font-size:${
-        defaultCanvasContext.fontSize + 'px'
-      }; font-family: ${defaultCanvasContext.fontFamily}`,
-    );
+    const svgRoot = this._createSVGElement('svg', getSVGRootAttributes(width, height));
     const rootId = this.render.getRoot().id;
     const dfesElement = this._createSVGElement('defs', {}) as any;
     svgRoot.appendChild(dfesElement);

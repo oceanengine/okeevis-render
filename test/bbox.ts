@@ -8,19 +8,19 @@ import Image from '../src/shapes/Image'
 import Line from '../src/shapes/Line'
 import Path from '../src/shapes/Path'
 import Polygon from '../src/shapes/Polygon'
-import POlyline from '../src/shapes/Polyline'
+import Poyline from '../src/shapes/Polyline'
 import Rect from '../src/shapes/Rect'
 import Sector from '../src/shapes/Sector'
 import Text from '../src/shapes/Text'
 import {LinearGradient, RadialGradient, Pattern,  } from '../src/color';
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {renderer: 'canvas'});
+const render = new Render(dom, {renderer: 'svg'});
 render.showBBox = false
 render.showBoundingRect = false;
 render.enableDirtyRect = true;
 render.showFPS = true;
-
+(window as any).renderer = render;
 function degToRad(a: number) {
   return a * Math.PI / 180;
 }
@@ -173,7 +173,7 @@ const group = new Group({
 });
 
 
-// group.animateTo({rotation: degToRad(360)}, 50000)
+group.animateTo({rotation: degToRad(360)}, 50000)
 group.add(arc);
 group.add(circle)
 group.add(image);
