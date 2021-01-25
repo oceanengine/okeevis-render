@@ -1,10 +1,12 @@
 import Painter from '../abstract/Painter';
+import {registerPainter, } from './index';
 import Render from '../render';
 import Group from '../shapes/Group';
-import Element, { defaultCanvasContext, } from '../shapes/Element';
+import Element, { defaultCanvasContext } from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
 import { fpsRect, fpsText } from './fps';
 
+// todo 支持渐变, 剪切, 阴影
 
 export default class SVGPainter implements Painter {
   public render: Render;
@@ -54,7 +56,7 @@ export default class SVGPainter implements Painter {
             const parentNode = dirtyNode.parentNode;
             this._mountNode(this._loadedSVGElements[parentNode.id], dirtyNode);
           }
-        })
+        });
       }
     }
     const allChunks = this.render.getAllChunks();
@@ -86,33 +88,45 @@ export default class SVGPainter implements Painter {
     const tagName = node.svgTagName;
     const attributes = node.getSvgAttributes();
     const id = node.id;
-    const svgDom =  this._createSVGElement(tagName, attributes);
+    const svgDom = this._createSVGElement(tagName, attributes);
+    if (tagName === 'text') {
+      const textNode = document.createTextNode(node.attr.text);
+      svgDom.appendChild(textNode)
+    }
     this._loadedSVGElements[id] = svgDom;
     parent.appendChild(svgDom);
     if (node.isGroup) {
       (node as Group).eachChild(child => this._mountNode(svgDom, child));
     }
+    node.clearDirty();
   }
 
   private _updateNode(node: Element) {
-    this._setElementAttr(this._loadedSVGElements[node.id], node.getSvgAttributes());
+    const svgDom = this._loadedSVGElements[node.id];
+    this._setElementAttr(svgDom, node.getSvgAttributes());
+    if (node.type === 'text') {
+      svgDom.textContent = node.attr.text;
+    }
+    node.clearDirty();
   }
 
   private _removeNode(node: Element) {
     const el = this._loadedSVGElements[node.id];
     el.parentNode.removeChild(el);
     delete this._loadedSVGElements[node.id];
+    node.clearDirty();
   }
 
   private _initSVGRoot() {
     const width = this.render.getWidth();
     const height = this.render.getHeight();
-    const svgRoot = document.createElement('svg') as any;
-    svgRoot.setAttribute('width', width + 'px');
-    svgRoot.setAttribute('height', height + 'px');
+    const svgRoot = this._createSVGElement('svg', {width, height, xmlns: SVG_NAMESPACE}) as any;
+    const rootId = this.render.getRoot().id;
     this._svgRoot = svgRoot;
-    this._mountNode(svgRoot, fpsText);
+    this.render.getDom().appendChild(svgRoot);
+    this._loadedSVGElements[rootId] = svgRoot;
     this._mountNode(svgRoot, fpsRect);
+    this._mountNode(svgRoot, fpsText);
     // todo default canvas context
   }
 
@@ -147,7 +161,10 @@ export default class SVGPainter implements Painter {
       return;
     }
     const fps = Math.floor((frameTimes.length * 1000) / (endTime - startTime));
-    fpsText.setAttr('text', fps + '');
+    fpsText.setAttr('text', fps + ' pfs');
+    // this._svgRoot.appendChild(this._loadedSVGElements[fpsRect.id]);
+    // this._svgRoot.appendChild(this._loadedSVGElements[fpsText.id])
     this._updateNode(fpsText);
   }
 }
+registerPainter('svg', SVGPainter);

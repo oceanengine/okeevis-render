@@ -1,4 +1,5 @@
 import Painter from '../abstract/Painter';
+import {registerPainter, } from './index';
 import Render from '../render';
 import Element, { defaultCanvasContext, FillAndStrokeStyle } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
@@ -631,3 +632,4 @@ export default class CanvasPainter implements Painter {
     this.drawElement(this._ctx, fpsText);
   }
 }
+registerPainter('canvas', CanvasPainter);

@@ -39,7 +39,7 @@ export default class Shape<T extends CommonAttr = ShapeConf> extends Element<T> 
     this.brush(path as any);
     return {
       ...super.getSvgAttributes(),
-      path: path.getSVGPathString(),
+      d: path.getSVGPathString(),
     };
   }
 }

@@ -17,6 +17,7 @@ import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
 import { Ref } from '../utils/ref';
+import { getSVGStyleAttributes } from '../svg/style';
 
 export type ElementAttr = GroupConf & ShapeConf;
 
@@ -461,7 +462,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getSvgAttributes(): any {
-    // todo
+    return getSVGStyleAttributes(this as any);
   }
 
   protected computClientBoundingRect(out: BBox): BBox {

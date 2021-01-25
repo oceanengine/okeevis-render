@@ -124,10 +124,31 @@ export default class Text extends Shape<TextConf> {
   }
 
   public getSvgAttributes() {
+    let anchor: 'start' | 'end' | 'middle';
+    let dy = 0;
+    const textStyle = this.getTextStyle();
+    if (textStyle.textBaseline === 'middle') {
+      dy = textStyle.fontSize / 3;
+    } else if (textStyle.textBaseline === 'top') {
+      dy = textStyle.fontSize;
+    }
+
+    if (textStyle.textAlign === 'start' || textStyle.textAlign === 'left') {
+      anchor = 'start';
+    }
+    if (textStyle.textAlign === 'right' || textStyle.textAlign === 'end') {
+      anchor = 'end';
+    }
+    if (textStyle.textAlign === 'center') {
+      anchor = 'middle';
+    }
+
     return {
       ...super.getSvgAttributes(),
       x: this.attr.x,
       y: this.attr.y,
+      dy,
+      anchor,
     };
   }
 }

@@ -1,6 +1,7 @@
 import parsePath from './parsePath';
 import { BBox, unionBBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
 import { equalWithTolerance, getPointOnPolar } from '../utils/math';
+import canvasToSvgPath from './canvasToSvgPath';
 
 export interface PathAction {
   action:
@@ -280,8 +281,7 @@ export default class Path2D {
   }
 
   public getSVGPathString(): string {
-    // todo svg
-    return '';
+    return canvasToSvgPath(this._pathList);
   }
 
   public getTotalLength(): number {

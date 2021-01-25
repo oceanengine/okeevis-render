@@ -1,16 +1,19 @@
 import * as ES6Set from 'es6-set';
 import Painter from './abstract/Painter';
-import CanvasPainter from './painter/CanvasPainter';
 import EventHandle from './event/EventHandle';
 import EventFul from './utils/Eventful';
 import Group, {ChunkItem, } from './shapes/Group';
 import Element from './shapes/Element';
 import {getDomContentSize, } from './utils/dom';
 import requestAnimationFrame from './utils/requestAnimationFrame';
+import { getPainter } from './painter';
 
+import './painter/CanvasPainter';
+import './painter/SVGPainter';
 
 export interface RenderOptions {
   dpr?: number;
+  renderer?: 'canvas' | 'svg';
 }
 
 export default class Render extends EventFul {
@@ -67,7 +70,9 @@ export default class Render extends EventFul {
     this._rootGroup.ownerRender = this;
     this._isBrowser =   /html.*?element/gi.test(Object.prototype.toString.call(dom));
     this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio : 1);
-    this._painter= new CanvasPainter(this);
+    this._renderer = option.renderer || 'canvas';
+    const UsedPainter = getPainter(this._renderer);
+    this._painter= new UsedPainter(this);
     this._eventHandle = new EventHandle(this);
     this._loop();
   }

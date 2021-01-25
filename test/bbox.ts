@@ -15,7 +15,7 @@ import Text from '../src/shapes/Text'
 import {LinearGradient, RadialGradient, } from '../src/color';
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom);
+const render = new Render(dom, {renderer: 'svg'});
 render.showBBox = false
 render.showBoundingRect = true;
 render.enableDirtyRect = true;
