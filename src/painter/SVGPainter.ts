@@ -3,6 +3,7 @@ import Render from '../render';
 import Group from '../shapes/Group';
 import Element, { defaultCanvasContext, } from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
+import { fpsRect, fpsText } from './fps';
 
 
 export default class SVGPainter implements Painter {
@@ -16,6 +17,8 @@ export default class SVGPainter implements Painter {
 
   private _canvas: HTMLCanvasElement;
 
+  private _frameTimes: number[] = [];
+
   public constructor(render: Render) {
     this.render = render;
     this._initSVGRoot();
@@ -26,7 +29,14 @@ export default class SVGPainter implements Painter {
     this._svgRoot.setAttribute('height', height + 'px');
   }
 
-  public onFrame() {
+  public onFrame(now: number) {
+    const showFPS = this.render.showFPS;
+    if (showFPS && now) {
+      this._frameTimes.push(now);
+      if (this._frameTimes.length > 60) {
+        this._frameTimes.shift();
+      }
+    }
     if (this.render.needUpdate()) {
       if (this._isFirstFrame) {
         this.render.getRoot().eachChild(child => this._mountNode(this._svgRoot as any, child));
@@ -97,10 +107,12 @@ export default class SVGPainter implements Painter {
   private _initSVGRoot() {
     const width = this.render.getWidth();
     const height = this.render.getHeight();
-    const svgRoot = document.createElement('svg');
+    const svgRoot = document.createElement('svg') as any;
     svgRoot.setAttribute('width', width + 'px');
     svgRoot.setAttribute('height', height + 'px');
     this._svgRoot = svgRoot;
+    this._mountNode(svgRoot, fpsText);
+    this._mountNode(svgRoot, fpsRect);
     // todo default canvas context
   }
 
@@ -128,6 +140,14 @@ export default class SVGPainter implements Painter {
   }
 
   private _drawFPS() {
-    
+    const frameTimes = this._frameTimes;
+    const startTime = frameTimes[0];
+    const endTime = frameTimes[frameTimes.length - 1];
+    if (endTime === startTime) {
+      return;
+    }
+    const fps = Math.floor((frameTimes.length * 1000) / (endTime - startTime));
+    fpsText.setAttr('text', fps + '');
+    this._updateNode(fpsText);
   }
 }

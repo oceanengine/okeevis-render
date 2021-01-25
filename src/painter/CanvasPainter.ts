@@ -1,16 +1,15 @@
 import Painter from '../abstract/Painter';
 import Render from '../render';
-import Element, { defaultCanvasContext, FillAndStrokeStyle, } from '../shapes/Element';
+import Element, { defaultCanvasContext, FillAndStrokeStyle } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
-import Rect from '../shapes/Rect';
-import Text from '../shapes/Text';
 import { BBox, bboxIntersect } from '../utils/bbox';
 import { mergeDirtyRect } from './dirtyRect';
-import { getCtxColor, isGradient, isTransparent, } from '../color';
+import { getCtxColor, isGradient, isTransparent } from '../color';
 import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
+import { fpsRect, fpsText } from './fps';
 
 const contextKeys: Array<keyof ShapeConf> = [
   'fill',
@@ -33,23 +32,8 @@ const contextKeys: Array<keyof ShapeConf> = [
   'lineDash',
   'clip',
 ];
-const fpsRect = new Rect({
-  x: 0,
-  y: 0,
-  width: 88,
-  height: 40,
-  fill: '#000000',
-});
-const fpsText = new Text({
-  x: 8,
-  y: 6,
-  fill: '#ffffff',
-  fontSize: 24,
-  fontWeight: 'bold',
-  textBaseline: 'top',
-});
 
-const renderingContext:FillAndStrokeStyle = {
+const renderingContext: FillAndStrokeStyle = {
   opacity: null,
   fill: null,
   stroke: null,
@@ -164,7 +148,7 @@ export default class CanvasPainter implements Painter {
     }
     if (this._canvas === this.render.getDom()) {
       ctx.beginPath();
-      this._brushRect(ctx, {x: 0, y: 0, width: 1, height: 1});
+      this._brushRect(ctx, { x: 0, y: 0, width: 1, height: 1 });
       ctx.clip();
     }
     ctx.translate(-x, -y);
@@ -283,9 +267,7 @@ export default class CanvasPainter implements Painter {
     if (renderingContext.opacity === 0 && !this._isPixelPainter) {
       return;
     }
-    const hasSelfContext = this._isPixelPainter
-      ? true
-      : this._hasSelfContext(item);
+    const hasSelfContext = this._isPixelPainter ? true : this._hasSelfContext(item);
 
     if (hasSelfContext) {
       ctx.save();
@@ -326,9 +308,9 @@ export default class CanvasPainter implements Painter {
       // if (batchBrush) {
       //   ctx.beginPath();
       // }
-      
+
       (item as Group).eachChild(child => this.drawElement(ctx, child, dirtyRegions));
-    
+
       // if (batchBrush) {
       //   if (fill && fill !== 'none') {
       //     ctx.fill();
@@ -403,17 +385,14 @@ export default class CanvasPainter implements Painter {
       try {
         const canvasCreator = getCanvasCreator();
         this._canvas = canvasCreator(this.render.dpr, this.render.dpr);
-      } catch(err) {
+      } catch (err) {
         this._canvas = this.render.getDom() as HTMLCanvasElement;
       }
     }
     this._ctx = this._canvas.getContext('2d');
   }
 
-  protected _setElementCanvasContext(
-    ctx: CanvasRenderingContext2D,
-    item: Element<GroupConf>,
-  ) {
+  protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
     const selfMatrix = item.getTransform();
     const baseMatrix = item.getBaseTransform();
     if (baseMatrix !== IDENTRY_MATRIX || selfMatrix !== IDENTRY_MATRIX) {
@@ -430,7 +409,10 @@ export default class CanvasPainter implements Painter {
         const globalMatrix = item.getGlobalTransform();
         styleHelper.resetTransform(ctx);
         if (this.dpr !== 1 || this.render.resetTransformDpr) {
-          ctx.scale(this.render.resetTransformDpr || this.dpr, this.render.resetTransformDpr || this.dpr);
+          ctx.scale(
+            this.render.resetTransformDpr || this.dpr,
+            this.render.resetTransformDpr || this.dpr,
+          );
         }
         if (this._isPixelPainter) {
           ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
@@ -445,7 +427,12 @@ export default class CanvasPainter implements Painter {
         );
       }
     }
-    const {fill: computedFill, stroke: computedStroke, fillOpacity, strokeOpacity,} = renderingContext;
+    const {
+      fill: computedFill,
+      stroke: computedStroke,
+      fillOpacity,
+      strokeOpacity,
+    } = renderingContext;
 
     if (item.attr.clip) {
       ctx.beginPath();
@@ -454,7 +441,9 @@ export default class CanvasPainter implements Painter {
     }
 
     if (item.attr.lineWidth >= 0) {
-      ctx.lineWidth = !item.attr.strokeNoScale ? item.attr.lineWidth : item.getExtendAttr('lineWidth');
+      ctx.lineWidth = !item.attr.strokeNoScale
+        ? item.attr.lineWidth
+        : item.getExtendAttr('lineWidth');
     }
 
     if (item.attr.lineCap) {
@@ -481,15 +470,24 @@ export default class CanvasPainter implements Painter {
     // group只支持color string, pattern,不支持渐变
     // todo 考虑小程序api setXXXX
     if (item.attr.stroke && !(item.isGroup && isGradient(item.attr.stroke))) {
-      styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, item.attr.stroke, item))
+      styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, item.attr.stroke, item));
     }
 
-    if (!item.attr.stroke && item.attr.stroke !== 'none' && isGradient(computedStroke) && item.type !== 'group') {
+    if (
+      !item.attr.stroke &&
+      item.attr.stroke !== 'none' &&
+      isGradient(computedStroke) &&
+      item.type !== 'group'
+    ) {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, computedStroke, item));
     }
 
     /** 渐变样式无法继承 */
-    if (item.attr.fill && item.attr.fill !== 'none' && !(item.isGroup && isGradient(item.attr.fill))) {
+    if (
+      item.attr.fill &&
+      item.attr.fill !== 'none' &&
+      !(item.isGroup && isGradient(item.attr.fill))
+    ) {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, item.attr.fill, item));
     }
 
@@ -499,7 +497,13 @@ export default class CanvasPainter implements Painter {
     }
 
     // todo 兼容小程序
-    if (item.attr.fontSize >= 0 || item.attr.fontFamily || item.attr.fontWeight || item.attr.fontVariant || item.attr.fontStyle) {
+    if (
+      item.attr.fontSize >= 0 ||
+      item.attr.fontFamily ||
+      item.attr.fontWeight ||
+      item.attr.fontVariant ||
+      item.attr.fontStyle
+    ) {
       const _fontSize = item.getExtendAttr('fontSize');
       const _fontFamily = item.getExtendAttr('fontFamily');
       const _fontWeight = item.getExtendAttr('fontWeight');
@@ -508,7 +512,7 @@ export default class CanvasPainter implements Painter {
         fontSize: _fontSize,
         fontFamily: _fontFamily,
         fontWeight: _fontWeight,
-        fontStyle: _fontStyle
+        fontStyle: _fontStyle,
       });
     }
 
@@ -533,9 +537,14 @@ export default class CanvasPainter implements Painter {
       ctx.lineDashOffset = item.attr.lineDashOffset;
     }
 
-
     if (item.attr.shadowBlur > 0 && !isTransparent(item.attr.shadowColor)) {
-      styleHelper.setShadow(ctx, item.attr.shadowOffsetX, item.attr.shadowOffsetY, item.attr.shadowBlur, item.attr.shadowColor);
+      styleHelper.setShadow(
+        ctx,
+        item.attr.shadowOffsetX,
+        item.attr.shadowOffsetY,
+        item.attr.shadowBlur,
+        item.attr.shadowColor,
+      );
     }
 
     if (item.attr.lineDash) {
@@ -543,10 +552,7 @@ export default class CanvasPainter implements Painter {
     }
   }
 
-  protected _hasSelfContext(
-    item: Element<ShapeConf>,
-  ): boolean {
-
+  protected _hasSelfContext(item: Element<ShapeConf>): boolean {
     if (contextKeys.some(key => item.attr[key] !== undefined)) {
       return true;
     }
@@ -580,7 +586,10 @@ export default class CanvasPainter implements Painter {
     ctx.save();
     if (isClientBBox || item.isGroup) {
       styleHelper.resetTransform(ctx);
-      ctx.scale(this.render.resetTransformDpr || this.dpr, this.render.resetTransformDpr || this.dpr);
+      ctx.scale(
+        this.render.resetTransformDpr || this.dpr,
+        this.render.resetTransformDpr || this.dpr,
+      );
     }
     styleHelper.setGlobalAlpha(ctx, 1);
     ctx.lineWidth = 1;
@@ -616,7 +625,7 @@ export default class CanvasPainter implements Painter {
     }
     const fps = Math.floor((frameTimes.length * 1000) / (endTime - startTime));
     fpsText.setAttr({
-      text: fps + ' fps'
+      text: fps + ' fps',
     });
     this.drawElement(this._ctx, fpsRect);
     this.drawElement(this._ctx, fpsText);
