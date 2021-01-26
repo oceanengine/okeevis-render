@@ -685,13 +685,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  public addAnimation(option: AnimateOption<T>) {
+  protected addAnimation(option: AnimateOption<T>) {
     this._animations.push(option);
   }
 
-  public stopAllAnimation(gotoEnd: boolean = false) {
+  public stopAllAnimation(gotoEnd: boolean = false): this {
     // todo goToEnd
-    this._animations = [];
+    this._animations.length = 0;
     return this;
   }
 

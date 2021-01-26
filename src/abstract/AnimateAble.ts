@@ -26,8 +26,6 @@ export interface AnimateOption<T> {
 
 export default abstract class AnimateAble < T > {
 
-  public abstract addAnimation(option: AnimateOption<T>): void;
-
   public abstract animateTo(target: T, during: number, ease: EasingName, callback: Function, delay: number): void;
 
   public abstract stopAllAnimation(): this;
