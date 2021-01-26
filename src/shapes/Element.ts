@@ -36,6 +36,7 @@ export interface BaseAttr extends TransformConf, EventConf {
   key?: string;
   ref?: Ref<Element>;
   display?: boolean;
+  // 已废弃属性
   zIndex?: number;
 
   fill?: ColorValue;
@@ -243,7 +244,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public getDefaultAttr(): T {
     return {
       display: true,
-      zIndex: 0,
       draggable: false,
       opacity: 1,
       rotation: 0,
@@ -526,9 +526,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.shapeKeys.indexOf(key) !== -1) {
       this.dirtyBBox();
     }
-    if (key === 'zIndex') {
-      this.parentNode?.dirtyZIndex();
-    }
+
     if (key === 'clip' && this.attr.clip) {
       const clip = this.getClipElement();
       if (!clip.parentNode) {
@@ -541,9 +539,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
     }
-    if (this.attr.zIndex > 0) {
-      this.parentNode.dirtyZIndex();
-    }
+
     this._mountClip();
   }
 

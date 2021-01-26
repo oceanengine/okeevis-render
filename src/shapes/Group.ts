@@ -31,8 +31,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   protected _chunks: T[][] = [];
 
-  private _zindexDirty: boolean = true;
-
   public get size(): number {
     return this._length;
   }
@@ -316,10 +314,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public resetPickRGB() {
     super.resetPickRGB();
     this.eachChild(child => child.resetPickRGB());
-  }
-
-  public dirtyZIndex() {
-    this._zindexDirty = true;
   }
 
   public dirtyClipTarget(clip: Element) {
