@@ -487,7 +487,8 @@ export default class EventHandle {
   };
 
   private _getMousePosition(event: MouseEvent | Touch): { x: number; y: number } {
-    if ((event as MouseEvent).offsetX) {
+    // svg下offsetX指向了svg元素的偏移
+    if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg') {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
     if (event as Touch) {
