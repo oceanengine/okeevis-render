@@ -736,9 +736,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     for (const key in animate.to) {
       if (key === 'fill' || key === 'stroke' || key === 'shadowColor') {
         fn = interpolateColor;
-      }
-      if (key === 'pathData') {
+      } else if (key === 'pathData') {
         fn = interpolatePath;
+      } else {
+        fn = interpolate;
       }
       this.setAttr(key, fn(animate.from[key], animate.to[key], progress));
     }
