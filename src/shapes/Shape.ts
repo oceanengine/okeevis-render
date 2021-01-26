@@ -36,7 +36,7 @@ export default class Shape<T extends CommonAttr = ShapeConf> extends Element<T> 
 
   public getSvgAttributes(): any {
     const ret = super.getSvgAttributes();
-    if (this.fillAble || this.strokeAble) {
+    if ((this.fillAble || this.strokeAble) && this.type !== 'text') {
       const path = new Path2D();
       this.brush(path as any);
       ret.d = path.getSVGPathString();

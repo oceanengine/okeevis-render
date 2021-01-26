@@ -127,10 +127,10 @@ export default class Text extends Shape<TextConf> {
     let anchor: 'start' | 'end' | 'middle';
     let dy = 0;
     const textStyle = this.getTextStyle();
-    if (textStyle.textBaseline === 'middle') {
-      dy = textStyle.fontSize / 3;
+    if (textStyle.textBaseline === 'bottom') {
+      dy = -textStyle.fontSize / 2;
     } else if (textStyle.textBaseline === 'top') {
-      dy = textStyle.fontSize;
+      dy = textStyle.fontSize / 2;
     }
 
     if (textStyle.textAlign === 'start' || textStyle.textAlign === 'left') {
@@ -148,8 +148,9 @@ export default class Text extends Shape<TextConf> {
       x: this.attr.x,
       y: this.attr.y,
       dy,
-      anchor,
-      "paint-order": 'stroke',
+      'dominant-baseline': 'middle',
+      'text-anchor': anchor,
+      'paint-order': 'stroke',
     };
   }
 }
