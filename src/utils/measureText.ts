@@ -8,6 +8,7 @@ const textSizeLRUMap = new LRUMap<TextMetrics>(3000);
 
 
 let defaultContext: CanvasRenderingContext2D;
+
 const canvasContextPool = new ES6Set<CanvasRenderingContext2D>();
 
 function getDefaultContext(): CanvasRenderingContext2D {
@@ -18,6 +19,10 @@ function getDefaultContext(): CanvasRenderingContext2D {
   return defaultContext;
 }
 
+function getContext() {
+  return canvasContextPool.values().next().value || getDefaultContext();
+}
+
 export function addContext(ctx: CanvasRenderingContext2D) {
   canvasContextPool.add(ctx);
 }
@@ -26,7 +31,7 @@ export function removeContext(ctx: CanvasRenderingContext2D) {
   canvasContextPool.delete(ctx);
 }
 
-export  function measureTextList(textList: string[], textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getDefaultContext()): TextMetrics[] {
+export  function measureTextList(textList: string[], textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getContext()): TextMetrics[] {
   ctx.save();
   initTextContext(ctx, textStyle);
   const sizeList = textList.map(text => measureText(text, textStyle, ctx, false))
@@ -34,7 +39,7 @@ export  function measureTextList(textList: string[], textStyle: TextConf = {}, c
   return sizeList;
 }
 
-export  function measureText(text: string, textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getDefaultContext(), setContext = true): TextMetrics {
+export  function measureText(text: string, textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getContext(), setContext = true): TextMetrics {
   const cacheKey = getCacheKey(text, textStyle);
   const cacheSize = textSizeLRUMap.get(cacheKey);
   if (cacheSize) {
