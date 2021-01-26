@@ -101,6 +101,11 @@ export default class SVGPainter implements Painter {
     return this._canvas.getContext('2d');
   }
 
+  public findDOMNode(node: Element): SVGElement {
+    const id = node.id;
+    return this._loadedSVGElements[id];
+  }
+
   public dispose() {
     delete this._loadedSVGElements;
     delete this._svgDefElement;

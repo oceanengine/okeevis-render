@@ -4,6 +4,7 @@ import Shape from './Shape';
 import { TextConf } from './Text';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
+import SVGPainter from '../painter/SVGPainter';
 
 export interface GroupConf extends TextConf {
   /**
@@ -213,7 +214,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public onFrame(now: number) {
     super.onFrame(now);
-    this.sortByZIndex();
     this.eachChild(child => child.onFrame(now));
   }
 
@@ -327,19 +327,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this.eachChild(child => child.dirtyClipTarget(clip));
   }
 
-  public sortByZIndex() {
-    // todo 未改变的情况下不排序;
-    // if (this._zindexDirty) {
-    //   this._components = this._components.sort((a, b) => b.attr.zIndex - a.attr.zIndex);
-    // }
-    // this._components.forEach((item) => {
-    //   if (item.isGroup) {
-    //     (item as any as Group).sortByZIndex();
-    //   }
-    // });
-    // this._zindexDirty = false;
-  }
-
   private _mountNode(item: T) {
     item.ownerRender = this.ownerRender;
     item.parentNode = this;
@@ -352,6 +339,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     if (this.lastChild === item) {
       return;
     }
+
     if (this.firstChild === item) {
       this.firstChild = item.nextSibling;
       this.firstChild.prevSibling = null;
@@ -366,5 +354,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       item.nextSibling = null;
       this.lastChild = item;
     }
+
+    if (this.ownerRender?.renderer === 'svg') {
+      const dom = (this.ownerRender.getPainter() as SVGPainter).findDOMNode(item);
+      dom.parentNode.appendChild(dom);
+    }
+
   }
 }

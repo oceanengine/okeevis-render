@@ -118,7 +118,7 @@ export default class Render extends EventFul {
     return this._height;
   }
 
-  public getRenderer(): 'canvas' | 'svg' {
+  public get renderer(): 'canvas' | 'svg' {
     return this._renderer;
   }
 
