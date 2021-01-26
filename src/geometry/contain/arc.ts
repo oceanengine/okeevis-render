@@ -33,8 +33,8 @@ export function pointInArcFill(
     ? [cx - startX, cy - startY]
     : [midX - startX, midY - startY];
   const pointStartVec = [x - startX, y - startY] as Vec2;
-  const crossCenter = cross([] as any, lineVec, outSideVec)[2];
-  const crossStart = cross([] as any, lineVec, pointStartVec)[2];
+  const crossCenter = cross(lineVec, outSideVec);
+  const crossStart = cross(lineVec, pointStartVec);
   const isSameSide = crossCenter * crossStart > 0;
   return isLargeArc ? pointInCircle(cx, cy, r, x, y) && !isSameSide : inSector && !isSameSide;
 }

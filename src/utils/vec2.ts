@@ -17,11 +17,8 @@ export function dot(a: Vec2, b: Vec2): number {
   return a[0] * b[0] + a[1] * b[1];
 }
 
-export function cross(out: [number, number, number], a: Vec2, b: Vec2): [number, number, number] {
-  const z = a[0] * b[1] - a[1] * b[0];
-  out[0] = out[1] = 0;
-  out[2] = z;
-  return out;
+export function cross(a: Vec2, b: Vec2): number {
+ return a[0] * b[1] - a[1] * b[0];
 }
 
 export function exactEquals(a: Vec2, b: Vec2): boolean {
