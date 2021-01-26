@@ -12,7 +12,7 @@ import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, { ShapeConf } from './Shape';
 import * as mat3 from '../../js/mat3';
-import { Vec2, transformMat3, vec2BBox } from '../utils/vec2';
+import { Vec2, transformMat3, vec2BBox, createVec2, } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
@@ -31,10 +31,10 @@ export const defaultSetting: {during: number; ease: EasingName } = {
 // 对象重用
 const reusePositionVec2: Vec2 = [0, 0];
 const reuseBBoxVectors: Vec2[] = [
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
+  createVec2(),
+  createVec2(),
+  createVec2(),
+  createVec2(),
 ];
 
 export interface BaseAttr extends TransformConf, EventConf {

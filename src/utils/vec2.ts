@@ -3,6 +3,21 @@ import {BBox, } from './bbox';
 
 export type Vec2 = [number, number];
 
+export function createVec2(): [number, number] {
+  let out;
+  try {
+    if (typeof Float32Array !== 'undefined') {
+      out = new Float32Array(2) as any;
+    } else {
+      out = new Array(2);
+    }
+  } catch (err) {
+    out = new Array(2);
+  }
+  out[0] = out[1] = 0;
+  return out;
+}
+
 // http://glmatrix.net/docs/vec2.js.html
 
 export function transformMat3(out: Vec2, a: Vec2, m: mat3) {
