@@ -697,10 +697,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public onFrame(now: number) {
     // clip element maybe usesed for muti component
+    if (!now) {
+      return;
+    }
 
     if (this._lastFrameTime === now) {
       return;
     }
+
     this._lastFrameTime = now;
 
     if (this.attr.clip) {

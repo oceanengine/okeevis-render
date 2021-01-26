@@ -94,6 +94,15 @@ export default class Render extends EventFul {
     this._painter?.resize(width, height);
   }
 
+  public refresh() {
+    this.dirty();
+  }
+
+  public refreshImmediately() {
+    this.dirty();
+    this._onFrame();
+  }
+
   public dirty(el?: Element<any>) {
     this._needUpdate = true;
     // todo svg下不能限制dirtyElements数量
@@ -198,7 +207,7 @@ export default class Render extends EventFul {
     return this._eventHandle;
   }
 
-  private _onFrame = (now: number) => {
+  private _onFrame = (now?: number) => {
     if (this._disposed) {
       return;
     }
