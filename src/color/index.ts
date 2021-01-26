@@ -1,3 +1,4 @@
+import * as Color from 'color';
 import Gradient from '../abstract/Gradient';
 import LinearGradient from './LinearGradient';
 import RadialGradient from './RadialGradient';
@@ -9,6 +10,38 @@ import { NAME_TRANSPARENT, RGBA_TRANSPARENT } from '../constant';
 export type ColorValue = 'none' | string | LinearGradient | RadialGradient | Pattern | null;
 
 export { Gradient, LinearGradient, RadialGradient, Pattern };
+
+function brightenStringColor(color: string, ration: number): string {
+  const out  = Color(color).lighten(ration)
+  const alpha = out.alpha();
+  const red = out.red();
+  const green = out.green();
+  const blue = out.blue();
+  if (alpha === 1) {
+    return out.hex();
+  }
+  return `rgba(${[red, green, blue, alpha].join(',')})`;
+}
+
+export function brighten(color: ColorValue, ration: number = 0): ColorValue {
+  if (!color) {
+    return color;
+  }
+
+  if (typeof color === 'string') {
+    return brightenStringColor(color, ration);
+  }
+
+  if (color instanceof LinearGradient || color instanceof RadialGradient) {
+    const nextColor = color.clone();
+    nextColor.option.stops.forEach(stop => {
+      stop.color = brightenStringColor(stop.color, ration);
+    });
+    return nextColor;
+  }
+
+  return color;
+}
 
 export function isGradient(color: ColorValue) {
   return color instanceof LinearGradient || color instanceof RadialGradient;

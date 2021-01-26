@@ -3,8 +3,19 @@ import * as lodash from '../utils/lodash';
 import interpolateNumber from './interpolateNumber';
 import interpolateArray from './interpolateArray';
 import interpolateObject from './interpolateObject';
+import interpolateColor from './interpolateColor';
+import interpolatePath from './interpolatePath';
 
-export function interpolate<T = any>(from: T, to: T, k: number): T {
+export {
+  interpolateNumber,
+  interpolateArray,
+  interpolateObject,
+  interpolatePath,
+  interpolateColor,
+  interpolate,
+};
+
+function interpolate<T = any>(from: T, to: T, k: number): T {
   if (typeof from === 'number' && typeof to === 'number') {
     return (interpolateNumber(from, to, k) as any) as T;
   }
@@ -18,4 +29,9 @@ export function interpolate<T = any>(from: T, to: T, k: number): T {
   return to;
 }
 
-export type InterpolateFunction<T = any> = (from: T, to: T, k: number) => T;
+export type InterpolateFunction<T = any> = (
+  from: T,
+  to: T,
+  k: number,
+  interpolateMap?: Record<string, InterpolateFunction>,
+) => T;

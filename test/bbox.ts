@@ -12,7 +12,7 @@ import Poyline from '../src/shapes/Polyline'
 import Rect from '../src/shapes/Rect'
 import Sector from '../src/shapes/Sector'
 import Text from '../src/shapes/Text'
-import {LinearGradient, RadialGradient, Pattern,  } from '../src/color';
+import {LinearGradient, RadialGradient, Pattern ,brighten  } from '../src/color';
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom, {renderer: 'svg'});
@@ -24,23 +24,27 @@ render.showFPS = true;
 function degToRad(a: number) {
   return a * Math.PI / 180;
 }
-
+const arcColor = '#5771c0'
 const arc = new Arc({
   cx: 150,
   cy: 150,
   radius: 100,
   start: degToRad(10),
   end: degToRad(80),
-  fill: 'blue',
+  fill: arcColor,
   rotation: 0.3,
 });
 
+const clipRect = new Rect({x: 0, y: 0, width: 100, height: 100})
+
+
 const circle = new Circle({
+  draggable: true,
   cursor: 'pointer',
   cx: 100,
   cy: 100,
   radius: 50,
-  clip: new Rect({x: 0, y: 0, width: 100, height: 100}),
+  clip:clipRect,
   fill: new RadialGradient({
     cx: 0.5,
     cy: 0.5,
@@ -93,9 +97,25 @@ const rect = new Rect({
   shadowOffsetX: 20,
   shadowOffsetY: 20,
   onClick: e => {
-    e.target.setAttr('fill', 'red')
-    circle.setAttr('clip', null)
-    group.firstChild.setAttr({fill: 'gray'})
+    // circle.setAttr('clip', null)
+    arc.animateTo({fill: brighten(arcColor, 0.5)});
+    e.target.parentNode.add(e.target)
+    clipRect.animateTo({x: 550}, 4000)
+    path.animateTo({fill: 'rgba(255, 0, 0, .1)'}, 800)
+    rect.animateTo({fill: new LinearGradient({
+      x1: 0,
+      y1: 0,
+      x2: 1,
+      y2: 1,
+      stops: [{
+        offset: 0,
+        color: 'green'
+      }, {
+        offset: 1,
+        color: 'yellow'
+      }]
+    })})
+    // group.firstChild.setAttr({fill: 'gray'})
   },
   fill: new LinearGradient({
     x1: 0,
@@ -116,7 +136,7 @@ const rect = new Rect({
 })
 
 
-rect.animateTo({rotation: degToRad(360)}, 5000)
+// rect.animateTo({rotation: degToRad(360)}, 5000)
 
 const polygon = new Polygon({
   fill: 'blue',
@@ -173,7 +193,7 @@ const group = new Group({
 });
 
 
-group.animateTo({rotation: degToRad(360)}, 50000)
+// group.animateTo({rotation: degToRad(360)}, 50000)
 group.add(arc);
 group.add(circle)
 group.add(image);

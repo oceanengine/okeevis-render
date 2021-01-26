@@ -25,6 +25,7 @@ import omit = require('lodash/omit');
 import toNumber = require('lodash/toNumber');
 import flatten = require('lodash/flatten');
 import throttle = require('lodash/throttle');
+import cloneDeep = require('lodash/cloneDeep')
 
 export {
   isNull,
@@ -49,4 +50,5 @@ export {
   toNumber,
   flatten,
   throttle,
+  cloneDeep,
 };

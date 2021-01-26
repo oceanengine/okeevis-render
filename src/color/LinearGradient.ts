@@ -1,4 +1,5 @@
 import Gradient, { GradientOption } from '../abstract/Gradient';
+import * as lodash from '../utils/lodash';
 import { BBox } from '../utils/bbox';
 import SVGNode from '../abstract/Node';
 
@@ -23,6 +24,10 @@ export default class LinearGradient extends Gradient<LinearGradientOption> {
 
   public constructor(option: LinearGradientOption) {
     super({ ...defaultOption, ...option });
+  }
+
+  public clone(): LinearGradient {
+    return new LinearGradient(lodash.cloneDeep(this.option));
   }
 
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {
