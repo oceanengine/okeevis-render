@@ -12,7 +12,7 @@ import TransformAble, { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, { ShapeConf } from './Shape';
 import * as mat3 from '../../js/mat3';
-import { Vec2, transformMat3, vec2BBox, createVec2, } from '../utils/vec2';
+import { Vec2, transformMat3, vec2BBox, createVec2 } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
@@ -23,19 +23,14 @@ export type ElementAttr = GroupConf & ShapeConf;
 
 const defaultStyleReciver = ({} as any) as FillAndStrokeStyle;
 
-export const defaultSetting: {during: number; ease: EasingName } = {
+export const defaultSetting: { during: number; ease: EasingName } = {
   during: 300,
-  ease: 'CubicOut'
+  ease: 'CubicOut',
 };
 
 // 对象重用
 const reusePositionVec2: Vec2 = [0, 0];
-const reuseBBoxVectors: Vec2[] = [
-  createVec2(),
-  createVec2(),
-  createVec2(),
-  createVec2(),
-];
+const reuseBBoxVectors: Vec2[] = [createVec2(), createVec2(), createVec2(), createVec2()];
 
 export interface BaseAttr extends TransformConf, EventConf {
   key?: string;
@@ -362,17 +357,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
         return;
       }
       this.dirty();
-      this.onAttrChange(attr as keyof T, value, this.attr[attr as keyof T]);
+      const oldValue = this.attr[attr as keyof T];
       this.attr[attr as keyof T] = value;
+      this.onAttrChange(attr as keyof T, value, oldValue);
     } else if (typeof attr === 'object') {
       this.prevProcessAttr(attr as T);
       this.dirty();
+      const prevAttr = this.attr;
+      this.attr = { ...this.attr, ...(attr as T) };
       for (const key in attr as T) {
-        if (this.attr[key as keyof T] !== (attr as T)[key]) {
-          this.onAttrChange(key as keyof T, (attr as T)[key], this.attr[key]);
+        if (this.attr[key as keyof T] !== (prevAttr as T)[key]) {
+          this.onAttrChange(key as keyof T, (attr as T)[key], prevAttr[key as keyof T]);
         }
       }
-      this.attr = { ...this.attr, ...(attr as T) };
     }
 
     return this;
@@ -416,10 +413,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public children(): Element[] {
     const ret: Element[] = [];
-    let node = this.firstChild
+    let node = this.firstChild;
     while (node) {
       ret.push(node);
-      node = node.nextSibling
+      node = node.nextSibling;
     }
     node = null;
     return ret;
@@ -534,7 +531,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.shapeKeys.indexOf(key) !== -1) {
       this.dirtyBBox();
     }
-
     if (key === 'clip' && this.attr.clip) {
       const clip = this.getClipElement();
       if (!clip.parentNode) {
@@ -623,7 +619,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public animateTo(
     toAttr: T,
     duringOrConf: number | AnimateConf = defaultSetting.during,
-    ease: EasingName = defaultSetting.ease ,
+    ease: EasingName = defaultSetting.ease,
     callback?: Function,
     delay?: number,
   ) {

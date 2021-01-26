@@ -1,5 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
+import * as lodash from '../utils/lodash';
 import { BBox, inBBox } from '../utils/bbox';
 import { measureText } from '../utils/measureText';
 
@@ -43,6 +44,8 @@ export default class Text extends Shape<TextConf> {
 
   public shapeKeys = shapeKeys;
 
+  private _inlineTextList: string[];
+
   public getDefaultAttr(): TextConf {
     return {
       ...super.getDefaultAttr(),
@@ -55,23 +58,47 @@ export default class Text extends Shape<TextConf> {
     return [...super.getAnimationKeys(), 'x', 'y', 'fontSize'];
   }
 
+  protected dirtyBBox() {
+    super.dirtyBBox();
+    this._inlineTextList = this._getInlineTextList();
+  }
+
   public brush(ctx: CanvasRenderingContext2D) {
-    const { x, y, text } = this.attr;
+    if (!this._inlineTextList || this._inlineTextList.length !== 1) {
+      return;
+    }
+    const { x, y } = this.attr;
+    const { lineHeight, textBaseline, } = this.getTextStyle();
     const { needStroke, needFill } = this.getFillAndStrokeStyle();
-    if (!text) {
+    const renderList = (this._inlineTextList || []).map((rowText, rowIndex) => {
+      let rowY: number = y;
+      if (textBaseline === 'top') {
+        rowY = y + rowIndex * lineHeight;
+      } else if (textBaseline === 'middle') {
+        rowY =  y + ((rowIndex + 1) -  renderList.length / 2) * lineHeight;
+      } else {
+        rowY =  y - (renderList.length - rowIndex - 1) * lineHeight; 
+      }
+      return {
+        x,
+        y: rowY,
+        text: rowText
+      };
+    });
+    if (renderList.length === 0) {
       return;
     }
     if (needStroke) {
-      ctx.strokeText(text, x, y);
+      renderList.forEach(item => ctx.strokeText(item.text, item.x, item.y));
     }
     if (needFill) {
-      ctx.fillText(text, x, y);
+      renderList.forEach(item => ctx.fillText(item.text, item.x, item.y));
     }
   }
 
-  protected measureText(ctx: CanvasRenderingContext2D): TextMetrics {
+  protected measureText(): TextMetrics {
     const textStyle = this.getTextStyle();
-    return measureText(this.attr.text, textStyle, ctx);
+    return measureText(this.attr.text, textStyle);
   }
 
   public getTextStyle(): TextConf {
@@ -89,12 +116,7 @@ export default class Text extends Shape<TextConf> {
   protected computeBBox(): BBox {
     const { x, y } = this.attr;
     const { textAlign, textBaseline, lineHeight } = this.getTextStyle();
-    let textWidth = 0;
-    if (this.ownerRender) {
-      const painter = this.ownerRender.getPainter();
-      const result = this.measureText(painter.getContext());
-      textWidth = result.width;
-    }
+    const textWidth = this.measureText().width;
     const bbox: BBox = {
       x,
       y,
@@ -152,5 +174,73 @@ export default class Text extends Shape<TextConf> {
       'text-anchor': anchor,
       'paint-order': 'stroke',
     };
+  }
+
+  private _getInlineTextList(): string[] {
+    const { text, truncate } = this.attr;
+    const textStyle = this.getTextStyle();
+    const { lineHeight } = textStyle;
+    if (text === '' || text === null || text === undefined) {
+      return [];
+    }
+    if (!truncate) {
+      return text.split('\n');
+    }
+    const textList = text.split('');
+    const rowTextList = [];
+    const { outerWidth, outerHeight, ellipse = '...' } = truncate;
+    const ellipseWidth = measureText(ellipse, textStyle).width;
+
+    if (outerHeight && outerHeight < lineHeight) {
+      return [];
+    }
+
+    let rowWidth = 0;
+    let rowHeight = lineHeight;
+    let rowIndex: number = 0;
+    const rowLetterWidthList: number[] = [];
+    rowTextList.push('');
+    for (let i = 0; i < textList.length; i++) {
+      const letter = textList[i];
+      if (letter === '\r') {
+        continue;
+      }
+      if (letter === '\n') {
+        rowTextList.push('');
+        rowIndex++;
+        rowWidth = 0;
+        rowHeight += lineHeight;
+        rowLetterWidthList.length = 0;
+        continue;
+      }
+      const letterWidth = measureText(letter, textStyle).width;
+      if (outerWidth && letterWidth + rowWidth <= outerWidth) {
+        rowWidth += letterWidth;
+        rowLetterWidthList.push(letterWidth);
+        rowTextList[rowIndex] += letter;
+      } else if (outerHeight && rowHeight + lineHeight > outerHeight) {
+        // 变省略号
+        let tempWidth = 0;
+        let tempStr = '';
+        for (let j = 0; j < rowLetterWidthList.length; j++) {
+          if (tempWidth + rowLetterWidthList[j] <= outerWidth - ellipseWidth) {
+            tempStr += rowTextList[rowIndex][j];
+            tempWidth += rowLetterWidthList[j];
+          } else {
+            break;
+          }
+        }
+        rowTextList[rowIndex] = tempStr;
+        break;
+      } else {
+        rowTextList.push(letter);
+        rowIndex++;
+        rowWidth = letterWidth;
+        rowHeight += lineHeight;
+        rowLetterWidthList.length = 0;
+        rowLetterWidthList.push(letterWidth);
+      }
+    }
+    return rowTextList;
   }
 }

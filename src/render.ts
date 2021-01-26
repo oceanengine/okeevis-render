@@ -6,6 +6,7 @@ import Group, {ChunkItem, } from './shapes/Group';
 import Element from './shapes/Element';
 import {getDomContentSize, } from './utils/dom';
 import requestAnimationFrame from './utils/requestAnimationFrame';
+import { addContext, removeContext, } from './utils/measureText';
 import { getPainter } from './painter';
 import { renderToSVGString } from './svg/renderToSVGString';
 import {  downloadBase64, } from './utils/download';
@@ -81,6 +82,7 @@ export default class Render extends EventFul {
       }
       const UsedPainter = getPainter(this._renderer);
       this._painter= new UsedPainter(this)
+      addContext(this._painter.getContext());
     } else {
       this._width = option.width || 300;
       this._height = option.height || 150;
@@ -176,8 +178,11 @@ export default class Render extends EventFul {
   public dispose() {
     // todo polyfill
     cancelAnimationFrame(this._requestAnimationFrameId);
+    if (this._painter) {
+      removeContext(this._painter.getContext());
+      this._painter.dispose();
+    }
     this._eventHandle.dispose();
-    this._painter?.dispose();
     this._rootGroup.clear();
     this._rootGroup = null;
     this._dom = undefined;
