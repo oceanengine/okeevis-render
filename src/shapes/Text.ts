@@ -116,7 +116,7 @@ export default class Text extends Shape<TextConf> {
     const { x, y } = this.attr;
     const textStyle = this.getTextStyle();
     const { textAlign, textBaseline, lineHeight } = textStyle;
-    const inlineTextList = this._inlineTextList || [];
+    const inlineTextList = this._getInlineTextList();
     const textHeight = inlineTextList.length * lineHeight;
     const textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width));
     const bbox: BBox = {
