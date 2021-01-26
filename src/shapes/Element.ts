@@ -23,6 +23,11 @@ export type ElementAttr = GroupConf & ShapeConf;
 
 const defaultStyleReciver = ({} as any) as FillAndStrokeStyle;
 
+export const defaultSetting: {during: number; ease: EasingName } = {
+  during: 300,
+  ease: 'CubicOut'
+};
+
 // 对象重用
 const reusePositionVec2: Vec2 = [0, 0];
 const reuseBBoxVectors: Vec2[] = [
@@ -617,8 +622,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public animateTo(
     toAttr: T,
-    duringOrConf: number | AnimateConf = 400,
-    ease?: EasingName,
+    duringOrConf: number | AnimateConf = defaultSetting.during,
+    ease: EasingName = defaultSetting.ease ,
     callback?: Function,
     delay?: number,
   ) {

@@ -1,5 +1,5 @@
 import { diff } from '@egjs/list-differ';
-import Element from './Element';
+import Element, { defaultSetting } from './Element';
 import Shape from './Shape';
 import { TextConf } from './Text';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
@@ -266,10 +266,15 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children());
         const chunks = ((nextElement as any) as Group).getChunks();
         ((prevElement as unknown) as Group).replaceChunks(chunks);
-        chunks.forEach(chunk => ((prevElement as any) as Group).addChunk(chunk));
       }
       prevElement.setBaseTransform(nextElement.getBaseTransform());
-      prevElement.stopAllAnimation().animateTo(nextElement.attr, 10000);
+      const {transitionDuration = defaultSetting.during, transitionEase = defaultSetting.ease, transitionProperty = 'all', transitionDelay = 0 } = nextElement.attr;
+      if (transitionProperty === 'none' || transitionProperty.length === 0) {
+        prevElement.setAttr(nextElement.attr);
+      } else {
+        const nextAttr = transitionProperty === 'all' ? nextElement.attr : lodash.pick(nextElement.attr, transitionProperty as any);
+        prevElement.stopAllAnimation().animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
+      }
     });
 
     result.added.forEach(index => {
@@ -341,7 +346,8 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       item.prevSibling = this.lastChild;
       this.lastChild = last.nextSibling = item;
       item.nextSibling = null;
-    } else { // 中间节点
+    } else {
+      // 中间节点
       item.prevSibling.nextSibling = item.nextSibling;
       item.prevSibling = this.lastChild;
       this.lastChild.nextSibling = item;
@@ -353,6 +359,5 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       const dom = (this.ownerRender.getPainter() as SVGPainter).findDOMNode(item);
       dom.parentNode.appendChild(dom);
     }
-
   }
 }
