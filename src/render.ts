@@ -66,7 +66,7 @@ export default class Render extends EventFul {
     this._rootGroup = new Group();
     this._rootGroup.ownerRender = this;
     this._isBrowser =   /html.*?element/gi.test(Object.prototype.toString.call(dom));
-    this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio : 1);
+    this.dpr = option.dpr || (this._isBrowser ? (window.devicePixelRatio || 1) : 1);
     this._renderer = option.renderer || 'canvas';
     this._dom = dom;
     if (dom) {
@@ -207,7 +207,7 @@ export default class Render extends EventFul {
     this._eventHandle.onFrame();
     this._needUpdate = false;
     this._dirtyElements.clear();
-    const currentTime = (typeof window !== 'undefined' && window.performance) ? window.performance.now() : Date.now();
+    const currentTime = (typeof window !== 'undefined' && window.performance && window.performance.now) ? window.performance.now() : Date.now();
     const timeRemaining = 16 - (currentTime - now);
     if (timeRemaining > 5) {
       this._rootGroup.getClientBoundingRect();

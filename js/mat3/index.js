@@ -1,10 +1,15 @@
+/* eslint-disable no-var */
 var mat3 = require('gl-matrix/mat3');
 
 mat3.create = function create() {
   var out;
-  if (typeof Float32Array !== undefined) {
-    out = new Float32Array(9);
-  } else {
+  try {
+    if (typeof Float32Array !== 'undefined') {
+      out = new Float32Array(9);
+    } else {
+      out = new Array(9);
+    }
+  } catch (err) {
     out = new Array(9);
   }
   out[1] = 0;
