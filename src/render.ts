@@ -34,7 +34,7 @@ export default class Render extends EventFul {
 
   public showFPS: boolean = false;
 
-  public resetTransformDpr: number;
+  public scaleWithDprBeforePaint: boolean = true;
     
   private _dom: HTMLDivElement | HTMLCanvasElement;
 

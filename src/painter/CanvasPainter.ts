@@ -1,5 +1,5 @@
 import Painter from '../abstract/Painter';
-import {registerPainter, } from './index';
+import { registerPainter } from './index';
 import Render from '../render';
 import Element, { defaultCanvasContext, FillAndStrokeStyle } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
@@ -144,7 +144,7 @@ export default class CanvasPainter implements Painter {
     }
     const dpr = this.dpr;
     ctx.save();
-    if (dpr !== 1) {
+    if (dpr !== 1 && this.render.scaleWithDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
     if (this._canvas === this.render.getDom()) {
@@ -191,7 +191,7 @@ export default class CanvasPainter implements Painter {
     const ctx = this._ctx;
     const dpr = this.dpr;
     ctx.save();
-    if (dpr !== 1) {
+    if (dpr !== 1 && this.render.scaleWithDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
     styleHelper.setFontStyle(ctx, defaultCanvasContext);
@@ -217,7 +217,7 @@ export default class CanvasPainter implements Painter {
       );
     }
     ctx.save();
-    if (dpr !== 1) {
+    if (dpr !== 1 && this.render.scaleWithDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
     // 改变默认的canvas上下文
@@ -409,11 +409,8 @@ export default class CanvasPainter implements Painter {
       } else {
         const globalMatrix = item.getGlobalTransform();
         styleHelper.resetTransform(ctx);
-        if (this.dpr !== 1 || this.render.resetTransformDpr) {
-          ctx.scale(
-            this.render.resetTransformDpr || this.dpr,
-            this.render.resetTransformDpr || this.dpr,
-          );
+        if (this.dpr !== 1) {
+          ctx.scale(this.dpr, this.dpr);
         }
         if (this._isPixelPainter) {
           ctx.translate(-this._paintPosition[0], -this._paintPosition[1]);
@@ -587,10 +584,9 @@ export default class CanvasPainter implements Painter {
     ctx.save();
     if (isClientBBox || item.isGroup) {
       styleHelper.resetTransform(ctx);
-      ctx.scale(
-        this.render.resetTransformDpr || this.dpr,
-        this.render.resetTransformDpr || this.dpr,
-      );
+      if (this.dpr !== 1) {
+        ctx.scale(this.dpr, this.dpr);
+      }
     }
     styleHelper.setGlobalAlpha(ctx, 1);
     ctx.lineWidth = 1;
