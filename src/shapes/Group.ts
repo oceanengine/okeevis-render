@@ -102,7 +102,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return this;
   }
 
-  public prevpend(item: T) {
+  public prepend(item: T) {
     if (!this.firstChild) {
       return this.add(item);
     }

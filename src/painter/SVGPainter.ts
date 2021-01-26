@@ -106,6 +106,10 @@ export default class SVGPainter implements Painter {
     return this._loadedSVGElements[id];
   }
 
+  public getBase64(): string {
+    return  'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent((this._svgRoot.parentNode as HTMLElement).innerHTML)));
+  }
+
   public dispose() {
     delete this._loadedSVGElements;
     delete this._svgDefElement;

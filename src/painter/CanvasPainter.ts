@@ -335,6 +335,10 @@ export default class CanvasPainter implements Painter {
     this._isFirstFrame = true;
   }
 
+  public getBase64(): string {
+    return this._canvas.toDataURL('image/png');
+  }
+
   public dispose() {
     if (this._canvasByCreated) {
       this._canvas.parentNode?.removeChild(this._canvas);

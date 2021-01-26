@@ -131,6 +131,10 @@ export default class Render extends EventFul {
     return this._renderer;
   }
 
+  public prepend(element: Element) {
+    this._rootGroup.prepend(element);
+  }
+
   public add(element: Element) {
     this._rootGroup.add(element);
   }
@@ -159,14 +163,35 @@ export default class Render extends EventFul {
     return this._dirtyElements;
   }
 
-  public getBase64() {
-
-  }
-
-  public downloadImage() {
-
-    
-  }
+  public downloadImage(name: string): void {
+    const base64: string = this.getPainter().getBase64();
+    const ismsie = !!(window as any).ActiveXObject || 'ActiveXObject' in window
+    const isedge = navigator.userAgent.indexOf('Edge') > -1;
+    const a: HTMLAnchorElement = document.createElement('a');
+    a.href = base64; // 将画布内的信息导出为png图片数据
+    a.download = name || document.title; // 设定下载名称
+    a.target = '_blank';
+    // for Chrome and Firefox
+    // 来自echarts
+    if (
+        typeof MouseEvent === 'function' &&
+        !(ismsie || isedge)
+    ) {
+        const evt: MouseEvent = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: false,
+        });
+        a.dispatchEvent(evt);
+    } else {
+        // for IE
+        const html: string = `<body style="margin:0;">
+                    <img src="${base64}" style="max-width:100%;"  title="(test)" />
+                </body>`;
+        const tab: Window = window.open();
+        tab.document.write(html);
+    }
+}
 
   public needUpdate(): boolean {
     return this._needUpdate;
@@ -198,6 +223,8 @@ export default class Render extends EventFul {
   public getPainter(): Painter {
     return this._painter;
   }
+
+  
 
   public renderToSVGString(): string {
     return renderToSVGString(this.getRoot(), this._width, this._height);
