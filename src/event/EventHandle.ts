@@ -487,7 +487,7 @@ export default class EventHandle {
   };
 
   private _getMousePosition(event: MouseEvent | Touch): { x: number; y: number } {
-    // svg下offsetX指向了svg元素的偏移
+    // firefox svg下offsetX指向了svg元素的偏移
     if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg') {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
@@ -504,6 +504,7 @@ export default class EventHandle {
     }
     const dom = this.render.getDom();
     dom.removeEventListener('wheel', this._syntheticMouseEvent);
+    dom.removeEventListener('contextmenu', this._syntheticMouseEvent);
     dom.removeEventListener('mousedown', this._syntheticMouseEvent);
     dom.removeEventListener('mouseup', this._syntheticMouseEvent);
     dom.removeEventListener('mousemove', this._syntheticMouseEvent);
@@ -525,6 +526,7 @@ export default class EventHandle {
     }
     const dom = this.render.getDom();
     dom.addEventListener('wheel', this._syntheticMouseEvent);
+    dom.addEventListener('contextmenu', this._syntheticMouseEvent);
     dom.addEventListener('mousedown', this._syntheticMouseEvent);
     dom.addEventListener('mouseup', this._syntheticMouseEvent);
     dom.addEventListener('mousemove', this._syntheticMouseEvent);

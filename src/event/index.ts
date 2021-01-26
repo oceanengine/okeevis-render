@@ -13,6 +13,7 @@ export {
 // todo 和react一致
 export interface EventConf {
   draggable?: boolean;
+  onContextMenu?:  (event: SyntheticMouseEvent) => void;
   onMouseMove?: (event: SyntheticMouseEvent) => void;
   onMouseDown?: (event: SyntheticMouseEvent) => void;
   onMouseUp?: (event: SyntheticMouseEvent) => void;
