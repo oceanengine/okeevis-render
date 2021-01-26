@@ -54,40 +54,39 @@ export default class Text extends Shape<TextConf> {
     };
   }
 
+  protected dirtyBBox() {
+    super.dirtyBBox();
+    this._inlineTextList = null;
+  }
+
   public getAnimationKeys(): Array<keyof TextConf> {
     return [...super.getAnimationKeys(), 'x', 'y', 'fontSize'];
   }
 
-  protected dirtyBBox() {
-    super.dirtyBBox();
-    this._inlineTextList = this._getInlineTextList();
-  }
-
   public brush(ctx: CanvasRenderingContext2D) {
-    if (!this._inlineTextList || this._inlineTextList.length !== 1) {
-      return;
-    }
     const { x, y } = this.attr;
-    const { lineHeight, textBaseline, } = this.getTextStyle();
+    const { lineHeight, textBaseline } = this.getTextStyle();
     const { needStroke, needFill } = this.getFillAndStrokeStyle();
-    const renderList = (this._inlineTextList || []).map((rowText, rowIndex) => {
+    const textList = this._getInlineTextList();
+    const renderList = textList.map((rowText, rowIndex) => {
       let rowY: number = y;
       if (textBaseline === 'top') {
         rowY = y + rowIndex * lineHeight;
       } else if (textBaseline === 'middle') {
-        rowY =  y + ((rowIndex + 1) -  renderList.length / 2) * lineHeight;
+        rowY = y + (rowIndex + 1 - textList.length / 2) * lineHeight;
       } else {
-        rowY =  y - (renderList.length - rowIndex - 1) * lineHeight; 
+        rowY = y - (textList.length - rowIndex - 1) * lineHeight;
       }
       return {
         x,
         y: rowY,
-        text: rowText
+        text: rowText,
       };
     });
     if (renderList.length === 0) {
       return;
     }
+    ctx.fillText(renderList[0].text, renderList[0].x, renderList[0].y)
     if (needStroke) {
       renderList.forEach(item => ctx.strokeText(item.text, item.x, item.y));
     }
@@ -115,13 +114,16 @@ export default class Text extends Shape<TextConf> {
 
   protected computeBBox(): BBox {
     const { x, y } = this.attr;
-    const { textAlign, textBaseline, lineHeight } = this.getTextStyle();
-    const textWidth = this.measureText().width;
+    const textStyle = this.getTextStyle();
+    const { textAlign, textBaseline, lineHeight } = textStyle;
+    const inlineTextList = this._inlineTextList || [];
+    const textHeight = inlineTextList.length * lineHeight;
+    const textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width));
     const bbox: BBox = {
       x,
       y,
       width: textWidth,
-      height: lineHeight,
+      height: textHeight,
     };
 
     if (textAlign === 'center') {
@@ -133,9 +135,9 @@ export default class Text extends Shape<TextConf> {
     if (textBaseline === 'top') {
       bbox.y = y;
     } else if (textBaseline === 'middle') {
-      bbox.y = y - lineHeight / 2;
+      bbox.y = y - textHeight / 2;
     } else {
-      bbox.y = y - lineHeight;
+      bbox.y = y - textHeight;
     }
 
     return bbox;
@@ -150,9 +152,11 @@ export default class Text extends Shape<TextConf> {
     let dy = 0;
     const textStyle = this.getTextStyle();
     if (textStyle.textBaseline === 'bottom') {
-      dy = -textStyle.fontSize / 2;
+      dy = -textStyle.fontSize /  2  + textStyle.fontSize / 10;
     } else if (textStyle.textBaseline === 'top') {
-      dy = textStyle.fontSize / 2;
+      dy = textStyle.fontSize / 2 + textStyle.fontSize / 10;
+    } else if (textStyle.textBaseline === 'middle') {
+      dy = textStyle.fontSize / 2 + textStyle.fontSize / 10;
     }
 
     if (textStyle.textAlign === 'start' || textStyle.textAlign === 'left') {
@@ -175,8 +179,18 @@ export default class Text extends Shape<TextConf> {
       'paint-order': 'stroke',
     };
   }
+  
+  private _getInlineTextList(): string [] {
+    if (!this._inlineTextList) {
+      this._inlineTextList = this._computeInlineTextList();
+    }
+    return this._inlineTextList;
+  }
 
-  private _getInlineTextList(): string[] {
+  private _computeInlineTextList(): string[] {
+    if (this._inlineTextList) {
+      return this._inlineTextList;
+    }
     const { text, truncate } = this.attr;
     const textStyle = this.getTextStyle();
     const { lineHeight } = textStyle;
