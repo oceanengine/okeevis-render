@@ -353,6 +353,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return this;
     }
     if (typeof attr === 'string') {
+      if (this.attr[attr as keyof T] === value) {
+        return;
+      }
       this.dirty();
       this.onAttrChange(attr as keyof T, value, this.attr[attr as keyof T]);
       this.attr[attr as keyof T] = value;
