@@ -7,6 +7,7 @@ import { measureText } from '../utils/measureText';
 export interface TextConf extends CommonAttr {
   x?: number;
   y?: number;
+  maxWidth?: number;
   text?: string;
   fontSize?: number;
   fontWeight?: string | number;
@@ -37,6 +38,7 @@ const shapeKeys: Array<keyof TextConf> = [
 export interface TextSpan {
   x: number;
   y: number;
+  dy?: number;
   text: string;
 }
 
@@ -94,10 +96,10 @@ export default class Text extends Shape<TextConf> {
     const { needStroke, needFill } = this.getFillAndStrokeStyle();
     const spanList = this.getSpanList();
     if (needStroke) {
-      spanList.forEach(item => ctx.strokeText(item.text, item.x, item.y));
+      spanList.forEach(item => ctx.strokeText(item.text, item.x, item.y, this.attr.maxWidth));
     }
     if (needFill) {
-      spanList.forEach(item => ctx.fillText(item.text, item.x, item.y));
+      spanList.forEach(item => ctx.fillText(item.text, item.x, item.y, this.attr.maxWidth));
     }
   }
 
@@ -124,7 +126,10 @@ export default class Text extends Shape<TextConf> {
     const { textAlign, textBaseline, lineHeight } = textStyle;
     const inlineTextList = this._getInlineTextList();
     const textHeight = inlineTextList.length * lineHeight;
-    const textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width)) || 0;
+    let textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width)) || 0;
+    if (this.attr.maxWidth > 0) {
+      textWidth = Math.min(textWidth, this.attr.maxWidth);
+    }
     const bbox: BBox = {
       x,
       y,
@@ -180,6 +185,7 @@ export default class Text extends Shape<TextConf> {
       x: this.attr.x,
       y: this.attr.y,
       dy,
+      textLength: this.attr.maxWidth,
       'dominant-baseline': 'middle',
       'text-anchor': anchor,
       'paint-order': 'stroke',
