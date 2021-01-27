@@ -522,7 +522,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     // do nothing
   }
 
-  public onAttrChange<U extends keyof T>(key: U, newValue: T[U], oldValue: T[U]) {
+  protected onAttrChange<U extends keyof T>(key: U, newValue: T[U], oldValue: T[U]) {
     if (newValue === oldValue) {
       return;
     }
