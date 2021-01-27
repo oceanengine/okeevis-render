@@ -197,7 +197,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _transformDirty: boolean = false;
 
-  private _absTransformDirty: boolean = false; // 自身或祖先矩阵变化
+  private _absTransformDirty: boolean = true; // 自身或祖先矩阵变化
 
   private _baseMatrix: mat3 = IDENTRY_MATRIX;
 
