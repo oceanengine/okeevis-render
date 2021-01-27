@@ -105,22 +105,23 @@ export default class Text extends Shape<TextConf> {
     if (this._isEmpty) {
       return;
     }
+    // be carefule stroke frist
     const { needFill, needStroke } = this.getFillAndStrokeStyle();
     if (!this.isMutiLine) {
-      if (needFill) {
-        ctx.fillText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
-      }
       if (needStroke) {
         ctx.strokeText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
+      }
+      if (needFill) {
+        ctx.fillText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
       }
       return;
     }
     this.eachSpanList((rowText, x, y) => {
-      if (needFill) {
-        ctx.fillText(rowText, x, y, this.attr.maxWidth);
-      }
       if (needStroke) {
         ctx.strokeText(rowText, x, y, this.attr.maxWidth);
+      }
+      if (needFill) {
+        ctx.fillText(rowText, x, y, this.attr.maxWidth);
       }
     });
   }
