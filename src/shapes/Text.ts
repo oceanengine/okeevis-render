@@ -34,6 +34,11 @@ const shapeKeys: Array<keyof TextConf> = [
   'textBaseline',
   'fontWeight',
 ];
+export interface TextSpan {
+  x: number;
+  y: number;
+  text: string;
+}
 
 export default class Text extends Shape<TextConf> {
   public type = 'text';
@@ -63,19 +68,18 @@ export default class Text extends Shape<TextConf> {
     return [...super.getAnimationKeys(), 'x', 'y', 'fontSize'];
   }
 
-  public brush(ctx: CanvasRenderingContext2D) {
+  public getSpanList(): TextSpan[] {
     const { x, y } = this.attr;
     const { lineHeight, textBaseline } = this.getTextStyle();
-    const { needStroke, needFill } = this.getFillAndStrokeStyle();
     const textList = this._getInlineTextList();
-    const renderList = textList.map((rowText, rowIndex) => {
+    return textList.map((rowText, rowIndex) => {
       let rowY: number = y;
       if (textBaseline === 'top') {
         rowY = y + rowIndex * lineHeight;
       } else if (textBaseline === 'middle') {
-        rowY = y + (rowIndex + 1 - textList.length / 2) * lineHeight;
-      } else {
-        rowY = y - (textList.length - rowIndex - 1) * lineHeight;
+        rowY = y + (rowIndex + 0.5 -  textList.length / 2) * lineHeight;
+      } else if (textBaseline === 'bottom') {
+        rowY = y  - (textList.length - 1 - rowIndex) * lineHeight;
       }
       return {
         x,
@@ -83,15 +87,17 @@ export default class Text extends Shape<TextConf> {
         text: rowText,
       };
     });
-    if (renderList.length === 0) {
-      return;
-    }
-    ctx.fillText(renderList[0].text, renderList[0].x, renderList[0].y)
+  }
+  
+
+  public brush(ctx: CanvasRenderingContext2D) {
+    const { needStroke, needFill } = this.getFillAndStrokeStyle();
+    const spanList = this.getSpanList();
     if (needStroke) {
-      renderList.forEach(item => ctx.strokeText(item.text, item.x, item.y));
+      spanList.forEach(item => ctx.strokeText(item.text, item.x, item.y));
     }
     if (needFill) {
-      renderList.forEach(item => ctx.fillText(item.text, item.x, item.y));
+      spanList.forEach(item => ctx.fillText(item.text, item.x, item.y));
     }
   }
 
@@ -118,7 +124,7 @@ export default class Text extends Shape<TextConf> {
     const { textAlign, textBaseline, lineHeight } = textStyle;
     const inlineTextList = this._getInlineTextList();
     const textHeight = inlineTextList.length * lineHeight;
-    const textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width));
+    const textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width)) || 0;
     const bbox: BBox = {
       x,
       y,
@@ -156,7 +162,7 @@ export default class Text extends Shape<TextConf> {
     } else if (textStyle.textBaseline === 'top') {
       dy = textStyle.fontSize / 2 + textStyle.fontSize / 10;
     } else if (textStyle.textBaseline === 'middle') {
-      dy = textStyle.fontSize / 2 + textStyle.fontSize / 10;
+      dy =  +textStyle.fontSize / 10;
     }
 
     if (textStyle.textAlign === 'start' || textStyle.textAlign === 'left') {
@@ -244,7 +250,7 @@ export default class Text extends Shape<TextConf> {
             break;
           }
         }
-        rowTextList[rowIndex] = tempStr;
+        rowTextList[rowIndex] = tempStr + ellipse;
         break;
       } else {
         rowTextList.push(letter);

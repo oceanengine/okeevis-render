@@ -2,6 +2,7 @@ import * as Es6Set from 'es6-set';
 import { diff } from '@egjs/list-differ';
 import Painter from '../abstract/Painter';
 import { registerPainter } from './index';
+import Text, {TextSpan, } from '../shapes/Text';
 import Render from '../render';
 import Group from '../shapes/Group';
 import Element from '../shapes/Element';
@@ -169,8 +170,8 @@ export default class SVGPainter implements Painter {
     const svgDom = this._createSVGElement(tagName, attributes);
     let appendNode = svgDom;
     if (tagName === 'text') {
-      const textNode = document.createTextNode(node.attr.text);
-      svgDom.appendChild(textNode);
+      const spanList = (node as Text).getSpanList();
+      this._mountTextNode(svgDom, spanList);
     }
     if (isClip) {
       const clip = this._createSVGElement('clipPath', { id: 'node-' + node.id });
@@ -196,11 +197,26 @@ export default class SVGPainter implements Painter {
     return svgDom;
   }
 
+  private _mountTextNode(svgText: SVGElement, spanList: TextSpan[]) {
+    if (spanList.length === 1) {
+      const textNode = document.createTextNode(spanList[0].text);
+      svgText.appendChild(textNode);
+    } else {
+      spanList.forEach(span => {
+        const tspan = this._createSVGElement('tspan', {x: span.x, y: span.y});
+        const textNode = document.createTextNode(span.text);
+        tspan.appendChild(textNode);
+        svgText.appendChild(tspan);
+      })
+    }
+  }
+
   private _updateNode(node: Element) {
     const svgDom = this._loadedSVGElements[node.id];
     this._setElementAttr(svgDom, node.getSvgAttributes());
     if (node.type === 'text') {
-      svgDom.textContent = node.attr.text;
+      svgDom.textContent = '';
+      this._mountTextNode(svgDom, (node as Text).getSpanList());
     }
     if (node.attr.display && svgDom.getAttribute('display') === 'none') {
       svgDom.setAttribute('display', '');
