@@ -2,12 +2,18 @@ import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { BBox, polygonBBox } from '../utils/bbox';
 import { pointInPolygonFill, pointInPolygonStroke } from '../geometry/contain/polygon';
+import bezierSmooth from '../geometry/bezier-smooth';
+import catmullRom from '../geometry/catmull-rom';
 
+interface Point {
+  x: number;
+  y: number;
+}
 export interface PolylineConf extends CommonAttr {
-  pointList?: Array<{ x: number; y: number }>;
+  pointList?: Point[];
   smooth?: boolean;
   smoothType?: 'bezier' | 'spline';
-  smoothConstraint?: { x: number; y: number; width: number; height: number };
+  smoothConstraint?: [Point, Point];
   smoothMonotone?: 'x' | 'y';
 }
 const shapeKeys: Array<keyof PolylineConf> = [
@@ -20,7 +26,7 @@ const shapeKeys: Array<keyof PolylineConf> = [
 
 export default class Polyline extends Shape<PolylineConf> {
   public type = 'polyline';
-  
+
   public pickByGPU = true;
 
   public shapeKeys = shapeKeys;
@@ -44,7 +50,28 @@ export default class Polyline extends Shape<PolylineConf> {
       return;
     }
     ctx.moveTo(pointList[0].x, pointList[0].y);
-    pointList.slice(1).forEach(point => ctx.lineTo(point.x, point.y));
+    if (this.attr.smooth && this.attr.smoothType === 'bezier') {
+      const smoothList = bezierSmooth(
+        pointList,
+        this.type === 'polygon',
+        this.attr.smoothConstraint,
+        this.attr.smoothMonotone,
+      );
+      const pL: Point[][] = smoothList;
+      for (let j: number = 0; j < pL.length; j++) {
+        const i: Point[] = pL[j];
+        ctx.bezierCurveTo(i[1].x, i[1].y, i[2].x, i[2].y, i[3].x, i[3].y);
+      }
+    } else if (this.attr.smooth && this.attr.smoothType === 'spline') {
+      const splinePoints = catmullRom(pointList, false, 100);
+      for (let i: number = 1; i < splinePoints.length; i++) {
+        ctx.lineTo(splinePoints[i].x, splinePoints[i].y);
+      }
+    } else {
+      for (let i: number = 1; i < pointList.length; i++) {
+        ctx.lineTo(pointList[i].x, pointList[i].y);
+      }
+    }
   }
 
   protected computeBBox(): BBox {

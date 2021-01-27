@@ -13,4 +13,18 @@ const polyline = new Polyline({
   fill: 'red',
   stroke: 'blue'
 })
+const polyline2 = new Polyline({
+  pointList: [
+    {x: 0, y: 0,},
+    {x: 100, y: 0,},
+    {x: 100, y: 100,},
+    {x: 100, y: 300,},
+    {x: 200, y: 250,},
+    {x: 100, y: 180,},
+  ],
+  smooth: true,
+  stroke: 'blue'
+})
+
 render.add(polyline)
+render.add(polyline2)

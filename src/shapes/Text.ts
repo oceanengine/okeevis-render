@@ -42,6 +42,8 @@ export interface TextSpan {
   text: string;
 }
 
+const spanKeys: Array<keyof TextConf> = ['text', 'fontSize', 'fontFamily', 'fontWeight', 'fontStyle', 'lineHeight', 'truncate'];
+
 export default class Text extends Shape<TextConf> {
   public type = 'text';
 
@@ -56,14 +58,21 @@ export default class Text extends Shape<TextConf> {
   public getDefaultAttr(): TextConf {
     return {
       ...super.getDefaultAttr(),
+      text: '',
       x: 0,
       y: 0,
     };
   }
 
-  protected dirtyBBox() {
-    super.dirtyBBox();
-    this._inlineTextList = null;
+  protected onAttrChange(key: any, newvalue: any, oldvalue: any) {
+    super.onAttrChange(key, newvalue, oldvalue);
+    if (newvalue === oldvalue || !this.ownerRender) {
+      return;
+    }
+    if (spanKeys.indexOf(key) !== -1) {
+      this._inlineTextList = undefined;
+      this._inlineTextList = this._getInlineTextList();
+    }
   }
 
   public getAnimationKeys(): Array<keyof TextConf> {
@@ -71,10 +80,16 @@ export default class Text extends Shape<TextConf> {
   }
 
   public getSpanList(): TextSpan[] {
+    const out: TextSpan[] = [];
+    this.eachSpanList((text, x, y) => out.push({x, y, text}));
+    return out;
+  }
+
+  public eachSpanList(callback: (text: string, x: number, y: number) => void) {
     const { x, y } = this.attr;
     const { lineHeight, textBaseline } = this.getTextStyle();
     const textList = this._getInlineTextList();
-    return textList.map((rowText, rowIndex) => {
+    textList.forEach((rowText, rowIndex) => {
       let rowY: number = y;
       if (textBaseline === 'top') {
         rowY = y + rowIndex * lineHeight;
@@ -83,24 +98,21 @@ export default class Text extends Shape<TextConf> {
       } else if (textBaseline === 'bottom') {
         rowY = y  - (textList.length - 1 - rowIndex) * lineHeight;
       }
-      return {
-        x,
-        y: rowY,
-        text: rowText,
-      };
+      callback(rowText, x,  rowY);
     });
   }
   
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { needStroke, needFill } = this.getFillAndStrokeStyle();
-    const spanList = this.getSpanList();
-    if (needStroke) {
-      spanList.forEach(item => ctx.strokeText(item.text, item.x, item.y, this.attr.maxWidth));
-    }
-    if (needFill) {
-      spanList.forEach(item => ctx.fillText(item.text, item.x, item.y, this.attr.maxWidth));
-    }
+    const {needFill, needStroke, } = this.getFillAndStrokeStyle();
+    this.eachSpanList((text, x, y) => {
+      if (needFill) {
+        ctx.fillText(text, x, y, this.attr.maxWidth)
+      }
+      if (needStroke) {
+        ctx.strokeText(text, x, y, this.attr.maxWidth)
+      }
+    });
   }
 
   protected measureText(): TextMetrics {
