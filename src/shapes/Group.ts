@@ -45,7 +45,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
   
   public onAttrChange(key: any) {
-    if (key === 'fontSize' || key === 'fontWeight') {
+    if (shapeKeys.indexOf(key) !== -1) {
       this.dirtyTextChildBBox();
     }
   }
