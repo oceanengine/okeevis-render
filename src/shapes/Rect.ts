@@ -41,13 +41,13 @@ export default class Rect extends Shape<RectConf> {
 
   public brush(ctx: CanvasRenderingContext2D): void {
     // 没有圆角的时候直接渲染矩形
-    if (!this.attr.r) {
-        ctx.rect(
-            this.attr.x,
-            this.attr.y,
-            this.attr.width,
-            this.attr.height,
-        );
+    const {x, y, width, height, r } = this.attr;
+    if (!r) {
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + width, y);
+      ctx.lineTo(x + width, y + height);
+      ctx.lineTo(x, y + height);
+      ctx.closePath();
     } else {
         // 1 2 3 4分别为左上 右上 右下 左下
         let r1: number;
@@ -59,13 +59,13 @@ export default class Rect extends Shape<RectConf> {
         } else {
             r1 = r2 = r3 = r4 = this.attr.r;
         }
-        const width: number = Math.abs(this.attr.width / 2);
-        const height: number = Math.abs(this.attr.height / 2);
+        const absWidth: number = Math.abs(width / 2);
+        const absHeight: number = Math.abs(height / 2);
         const rect = this.getBBox();
-        r1 = Math.min(r1, width, height);
-        r2 = Math.min(r2, width, height);
-        r3 = Math.min(r3, width, height);
-        r4 = Math.min(r4, width, height);
+        r1 = Math.min(r1, absWidth, absHeight);
+        r2 = Math.min(r2, absWidth, absHeight);
+        r3 = Math.min(r3, absWidth, absHeight);
+        r4 = Math.min(r4, absWidth, absHeight);
 
         const c1: Point = {
             x: rect.x + r1,
