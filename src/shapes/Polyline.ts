@@ -1,5 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
+import * as lodash from '../utils/lodash';
 import { BBox, polygonBBox } from '../utils/bbox';
 import { pointInPolygonFill, pointInPolygonStroke } from '../geometry/contain/polygon';
 import bezierSmooth from '../geometry/bezier-smooth';
@@ -75,7 +76,19 @@ export default class Polyline extends Shape<PolylineConf> {
   }
 
   protected computeBBox(): BBox {
-    return polygonBBox(this.attr.pointList || []);
+    let points = this.attr.pointList || [];
+    if (this.attr.smooth && this.attr.smoothType === 'bezier') {
+      points = lodash.flatten(bezierSmooth(
+        points,
+        this.type === 'polygon',
+        this.attr.smoothConstraint,
+        this.attr.smoothMonotone,
+      ))
+    }
+    if (this.attr.smooth && this.attr.smoothType === 'spline') {
+      points = catmullRom(points, false, 100);
+    }
+    return polygonBBox(points|| []);
   }
 
   public isPointInFill(x: number, y: number): boolean {

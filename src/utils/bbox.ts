@@ -164,6 +164,9 @@ export function sectorBBox(
 }
 
 export function polygonBBox(points: Array<{ x: number; y: number }>): BBox {
+  if (points.length === 0) {
+    return {x: 0, y: 0, width: 0, height: 0};
+  }
   let minX = Number.POSITIVE_INFINITY;
   let minY = Number.POSITIVE_INFINITY;
   let maxX = Number.NEGATIVE_INFINITY;
