@@ -1,7 +1,7 @@
 import { diff } from '@egjs/list-differ';
 import Element, { defaultSetting } from './Element';
 import Shape from './Shape';
-import { TextConf } from './Text';
+import { TextConf, shapeKeys } from './Text';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 import SVGPainter from '../painter/SVGPainter';
@@ -27,6 +27,8 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public strokeAble = false;
 
+  public shapeKeys = shapeKeys;
+
   private _length: number = 0;
 
   protected _chunks: T[][] = [];
@@ -40,6 +42,12 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       ...super.getDefaultAttr(),
       _batchBrush: false,
     };
+  }
+  
+  public onAttrChange(key: any) {
+    if (key === 'fontSize' || key === 'fontWeight') {
+      this.dirtyTextChildBBox();
+    }
   }
 
   public getAnimationKeys(): Array<keyof GroupConf> {
@@ -324,6 +332,17 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public dirtyClipTarget(clip: Element) {
     super.dirtyClipTarget(clip);
     this.eachChild(child => child.dirtyClipTarget(clip));
+  }
+
+  public dirtyTextChildBBox() {
+    this.eachChild(child => {
+      if (child.type === 'text') {
+        child.dirtyBBox();
+      }
+      if (child.isGroup) {
+        (child as any as Group).dirtyTextChildBBox()
+      }
+    })
   }
 
   private _mountNode(item: T) {

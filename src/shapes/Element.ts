@@ -856,7 +856,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  protected dirtyBBox() {
+  public dirtyBBox() {
     this._bboxDirty = true;
     this.dirtyClientBoundingRect();
   }

@@ -24,7 +24,7 @@ export interface TextConf extends CommonAttr {
     ellipse?: string;
   };
 }
-const shapeKeys: Array<keyof TextConf> = [
+export const shapeKeys: Array<keyof TextConf> = [
   'x',
   'y',
   'text',
