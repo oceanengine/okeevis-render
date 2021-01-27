@@ -434,6 +434,7 @@ export default class CanvasPainter implements Painter {
       stroke: computedStroke,
       fillOpacity,
       strokeOpacity,
+      lineWidth,
     } = renderingContext;
 
     if (item.attr.clip) {
@@ -443,9 +444,7 @@ export default class CanvasPainter implements Painter {
     }
 
     if (item.attr.lineWidth >= 0) {
-      ctx.lineWidth = !item.attr.strokeNoScale
-        ? item.attr.lineWidth
-        : item.getExtendAttr('lineWidth');
+      ctx.lineWidth = lineWidth;
     }
 
     if (item.attr.lineCap) {

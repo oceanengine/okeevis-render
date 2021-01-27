@@ -42,8 +42,6 @@ export interface TextSpan {
   text: string;
 }
 
-const spanKeys: Array<keyof TextConf> = ['text', 'fontSize', 'fontFamily', 'fontWeight', 'fontStyle', 'lineHeight', 'truncate'];
-
 export default class Text extends Shape<TextConf> {
   public type = 'text';
 
@@ -53,7 +51,18 @@ export default class Text extends Shape<TextConf> {
 
   public shapeKeys = shapeKeys;
 
-  private _inlineTextList: string[];
+  private get _isEmpty(): boolean {
+    const { text } = this.attr;
+    if (text === undefined || text === null || text === '') {
+      return true;
+    }
+    return false;
+  }
+
+  private get isMutiLine(): boolean {
+    const { text, truncate } = this.attr;
+    return !!((text + '').indexOf('\n') !== -1 || truncate);
+  }
 
   public getDefaultAttr(): TextConf {
     return {
@@ -64,24 +73,13 @@ export default class Text extends Shape<TextConf> {
     };
   }
 
-  protected onAttrChange(key: any, newvalue: any, oldvalue: any) {
-    super.onAttrChange(key, newvalue, oldvalue);
-    if (newvalue === oldvalue || !this.ownerRender) {
-      return;
-    }
-    if (spanKeys.indexOf(key) !== -1) {
-      this._inlineTextList = undefined;
-      this._inlineTextList = this._getInlineTextList();
-    }
-  }
-
   public getAnimationKeys(): Array<keyof TextConf> {
     return [...super.getAnimationKeys(), 'x', 'y', 'fontSize'];
   }
 
   public getSpanList(): TextSpan[] {
     const out: TextSpan[] = [];
-    this.eachSpanList((text, x, y) => out.push({x, y, text}));
+    this.eachSpanList((text, x, y) => out.push({ x, y, text }));
     return out;
   }
 
@@ -94,23 +92,35 @@ export default class Text extends Shape<TextConf> {
       if (textBaseline === 'top') {
         rowY = y + rowIndex * lineHeight;
       } else if (textBaseline === 'middle') {
-        rowY = y + (rowIndex + 0.5 -  textList.length / 2) * lineHeight;
+        rowY = y + (rowIndex + 0.5 - textList.length / 2) * lineHeight;
       } else if (textBaseline === 'bottom') {
-        rowY = y  - (textList.length - 1 - rowIndex) * lineHeight;
+        rowY = y - (textList.length - 1 - rowIndex) * lineHeight;
       }
-      callback(rowText, x,  rowY);
+      callback(rowText, x, rowY);
     });
   }
-  
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const {needFill, needStroke, } = this.getFillAndStrokeStyle();
-    this.eachSpanList((text, x, y) => {
+    const { text } = this.attr;
+    if (this._isEmpty) {
+      return;
+    }
+    const { needFill, needStroke } = this.getFillAndStrokeStyle();
+    if (!this.isMutiLine) {
       if (needFill) {
-        ctx.fillText(text, x, y, this.attr.maxWidth)
+        ctx.fillText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
       }
       if (needStroke) {
-        ctx.strokeText(text, x, y, this.attr.maxWidth)
+        ctx.strokeText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
+      }
+      return;
+    }
+    this.eachSpanList((rowText, x, y) => {
+      if (needFill) {
+        ctx.fillText(rowText, x, y, this.attr.maxWidth);
+      }
+      if (needStroke) {
+        ctx.strokeText(rowText, x, y, this.attr.maxWidth);
       }
     });
   }
@@ -133,15 +143,28 @@ export default class Text extends Shape<TextConf> {
   }
 
   protected computeBBox(): BBox {
+    if (this._isEmpty) {
+      return { x: 0, y: 0, width: 0, height: 0 };
+    }
     const { x, y } = this.attr;
     const textStyle = this.getTextStyle();
     const { textAlign, textBaseline, lineHeight } = textStyle;
-    const inlineTextList = this._getInlineTextList();
-    const textHeight = inlineTextList.length * lineHeight;
-    let textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width)) || 0;
+    let textWidth: number;
+    let textHeight: number;
+
+    if (!this.isMutiLine) {
+      textWidth = measureText(this.attr.text, textStyle).width;
+      textHeight = lineHeight;
+    } else {
+      const inlineTextList = this._getInlineTextList();
+      textHeight = inlineTextList.length * lineHeight;
+      textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width)) || 0;
+    }
+
     if (this.attr.maxWidth > 0) {
       textWidth = Math.min(textWidth, this.attr.maxWidth);
     }
+
     const bbox: BBox = {
       x,
       y,
@@ -175,11 +198,11 @@ export default class Text extends Shape<TextConf> {
     let dy = 0;
     const textStyle = this.getTextStyle();
     if (textStyle.textBaseline === 'bottom') {
-      dy = -textStyle.fontSize /  2  + textStyle.fontSize / 10;
+      dy = -textStyle.fontSize / 2 + textStyle.fontSize / 10;
     } else if (textStyle.textBaseline === 'top') {
       dy = textStyle.fontSize / 2 + textStyle.fontSize / 10;
     } else if (textStyle.textBaseline === 'middle') {
-      dy =  +textStyle.fontSize / 10;
+      dy = +textStyle.fontSize / 10;
     }
 
     if (textStyle.textAlign === 'start' || textStyle.textAlign === 'left') {
@@ -203,18 +226,8 @@ export default class Text extends Shape<TextConf> {
       'paint-order': 'stroke',
     };
   }
-  
-  private _getInlineTextList(): string [] {
-    if (!this._inlineTextList) {
-      this._inlineTextList = this._computeInlineTextList();
-    }
-    return this._inlineTextList;
-  }
 
-  private _computeInlineTextList(): string[] {
-    if (this._inlineTextList) {
-      return this._inlineTextList;
-    }
+  private _getInlineTextList(): string[] {
     const { text, truncate } = this.attr;
     const textStyle = this.getTextStyle();
     const { lineHeight } = textStyle;
