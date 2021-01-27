@@ -11,10 +11,8 @@ const text = 'Tenfdsfdsdddddddddddddfdsst'
 const textBaseline = 'middle'
 const y = 200;
 const lineHeight = 40;
-const truncate = {
-  outerWidth: 100,
-  outerHeight: 80,
-}
+const truncate = undefined as any
+const maxWidth = 1000;
 const textEl = new Text({
   draggable: true,
   x: 120,
@@ -22,6 +20,7 @@ const textEl = new Text({
   text,
   textAlign,
   textBaseline,
+  maxWidth,
   fill: 'red',
   fontSize,
   truncate,
@@ -37,6 +36,7 @@ const text2 = new Text({
   y,
   text,
   textAlign,
+  maxWidth,
   textBaseline,
   fill: 'red',
   fontSize,

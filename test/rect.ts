@@ -2,7 +2,7 @@ import Render from '../src/render'
 import Rect from '../src/shapes/Rect'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom)
+const render = new Render(dom, {renderer: 'svg'})
 
 const rect = new Rect({
   x: 100,
@@ -12,6 +12,7 @@ const rect = new Rect({
   fill: 'blue',
   stroke: 'red',
   lineWidth: 2,
+  r: 200,
 })
 
 render.add(rect)

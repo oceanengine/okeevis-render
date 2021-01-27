@@ -5,15 +5,19 @@ const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom)
 
 const polyline = new Polyline({
+  draggable: true,
   pointList: [
     {x: 0, y: 0,},
     {x: 100, y: 0,},
     {x: 100, y: 100,},
   ],
+  lineWidth: 2,
   fill: 'red',
   stroke: 'blue'
 })
 const polyline2 = new Polyline({
+  draggable: true,
+  lineWidth: 2,
   pointList: [
     {x: 0, y: 0,},
     {x: 100, y: 0,},
