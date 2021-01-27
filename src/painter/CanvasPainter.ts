@@ -272,9 +272,8 @@ export default class CanvasPainter implements Painter {
 
     if (hasSelfContext) {
       ctx.save();
+      this._setElementCanvasContext(ctx, item);
     }
-
-    hasSelfContext && this._setElementCanvasContext(ctx, item);
     if (!item.isGroup) {
       if (item.fillAble && renderingContext.needFill && !this._isPixelPainter) {
         if (renderingContext.fillOpacity !== renderingContext.strokeOpacity) {
