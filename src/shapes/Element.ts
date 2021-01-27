@@ -384,6 +384,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public beforeDirty() {
+    if (this.ownerRender && this.ownerRender.getDirtyElements().size > this.ownerRender.maxDirtyRects) {
+      this._dirtyRect = undefined;
+      return;
+    }
     if (!this._dirty && this._clientBoundingRect) {
       this._dirtyRect = this.getCurrentDirtyRect();
     }
