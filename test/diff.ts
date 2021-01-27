@@ -17,7 +17,7 @@ const group = new Group({
   fill: 'blue',
 });
 
-group.addAll(makeCircle(1000));
+group.addAll(makeCircle(500));
 render.add(group);
 group.children().forEach(item => item.animateTo({
   position: [Math.random() * 640, Math.random()*480],
