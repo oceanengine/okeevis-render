@@ -39,6 +39,7 @@ export interface DispatchTouchParam {
   touches: DispatchTouch[];
   changedTouches: DispatchTouch[];
 }
+const AUTO_DETECT_THROTTLE = 100;
 
 export default class EventHandle {
   public render: Render;
@@ -57,15 +58,17 @@ export default class EventHandle {
 
   private _PixelPainter: CanvasPainter;
 
+  private _lastMouseSyntheticTimestamp: number;
+
   public constructor(render: Render) {
     this.render = render;
     this._PixelPainter = new CanvasPainter(render, true);
     this._initEvents();
-    this._onRenderDirty = lodash.throttle(this._onRenderDirty, 100);
+    this._onRenderDirty = lodash.throttle(this._onRenderDirty, AUTO_DETECT_THROTTLE);
   }
 
   public onFrame() {
-    if (this.render.needUpdate() && this._prevMousePosition) {
+    if (this.render.needUpdate() && this._prevMousePosition && (Date.now() - this._lastMouseSyntheticTimestamp) > AUTO_DETECT_THROTTLE) {
       this._onRenderDirty();
     }
   }
@@ -193,6 +196,7 @@ export default class EventHandle {
     const { x, y } = isNative ? this._getMousePosition(nativeEvent) : nativeEvent;
     const target = this.pickTarget(x, y);
     const prevMouseTarget = this._prevMouseTarget;
+    this._lastMouseSyntheticTimestamp = Date.now();
     const mouseEventParam: SyntheticMouseEventParams = {
       x,
       y,
