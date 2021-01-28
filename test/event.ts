@@ -31,8 +31,12 @@ const shape1 = new Circle({
   onDragEnd: e => console.log(e),
   getDragOffset: e => {
     return {x: e.dx, y:e.dy}
+  },
+  onMounted() {
+    shape1.animateTo({cx: 400}, 200)
   }
 });
+shape1.on('dblclick', (e: any) => console.log('dblclick from on'))
 const shape2 = new Circle({
   cx: 320,
   cy: 480,
