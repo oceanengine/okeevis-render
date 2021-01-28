@@ -1,5 +1,6 @@
 import Eventful from '../utils/Eventful';
 import Render from '../render';
+import CanvasPainter from '../painter/CanvasPainter';
 import Group, { GroupConf } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue, isTransparent } from '../color';
@@ -402,6 +403,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._dirty = true;
     if (this.ownerRender) {
       this.ownerRender.dirty(dirtyElement || this);
+      if (this.isGroup && this.ownerRender.renderer === 'canvas') {
+        const leafNodeSize = (this as  any as Group).getLeafNodesSize();
+        if (leafNodeSize > this.ownerRender.maxDirtyRects) {
+          (this.ownerRender.getPainter() as CanvasPainter).noDirtyRectNextFrame();
+        }
+      }
     }
     if (this.attr.clip) {
       this._mountClip();

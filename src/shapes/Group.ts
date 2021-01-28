@@ -229,6 +229,16 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._chunks = [];
   }
 
+  public getLeafNodesSize(ret:{size: number} = {size: 0}): number {
+    this.eachChild(child => {
+      ret.size++;
+      if (child.isGroup) {
+        (child as any as Group).getLeafNodesSize(ret);
+      }
+    })
+    return ret.size;
+  }
+
   public updateAll(list: T[]) {
     this._chunks = [];
     const prevList = this.children();
@@ -275,6 +285,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         const chunks = ((nextElement as any) as Group).getChunks();
         ((prevElement as unknown) as Group).replaceChunks(chunks);
       }
+      // todo clone matrix
       prevElement.setBaseTransform(nextElement.getBaseTransform());
       const {transitionDuration = defaultSetting.during, transitionEase = defaultSetting.ease, transitionProperty = 'all', transitionDelay = 0 } = nextElement.attr;
       if (transitionProperty === 'none' || transitionProperty.length === 0) {
