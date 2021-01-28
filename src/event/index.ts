@@ -1,13 +1,15 @@
 import SyntheticEvent from  './SyntheticEvent';
 import SyntheticMouseEvent from './SyntheticMouseEvent';
 import SyntheticDragEvent from './SyntheticDragEvent';
-import SyntheticTouchEvent from  './SyntheticTouchEvent'
+import SyntheticTouchEvent from  './SyntheticTouchEvent';
+import SyntheticWheelEvent from './SyntheticWheelEvent';
 
 export {
   SyntheticEvent,
   SyntheticMouseEvent,
   SyntheticDragEvent,
   SyntheticTouchEvent,
+  SyntheticWheelEvent,
 }
 
 // todo 和react一致

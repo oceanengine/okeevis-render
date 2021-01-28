@@ -2,7 +2,6 @@
  * @desc lodash import
  */
 /* tslint:disable:no-require-imports */
-import '../../js/lodash/_root';
 import isNull = require('lodash/isNull');
 import isUndefined = require('lodash/isUndefined');
 import isBoolean = require('lodash/isBoolean');
@@ -26,6 +25,11 @@ import toNumber = require('lodash/toNumber');
 import flatten = require('lodash/flatten');
 import throttle = require('lodash/throttle');
 import cloneDeep = require('lodash/cloneDeep')
+import root = require('lodash/_root');
+
+if (typeof root !== 'undefined' && !root.Date) {
+  root.Date = Date;
+}
 
 export {
   isNull,

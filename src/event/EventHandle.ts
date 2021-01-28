@@ -1,16 +1,21 @@
+import * as normalizeWheel from 'normalize-wheel';
 import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
+
+
 import {
   SyntheticEvent,
   SyntheticMouseEvent,
   SyntheticTouchEvent,
   SyntheticDragEvent,
+  SyntheticWheelEvent,
   EventConf,
 } from './index';
 import { SyntheticDragEventParams } from './SyntheticDragEvent';
 import { SyntheticMouseEventParams } from './SyntheticMouseEvent';
+import { SyntheticWheelEventParams } from './SyntheticWheelEvent';
 import { SyntheticTouchEventParams, SyntheticTouch } from './SyntheticTouchEvent';
 
 import { inBBox } from '../utils/bbox';
@@ -183,12 +188,25 @@ export default class EventHandle {
     const mouseEventParam: SyntheticMouseEventParams = {
       x,
       y,
-      detail: nativeEvent.detail,
       bubbles: nativeEvent.bubbles,
       original: nativeEvent,
       timeStamp: nativeEvent.timeStamp,
     };
-    const event: SyntheticMouseEvent = new SyntheticMouseEvent(nativeEvent.type, mouseEventParam);
+    let event: SyntheticMouseEvent;
+    if (nativeEvent.type === 'wheel') {
+      const {deltaMode, deltaX, deltaY, deltaZ, } = nativeEvent as WheelEvent;
+      const wheelEventParam: SyntheticWheelEventParams = {
+        ...mouseEventParam,
+        deltaMode,
+        deltaX,
+        deltaY,
+        deltaZ,
+        normalizeWheel: normalizeWheel(nativeEvent as WheelEvent)
+      }
+      event = new SyntheticWheelEvent(nativeEvent.type, wheelEventParam);
+    } else {
+      event = new SyntheticMouseEvent(nativeEvent.type, mouseEventParam);
+    }
     this._dispatchSyntheticMouseEvent(event, target);
 
     if (event.type === 'mousedown' || event.type === 'mousemove') {
@@ -327,7 +345,6 @@ export default class EventHandle {
       y: null,
       dx: null,
       dy: null,
-      detail: nativeEvent.detail,
       bubbles: true,
       original: nativeEvent,
       timeStamp: Date.now(),
@@ -410,7 +427,6 @@ export default class EventHandle {
     const eventParam = {
       x,
       y,
-      detail: nativeEvent.detail,
       bubbles: nativeEvent.bubbles,
       original: nativeEvent,
       timeStamp: nativeEvent.timeStamp,
@@ -443,7 +459,6 @@ export default class EventHandle {
     const eventParam = {
       x,
       y,
-      detail: nativeEvent.detail,
       bubbles: nativeEvent.bubbles,
       original: nativeEvent,
       timeStamp: nativeEvent.timeStamp,
@@ -471,7 +486,6 @@ export default class EventHandle {
     const mouseEventParam: SyntheticMouseEventParams = {
       x,
       y,
-      detail: nativeEvent.detail,
       bubbles: nativeEvent.bubbles,
       original: nativeEvent,
       timeStamp: nativeEvent.timeStamp,

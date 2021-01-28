@@ -21,4 +21,3 @@ declare global {
         draw(reverse?: boolean, callback?: Function): void;
     }
 }
-declare module 'lodash/_root'

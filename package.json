@@ -93,6 +93,7 @@
     "color": "3.1.3",
     "es6-set": "0.1.5",
     "gl-matrix": "3.3.0",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "normalize-wheel": "1.0.1"
   }
 }

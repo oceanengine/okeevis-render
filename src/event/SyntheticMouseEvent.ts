@@ -8,7 +8,6 @@ import Element from '../shapes/Element';
 export interface SyntheticMouseEventParams extends SyntheticEventParams {
   x: number;
   y: number;
-  detail?: any;
 }
 
 export default class SyntheticMouseEvent extends SyntheticEvent<MouseEvent> {
@@ -29,6 +28,5 @@ export default class SyntheticMouseEvent extends SyntheticEvent<MouseEvent> {
     super(type, params);
     this.x = params.x;
     this. y = params.y;
-    this.detail = params.detail;
   }
 }
