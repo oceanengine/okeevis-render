@@ -589,6 +589,7 @@ export default class EventHandle {
       }
 
       target.translate(dx, dy);
+      // todo 如果脏数据超过了脏限制,不要实时刷新
       this.render.getPainter().onFrame();
     }
 

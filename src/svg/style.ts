@@ -90,7 +90,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     ret.stroke = getSVGColor(stroke);
   }
   if (lineWidth !== undefined && lineWidth >= 0) {
-    ret['stroke-width'] = lineWidth + '';
+    ret['stroke-width'] = (node.attr.strokeNoScale ? node.getExtendAttr('lineWidth') : lineWidth) + '';
   }
   if (opacity !== undefined && opacity !== 1) {
     ret.opacity = opacity + '';
