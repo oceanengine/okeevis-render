@@ -144,7 +144,7 @@ export default class CanvasPainter implements Painter {
     }
     const dpr = this.dpr;
     ctx.save();
-    if (dpr !== 1 && this.render.scaleWithDprBeforePaint) {
+    if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
     if (this._canvas === this.render.getDom()) {
@@ -191,7 +191,7 @@ export default class CanvasPainter implements Painter {
     const ctx = this._ctx;
     const dpr = this.dpr;
     ctx.save();
-    if (dpr !== 1 && this.render.scaleWithDprBeforePaint) {
+    if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
     styleHelper.setFontStyle(ctx, defaultCanvasContext);
@@ -217,7 +217,7 @@ export default class CanvasPainter implements Painter {
       );
     }
     ctx.save();
-    if (dpr !== 1 && this.render.scaleWithDprBeforePaint) {
+    if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
     // 改变默认的canvas上下文
@@ -443,7 +443,7 @@ export default class CanvasPainter implements Painter {
     }
 
     if (item.attr.lineWidth >= 0) {
-      ctx.lineWidth = lineWidth;
+      styleHelper.setLineWidth(ctx, lineWidth);
     }
 
     if (item.attr.lineCap) {
@@ -591,7 +591,7 @@ export default class CanvasPainter implements Painter {
       }
     }
     styleHelper.setGlobalAlpha(ctx, 1);
-    ctx.lineWidth = 1;
+    styleHelper.setLineWidth(ctx, 1);
     styleHelper.setStrokeStyle(ctx, 'red');
     ctx.beginPath();
     this._brushRect(ctx, bbox);

@@ -36,7 +36,7 @@ export default class Render extends EventFul {
 
   public showFPS: boolean = false;
 
-  public scaleWithDprBeforePaint: boolean = true;
+  public scaleByDprBeforePaint: boolean = true;
     
   private _dom: HTMLDivElement | HTMLCanvasElement;
 

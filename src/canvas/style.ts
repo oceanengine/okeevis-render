@@ -8,7 +8,13 @@ export function resetTransform(ctx: CanvasRenderingContext2D): void {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 }
-
+export function setLineWidth(ctx: CanvasRenderingContext2D, lineWidth: number) {
+  if (!ctx.setLineWidth) {
+    ctx.lineWidth = lineWidth;
+  } else {
+    ctx.setLineWidth(lineWidth);
+  }
+}
 export function setFillStyle(ctx: CanvasRenderingContext2D, fill: string | CanvasGradient | CanvasPattern) {
   if (!ctx.setFillStyle) {
     ctx.fillStyle = fill;

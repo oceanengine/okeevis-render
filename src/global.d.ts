@@ -10,7 +10,9 @@ declare global {
         setFillStyle(fill: string | CanvasGradient | CanvasPattern): void;
         setFontSize(fontSize: number): void;
         setGlobalAlpha(alpha: number): void;
+        setLineWidth(lineWidth: number): void;
         setLineCap(lineCap: string): void;
+        setLineDash(lineDash: number[], offset?: number): void;
         setLineJoin(lineJoin: string): void;
         setMiterLimit(miterLimit: number): void;
         setShadow(offsetX: number, offsetY: number, blur: number, color: string): void;
