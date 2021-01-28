@@ -26,7 +26,7 @@ export interface EventConf {
   onDblClick?: (event: SyntheticMouseEvent) => void;
   onMouseLeave?: (event: SyntheticMouseEvent) => void;
   onMouseEnter?: (event: SyntheticMouseEvent) => void;
-  onWheel?: (event: SyntheticMouseEvent) => void;
+  onWheel?: (event: SyntheticWheelEvent) => void;
   onDragStart?: (event: SyntheticDragEvent) => void;
   onDrag?: (event: SyntheticDragEvent) => void;
   onDragEnd?: (event: SyntheticDragEvent) => void;
