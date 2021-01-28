@@ -1,7 +1,13 @@
-import {NormalLizeWheel, } from 'normalize-wheel'
 import SyntheticMouseEvent, { SyntheticMouseEventParams } from './SyntheticMouseEvent';
 
 // https://gist.github.com/akella/11574989a9f3cc9e0ad47e401c12ccaf
+
+export interface NormalLizeWheel {
+  spinX: number;
+  spinY: number;
+  pixelX: number;
+  pixelY: number;
+}
 
 export interface SyntheticWheelEventParams extends SyntheticMouseEventParams {
   deltaMode: number;
@@ -11,7 +17,7 @@ export interface SyntheticWheelEventParams extends SyntheticMouseEventParams {
   normalizeWheel: NormalLizeWheel;
 }
 
-export default class SyntheticDragEvent extends SyntheticMouseEvent {
+export default class SyntheticWheelEvent extends SyntheticMouseEvent {
   public syntheticType = 'wheel';
 
   public deltaMode: number;
@@ -30,6 +36,6 @@ export default class SyntheticDragEvent extends SyntheticMouseEvent {
     this.deltaX = params.deltaX;
     this.deltaY = params.deltaY;
     this.deltaZ = params.deltaZ;
-    this.normalizeWheel = params.normalizeWheel;
+    this.normalizeWheel = params.normalizeWheel
   }
 }
