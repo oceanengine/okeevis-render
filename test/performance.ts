@@ -23,11 +23,17 @@ const rootGroup = new Group({
   draggable: true,
   scaleX: 2,
   scaleY: 2,
-  onDragStart: () => {
+  onDragStart: (e: any) => {
+    if (e.target !== rootGroup ) {
+      return
+    }
     labelGroup.setAttr('display', false)
     edgeGroup.setAttr('display', false)
   },
-  onDragEnd: () => {
+  onDragEnd: (e: any) => {
+    if (e.target !== rootGroup ) {
+      return
+    }
     labelGroup.setAttr('display', true)
     edgeGroup.setAttr('display', true)
   }
