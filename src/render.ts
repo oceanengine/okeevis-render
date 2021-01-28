@@ -61,6 +61,8 @@ export default class Render extends EventFul {
   private _eventHandle: EventHandle;
 
   private _disposed: boolean = false;
+
+  private _isOnframe: boolean = false;
   
   public constructor(dom?: HTMLDivElement | HTMLCanvasElement, option: RenderOptions = {}) {
     super();
@@ -216,9 +218,10 @@ export default class Render extends EventFul {
   }
 
   private _onFrame = (now?: number) => {
-    if (this._disposed) {
+    if (this._disposed || this._isOnframe) {
       return;
     }
+    this._isOnframe = true;
     this._rootGroup.onFrame(now);
     this._painter?.onFrame(now);
     this._eventHandle.onFrame();
@@ -230,6 +233,7 @@ export default class Render extends EventFul {
       this._rootGroup.getClientBoundingRect();
     }
     requestAnimationFrame(this._onFrame);
+    this._isOnframe = false;
   }
 
   private _loop() {
