@@ -329,8 +329,8 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       }
       if (!item.isGroup && !(item.getExtendAttr('pointerEvents') === 'none' && ignoreMute)) {
         ret.push((item as any) as Shape);
-      } else {
-        ((item as any) as Group).getAllLeafNodes(ret, ignoreInvisible);
+      } else if (item.isGroup) {
+        ((item as any) as Group).getAllLeafNodes(ret, ignoreInvisible, ignoreMute);
       }
     });
     return ret;
