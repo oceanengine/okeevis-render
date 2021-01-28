@@ -574,9 +574,6 @@ export default class EventHandle {
 
     const { bubbles, isPropagationStopped } = event;
 
-    const eventKey = Object.keys(target.attr).filter(
-      key => key.toLowerCase() === 'on' + event.type,
-    )[0] as keyof EventConf;
 
     if (event.type === 'drag' && count === 0) {
       const dragEvent = event as SyntheticDragEvent;
@@ -593,10 +590,8 @@ export default class EventHandle {
       this.render.getPainter().onFrame();
     }
 
-    if (target.attr[eventKey]) {
-      (target.attr[eventKey] as Function)(event as any);
-    }
     target.dispatch(event.type, event);
+    
     if (bubbles && !isPropagationStopped && target.parentNode) {
       count++;
       this._dispatchSyntheticMouseEvent(event, (target.parentNode as any) as Element, count);

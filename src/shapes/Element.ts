@@ -252,6 +252,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
     } as T;
   }
 
+  protected onEvent = (type: string, ...params: any[]) => {
+    const eventKey = Object.keys(this.attr).filter(
+      key => key.toLowerCase() === 'on' + type,
+    )[0] as keyof EventConf;
+    if (eventKey) {
+      (this.attr[eventKey] as Function).apply(null, params);
+    }
+  }
+
   public getComputedOpacity(): number {
     let node: Element<any> = this;
     let opacity = 1;

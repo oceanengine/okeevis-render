@@ -14,7 +14,7 @@ export default class EventFul {
 
   public off(eventName: string, listener?: Function): void {
     const listenerList = this._eventListeners[eventName] || [];
-    if (typeof listener === undefined) {
+    if (typeof listener === 'undefined') {
       delete this._eventListeners[eventName];
     } else if (typeof listener === 'function') {
       const exsitIndex = listenerList.indexOf(listener);
@@ -28,7 +28,7 @@ export default class EventFul {
   public dispatch(type: string, ...args:any[]): void {
     const listenerList = this._eventListeners[type] || [];
     listenerList.forEach(listener => listener.apply(null, args));
-    this.onEvent.apply(null, args);
+    this.onEvent.apply(null, [type, ...args]);
   }
 
   public removeAllListeners() {
