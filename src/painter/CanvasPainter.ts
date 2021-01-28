@@ -206,7 +206,7 @@ export default class CanvasPainter implements Painter {
   }
 
   public paint(dirtyRegions?: BBox[]) {
-    // console.time('paint');
+    console.time('paint');
     const ctx = this._canvas.getContext('2d');
     const dpr = this.dpr;
     if (!dirtyRegions) {
@@ -233,7 +233,7 @@ export default class CanvasPainter implements Painter {
     }
     this.render.getRoot().eachChild(item => this.drawElement(ctx, item, dirtyRegions));
     ctx.restore();
-    // console.timeEnd('paint');
+    console.timeEnd('paint');
   }
 
   public drawElement(ctx: CanvasRenderingContext2D, item: Element, dirtyRegions?: BBox[]) {
@@ -328,6 +328,10 @@ export default class CanvasPainter implements Painter {
     if (hasSelfContext) {
       ctx.restore();
     }
+  }
+
+  public isFullPaintNextFrame(): boolean {
+    return !this.render.enableDirtyRect || this._isFirstFrame;
   }
 
   public noDirtyRectNextFrame() {

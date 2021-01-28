@@ -4,14 +4,12 @@ import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
 
-
 import {
   SyntheticEvent,
   SyntheticMouseEvent,
   SyntheticTouchEvent,
   SyntheticDragEvent,
   SyntheticWheelEvent,
-  EventConf,
 } from './index';
 import { SyntheticDragEventParams } from './SyntheticDragEvent';
 import { SyntheticMouseEventParams } from './SyntheticMouseEvent';
@@ -39,7 +37,7 @@ interface DispatchTouch {
 }
 export interface DispatchTouchParam {
   touches: DispatchTouch[];
-  changedTouches: DispatchTouch[]; 
+  changedTouches: DispatchTouch[];
 }
 
 export default class EventHandle {
@@ -72,20 +70,30 @@ export default class EventHandle {
     }
   }
 
-  public dispatch<T extends string>(type: T, param: T extends 'touchstart' | 'touchmove' | 'touchend' ? DispatchTouchParam : {x: number, y: number, detail?: any}) {
+  public dispatch<T extends string>(
+    type: T,
+    param: T extends 'touchstart' | 'touchmove' | 'touchend'
+      ? DispatchTouchParam
+      : { x: number; y: number; detail?: any },
+  ) {
     if (type === 'touchstart' || type === 'touchmove' || type === 'touchend') {
-      this._syntheticTouchEvent({
-        type,
-        ...param,
-      } as any, false)
+      this._syntheticTouchEvent(
+        {
+          type,
+          ...param,
+        } as any,
+        false,
+      );
     } else {
-      this._syntheticMouseEvent({
-        type,
-        ...param
-      } as any, false);
+      this._syntheticMouseEvent(
+        {
+          type,
+          ...param,
+        } as any,
+        false,
+      );
     }
   }
-
 
   public pickTarget(x: number, y: number): Element {
     // console.time('pick');
@@ -194,15 +202,15 @@ export default class EventHandle {
     };
     let event: SyntheticMouseEvent;
     if (nativeEvent.type === 'wheel') {
-      const {deltaMode, deltaX, deltaY, deltaZ, } = nativeEvent as WheelEvent;
+      const { deltaMode, deltaX, deltaY, deltaZ } = nativeEvent as WheelEvent;
       const wheelEventParam: SyntheticWheelEventParams = {
         ...mouseEventParam,
         deltaMode,
         deltaX,
         deltaY,
         deltaZ,
-        normalizeWheel: normalizeWheel(nativeEvent as WheelEvent)
-      }
+        normalizeWheel: normalizeWheel(nativeEvent as WheelEvent),
+      };
       event = new SyntheticWheelEvent(nativeEvent.type, wheelEventParam);
     } else {
       event = new SyntheticMouseEvent(nativeEvent.type, mouseEventParam);
@@ -412,7 +420,6 @@ export default class EventHandle {
         this._dragStartMouse = null;
         this._prevMousePosition = null;
       }
-      
     }
   };
 
@@ -574,7 +581,6 @@ export default class EventHandle {
 
     const { bubbles, isPropagationStopped } = event;
 
-
     if (event.type === 'drag' && count === 0) {
       const dragEvent = event as SyntheticDragEvent;
       let dx = dragEvent.dx;
@@ -587,11 +593,16 @@ export default class EventHandle {
 
       target.translate(dx, dy);
       // todo 如果脏数据超过了脏限制,不要实时刷新
-      this.render.getPainter().onFrame();
+      if (
+        this.render.renderer === 'canvas' &&
+        !(this.render.getPainter() as CanvasPainter).isFullPaintNextFrame()
+      ) {
+        this.render.getPainter().onFrame();
+      }
     }
 
     target.dispatch(event.type, event);
-    
+
     if (bubbles && !isPropagationStopped && target.parentNode) {
       count++;
       this._dispatchSyntheticMouseEvent(event, (target.parentNode as any) as Element, count);
