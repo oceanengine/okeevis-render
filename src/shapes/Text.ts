@@ -107,21 +107,38 @@ export default class Text extends Shape<TextConf> {
     }
     // be carefule stroke frist
     const { needFill, needStroke } = this.getFillAndStrokeStyle();
+    const isXcX = !!ctx.setFontSize;
     if (!this.isMutiLine) {
       if (needStroke) {
-        ctx.strokeText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
+        if (!isXcX && this.attr.maxWidth > 0) {
+          ctx.strokeText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
+        } else {
+          ctx.strokeText(text, this.attr.x, this.attr.y);
+        }
       }
       if (needFill) {
-        ctx.fillText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
+        if (!isXcX && this.attr.maxWidth > 0) {
+          ctx.fillText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
+        } else {
+          ctx.fillText(text, this.attr.x, this.attr.y);
+        }
       }
       return;
     }
     this.eachSpanList((rowText, x, y) => {
       if (needStroke) {
-        ctx.strokeText(rowText, x, y, this.attr.maxWidth);
+        if (!isXcX && this.attr.maxWidth > 0) {
+         ctx.strokeText(rowText, x, y, this.attr.maxWidth);
+        } else {
+          ctx.strokeText(rowText, x, y);
+        }
       }
       if (needFill) {
-        ctx.fillText(rowText, x, y, this.attr.maxWidth);
+        if (!isXcX && this.attr.maxWidth > 0) {
+          ctx.fillText(rowText, x, y, this.attr.maxWidth);
+        } else {
+          ctx.fillText(rowText, x, y);
+        }
       }
     });
   }
