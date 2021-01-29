@@ -29,11 +29,11 @@ export const cancelAnimationFrame = windowCancelAnimationFrame
 function timerRaf(callback: Function): number {
   const currTime = new Date().getTime();
   const timeToCall = Math.max(0, 16 - (currTime - lastTime));
-  const id = window.setTimeout(function () {
+  const id = setTimeout(function () {
     callback(currTime + timeToCall);
   }, timeToCall);
   lastTime = currTime + timeToCall;
-  return id;
+  return id as any
 }
 
 function timerCaf(id: number) {
