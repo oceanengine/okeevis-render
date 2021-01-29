@@ -2,6 +2,14 @@ import * as matrix from 'gl-matrix';
 
 
 declare global {
+    interface Window {
+        msRequestAnimationFrame: typeof requestAnimationFrame;
+        mozRequestAnimationFrame: typeof requestAnimationFrame;
+        oRequestAnimationFrame: typeof requestAnimationFrame;
+        msCancelAnimationFrame: Function;
+        mozCancelAnimationFrame: Function;
+        oCancelAnimationFrame: Function;
+    }
     export type mat3 = matrix.mat3;
     export type mat2 = matrix.mat2;
     
