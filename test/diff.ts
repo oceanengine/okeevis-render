@@ -21,7 +21,7 @@ group.addAll(makeCircle(3000));
 render.add(group);
 group.children().forEach(item => item.animateTo({
   position: [Math.random() * 640, Math.random()*480],
-}, 20000))
+}, 50000))
 document.onclick = e => {
   return
   group.add(new Rect({
