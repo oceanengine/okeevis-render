@@ -513,6 +513,7 @@ export default class CanvasPainter implements Painter {
       const _fontFamily = item.getExtendAttr('fontFamily');
       const _fontWeight = item.getExtendAttr('fontWeight');
       const _fontStyle = item.getExtendAttr('fontStyle');
+      // tood gc optimize
       styleHelper.setFontStyle(ctx, {
         fontSize: _fontSize,
         fontFamily: _fontFamily,
