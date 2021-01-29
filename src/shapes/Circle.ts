@@ -31,7 +31,8 @@ export default class Circle extends Shape<CircleConf> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    ctx.arc(this.attr.cx, this.attr.cy, this.attr.radius, 0, Math.PI * 2, true);
+    const {cx, cy, radius} = this.attr;
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2, true);
   }
 
   public isPointInFill(x: number, y: number): boolean {

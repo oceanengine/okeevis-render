@@ -206,7 +206,7 @@ export default class CanvasPainter implements Painter {
   }
 
   public paint(dirtyRegions?: BBox[]) {
-    console.time('paint');
+    // console.time('paint');
     const ctx = this._canvas.getContext('2d');
     const dpr = this.dpr;
     if (!dirtyRegions) {
@@ -233,7 +233,7 @@ export default class CanvasPainter implements Painter {
     }
     this.render.getRoot().eachChild(item => this.drawElement(ctx, item, dirtyRegions));
     ctx.restore();
-    console.timeEnd('paint');
+    // console.timeEnd('paint');
   }
 
   public drawElement(ctx: CanvasRenderingContext2D, item: Element, dirtyRegions?: BBox[]) {
@@ -401,6 +401,7 @@ export default class CanvasPainter implements Painter {
   }
 
   protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
+    const { clip, lineCap, lineJoin, miterLimit, stroke, fill,  fontSize, fontFamily, fontWeight, fontStyle, fontVariant, textBaseline, textAlign, blendMode, lineDashOffset, shadowBlur, shadowOffsetX, shadowOffsetY, shadowColor, lineDash, } = item.attr;
     const selfMatrix = item.getTransform();
     const baseMatrix = item.getBaseTransform();
     if (baseMatrix !== IDENTRY_MATRIX || selfMatrix !== IDENTRY_MATRIX) {
@@ -440,7 +441,7 @@ export default class CanvasPainter implements Painter {
       lineWidth,
     } = renderingContext;
 
-    if (item.attr.clip) {
+    if (clip) {
       ctx.beginPath();
       item.getClipElement().brush(ctx);
       ctx.clip();
@@ -450,16 +451,16 @@ export default class CanvasPainter implements Painter {
       styleHelper.setLineWidth(ctx, lineWidth);
     }
 
-    if (item.attr.lineCap) {
-      styleHelper.setLineCap(ctx, item.attr.lineCap);
+    if (lineCap) {
+      styleHelper.setLineCap(ctx, lineCap);
     }
 
-    if (item.attr.lineJoin) {
-      styleHelper.setLineJoin(ctx, item.attr.lineJoin);
+    if (lineJoin) {
+      styleHelper.setLineJoin(ctx, lineJoin);
     }
 
-    if (item.attr.miterLimit >= 0) {
-      styleHelper.setMiterLimit(ctx, item.attr.miterLimit);
+    if (miterLimit >= 0) {
+      styleHelper.setMiterLimit(ctx, miterLimit);
     }
 
     // 文本和图像自己检测, 不走gpu,不故考虑fontSize
@@ -473,13 +474,13 @@ export default class CanvasPainter implements Painter {
 
     // group只支持color string, pattern,不支持渐变
     // todo 考虑小程序api setXXXX
-    if (item.attr.stroke && !(item.isGroup && isGradient(item.attr.stroke))) {
-      styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, item.attr.stroke, item));
+    if (stroke && !(item.isGroup && isGradient(stroke))) {
+      styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, stroke, item));
     }
 
     if (
-      !item.attr.stroke &&
-      item.attr.stroke !== 'none' &&
+      !stroke &&
+      stroke !== 'none' &&
       isGradient(computedStroke) &&
       item.type !== 'group'
     ) {
@@ -488,25 +489,25 @@ export default class CanvasPainter implements Painter {
 
     /** 渐变样式无法继承 */
     if (
-      item.attr.fill &&
-      item.attr.fill !== 'none' &&
-      !(item.isGroup && isGradient(item.attr.fill))
+      fill &&
+      fill !== 'none' &&
+      !(item.isGroup && isGradient(fill))
     ) {
-      styleHelper.setFillStyle(ctx, getCtxColor(ctx, item.attr.fill, item));
+      styleHelper.setFillStyle(ctx, getCtxColor(ctx, fill, item));
     }
 
     /** 渐变样式无法继承 */
-    if (!item.attr.fill && isGradient(computedFill) && item.type !== 'group') {
+    if (!fill && isGradient(computedFill) && item.type !== 'group') {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, computedFill, item));
     }
 
     // todo 兼容小程序
     if (
-      item.attr.fontSize >= 0 ||
-      item.attr.fontFamily ||
-      item.attr.fontWeight ||
-      item.attr.fontVariant ||
-      item.attr.fontStyle
+      fontSize  ||
+      fontFamily ||
+      fontWeight ||
+      fontVariant ||
+      fontStyle
     ) {
       const _fontSize = item.getExtendAttr('fontSize');
       const _fontFamily = item.getExtendAttr('fontFamily');
@@ -520,12 +521,12 @@ export default class CanvasPainter implements Painter {
       });
     }
 
-    if (item.attr.textBaseline) {
-      styleHelper.setTextBaseline(ctx, item.attr.textBaseline);
+    if (textBaseline) {
+      styleHelper.setTextBaseline(ctx, textBaseline);
     }
 
-    if (item.attr.textAlign) {
-      styleHelper.setTextAlign(ctx, item.attr.textAlign);
+    if (textAlign) {
+      styleHelper.setTextAlign(ctx, textAlign);
     }
 
     // 透明度相同时不用复用alpha
@@ -533,27 +534,29 @@ export default class CanvasPainter implements Painter {
       styleHelper.setGlobalAlpha(ctx, fillOpacity);
     }
 
-    if (item.attr.blendMode) {
-      ctx.globalCompositeOperation = item.attr.blendMode;
+    if (blendMode) {
+      ctx.globalCompositeOperation = blendMode;
     }
 
-    if (item.attr.lineDashOffset !== undefined) {
+    if (lineDash) {
+      ctx.setLineDash(lineDash);
+    }
+
+    if (lineDashOffset !== undefined) {
       ctx.lineDashOffset = item.attr.lineDashOffset;
     }
 
-    if (item.attr.shadowBlur > 0 && !isTransparent(item.attr.shadowColor)) {
+    if (shadowBlur > 0 && !isTransparent(shadowColor)) {
       styleHelper.setShadow(
         ctx,
-        item.attr.shadowOffsetX,
-        item.attr.shadowOffsetY,
-        item.attr.shadowBlur,
-        item.attr.shadowColor,
+        shadowOffsetX,
+        shadowOffsetY,
+        shadowBlur,
+        shadowColor,
       );
     }
 
-    if (item.attr.lineDash) {
-      ctx.setLineDash(item.attr.lineDash);
-    }
+   
   }
 
   protected _hasSelfContext(item: Element<ShapeConf>): boolean {
