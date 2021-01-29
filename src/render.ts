@@ -2,14 +2,14 @@ import * as ES6Set from 'es6-set';
 import Painter from './abstract/Painter';
 import EventHandle from './event/EventHandle';
 import EventFul from './utils/Eventful';
-import Group, {ChunkItem, } from './shapes/Group';
+import Group, { ChunkItem } from './shapes/Group';
 import Element from './shapes/Element';
-import {getDomContentSize, } from './utils/dom';
-import requestAnimationFrame from './utils/requestAnimationFrame';
-import { addContext, removeContext, } from './utils/measureText';
+import { getDomContentSize } from './utils/dom';
+import { requestAnimationFrame, cancelAnimationFrame } from './utils/rAF';
+import { addContext, removeContext } from './utils/measureText';
 import { getPainter } from './painter';
 import { renderToSVGString } from './svg/renderToSVGString';
-import {  downloadBase64, } from './utils/download';
+import { downloadBase64 } from './utils/download';
 
 import './painter/CanvasPainter';
 import './painter/SVGPainter';
@@ -37,7 +37,7 @@ export default class Render extends EventFul {
   public showFPS: boolean = false;
 
   public scaleByDprBeforePaint: boolean = true;
-    
+
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
   private _width: number;
@@ -51,7 +51,7 @@ export default class Render extends EventFul {
   private _needUpdate: boolean = true;
 
   private _requestAnimationFrameId: number;
-  
+
   private _rootGroup: Group;
 
   private _dirtyElements: ES6Set<Element> = new ES6Set();
@@ -63,27 +63,27 @@ export default class Render extends EventFul {
   private _disposed: boolean = false;
 
   private _isOnframe: boolean = false;
-  
+
   public constructor(dom?: HTMLDivElement | HTMLCanvasElement, option: RenderOptions = {}) {
     super();
-    
+
     this._rootGroup = new Group();
     this._rootGroup.ownerRender = this;
-    this._isBrowser =   /html.*?element/gi.test(Object.prototype.toString.call(dom));
-    this.dpr = option.dpr || (this._isBrowser ? (window.devicePixelRatio || 1) : 1);
+    this._isBrowser = /html.*?element/gi.test(Object.prototype.toString.call(dom));
+    this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio || 1 : 1);
     this._renderer = option.renderer || 'canvas';
     this._dom = dom;
     if (dom) {
       if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
-        this._width =  (dom as HTMLCanvasElement).width;
+        this._width = (dom as HTMLCanvasElement).width;
         this._height = (dom as HTMLCanvasElement).height;
       } else {
-        const[width, height] = getDomContentSize(dom);
+        const [width, height] = getDomContentSize(dom);
         this._width = width;
         this._height = height;
       }
       const UsedPainter = getPainter(this._renderer);
-      this._painter= new UsedPainter(this)
+      this._painter = new UsedPainter(this);
       addContext(this._painter.getContext());
     } else {
       this._width = option.width || 300;
@@ -171,7 +171,7 @@ export default class Render extends EventFul {
   public downloadImage(name: string): void {
     const base64: string = this.getPainter().getBase64();
     downloadBase64(base64, name);
-}
+  }
 
   public needUpdate(): boolean {
     return this._needUpdate;
@@ -207,8 +207,6 @@ export default class Render extends EventFul {
     return this._painter;
   }
 
-  
-
   public renderToSVGString(): string {
     return renderToSVGString(this.getRoot(), this._width, this._height);
   }
@@ -227,17 +225,19 @@ export default class Render extends EventFul {
     this._eventHandle.onFrame();
     this._needUpdate = false;
     this._dirtyElements.clear();
-    const currentTime = (typeof window !== 'undefined' && window.performance && window.performance.now) ? window.performance.now() : Date.now();
+    const currentTime =
+      typeof window !== 'undefined' && window.performance && window.performance.now
+        ? window.performance.now()
+        : Date.now();
     const timeRemaining = 16 - (currentTime - now);
     if (timeRemaining > 5) {
       this._rootGroup.getClientBoundingRect();
     }
     requestAnimationFrame(this._onFrame);
     this._isOnframe = false;
-  }
+  };
 
   private _loop() {
     this._requestAnimationFrameId = requestAnimationFrame(this._onFrame);
   }
-  
 }

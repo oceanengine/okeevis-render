@@ -1,25 +1,30 @@
 /**
  * @desc requestAnimationFrame
  */
-// import { requestAnimationFrameHack } from '@/animation/scedular';
 
 let lastTime = 0;
 
-export const requestAnimationFrame =
-  (typeof window !== 'undefined' &&
-    (window.msRequestAnimationFrame ||
-      window.mozRequestAnimationFrame ||
-      window.oRequestAnimationFrame ||
-      window.requestAnimationFrame)) ||
-  timerRaf;
+const windowAnimationFrame =
+  typeof window !== 'undefined' &&
+  (window.requestAnimationFrame ||
+    window.msRequestAnimationFrame ||
+    window.mozRequestAnimationFrame ||
+    window.oRequestAnimationFrame);
 
-export const cancelAnimationFrame =
-  (typeof window !== 'undefined' &&
-    (window.msCancelAnimationFrame ||
-      window.mozCancelAnimationFrame ||
-      window.oCancelAnimationFrame ||
-      window.cancelAnimationFrame)) ||
-  timerCaf;
+const windowCancelAnimationFrame =
+  typeof window !== 'undefined' &&
+  (window.cancelAnimationFrame ||
+    window.msCancelAnimationFrame ||
+    window.mozCancelAnimationFrame ||
+    window.oCancelAnimationFrame);
+
+export const requestAnimationFrame = windowAnimationFrame
+  ? windowAnimationFrame.bind(window)
+  : timerRaf;
+
+export const cancelAnimationFrame = windowCancelAnimationFrame
+  ? windowCancelAnimationFrame.bind(window)
+  : timerCaf;
 
 function timerRaf(callback: Function): number {
   const currTime = new Date().getTime();
