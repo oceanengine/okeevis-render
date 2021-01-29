@@ -393,8 +393,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this.type === 'group';
   }
 
-  public beforeDirty() {
-    if (this.ownerRender && this.ownerRender.getDirtyElements().size > this.ownerRender.maxDirtyRects) {
+  public beforeDirty(leafNodeSize: number) {
+    const maxDirtyLimit = this.ownerRender.maxDirtyRects;
+    if (this.ownerRender.getDirtyElements().size > maxDirtyLimit || leafNodeSize > maxDirtyLimit) {
       this._dirtyRect = undefined;
       return;
     }
@@ -408,12 +409,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public dirty(dirtyElement: Element = null) {
-    this.beforeDirty();
+    let leafNodeSize = 1;
+    if (this.ownerRender && this.ownerRender.renderer === 'canvas') {
+      if (this.isGroup) {
+        leafNodeSize = (this as  any as Group).getLeafNodesSize();
+        this.beforeDirty(leafNodeSize)
+      } else {
+        this.beforeDirty(leafNodeSize);
+      }
+    }
     this._dirty = true;
     if (this.ownerRender) {
       this.ownerRender.dirty(dirtyElement || this);
       if (this.isGroup && this.ownerRender.renderer === 'canvas') {
-        const leafNodeSize = (this as  any as Group).getLeafNodesSize();
         if (leafNodeSize > this.ownerRender.maxDirtyRects) {
           (this.ownerRender.getPainter() as CanvasPainter).noDirtyRectNextFrame();
         }
