@@ -107,17 +107,16 @@ export default class Text extends Shape<TextConf> {
     }
     // be carefule stroke frist
     const { needFill, needStroke } = this.getFillAndStrokeStyle();
-    const isXcX = !!ctx.setFontSize;
     if (!this.isMutiLine) {
       if (needStroke) {
-        if (!isXcX && this.attr.maxWidth > 0) {
+        if (this.attr.maxWidth > 0) {
           ctx.strokeText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
         } else {
           ctx.strokeText(text, this.attr.x, this.attr.y);
         }
       }
       if (needFill) {
-        if (!isXcX && this.attr.maxWidth > 0) {
+        if (this.attr.maxWidth > 0) {
           ctx.fillText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
         } else {
           ctx.fillText(text, this.attr.x, this.attr.y);
@@ -127,14 +126,14 @@ export default class Text extends Shape<TextConf> {
     }
     this.eachSpanList((rowText, x, y) => {
       if (needStroke) {
-        if (!isXcX && this.attr.maxWidth > 0) {
+        if (this.attr.maxWidth > 0) {
          ctx.strokeText(rowText, x, y, this.attr.maxWidth);
         } else {
           ctx.strokeText(rowText, x, y);
         }
       }
       if (needFill) {
-        if (!isXcX && this.attr.maxWidth > 0) {
+        if (this.attr.maxWidth > 0) {
           ctx.fillText(rowText, x, y, this.attr.maxWidth);
         } else {
           ctx.fillText(rowText, x, y);
