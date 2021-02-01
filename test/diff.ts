@@ -22,6 +22,7 @@ render.add(group);
 group.children().forEach(item => item.animateTo({
   position: [Math.random() * 640, Math.random()*480],
 }, 50000))
+// group.updateAll(makeText(3000))
 document.onclick = e => {
   return
   group.add(new Rect({
@@ -41,6 +42,8 @@ function makeText(count: number) {
       x: Math.random() * 400,
       y: Math.random() * 600,
       text: index + '',
+      transitionDuration: 50000,
+
     });
   });
 }
