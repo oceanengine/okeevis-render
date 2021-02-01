@@ -7,9 +7,9 @@ import * as mat3 from '../../js/mat3';
  * @param originX 
  * @param originY 
  */
-const vec2: [number, number] = [0, 0];
 
 export function rotate(matrix: mat3, angle = 0,  originX = 0, originY = 0): mat3 {
+  const vec2: [number, number] = [originX, originY];
   vec2[0] = originX;
   vec2[1] = originY;
   mat3.translate(matrix, matrix, vec2);
@@ -21,8 +21,7 @@ export function rotate(matrix: mat3, angle = 0,  originX = 0, originY = 0): mat3
 }
 
 export function scale(matrix: mat3, sx = 1, sy = 1, originX = 0, originY = 0) {
-  vec2[0] = originX;
-  vec2[1] = originY;
+  const vec2: [number, number] = [originX, originY];
   mat3.translate(matrix, matrix, vec2);
   mat3.scale(matrix,matrix, [sx, sy]);
   vec2[0] = -originX;

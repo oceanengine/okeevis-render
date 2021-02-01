@@ -1,12 +1,12 @@
 import Painter from '../abstract/Painter';
 import { registerPainter } from './index';
 import Render from '../render';
-import Element, { defaultCanvasContext, FillAndStrokeStyle } from '../shapes/Element';
+import Element, { defaultCanvasContext, } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
 import { BBox, bboxIntersect } from '../utils/bbox';
 import { mergeDirtyRect } from './dirtyRect';
-import { getCtxColor, isGradient, isTransparent } from '../color';
+import { getCtxColor, isGradient, isTransparent, ColorValue} from '../color';
 import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
@@ -34,18 +34,6 @@ const contextKeys: Array<keyof ShapeConf> = [
   'clip',
 ];
 
-const renderingContext: FillAndStrokeStyle = {
-  opacity: null,
-  fill: null,
-  stroke: null,
-  fillOpacity: null,
-  strokeOpacity: null,
-  lineWidth: null,
-  hasFill: null,
-  hasStroke: null,
-  needFill: null,
-  needStroke: null,
-};
 
 export default class CanvasPainter implements Painter {
   public render: Render;
@@ -198,8 +186,14 @@ export default class CanvasPainter implements Painter {
     styleHelper.setTextBaseline(ctx, defaultCanvasContext.textBaseline);
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
     parentList.forEach(current => {
-      current.getFillAndStrokeStyle(renderingContext);
-      this._setElementCanvasContext(ctx, current);
+      // current.getFillAndStrokeStyle(renderingContext);
+      const opacity = current.getComputedOpacity();
+      const fillOpacity = current.getExtendAttr('fillOpacity') * opacity;
+      const strokeOpacity = current.getExtendAttr('strokeOpacity') * opacity;
+      const lineWidth = current.getExtendAttr('lineWidth');
+      const stroke = current.getExtendAttr('stroke');
+      const fill = current.getExtendAttr('fill');
+      this._setElementCanvasContext(ctx, current, fill, stroke, fillOpacity, strokeOpacity, lineWidth);
     });
     chunk.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
@@ -254,7 +248,19 @@ export default class CanvasPainter implements Painter {
         return;
       }
     }
-    item.getFillAndStrokeStyle(renderingContext);
+
+    const opacity = item.getComputedOpacity();
+    const fillOpacity = item.getExtendAttr('fillOpacity') * opacity;
+    const strokeOpacity = item.getExtendAttr('strokeOpacity') * opacity;
+    const lineWidth = item.getExtendAttr('lineWidth');
+    const stroke = item.getExtendAttr('stroke');
+    const fill = item.getExtendAttr('fill');
+    const hasFill = fill && fill !== 'none';
+    const hasStroke = stroke && stroke !== 'none' && lineWidth > 0;
+    const needFill = hasFill && fillOpacity !== 0 && !isTransparent(fill);
+    const needStroke = hasStroke && strokeOpacity !== 0 && !isTransparent(stroke);
+
+    // item.getFillAndStrokeStyle(renderingContext);
     // if (isInBatch) {
     //   if (item.isGroup) {
     //     console.warn('batch brush muse be shape element');
@@ -265,19 +271,19 @@ export default class CanvasPainter implements Painter {
     //   return;
     // }
 
-    if (renderingContext.opacity === 0 && !this._isPixelPainter) {
+    if (opacity === 0 && !this._isPixelPainter) {
       return;
     }
-    const hasSelfContext = this._isPixelPainter ? true : this._hasSelfContext(item);
+    const hasSelfContext = this._isPixelPainter ? true : this._hasSelfContext(item, fill, fillOpacity, stroke, strokeOpacity);
 
     if (hasSelfContext) {
       ctx.save();
-      this._setElementCanvasContext(ctx, item);
+      this._setElementCanvasContext(ctx, item, fill, stroke, fillOpacity, strokeOpacity, lineWidth);
     }
     if (!item.isGroup) {
-      if (item.fillAble && renderingContext.needFill && !this._isPixelPainter) {
-        if (renderingContext.fillOpacity !== renderingContext.strokeOpacity) {
-          styleHelper.setGlobalAlpha(ctx, renderingContext.fillOpacity);
+      if (item.fillAble && needFill && !this._isPixelPainter) {
+        if (fillOpacity !== strokeOpacity) {
+          styleHelper.setGlobalAlpha(ctx, fillOpacity);
         }
       }
       if (item.fillAble || (item.strokeAble && item.type !== 'text')) {
@@ -286,19 +292,19 @@ export default class CanvasPainter implements Painter {
       (item as Shape).brush(ctx);
       if (
         item.fillAble &&
-        (renderingContext.needFill || (this._isPixelPainter && renderingContext.hasFill)) &&
+        (needFill || (this._isPixelPainter && hasFill)) &&
         item.type !== 'text'
       ) {
         ctx.fill();
       }
-      if (item.strokeAble && renderingContext.needStroke && !this._isPixelPainter) {
-        if (renderingContext.fillOpacity !== renderingContext.strokeOpacity) {
-          styleHelper.setGlobalAlpha(ctx, renderingContext.strokeOpacity);
+      if (item.strokeAble && needStroke && !this._isPixelPainter) {
+        if (fillOpacity !== strokeOpacity) {
+          styleHelper.setGlobalAlpha(ctx, strokeOpacity);
         }
       }
       if (
         item.strokeAble &&
-        (renderingContext.needStroke || (this._isPixelPainter && renderingContext.hasStroke)) &&
+        (needStroke || (this._isPixelPainter && hasStroke)) &&
         item.type !== 'text'
       ) {
         ctx.stroke();
@@ -400,7 +406,7 @@ export default class CanvasPainter implements Painter {
     this._ctx = this._canvas.getContext('2d');
   }
 
-  protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>) {
+  protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, computedFill: ColorValue, computedStroke: ColorValue, fillOpacity: number, strokeOpacity: number, lineWidth: number) {
     const { clip, lineCap, lineJoin, miterLimit, stroke, fill,  fontSize, fontFamily, fontWeight, fontStyle, fontVariant, textBaseline, textAlign, blendMode, lineDashOffset, shadowBlur, shadowOffsetX, shadowOffsetY, shadowColor, lineDash, } = item.attr;
     const selfMatrix = item.getTransform();
     const baseMatrix = item.getBaseTransform();
@@ -433,13 +439,6 @@ export default class CanvasPainter implements Painter {
         );
       }
     }
-    const {
-      fill: computedFill,
-      stroke: computedStroke,
-      fillOpacity,
-      strokeOpacity,
-      lineWidth,
-    } = renderingContext;
 
     if (clip) {
       ctx.beginPath();
@@ -560,15 +559,15 @@ export default class CanvasPainter implements Painter {
    
   }
 
-  protected _hasSelfContext(item: Element<ShapeConf>): boolean {
+  protected _hasSelfContext(item: Element<ShapeConf>, fill: ColorValue, fillOpacity: number, stroke: ColorValue, strokeOpacity: number): boolean {
     if (contextKeys.some(key => item.attr[key] !== undefined)) {
       return true;
     }
-    if (isGradient(renderingContext.fill) || isGradient(renderingContext.stroke)) {
+    if (isGradient(fill) || isGradient(stroke)) {
       return true;
     }
 
-    if (renderingContext.fillOpacity !== 1 || renderingContext.strokeOpacity !== 1) {
+    if (fillOpacity !== 1 || strokeOpacity !== 1) {
       return true;
     }
 

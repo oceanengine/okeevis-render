@@ -571,8 +571,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
     }
-    if (this.ownerRender) {
-      setTimeout(() => this.dispatch('mounted'));
+    if (this.ownerRender && this.attr.onMounted) {
+      this.attr.onMounted();
     }
     this._mountClip();
   }
