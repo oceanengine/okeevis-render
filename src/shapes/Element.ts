@@ -31,7 +31,7 @@ export const defaultSetting: { during: number; ease: EasingName } = {
 const reuseBBoxVectors: Vec2[] = [createVec2(), createVec2(), createVec2(), createVec2()];
 
 export interface BaseAttr extends TransformConf, EventConf {
-  key?: string;
+  key?: string | number;
   ref?: Ref<Element>;
   display?: boolean;
   // 已废弃属性

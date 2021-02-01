@@ -15,8 +15,8 @@ const actionType = [
 const interpolatePath: InterpolateFunction<Path2D> = (from: Path2D, to: Path2D, k: number): Path2D => {
   const current = to.getPathList().map((pathAction, index) => {
     const oldPath = from.getPathList()[index];
-    if (pathAction.action !== oldPath.action) { return pathAction; }
-    if (actionType.includes(pathAction.action)) {
+    if (!oldPath || (oldPath.action !== pathAction.action)) { return pathAction; }
+    if (actionType.indexOf(pathAction.action) !== -1) {
       return {
         ...pathAction,
         params: pathAction.params.map((param, pIndex) => {

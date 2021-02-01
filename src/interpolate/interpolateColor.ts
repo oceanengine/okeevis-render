@@ -25,6 +25,7 @@ export default function interpolateColor(from: ColorValue, to: ColorValue, k: nu
       toColor.alpha = 1;
     }
     const out = interpolate(fromColor, toColor, k);
+    out.alpha = parseFloat(out.alpha.toFixed(3));
     return Color(out).toString();
   }
 
