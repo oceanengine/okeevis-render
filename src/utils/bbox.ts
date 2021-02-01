@@ -52,6 +52,7 @@ export function getOffsetBBox(bbox: BBox, offset: number): BBox {
 }
 
 export function unionBBox(bboxList: BBox[]): BBox {
+  bboxList = bboxList.filter(box => box.width > 0 && box.height > 0);
   if (bboxList.length === 0) {
     return { x: 0, y: 0, width: 0, height: 0 };
   }
@@ -69,6 +70,7 @@ export function unionBBox(bboxList: BBox[]): BBox {
     maxX = Math.max(box.x + box.width, maxX);
     maxY = Math.max(box.y + box.height, maxY);
   }
+ 
   return {
     x: minX,
     y: minY,
@@ -106,7 +108,7 @@ export function lineBBox(x1: number, y1: number, x2: number, y2: number): BBox {
 }
 
 export function arcBBox(cx: number, cy: number, r: number, start: number, end: number): BBox {
-  if (r === 0 || start === end) {
+  if (r === 0 || equalWithTolerance(start, end)) {
     return {
       x: cx,
       y: cy,
