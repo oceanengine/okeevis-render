@@ -28,7 +28,6 @@ export const defaultSetting: { during: number; ease: EasingName } = {
 };
 
 // 对象重用
-const reusePositionVec2: Vec2 = [0, 0];
 const reuseBBoxVectors: Vec2[] = [createVec2(), createVec2(), createVec2(), createVec2()];
 
 export interface BaseAttr extends TransformConf, EventConf {
@@ -822,9 +821,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       translateX = 0,
       translateY = 0,
     } = this.attr;
-    reusePositionVec2[0] = translateX;
-    reusePositionVec2[1] = translateY;
-    (translateX !== 0 || translateY !== 0) && mat3.translate(out, out, reusePositionVec2);
+    (translateX !== 0 || translateY !== 0) && mat3.translate(out, out, [translateX, translateY]);
     rotation !== 0 && transformUtils.rotate(out, rotation, originX, originY);
     (scaleX !== 1 || scaleY !== 1) && transformUtils.scale(out, scaleX, scaleY, originX, originY);
     return out;
