@@ -3,7 +3,7 @@ import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Group, { GroupConf } from './Group';
 import * as lodash from '../utils/lodash';
-import { ColorValue, isTransparent } from '../color';
+import { ColorValue, } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
 import easingFunctions, { EasingName } from '../animate/ease';
 import { interpolate } from '../interpolate';
@@ -21,8 +21,6 @@ import { Ref } from '../utils/ref';
 import { getSVGStyleAttributes } from '../svg/style';
 
 export type ElementAttr = GroupConf & ShapeConf;
-
-const defaultStyleReciver = ({} as any) as FillAndStrokeStyle;
 
 export const defaultSetting: { during: number; ease: EasingName } = {
   during: 300,
@@ -82,19 +80,6 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionEase?: EasingName;
   transitionDuration?: number;
   transitionDelay?: number;
-}
-
-export interface FillAndStrokeStyle {
-  fill: ColorValue;
-  stroke: ColorValue;
-  lineWidth: number;
-  hasFill: boolean;
-  hasStroke: boolean;
-  needFill: boolean;
-  needStroke: boolean;
-  opacity: number;
-  fillOpacity: number;
-  strokeOpacity: number;
 }
 
 // 可继承(不可跨级)
@@ -299,30 +284,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public hasStroke() {
     const stroke = this.getExtendAttr('stroke');
     return stroke && stroke !== 'none';
-  }
-
-  public getFillAndStrokeStyle(
-    receiver: FillAndStrokeStyle = defaultStyleReciver,
-  ): FillAndStrokeStyle {
-    const opacity = this.getComputedOpacity();
-    const fillOpacity = this.getExtendAttr('fillOpacity') * opacity;
-    const strokeOpacity = this.getExtendAttr('strokeOpacity') * opacity;
-    const lineWidth = this.getExtendAttr('lineWidth');
-    const stroke = this.getExtendAttr('stroke');
-    const fill = this.getExtendAttr('fill');
-    const hasFill = fill && fill !== 'none';
-    const hasStroke = stroke && stroke !== 'none' && lineWidth > 0;
-    receiver.fill = fill;
-    receiver.stroke = stroke;
-    receiver.opacity = opacity;
-    receiver.fillOpacity = fillOpacity;
-    receiver.strokeOpacity = strokeOpacity;
-    receiver.lineWidth = lineWidth;
-    receiver.hasFill = hasFill;
-    receiver.hasStroke = hasStroke;
-    receiver.needFill = hasFill && fillOpacity !== 0 && !isTransparent(fill);
-    receiver.needStroke = hasStroke && strokeOpacity !== 0 && !isTransparent(stroke);
-    return receiver as FillAndStrokeStyle;
   }
 
   public contains(child: Element): boolean {

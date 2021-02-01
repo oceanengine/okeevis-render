@@ -182,7 +182,7 @@ export default class CanvasPainter implements Painter {
     if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
-    styleHelper.setFontStyle(ctx, defaultCanvasContext);
+    styleHelper.setFontStyle(ctx, defaultCanvasContext.fontSize, defaultCanvasContext.fontFamily);
     styleHelper.setTextBaseline(ctx, defaultCanvasContext.textBaseline);
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
     parentList.forEach(current => {
@@ -215,7 +215,7 @@ export default class CanvasPainter implements Painter {
       ctx.scale(dpr, dpr);
     }
     // 改变默认的canvas上下文
-    styleHelper.setFontStyle(ctx, defaultCanvasContext);
+    styleHelper.setFontStyle(ctx, defaultCanvasContext.fontSize, defaultCanvasContext.fontFamily);
     styleHelper.setTextBaseline(ctx, defaultCanvasContext.textBaseline);
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
     // todo 初始化LineWidth = 0;
@@ -513,12 +513,7 @@ export default class CanvasPainter implements Painter {
       const _fontWeight = item.getExtendAttr('fontWeight');
       const _fontStyle = item.getExtendAttr('fontStyle');
       // tood gc optimize
-      styleHelper.setFontStyle(ctx, {
-        fontSize: _fontSize,
-        fontFamily: _fontFamily,
-        fontWeight: _fontWeight,
-        fontStyle: _fontStyle,
-      });
+      styleHelper.setFontStyle(ctx, _fontSize,_fontFamily,_fontWeight, _fontStyle);
     }
 
     if (textBaseline) {

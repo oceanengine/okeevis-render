@@ -1,5 +1,3 @@
-import {TextConf, } from '../shapes/Text';
-
 // todo 小程序下绘制时dpr是1:1(小程序会自动加上缩放效果), 但是resetTransform会导致被缩小
 export function resetTransform(ctx: CanvasRenderingContext2D): void {
   if (ctx.resetTransform) {
@@ -15,19 +13,27 @@ export function setLineWidth(ctx: CanvasRenderingContext2D, lineWidth: number) {
     ctx.setLineWidth(lineWidth);
   }
 }
-export function setFillStyle(ctx: CanvasRenderingContext2D, fill: string | CanvasGradient | CanvasPattern) {
+export function setFillStyle(
+  ctx: CanvasRenderingContext2D,
+  fill: string | CanvasGradient | CanvasPattern,
+) {
   if (!ctx.setFillStyle) {
     ctx.fillStyle = fill;
   } else {
     ctx.setFillStyle(fill);
   }
 }
-export function setFontStyle(ctx: CanvasRenderingContext2D, textStyle: TextConf): void {
-  const { fontFamily = 'sans-serif', fontSize = 12, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;
+export function setFontStyle(
+  ctx: CanvasRenderingContext2D,
+  fontSize = 12,
+  fontFamily = 'sans-serif',
+  fontWeight: string | number = 'normal',
+  fontStyle = 'normal',
+): void {
   if (!ctx.setFontSize) {
     ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
   } else {
-    ctx.setFontSize(textStyle.fontSize);
+    ctx.setFontSize(fontSize);
   }
 }
 export function setGlobalAlpha(ctx: CanvasRenderingContext2D, alpha: number): void {
@@ -58,7 +64,13 @@ export function setMiterLimit(ctx: CanvasRenderingContext2D, miterLimit: number)
     ctx.setMiterLimit(miterLimit);
   }
 }
-export function setShadow(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, blur: number, color: string): void {
+export function setShadow(
+  ctx: CanvasRenderingContext2D,
+  offsetX: number,
+  offsetY: number,
+  blur: number,
+  color: string,
+): void {
   if (!ctx.setShadow) {
     ctx.shadowColor = color;
     ctx.shadowBlur = blur;
@@ -68,7 +80,10 @@ export function setShadow(ctx: CanvasRenderingContext2D, offsetX: number, offset
     ctx.setShadow(offsetX, offsetY, blur, color);
   }
 }
-export function setStrokeStyle(ctx: CanvasRenderingContext2D, stroke: string | CanvasGradient | CanvasPattern): void {
+export function setStrokeStyle(
+  ctx: CanvasRenderingContext2D,
+  stroke: string | CanvasGradient | CanvasPattern,
+): void {
   if (!ctx.setStrokeStyle) {
     ctx.strokeStyle = stroke;
   } else {
@@ -82,7 +97,10 @@ export function setTextAlign(ctx: CanvasRenderingContext2D, textAlign: CanvasTex
     ctx.setTextAlign(textAlign);
   }
 }
-export function setTextBaseline(ctx: CanvasRenderingContext2D, textBaseline: CanvasTextBaseline): void {
+export function setTextBaseline(
+  ctx: CanvasRenderingContext2D,
+  textBaseline: CanvasTextBaseline,
+): void {
   if (!ctx.setTextBaseline) {
     ctx.textBaseline = textBaseline;
   } else {

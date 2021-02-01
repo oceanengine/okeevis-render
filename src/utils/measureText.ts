@@ -55,12 +55,12 @@ export  function measureText(text: string, textStyle: TextConf = {}, ctx: Canvas
 
 function initTextContext(ctx: CanvasRenderingContext2D, textStyle: TextConf = {}) {
   const { fontFamily = 'sans-serif', fontSize = 12, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;
-  styleHelper.setFontStyle(ctx, {
+  styleHelper.setFontStyle(ctx, 
+    fontSize,
     fontFamily,
     fontWeight,
-    fontSize,
     fontStyle,
-  })
+  )
 }
 function getCacheKey(text: string, textStyle: TextConf): string {
   const { fontFamily = 'sans-serif', fontSize = 10, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;
