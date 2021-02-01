@@ -476,9 +476,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   protected computClientBoundingRect(out: BBox): BBox {
     // todo gc optimize
     let { x, y, width, height } = this.getBBox();
-    if (width === 0 || height === 0) {
-      return {x: 0, y: 0, width: 0, height: 0};
-    }
     const hasStroke = this.hasStroke();
     const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
     const offsetLineWidth = (Math.sqrt(2) / 2) * lineWidth;
