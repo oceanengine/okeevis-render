@@ -250,9 +250,11 @@ export default class Path2D {
     const pathList = this._pathList;
     for (let i = 0; i < pathList.length; i++) {
       const { action, params } = pathList[i];
-      if (action === 'moveTo' && i !== 0) {
-        if (equalWithTolerance(endX, params[0]) && equalWithTolerance(endY, params[1])) {
-          mergeIndex.push(i);
+      if (action === 'moveTo') {
+        if (i !== 0) {
+          if (equalWithTolerance(endX, params[0]) && equalWithTolerance(endY, params[1])) {
+            mergeIndex.push(i);
+          }
         }
         prevMoveToParam = params as [number, number];
       } else if (action === 'lineTo') {
