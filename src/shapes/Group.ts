@@ -71,7 +71,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   protected computeBBox(): BBox {
     const bboxList = this.children()
       .filter(item => item.attr.display)
-      .map(child => child.getClientBoundingRect());
+      .map(child => child.getBoundingClientRect());
     return unionBBox(bboxList);
   }
 

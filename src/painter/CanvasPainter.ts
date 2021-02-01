@@ -584,7 +584,7 @@ export default class CanvasPainter implements Painter {
 
   private _brushBoundingBBox(item: Element, isClientBBox: boolean) {
     const ctx = this._ctx;
-    const bbox = isClientBBox ? item.getClientBoundingRect() : item.getBBox();
+    const bbox = isClientBBox ? item.getBoundingClientRect() : item.getBBox();
     ctx.save();
     if (isClientBBox || item.isGroup) {
       styleHelper.resetTransform(ctx);

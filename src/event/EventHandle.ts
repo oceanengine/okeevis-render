@@ -111,7 +111,7 @@ export default class EventHandle {
 
     // 过渡掉不在包围盒中的
     pickNodes = pickNodes.filter(
-      node => node.attr.display && inBBox(node.getClientBoundingRect(), x, y),
+      node => node.attr.display && inBBox(node.getBoundingClientRect(), x, y),
     );
 
     let geometryPickIndex: number = -1;

@@ -419,7 +419,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   // todo 计算boundRect同时计算dirtyRect
-  public getClientBoundingRect(): BBox {
+  public getBoundingClientRect(): BBox {
     if (this.attr.display === false) {
       return createZeroBBox();
     }
@@ -444,10 +444,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public getCurrentDirtyRect(): BBox {
     const shadowBlur = this.getExtendAttr('shadowBlur');
     if (shadowBlur === 0) {
-      return ceilBBox(this.getClientBoundingRect());
+      return ceilBBox(this.getBoundingClientRect());
     }
     // 计算当前dirtyRect
-    const { x, y, width, height } = this.getClientBoundingRect();
+    const { x, y, width, height } = this.getBoundingClientRect();
     // 暂不考虑miter尖角影响, 默认使用了bevel
     // const miterLimit = this.getExtendAttr('miterLimit');
     // const lineJoin = this.getExtendAttr('lineJoin');

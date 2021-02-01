@@ -231,7 +231,7 @@ export default class Render extends EventFul {
         : Date.now();
     const timeRemaining = 16 - (currentTime - now);
     if (timeRemaining > 5) {
-      this._rootGroup.getClientBoundingRect();
+      this._rootGroup.getBoundingClientRect();
     }
     requestAnimationFrame(this._onFrame);
     this._isOnframe = false;
