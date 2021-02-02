@@ -390,13 +390,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.attr.clip) {
       this._mountClip();
     }
-    if (this.attr.ref) {
-      this.attr.ref.current = this as Element<any>;
-    }
   }
 
   public clearDirty() {
     this._dirty = false;
+  }
+
+  public get childNodes(): Element[] {
+    return this.children();
   }
 
   public children(): Element[] {
@@ -525,9 +526,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
         clip.destroy();
       }
     }
+    if (key === 'ref' && newValue) {
+      (newValue as Ref<any>).current = this;
+    }
   }
 
   public mounted() {
+    if (!(this.parentNode && this.parentNode.ownerRender)) {
+      return;
+    }
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
     }
