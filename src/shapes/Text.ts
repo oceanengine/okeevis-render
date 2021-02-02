@@ -8,7 +8,7 @@ export interface TextConf extends CommonAttr {
   x?: number;
   y?: number;
   maxWidth?: number;
-  text?: string;
+  text?: string | number;
   fontSize?: number;
   fontWeight?: string | number;
   fontFamily?: string;
@@ -101,10 +101,11 @@ export default class Text extends Shape<TextConf> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { text } = this.attr;
+    const { text: _text } = this.attr;
     if (this._isEmpty) {
       return;
     }
+    const text = _text + '';
     const hasFill = this.hasFill();
     const hasStroke = this.hasStroke();
     
@@ -145,7 +146,8 @@ export default class Text extends Shape<TextConf> {
 
   protected measureText(): TextMetrics {
     const textStyle = this.getTextStyle();
-    return measureText(this.attr.text, textStyle);
+    const text = this._isEmpty ? '' : this.attr.text + '';
+    return measureText(text, textStyle);
   }
 
   public getTextStyle(): TextConf {
@@ -171,7 +173,7 @@ export default class Text extends Shape<TextConf> {
     let textHeight: number;
 
     if (!this.isMutiLine) {
-      textWidth = measureText(this.attr.text, textStyle).width;
+      textWidth = measureText(this.attr.text + '', textStyle).width;
       textHeight = lineHeight;
     } else {
       const inlineTextList = this._getInlineTextList();
@@ -246,12 +248,13 @@ export default class Text extends Shape<TextConf> {
   }
 
   private _getInlineTextList(): string[] {
-    const { text, truncate } = this.attr;
+    const { text: _text, truncate } = this.attr;
     const textStyle = this.getTextStyle();
     const { lineHeight } = textStyle;
-    if (text === '' || text === null || text === undefined) {
+    if (this._isEmpty) {
       return [];
     }
+    const text = _text + '';
     if (!truncate) {
       return text.split('\n');
     }

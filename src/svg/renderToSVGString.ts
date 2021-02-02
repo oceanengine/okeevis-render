@@ -65,7 +65,7 @@ function getNodeString(node: Element, stringBuffer: string[], isRoot = false) {
   }
 
   if (node.type === 'text') {
-    stringBuffer.push(node.attr.text);
+    stringBuffer.push(node.attr.text + '');
   }
 
   children && children.forEach(child => getNodeString(child, stringBuffer));

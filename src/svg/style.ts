@@ -120,7 +120,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   }
 
   if (fontFamily !== undefined) {
-    ret['font-size'] = fontFamily;
+    ret['font-family'] = fontFamily;
   }
 
   if (fontStyle !== undefined) {
