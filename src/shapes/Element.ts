@@ -529,6 +529,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (key === 'ref' && newValue) {
       (newValue as Ref<any>).current = this;
     }
+    if (key === 'lineWidth') {
+      this.dirtyClientBoundingRect();
+    }
   }
 
   public mounted() {
