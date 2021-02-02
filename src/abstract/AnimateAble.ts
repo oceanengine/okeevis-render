@@ -4,7 +4,7 @@ import {
 
 export interface AnimateConf {
   during ? : number;
-  ease ? : Function;
+  ease ? :   EasingName;
   delay ? : number;
   onFrame ? : Function;
   callback ? : Function;

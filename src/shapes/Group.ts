@@ -176,11 +176,14 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     if (element === this.firstChild) {
       this.firstChild = element.nextSibling;
     }
-    if (element.prevSibling) {
-      element.prevSibling.nextSibling = element.nextSibling;
+    if (element === this.lastChild) {
+      this.lastChild = element.prevSibling;
     }
     if (element.nextSibling) {
       element.nextSibling.prevSibling = element.prevSibling;
+    }
+    if (element.prevSibling) {
+      element.prevSibling.nextSibling = element.nextSibling;
     }
     element.prevSibling = null;
     element.nextSibling = null;

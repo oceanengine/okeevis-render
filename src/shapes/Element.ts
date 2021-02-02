@@ -127,8 +127,8 @@ const defaultTRansformConf: CommonAttr = {
   originY: 0,
   translateX: 0,
   translateY: 0,
-  scaleX: 0,
-  scaleY: 0,
+  scaleX: 1,
+  scaleY: 1,
   origin: [0, 0],
   position: [0, 0],
   scale: [0, 0],
@@ -650,9 +650,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         stopped: false,
         from: animateFromAttr as T,
         to: animateToAttr,
-        during: duringOrConf.during,
-        ease,
-        delay,
+       ...(defaultSetting as any),
         ...duringOrConf,
       });
     } else {
@@ -798,6 +796,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public translate(dx: number, dy: number) {
+    if (dx === 0 && dy === 0) {
+      return;
+    }
     this.dirty();
     this._baseMatrix = mat3.translate(mat3.create(), this._baseMatrix, [dx, dy]);
     this.dirtyAbsTransform();
