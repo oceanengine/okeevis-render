@@ -296,7 +296,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         prevElement.stopAllAnimation().animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
       }
     });
-
     result.added.forEach(index => {
       this.add(list[index]);
     });
@@ -358,7 +357,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   private _mountNode(item: T) {
-    item.ownerRender = this.ownerRender;
     item.parentNode = this;
     item.mounted();
     this.dirty(item);
@@ -380,6 +378,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     } else {
       // 中间节点
       item.prevSibling.nextSibling = item.nextSibling;
+      item.nextSibling.prevSibling = item.prevSibling;
       item.prevSibling = this.lastChild;
       this.lastChild.nextSibling = item;
       item.nextSibling = null;
