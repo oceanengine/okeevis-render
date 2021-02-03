@@ -228,11 +228,11 @@ export default class EventHandle {
       // todo 父元素也可以拖动
       if (event.type === 'mousedown' && nativeEvent.button !== 2) {
         const parentNodes = target.getAncestorNodes(true);
-        nativeEvent.preventDefault && nativeEvent.preventDefault();
         for (let i = 0; i < parentNodes.length; i++) {
           if (parentNodes[i].attr.draggable) {
             this._draggingTarget = parentNodes[i];
             this._dragStartMouse = { x, y };
+            nativeEvent.preventDefault && nativeEvent.preventDefault();
             break;
           }
         }
@@ -273,7 +273,7 @@ export default class EventHandle {
     }
 
     if (event.type === 'mousemove' || event.type === 'wheel') {
-      if (this.render.isBrowser()) {
+      if (this.render.isBrowser() && !this._eventOnly) {
         const cursor = this._draggingTarget
           ? this._draggingTarget.getExtendAttr('cursor')
           : target.getExtendAttr('cursor');
@@ -467,7 +467,7 @@ export default class EventHandle {
     // todo
     const { x, y } = this._getMousePosition(nativeEvent);
     const target = this.pickTarget(x, y);
-    if (this.render.isBrowser()) {
+    if (this.render.isBrowser() && !this._eventOnly) {
       const cursor = target.getExtendAttr('cursor');
       this.render.getDom().style.cursor = cursor;
     }
