@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { BBox, unionBBox, } from '../utils/bbox';
+import { BBox, unionBBox } from '../utils/bbox';
 import Path2D from '../geometry/Path2D';
 
 export interface CompoundPathConf extends CommonAttr {
@@ -19,8 +19,8 @@ export default class CompoundPath extends Shape<CompoundPathConf> {
   public getDefaultAttr(): CompoundPathConf {
     return {
       ...super.getDefaultAttr(),
-     shapes: [],
-     closePath: false,
+      shapes: [],
+      closePath: false,
     };
   }
 
@@ -48,11 +48,13 @@ export default class CompoundPath extends Shape<CompoundPathConf> {
   }
 
   protected computeBBox(): BBox {
+    if (!this.attr.pathData) {
+      return { x: 0, y: 0, width: 0, height: 0 };
+    }
     return this.attr.pathData.getPathBBox();
   }
 
-  public  pickByGPU(): boolean {
-    return false;
-  };
-  
+  public pickByGPU(): boolean {
+    return true;
+  }
 }
