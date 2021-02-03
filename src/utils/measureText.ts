@@ -19,7 +19,7 @@ function getDefaultContext(): CanvasRenderingContext2D {
   return defaultContext;
 }
 
-function getContext() {
+export function getContext() {
   return canvasContextPool.values().next().value || getDefaultContext();
 }
 

@@ -47,8 +47,6 @@ export default class Text extends Shape<TextConf> {
 
   public svgTagName = 'text';
 
-  public pickByGPU = false;
-
   public shapeKeys = shapeKeys;
 
   private get _isEmpty(): boolean {

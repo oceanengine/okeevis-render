@@ -15,8 +15,6 @@ const shapeKeys: Array<keyof LineConf> = ['x1', 'y1', 'x2', 'y2'];
 export default class Line extends Shape<LineConf> {
   public type = 'line';
 
-  public pickByGPU = false;
-
   public fillAble = false;
 
   public shapeKeys = shapeKeys;

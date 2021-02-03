@@ -6,8 +6,6 @@ export type PolygonConf = PolylineConf;
 export default class Polygon extends Polyline {
   public type = 'polygon';
 
-  public pickByGPU = true;
-
   public brush(ctx: CanvasRenderingContext2D) {
     super.brush(ctx);
     ctx.closePath();

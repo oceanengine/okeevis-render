@@ -28,8 +28,6 @@ const shapeKeys: Array<keyof SectorConf> = [
 export default class Sector extends Shape<SectorConf> {
   public type = 'sector';
 
-  public pickByGPU = false;
-
   public shapeKeys = shapeKeys;
 
   public getDefaultAttr(): SectorConf {

@@ -18,8 +18,6 @@ const shapeKeys: Array<keyof EllipseConf> = ['cx', 'cy', 'rx', 'ry'];
 export default class Circle extends Shape<EllipseConf> {
   public type = 'ellipse';
 
-  public pickByGPU = false;
-
   public shapeKeys = shapeKeys;
 
   public getDefaultAttr(): EllipseConf {

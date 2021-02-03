@@ -20,8 +20,6 @@ const shapeKeys: Array<keyof RectConf> = ['x', 'y', 'width', 'height'];
 export default class Rect extends Shape<RectConf> {
   public type = 'rect';
 
-  public pickByGPU = false;
-
   public shapeKeys = shapeKeys;
 
   public getDefaultAttr(): RectConf {

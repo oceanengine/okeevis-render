@@ -157,9 +157,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public nextSibling: Element;
 
   public ownerRender: Render | null;
-
-  public pickByGPU: boolean = true;
-
+ 
   public pickRGB: [number, number, number];
 
   public readonly shapeKeys: Array<keyof T> = [];
@@ -551,6 +549,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.pickRGB = null;
   }
 
+  public pickByGPU(): boolean {
+    return false;
+  };
+
+
   /**
    *
    * @param x inverted x
@@ -562,7 +565,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const lineWidth = this.getExtendAttr('lineWidth');
     return (
       (hasFill && this.isPointInFill(x, y)) || (hasStroke && this.isPointInStroke(x, y, lineWidth))
-    );
+    )
   }
 
   public isInClip(x: number, y: number): boolean {

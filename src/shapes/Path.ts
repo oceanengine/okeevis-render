@@ -12,6 +12,7 @@ const shapeKeys: Array<keyof PathConf> = ['pathData', 'brush'];
 export default class Path extends Shape<PathConf> {
   public type = 'path';
 
+
   public shapeKeys = shapeKeys;
 
   public static fromSvgPath(inputPath: string, attr?: PathConf): Path {
@@ -51,5 +52,9 @@ export default class Path extends Shape<PathConf> {
       attr.brush(path);
       attr.pathData = path;
     }
+  }
+
+  public pickByGPU(): boolean {
+    return true;
   }
 }

@@ -119,7 +119,7 @@ export default class EventHandle {
 
     for (let i = 0; i < pickNodes.length; i++) {
       const node = pickNodes[i];
-      if (node.pickByGPU) {
+      if (node.pickByGPU()) {
         continue;
       }
       const absTransform = node.getGlobalTransform();
@@ -134,7 +134,7 @@ export default class EventHandle {
       }
     }
 
-    const gpuPickNodes = pickNodes.filter(node => node.pickByGPU);
+    const gpuPickNodes = pickNodes.filter(node => node.pickByGPU());
     gpuPickNodes.forEach((item, index) => {
       // 颜色空间大约有40W个,基本够用.
       item.pickRGB = valueToRgb(index + 1);
@@ -154,7 +154,7 @@ export default class EventHandle {
 
       for (let i = 0; i < pickNodes.length; i++) {
         const node = pickNodes[i];
-        if (!node.pickByGPU) {
+        if (!node.pickByGPU()) {
           continue;
         }
         const [r, g, b] = node.pickRGB;

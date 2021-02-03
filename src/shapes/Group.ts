@@ -390,7 +390,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
     if (this.ownerRender?.renderer === 'svg') {
       const dom = (this.ownerRender.getPainter() as SVGPainter).findDOMNode(item);
-      dom.parentNode.appendChild(dom);
+      if (dom && dom.parentNode) {
+        dom.parentNode.appendChild(dom);
+      } else {
+        console.warn('dom not exist', item);
+      }
     }
   }
 }

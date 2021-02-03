@@ -19,8 +19,6 @@ export default class Image extends Shape<ImageConf> {
 
   public svgTagName = 'image';
 
-  public pickByGPU = false;
-
   public fillAble = false;
 
   public strokeAble = false;

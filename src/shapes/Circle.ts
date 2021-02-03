@@ -13,8 +13,6 @@ const shapeKeys: Array<keyof CircleConf> = ['cx', 'cy', 'radius'];
 export default class Circle extends Shape<CircleConf> {
   public type = 'circle';
 
-  public pickByGPU = false;
-
   public shapeKeys = shapeKeys;
   
   public getDefaultAttr(): CircleConf {
