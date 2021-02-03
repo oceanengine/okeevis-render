@@ -56,13 +56,16 @@ export default class EventHandle {
 
   private _prevTouchTarget: Record<number, Element> | null = null;
 
+  private _eventOnly: boolean;
+
   private _PixelPainter: CanvasPainter;
 
   private _lastMouseSyntheticTimestamp: number;
 
-  public constructor(render: Render) {
+  public constructor(render: Render, eventOnly: boolean = false) {
     this.render = render;
     this._PixelPainter = new CanvasPainter(render, true);
+    this._eventOnly = eventOnly;
     this._initEvents();
     this._onRenderDirty = lodash.throttle(this._onRenderDirty, AUTO_DETECT_THROTTLE);
   }
@@ -105,9 +108,9 @@ export default class EventHandle {
     const ignoreMute = true; // pointerevent none
     let target: Element;
     // 初步过滤掉不显示和不触发事件的元素
-    let pickNodes = this.render.getAllLeafNodes(ignoreInvisibleNodes, ignoreMute).reverse();
+    let pickNodes = this._getHandleGroup().getAllLeafNodes([], ignoreInvisibleNodes, ignoreMute).reverse();
 
-    this.render.getRoot().resetPickRGB();
+    this._getHandleGroup().resetPickRGB();
 
     // 过渡掉不在包围盒中的
     pickNodes = pickNodes.filter(
@@ -177,7 +180,7 @@ export default class EventHandle {
     }
 
     // console.timeEnd('pick');
-    return target || this.render.getRoot();
+    return target || this._getHandleGroup();
   }
 
   public dispose() {
@@ -219,7 +222,7 @@ export default class EventHandle {
     } else {
       event = new SyntheticMouseEvent(nativeEvent.type, mouseEventParam);
     }
-    this._dispatchSyntheticMouseEvent(event, target);
+    this._dispatchSyntheticEvent(event, target);
 
     if (event.type === 'mousedown' || event.type === 'mousemove') {
       // todo 父元素也可以拖动
@@ -245,12 +248,12 @@ export default class EventHandle {
           ...this._getDragParam(mouseEventParam),
         };
         const onDragEvent = new SyntheticDragEvent(eventType, dragParam);
-        this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
+        this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
         if (prevMouseTarget !== target) {
           const onDragLeaveEvent = new SyntheticDragEvent('dragleave', dragParam);
           const onDragOverEvent = new SyntheticDragEvent('dragover', dragParam);
-          this._dispatchSyntheticMouseEvent(onDragLeaveEvent, prevMouseTarget);
-          this._dispatchSyntheticMouseEvent(onDragOverEvent, target);
+          this._dispatchSyntheticEvent(onDragLeaveEvent, prevMouseTarget);
+          this._dispatchSyntheticEvent(onDragOverEvent, target);
         }
       }
     }
@@ -266,7 +269,7 @@ export default class EventHandle {
         ...this._getDragParam(mouseEventParam),
       };
       const dropEvent = new SyntheticDragEvent('drop', dragParam);
-      this._dispatchSyntheticMouseEvent(dropEvent, target);
+      this._dispatchSyntheticEvent(dropEvent, target);
     }
 
     if (event.type === 'mousemove' || event.type === 'wheel') {
@@ -279,8 +282,8 @@ export default class EventHandle {
       if (prevMouseTarget !== target) {
         const mouseoutEvent = new SyntheticMouseEvent('mouseout', event);
         const mouseoverEvent = new SyntheticMouseEvent('mouseover', event);
-        this._dispatchSyntheticMouseEvent(mouseoutEvent, prevMouseTarget);
-        this._dispatchSyntheticMouseEvent(mouseoverEvent, target);
+        this._dispatchSyntheticEvent(mouseoutEvent, prevMouseTarget);
+        this._dispatchSyntheticEvent(mouseoverEvent, target);
         const containSelf = true;
         const prevTargetParentNodes = prevMouseTarget
           ? prevMouseTarget.getAncestorNodes(containSelf)
@@ -292,7 +295,7 @@ export default class EventHandle {
               ...mouseEventParam,
               bubbles: false,
             });
-            this._dispatchSyntheticMouseEvent(mouseleaveEvent, prevNode);
+            this._dispatchSyntheticEvent(mouseleaveEvent, prevNode);
           }
         });
         currentTargetParentNodes.forEach(currentNode => {
@@ -301,7 +304,7 @@ export default class EventHandle {
               ...mouseEventParam,
               bubbles: false,
             });
-            this._dispatchSyntheticMouseEvent(mouseenterEvent, currentNode);
+            this._dispatchSyntheticEvent(mouseenterEvent, currentNode);
           }
         });
       }
@@ -346,7 +349,7 @@ export default class EventHandle {
 
     // todo 根节点只被冒泡触发一次
     touchEventParam.changedTouches.forEach(touch =>
-      this._dispatchSyntheticMouseEvent(event, touch.target),
+      this._dispatchSyntheticEvent(event, touch.target),
     );
 
     const dragEventParam: SyntheticDragEventParams = {
@@ -386,7 +389,7 @@ export default class EventHandle {
           ...this._dragStartMouse,
           ...this._getDragParam(this._findTouch(touchesList, dragStartTouchId)),
         } as any);
-        this._dispatchSyntheticMouseEvent(dragStartEvent, dragStartTarget);
+        this._dispatchSyntheticEvent(dragStartEvent, dragStartTarget);
       }
     }
 
@@ -401,7 +404,7 @@ export default class EventHandle {
           ...this._getDragParam(this._findTouch(touchesList, dragStartTouchId)),
         };
         const onDragEvent = new SyntheticDragEvent('drag', dragParam);
-        this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
+        this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
       }
       if (touch) {
         this._prevMousePosition = { x: touch.x, y: touch.y };
@@ -419,7 +422,7 @@ export default class EventHandle {
           ...this._getDragParam(touch),
         };
         const onDragEvent = new SyntheticDragEvent('dragend', dragParam);
-        this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
+        this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
         this._draggingTarget = null;
         this._dragStartTouchId = null;
         this._dragStartMouse = null;
@@ -435,7 +438,7 @@ export default class EventHandle {
   private _handleMouseLeave = (nativeEvent: WheelEvent) => {
     // todo
     const { x, y } = this._getMousePosition(nativeEvent);
-    const target = this._prevMouseTarget || this.render.getRoot();
+    const target = this._prevMouseTarget || this._getHandleGroup();
     const eventParam = {
       x,
       y,
@@ -449,14 +452,14 @@ export default class EventHandle {
     });
     this._prevMousePosition = null;
     this._prevMouseTarget = null;
-    this._dispatchSyntheticMouseEvent(mouseoutEvent, target);
+    this._dispatchSyntheticEvent(mouseoutEvent, target);
     const parentNodes = target.getAncestorNodes(true);
     parentNodes.forEach(node => {
       const mouseLeaveEvent: SyntheticMouseEvent = new SyntheticMouseEvent(
         'mouseleave',
         eventParam,
       );
-      this._dispatchSyntheticMouseEvent(mouseLeaveEvent, node);
+      this._dispatchSyntheticEvent(mouseLeaveEvent, node);
     });
   };
 
@@ -479,7 +482,7 @@ export default class EventHandle {
       ...eventParam,
       bubbles: true,
     });
-    this._dispatchSyntheticMouseEvent(mouseoverEvent, target);
+    this._dispatchSyntheticEvent(mouseoverEvent, target);
     // 触发当前对象的mouseover, mouseenter事件
     const parentNodes = target.getAncestorNodes(true);
     parentNodes.forEach(node => {
@@ -487,7 +490,7 @@ export default class EventHandle {
         ...eventParam,
         bubbles: true,
       });
-      this._dispatchSyntheticMouseEvent(mouseEnterEvent, node);
+      this._dispatchSyntheticEvent(mouseEnterEvent, node);
     });
     this._prevMousePosition = { x, y };
     this._prevMouseTarget = target;
@@ -507,7 +510,7 @@ export default class EventHandle {
         ...mouseEventParam,
         ...this._getDragParam(mouseEventParam),
       });
-      this._dispatchSyntheticMouseEvent(onDragEvent, this._draggingTarget);
+      this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
     }
     this._draggingTarget = null;
   };
@@ -522,6 +525,10 @@ export default class EventHandle {
       const { clientX, clientY } = event;
       return { x: clientX - left, y: clientY - top };
     }
+  }
+
+  private _getHandleGroup() {
+    return !this._eventOnly ? this.render.getRoot() : this.render.getEventGroup();
   }
 
   private _detachEvents() {
@@ -568,11 +575,12 @@ export default class EventHandle {
     document.addEventListener('mouseup', this._handleDocumentMouseUp);
   }
 
-  private _dispatchSyntheticMouseEvent(event: SyntheticEvent, target: Element, count = 0) {
+  private _dispatchSyntheticEvent(event: SyntheticEvent, target: Element, count = 0) {
     if (!target) {
       return;
     }
     const isRoot = this.render.getRoot() === target;
+
     if (isRoot) {
       this.render.dispatch(event.type, event);
     }
@@ -610,7 +618,7 @@ export default class EventHandle {
 
     if (bubbles && !isPropagationStopped && target.parentNode) {
       count++;
-      this._dispatchSyntheticMouseEvent(event, (target.parentNode as any) as Element, count);
+      this._dispatchSyntheticEvent(event, (target.parentNode as any) as Element, count);
     }
     // todo 拖动行为
   }

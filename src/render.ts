@@ -54,11 +54,15 @@ export default class Render extends EventFul {
 
   private _rootGroup: Group;
 
+  private _eventGroop: Group = new Group();
+
   private _dirtyElements: ES6Set<Element> = new ES6Set();
 
   private _painter: Painter;
 
   private _eventHandle: EventHandle;
+
+  private _eventElementHandle: EventHandle;
 
   private _disposed: boolean = false;
 
@@ -90,6 +94,7 @@ export default class Render extends EventFul {
       this._height = option.height || 150;
     }
     this._eventHandle = new EventHandle(this);
+    this._eventElementHandle = new EventHandle(this, true)
     this._loop();
   }
 
@@ -156,12 +161,24 @@ export default class Render extends EventFul {
     this._rootGroup.updateAll(elements);
   }
 
+  public addEventElement(element: Element) {
+    this._eventGroop.add(element);
+  }
+
+  public removeEventElement(element: Element) {
+    this._eventGroop.remove(element);
+  }
+
   public getDom(): HTMLDivElement | HTMLCanvasElement {
     return this._dom;
   }
 
   public getRoot(): Group {
     return this._rootGroup;
+  }
+
+  public getEventGroup() {
+    return this._eventGroop;
   }
 
   public getDirtyElements(): ES6Set<Element> {
@@ -185,14 +202,11 @@ export default class Render extends EventFul {
       this._painter.dispose();
     }
     this._eventHandle.dispose();
+    this._eventElementHandle.dispose();
     this._rootGroup.clear();
     this._rootGroup = null;
     this._dom = undefined;
     this._disposed = true;
-  }
-
-  public getAllLeafNodes(ignoreInvisible = false, ignoreMute = false): Element[] {
-    return this._rootGroup.getAllLeafNodes([], ignoreInvisible, ignoreMute);
   }
 
   public getAllChunks(): ChunkItem[] {
@@ -223,6 +237,7 @@ export default class Render extends EventFul {
     this._rootGroup.onFrame(now);
     this._painter?.onFrame(now);
     this._eventHandle.onFrame();
+    this._eventElementHandle.onFrame();
     this._needUpdate = false;
     this._dirtyElements.clear();
     const currentTime =
