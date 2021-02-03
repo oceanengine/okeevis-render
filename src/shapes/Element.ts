@@ -353,11 +353,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public beforeDirty(leafNodeSize: number) {
     const maxDirtyLimit = this.ownerRender.maxDirtyRects;
-    if (this.ownerRender.getDirtyElements().size > maxDirtyLimit || leafNodeSize > maxDirtyLimit) {
+    if (!this.ownerRender.enableDirtyRect || this.ownerRender.getDirtyElements().size > maxDirtyLimit || leafNodeSize > maxDirtyLimit) {
       this._dirtyRect = undefined;
       return;
     }
-    if (!this._dirty && this._clientBoundingRect) {
+    if (!this._dirty && this._lastFrameTime) {
       this._dirtyRect = this.getCurrentDirtyRect();
     }
   }
@@ -539,7 +539,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
     }
-    if (this.ownerRender && this.attr.onMounted) {
+    if (this.attr.onMounted) {
       this.attr.onMounted();
     }
     this._mountClip();
