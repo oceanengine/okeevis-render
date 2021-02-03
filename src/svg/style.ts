@@ -44,6 +44,7 @@ export function getSVGRootAttributes(width: number, height: number): any {
   return {
     width,
     height,
+    fill: 'none',
     xmlns: SVG_NAMESPACE,
     'xmlns:xlink': XLINK_NAMESPACE,
     style: `user-select: none;cursor: default;font-size:${
@@ -57,6 +58,11 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     fill,
     stroke,
     lineWidth,
+    lineDash,
+    lineDashOffset,
+    lineCap,
+    miterLimit,
+    lineJoin,
     opacity,
     fillOpacity,
     strokeOpacity,
@@ -125,6 +131,26 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
 
   if (fontStyle !== undefined) {
     ret['font-style'] = fontStyle;
+  }
+
+  if (lineDash) {
+    ret['stroke-dasharray'] = lineDash.join(' ');
+  }
+
+  if (lineDashOffset >= 0) {
+    ret['stroke-dashoffset'] = lineDashOffset +'';
+  }
+
+  if (lineCap) {
+    ret['stroke-linecap'] = lineCap;
+  }
+
+  if (lineJoin) {
+    ret['stroke-linjoin'] = lineJoin;
+  }
+
+  if (miterLimit) {
+    ret['stroke-miterlimit'] = miterLimit + '';
   }
 
   return ret;
