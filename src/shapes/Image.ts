@@ -71,6 +71,7 @@ export default class Image extends Shape<ImageConf> {
       width: this.attr.width,
       height: this.attr.height,
       "xlink:href": this.attr.src,
+      'preserveAspectRatio': 'none',
     }
   }
 
