@@ -157,6 +157,10 @@ export default class Render extends EventFul {
     this._rootGroup.remove(element);
   }
 
+  public clear() {
+    this._rootGroup.clear();
+  }
+
   public updateAll(elements: Element[]) {
     this._rootGroup.updateAll(elements);
   }
@@ -204,6 +208,7 @@ export default class Render extends EventFul {
     this._eventHandle.dispose();
     this._eventElementHandle.dispose();
     this._rootGroup.clear();
+    this._eventGroop.clear();
     this._rootGroup = null;
     this._dom = undefined;
     this._disposed = true;
