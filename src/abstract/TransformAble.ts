@@ -10,6 +10,7 @@ export interface TransformConf {
   position?: [number, number];
   scale?: [number, number];
   origin?: [number, number];
+  matrix?: mat3;
 }
 
 export default abstract class TransformAble {

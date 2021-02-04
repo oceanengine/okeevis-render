@@ -118,6 +118,7 @@ const transformKeys: Array<keyof CommonAttr> = [
   'translateY',
   'originX',
   'originY',
+  'matrix',
 ];
 
 const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
@@ -834,10 +835,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
       scaleY = 1,
       translateX = 0,
       translateY = 0,
+      matrix,
     } = this.attr;
     (translateX !== 0 || translateY !== 0) && mat3.translate(out, out, [translateX, translateY]);
     rotation !== 0 && transformUtils.rotate(out, rotation, originX, originY);
     (scaleX !== 1 || scaleY !== 1) && transformUtils.scale(out, scaleX, scaleY, originX, originY);
+    if (matrix) {
+      mat3.multiply(out, out, matrix);
+    }
     return out;
   }
 
