@@ -71,7 +71,11 @@ export default class EventHandle {
   }
 
   public onFrame() {
-    if (this.render.needUpdate() && this._prevMousePosition && (Date.now() - this._lastMouseSyntheticTimestamp) > AUTO_DETECT_THROTTLE) {
+    if (
+      this.render.needUpdate() &&
+      this._prevMousePosition &&
+      Date.now() - this._lastMouseSyntheticTimestamp > AUTO_DETECT_THROTTLE
+    ) {
       this._onRenderDirty();
     }
   }
@@ -108,7 +112,9 @@ export default class EventHandle {
     const ignoreMute = true; // pointerevent none
     let target: Element;
     // 初步过滤掉不显示和不触发事件的元素
-    let pickNodes = this._getHandleGroup().getAllLeafNodes([], ignoreInvisibleNodes, ignoreMute).reverse();
+    let pickNodes = this._getHandleGroup()
+      .getAllLeafNodes([], ignoreInvisibleNodes, ignoreMute)
+      .reverse();
 
     this._getHandleGroup().resetPickRGB();
 
@@ -608,6 +614,7 @@ export default class EventHandle {
       // todo 如果脏数据超过了脏限制,不要实时刷新
       if (
         this.render.renderer === 'canvas' &&
+        !this._eventOnly &&
         !(this.render.getPainter() as CanvasPainter).isFullPaintNextFrame()
       ) {
         this.render.getPainter().onFrame();
