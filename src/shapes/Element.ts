@@ -344,6 +344,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this;
   }
 
+  public show() {
+    this.setAttr('display', true as any);
+  }
+
+  public hide() {
+    this.setAttr('display', false as any);
+  }
+
   public get isClip(): boolean {
     return this.ownerRender && !this.parentNode;
   }
