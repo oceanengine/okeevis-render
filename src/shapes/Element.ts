@@ -9,7 +9,7 @@ import easingFunctions, { EasingName } from '../animate/ease';
 import { interpolate } from '../interpolate';
 import interpolatePath from '../interpolate/interpolatePath';
 import interpolateColor from '../interpolate/interpolateColor';
-import TransformAble, { TransformConf } from '../abstract/TransformAble';
+import { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, { ShapeConf } from './Shape';
 import * as mat3 from '../../js/mat3';
@@ -138,7 +138,7 @@ const defaultTRansformConf: CommonAttr = {
 let nodeId = 1;
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful
-  implements AnimateAble<T>, TransformAble {
+  implements AnimateAble<T> {
   public id: number;
 
   public attr: T & CommonAttr = {} as T;
@@ -183,13 +183,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _absTransformDirty: boolean = true; // 自身或祖先矩阵变化
 
-  private _baseMatrix: mat3 = IDENTRY_MATRIX;
-
   private _clientBoundingRect: BBox;
 
   private _clientBoundingRectDirty: boolean = true;
 
   private _dirtyRect: BBox;
+
+  private _dragOffset: [number, number] = [0, 0];
 
   private _lastFrameTime: number;
 
@@ -618,6 +618,30 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.removeAllListeners();
   }
 
+  public getDragOffset(): [number, number] {
+    return this._dragOffset;
+  }
+
+  public setDragOffset(x: number, y: number) {
+    if (this._dragOffset[0] === x && this._dragOffset[1] === y) {
+      return;
+    }
+    this._dragOffset[0] = x;
+    this._dragOffset[1] = y;
+    this.dirty();
+    this.dirtyGlobalTransform();
+  }
+
+  public dragMoveBy(dx: number, dy: number) {
+    if (dx === 0 && dy === 0) {
+      return;
+    }
+    this._dragOffset[0] += dx;
+    this._dragOffset[1] += dy;
+    this.dirty();
+    this.dirtyGlobalTransform();
+  }
+
   /* ************ AnimateAble Begin ******************* */
 
   public animateTo(
@@ -775,49 +799,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._transform;
   }
 
-  public getBaseTransform(): mat3 {
-    return this._baseMatrix;
-  }
-
   public getGlobalTransform(): mat3 {
     if (!this._absTransform || this._absTransformDirty) {
       this._absTransform = this._computeGlobalTransform();
       this._absTransformDirty = false;
     }
     return this._absTransform;
-  }
-
-  public resetTransform() {
-    this.dirty();
-    this._baseMatrix = mat3.create();
-    this.dirtyAbsTransform();
-  }
-
-  public setBaseTransform(matrix: mat3) {
-    this.dirty();
-    this._baseMatrix = matrix;
-    this.dirtyAbsTransform();
-  }
-
-  public translate(dx: number, dy: number) {
-    if (dx === 0 && dy === 0) {
-      return;
-    }
-    this.dirty();
-    this._baseMatrix = mat3.translate(mat3.create(), this._baseMatrix, [dx, dy]);
-    this.dirtyAbsTransform();
-  }
-
-  public scale(sx: number, sy: number = sx) {
-    this.dirty();
-    this._baseMatrix = mat3.scale(mat3.create(), this._baseMatrix, [sx, sy]);
-    this.dirtyAbsTransform();
-  }
-
-  public rotate(rad: number) {
-    this.dirty();
-    this._baseMatrix = mat3.rotate(mat3.create(), this._baseMatrix, rad);
-    this.dirtyAbsTransform();
   }
 
   public dirtyClientBoundingRect() {
@@ -848,10 +835,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public dirtyTransform() {
     this._transformDirty = true;
-    this.dirtyAbsTransform();
+    this.dirtyGlobalTransform();
   }
 
-  public dirtyAbsTransform() {
+  public dirtyGlobalTransform() {
     this._absTransformDirty = true;
     this.dirtyClientBoundingRect();
     if (this.ownerRender && this.ownerRender.renderer === 'svg') {
@@ -875,7 +862,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const parentTransform = this.parentNode ? this.parentNode.getGlobalTransform() : IDENTRY_MATRIX;
     const selfTransform = this.getTransform();
     const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.create();
-    mat3.multiply(out, this._baseMatrix, parentTransform);
-    return mat3.multiply(out, out, selfTransform);
+    const [dx, dy] = this._dragOffset;
+    if (dx !== 0 || dy !== 0) {
+      mat3.translate(out, out,this._dragOffset);
+    }
+    if (!mat3.exactEquals(parentTransform, IDENTRY_MATRIX)) {
+      mat3.multiply(out, out, parentTransform);
+    }
+    if (!mat3.exactEquals(selfTransform, IDENTRY_MATRIX)) {
+      mat3.multiply(out, out, selfTransform);
+    }
+    return out;
   }
 }

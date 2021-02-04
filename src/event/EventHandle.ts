@@ -604,7 +604,7 @@ export default class EventHandle {
         dy = offset.y;
       }
 
-      target.translate(dx, dy);
+      target.dragMoveBy(dx, dy);
       // todo 如果脏数据超过了脏限制,不要实时刷新
       if (
         this.render.renderer === 'canvas' &&

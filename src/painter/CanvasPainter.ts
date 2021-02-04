@@ -409,9 +409,10 @@ export default class CanvasPainter implements Painter {
   protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, computedFill: ColorValue, computedStroke: ColorValue, fillOpacity: number, strokeOpacity: number, lineWidth: number) {
     const { clip, lineCap, lineJoin, miterLimit, stroke, fill,  fontSize, fontFamily, fontWeight, fontStyle, fontVariant, textBaseline, textAlign, blendMode, lineDashOffset, shadowBlur, shadowOffsetX, shadowOffsetY, shadowColor, lineDash, } = item.attr;
     const selfMatrix = item.getTransform();
-    const baseMatrix = item.getBaseTransform();
-    if (baseMatrix !== IDENTRY_MATRIX || selfMatrix !== IDENTRY_MATRIX) {
-      if (baseMatrix === IDENTRY_MATRIX) {
+    const dragOffset = item.getDragOffset();
+    const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
+    if (hasDrag || selfMatrix !== IDENTRY_MATRIX) {
+      if (!hasDrag) {
         ctx.transform(
           selfMatrix[0],
           selfMatrix[1],
@@ -565,8 +566,9 @@ export default class CanvasPainter implements Painter {
     if (fillOpacity !== 1 || strokeOpacity !== 1) {
       return true;
     }
-
-    if (item.getBaseTransform() !== IDENTRY_MATRIX || item.getTransform() !== IDENTRY_MATRIX) {
+    const dragOffset = item.getDragOffset();
+    const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
+    if (hasDrag || item.getTransform() !== IDENTRY_MATRIX) {
       return true;
     }
 

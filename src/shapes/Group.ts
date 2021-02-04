@@ -82,12 +82,12 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public dirtyTransform() {
     super.dirtyTransform();
-    this.eachChild(child => child.dirtyAbsTransform());
+    this.eachChild(child => child.dirtyGlobalTransform());
   }
 
-  public dirtyAbsTransform() {
-    super.dirtyAbsTransform();
-    this.eachChild(child => child.dirtyAbsTransform());
+  public dirtyGlobalTransform() {
+    super.dirtyGlobalTransform();
+    this.eachChild(child => child.dirtyGlobalTransform());
   }
 
   public add(item: T): this {
@@ -290,7 +290,8 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         ((prevElement as unknown) as Group).replaceChunks(chunks);
       }
       // todo clone matrix
-      prevElement.setBaseTransform(nextElement.getBaseTransform());
+      const dragOffset = nextElement.getDragOffset();
+      prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
       const {transitionDuration = defaultSetting.during, transitionEase = defaultSetting.ease, transitionProperty = 'all', transitionDelay = 0 } = nextElement.attr;
       if (transitionProperty === 'none' || transitionProperty.length === 0) {
         prevElement.setAttr(nextElement.attr);
