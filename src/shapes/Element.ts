@@ -189,7 +189,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _dirtyRect: BBox;
 
-  private _dragOffset: [number, number] = [0, 0];
+  private _dragOffset: [number, number] = createVec2();
 
   private _lastFrameTime: number;
 
