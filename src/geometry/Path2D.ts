@@ -231,6 +231,7 @@ export default class Path2D {
         points = points.concat(getActionKeyPoints(action, params));
       }
     }
+    const filterZero = false;
     return unionBBox([
       polygonBBox(
         points.map(vec2 => {
@@ -239,7 +240,7 @@ export default class Path2D {
         }),
       ),
       ...bboxList,
-    ]);
+    ], filterZero);
   }
 
   public compressMoveToCommand() {

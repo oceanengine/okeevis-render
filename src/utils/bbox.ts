@@ -51,8 +51,10 @@ export function getOffsetBBox(bbox: BBox, offset: number): BBox {
   };
 }
 
-export function unionBBox(bboxList: BBox[]): BBox {
-  bboxList = bboxList.filter(box => box.width > 0 && box.height > 0);
+export function unionBBox(bboxList: BBox[], filterZero = true): BBox {
+  if (filterZero) {
+    bboxList = bboxList.filter(box => box.width > 0 && box.height > 0);
+  }
   if (bboxList.length === 0) {
     return { x: 0, y: 0, width: 0, height: 0 };
   }
@@ -62,7 +64,7 @@ export function unionBBox(bboxList: BBox[]): BBox {
   let maxY = Number.NEGATIVE_INFINITY;
   for (let i = 0; i < bboxList.length; i++) {
     const box = bboxList[i];
-    if (box.width === 0 || box.height === 0) {
+    if ((box.width === 0 || box.height === 0) && filterZero) {
       continue;
     }
     minX = Math.min(box.x, minX);
