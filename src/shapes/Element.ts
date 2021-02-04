@@ -386,7 +386,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         }
       }
     }
-    if (this.attr.clip) {
+    if (this.attr.clip && this.ownerRender) {
       this._mountClip();
     }
   }
@@ -519,11 +519,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.shapeKeys.indexOf(key) !== -1) {
       this.dirtyBBox();
     }
-    if (key === 'clip' && this.attr.clip) {
-      const clip = this.getClipElement();
-      if (!clip.parentNode) {
-        clip.destroy();
-      }
+    // if (key === 'clip' && this.attr.clip) {
+    //   const clip = this.getClipElement();
+    //   if (!clip.parentNode) {
+    //     clip.destroy();
+    //   }
+    // }
+    if (key === 'clip' && this.ownerRender) {
+      this._mountClip();
     }
     if (key === 'ref' && newValue) {
       (newValue as Ref<any>).current = this;
@@ -853,7 +856,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _mountClip() {
     const clip = this.getClipElement();
-    if (clip) {
+    if (clip && this.ownerRender) {
       clip.ownerRender = this.ownerRender;
     }
   }
