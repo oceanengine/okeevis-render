@@ -424,7 +424,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return createZeroBBox();
     }
     if (!this._clientBoundingRect || this._clientBoundingRectDirty) {
-      this._clientBoundingRect = this.computClientBoundingRect(
+      this._clientBoundingRect = this.computeBoundingClientRect(
         this._clientBoundingRect || createZeroBBox(),
       );
       this._clientBoundingRectDirty = false;
@@ -473,7 +473,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return getSVGStyleAttributes(this as any);
   }
 
-  protected computClientBoundingRect(out: BBox): BBox {
+  protected computeBoundingClientRect(out: BBox): BBox {
     // todo gc optimize
     let { x, y, width, height } = this.getBBox();
     const hasStroke = this.hasStroke();

@@ -55,7 +55,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return [...super.getAnimationKeys(), 'fontSize'];
   }
 
-  public computClientBoundingRect(): BBox {
+  public computeBoundingClientRect(): BBox {
     return this.getBBox();
   }
 
