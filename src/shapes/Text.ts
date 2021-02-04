@@ -233,16 +233,19 @@ export default class Text extends Shape<TextConf> {
       anchor = 'middle';
     }
 
-    return {
+    const ret =  {
       ...super.getSvgAttributes(),
       x: this.attr.x,
       y: this.attr.y,
       dy,
-      textLength: this.attr.maxWidth,
       'dominant-baseline': 'middle',
       'text-anchor': anchor,
       'paint-order': 'stroke',
     };
+    if (this.attr.maxWidth > 0) {
+      ret.textLength = this.attr.maxWidth;
+    }
+    return ret;
   }
 
   private _getInlineTextList(): string[] {
