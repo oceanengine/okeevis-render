@@ -263,7 +263,7 @@ export default class Text extends Shape<TextConf> {
     const { outerWidth, outerHeight, ellipse = '...' } = truncate;
     const ellipseWidth = measureText(ellipse, textStyle).width;
 
-    if (outerHeight && outerHeight < lineHeight) {
+    if (lodash.isNumber(outerHeight) && outerHeight < lineHeight) {
       return [];
     }
 
@@ -312,6 +312,9 @@ export default class Text extends Shape<TextConf> {
         rowLetterWidthList.length = 0;
         rowLetterWidthList.push(letterWidth);
       }
+    }
+    if (this.id === 231) {
+      debugger
     }
     return rowTextList;
   }
