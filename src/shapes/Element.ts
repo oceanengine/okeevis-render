@@ -147,17 +147,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public svgTagName: string = 'path';
 
-  public parentNode: Group | null;
+  public parentNode: Group | null = null;
 
-  public firstChild: Element;
+  public firstChild: Element = null;
 
-  public lastChild: Element;
+  public lastChild: Element = null;
 
-  public prevSibling: Element;
+  public prevSibling: Element = null;
 
-  public nextSibling: Element;
+  public nextSibling: Element = null;
 
-  public ownerRender: Render | null;
+  public ownerRender: Render | null = null;
  
   public pickRGB: [number, number, number];
 

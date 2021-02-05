@@ -94,6 +94,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     if (!item) {
       return;
     }
+
     if (item.parentNode === this) {
       this._moveToTail(item);
       item.dirty();
@@ -106,6 +107,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       this.lastChild.nextSibling = item;
       this.lastChild = item;
     }
+    item.nextSibling = null;
     this._length += 1;
     this._mountNode(item);
     return this;
@@ -171,6 +173,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public remove(element: T) {
     if (element.parentNode !== this) {
+      console.warn('remove component not child of this group');
       return;
     }
     if (element === this.firstChild) {
@@ -253,7 +256,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
     const result = diff(prevList, list, (item, index) => {
       const attr = item.attr;
-      const key = attr.key ? item.type + attr.key : `auto-key-${item.type}-${index}`;
+      const key = attr.key ? item.type +  attr.key : `auto-key-${item.type}-${index}`;
       return key;
     });
 
@@ -277,10 +280,11 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     result.maintained.forEach(([from, to]) => {
       const prevElement = prevList[from];
       const nextElement = list[to];
-      // 相同实例
+      
       if (prevElement === nextElement) {
         return;
       }
+     
       if (nextElement.attr.ref) {
         nextElement.attr.ref.current = prevElement;
       }
