@@ -205,6 +205,7 @@ export default class Render extends EventFul {
       removeContext(this._painter.getContext());
       this._painter.dispose();
     }
+    this.removeAllListeners();
     this._eventHandle.dispose();
     this._eventElementHandle.dispose();
     this._rootGroup.clear();
