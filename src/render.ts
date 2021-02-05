@@ -38,6 +38,8 @@ export default class Render extends EventFul {
 
   public scaleByDprBeforePaint: boolean = true;
 
+  public eventListener: Function;
+
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
   private _width: number;
@@ -233,6 +235,12 @@ export default class Render extends EventFul {
 
   public getEventHandle(): EventHandle {
     return this._eventHandle;
+  }
+
+  protected onEvent(type: string, ...params: any[]) {
+   if (this.eventListener) {
+     this.eventListener.apply(null, params);
+   }
   }
 
   private _onFrame = (now?: number) => {
