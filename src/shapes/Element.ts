@@ -167,9 +167,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public strokeAble: boolean = true;
 
-  public needFill: boolean ;
+  public needFill: boolean = false;
   
-  public needStroke: boolean;
+  public needStroke: boolean = false;
 
   private _dirty: boolean = true;
 
