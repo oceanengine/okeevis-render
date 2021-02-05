@@ -222,6 +222,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       'scaleY',
       'originX',
       'originY',
+      'matrix',
       'shadowColor',
       'shadowBlur',
       'shadowOffsetX',
