@@ -259,6 +259,8 @@ export default class CanvasPainter implements Painter {
     const hasStroke = stroke && stroke !== 'none' && lineWidth > 0;
     const needFill = hasFill && fillOpacity !== 0 && !isTransparent(fill);
     const needStroke = hasStroke && strokeOpacity !== 0 && !isTransparent(stroke);
+    item.needFill = needFill;
+    item.needStroke = needStroke;
 
     // item.getFillAndStrokeStyle(renderingContext);
     // if (isInBatch) {
@@ -447,7 +449,7 @@ export default class CanvasPainter implements Painter {
       ctx.clip();
     }
 
-    if (item.attr.lineWidth >= 0) {
+    if (item.attr.lineWidth > 0) {
       styleHelper.setLineWidth(ctx, lineWidth);
     }
 

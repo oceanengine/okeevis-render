@@ -104,18 +104,17 @@ export default class Text extends Shape<TextConf> {
       return;
     }
     const text = _text + '';
-    const hasFill = this.hasFill();
-    const hasStroke = this.hasStroke();
-    
+    const { needFill, needStroke } = this;
+
     if (!this.isMutiLine) {
-      if (hasStroke) {
+      if (needStroke) {
         if (this.attr.maxWidth > 0) {
           ctx.strokeText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
         } else {
           ctx.strokeText(text, this.attr.x, this.attr.y);
         }
       }
-      if (hasFill) {
+      if (needFill) {
         if (this.attr.maxWidth > 0) {
           ctx.fillText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
         } else {
@@ -125,14 +124,14 @@ export default class Text extends Shape<TextConf> {
       return;
     }
     this.eachSpanList((rowText, x, y) => {
-      if (hasStroke) {
+      if (needStroke) {
         if (this.attr.maxWidth > 0) {
-         ctx.strokeText(rowText, x, y, this.attr.maxWidth);
+          ctx.strokeText(rowText, x, y, this.attr.maxWidth);
         } else {
           ctx.strokeText(rowText, x, y);
         }
       }
-      if (hasFill) {
+      if (needFill) {
         if (this.attr.maxWidth > 0) {
           ctx.fillText(rowText, x, y, this.attr.maxWidth);
         } else {
@@ -233,7 +232,7 @@ export default class Text extends Shape<TextConf> {
       anchor = 'middle';
     }
 
-    const ret =  {
+    const ret = {
       ...super.getSvgAttributes(),
       x: this.attr.x,
       y: this.attr.y,

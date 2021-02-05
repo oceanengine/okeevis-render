@@ -167,6 +167,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public strokeAble: boolean = true;
 
+  public needFill: boolean ;
+  
+  public needStroke: boolean;
+
   private _dirty: boolean = true;
 
   private _animations: AnimateOption<T>[] = [];
