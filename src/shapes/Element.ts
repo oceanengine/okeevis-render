@@ -33,6 +33,7 @@ const reuseBBoxVectors: Vec2[] = [createVec2(), createVec2(), createVec2(), crea
 export interface BaseAttr extends TransformConf, EventConf {
   key?: string | number;
   ref?: Ref<Element>;
+  data?: any;
   display?: boolean;
   // 已废弃属性
   zIndex?: number;
