@@ -241,7 +241,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     } as T;
   }
 
-  protected onEvent = (type: string, ...params: any[]) => {
+  protected onEvent(type: string, ...params: any[]) {
     const eventKey = Object.keys(this.attr).filter(
       key => key.toLowerCase() === 'on' + type,
     )[0] as keyof EventConf;

@@ -239,7 +239,7 @@ export default class Render extends EventFul {
 
   protected onEvent(type: string, ...params: any[]) {
    if (this.eventListener) {
-     this.eventListener.apply(null, params);
+     this.eventListener.call(null, type, params);
    }
   }
 

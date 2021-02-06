@@ -28,7 +28,7 @@ export default class EventFul {
   public dispatch(type: string, ...args:any[]): void {
     const listenerList = this._eventListeners[type] || [];
     listenerList.forEach(listener => listener.apply(null, args));
-    this.onEvent.apply(null, [type, ...args]);
+    this.onEvent.apply(this, [type, ...args]);
   }
 
   public removeAllListeners() {
