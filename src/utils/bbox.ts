@@ -26,7 +26,7 @@ export function ceilBBox(box: BBox): BBox {
   }
 }
 
-export function inBBox( bbox: BBox, x: number, y: number, lineWidth = 0): boolean {
+export function inBBox( bbox: BBox, x: number, y: number, lineWidth = 1): boolean {
   return x >= bbox.x - lineWidth / 2 && x <= bbox.x + bbox.width + lineWidth / 2 && y >= bbox.y  - lineWidth / 2 && y <= bbox.y + bbox.height + lineWidth / 2;
 }
 
