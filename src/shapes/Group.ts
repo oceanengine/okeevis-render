@@ -90,7 +90,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this.eachChild(child => child.dirtyGlobalTransform());
   }
 
-  public add(item: T): this {
+  public add(item: T, dirty: boolean = true): this {
     if (!item) {
       return;
     }
@@ -109,7 +109,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     }
     item.nextSibling = null;
     this._length += 1;
-    this._mountNode(item);
+    this._mountNode(item, dirty);
     return this;
   }
 
@@ -168,7 +168,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public mountChunk(chunkItems: T[]) {
     this._chunks = this._chunks.filter(chunk => chunk !== chunkItems);
-    chunkItems.forEach(item => this.add(item));
+    chunkItems.forEach(item => this.add(item, false));
   }
 
   public remove(element: T) {
@@ -364,10 +364,12 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     })
   }
 
-  private _mountNode(item: T) {
+  private _mountNode(item: T, dirty: boolean = true) {
     item.parentNode = this;
     item.mounted();
-    this.dirty(item);
+    if (dirty) {
+      this.dirty(item);
+    }
     this.dirtyBBox();
   }
 
