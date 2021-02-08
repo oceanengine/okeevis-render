@@ -1,5 +1,4 @@
-
-import {BBox, unionBBox, bboxIntersect, } from '../utils/bbox';
+import { BBox, unionBBox, bboxIntersect } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 
 /**  https://idom.me/articles/841.html
@@ -8,7 +7,6 @@ import * as lodash from '../utils/lodash';
  * 3. 脏区数量建议不超过3个, 超过则强制合并
  * */
 
-export function mergeDirtyRect(mergedRects: BBox[], dirtyRects: BBox[]): BBox[] {
-  const regionList = [...mergedRects, ...dirtyRects];
-  return [unionBBox(regionList)]
+export default function mergeDirtyRegions(mergedRects: BBox[]): BBox[] {
+  return [unionBBox(mergedRects)];
 }

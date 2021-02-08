@@ -4,8 +4,8 @@ import Render from '../render';
 import Element, { defaultCanvasContext, } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
-import { BBox, bboxIntersect } from '../utils/bbox';
-import { mergeDirtyRect } from './dirtyRect';
+import { BBox, bboxIntersect, } from '../utils/bbox';
+import mergeDirtyRegions from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent, ColorValue} from '../color';
 import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
@@ -55,6 +55,10 @@ export default class CanvasPainter implements Painter {
 
   private _frameTimes: number[] = [];
 
+  private _ctxCount = 0;
+
+  private _repaintCount = 0;
+
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
     this._isPixelPainter = isPixelPainter;
@@ -77,6 +81,8 @@ export default class CanvasPainter implements Painter {
   }
 
   public onFrame(now?: number) {
+    this._ctxCount = 0;
+    this._repaintCount = 0;
     const showFPS = this.render.showFPS;
     const needUpdate = this.render.needUpdate();
     if (showFPS && now) {
@@ -102,6 +108,9 @@ export default class CanvasPainter implements Painter {
         // 全屏刷新
         this.paint();
       }
+      // console.log('dirty-size: ', dirytCount)
+      // console.log('ctx count: ', this._ctxCount)
+      // console.log('paint count', this._repaintCount);
     }
     if (allChunks.length > 0 && !this._isPixelPainter) {
       const { parent, chunks } = allChunks[0];
@@ -157,10 +166,9 @@ export default class CanvasPainter implements Painter {
     this.render.getDirtyElements().forEach(el => dirtyElements.push(el));
     for (let i = 0; i < dirtyElements.length; i++) {
       const el = dirtyElements[i];
-      dirtyRegions = mergeDirtyRect(dirtyRegions, el.getDirtyRects());
-      // todo 检测脏区面积占比, 提前return
+      el.getDirtyRects().forEach(rect => dirtyRegions.push(rect));
     }
-    this.paint(dirtyRegions);
+    this.paint(mergeDirtyRegions(dirtyRegions));
     // console.timeEnd('compute dirty rects');
   }
 
@@ -248,6 +256,8 @@ export default class CanvasPainter implements Painter {
         return;
       }
     }
+
+    this._repaintCount++;
 
     const opacity = item.getComputedOpacity();
     const fillOpacity = item.getExtendAttr('fillOpacity') * opacity;
@@ -409,6 +419,7 @@ export default class CanvasPainter implements Painter {
   }
 
   protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, computedFill: ColorValue, computedStroke: ColorValue, fillOpacity: number, strokeOpacity: number, lineWidth: number) {
+    this._ctxCount++;
     const { clip, lineCap, lineJoin, miterLimit, stroke, fill,  fontSize, fontFamily, fontWeight, fontStyle, fontVariant, textBaseline, textAlign, blendMode, lineDashOffset, shadowBlur, shadowOffsetX, shadowOffsetY, shadowColor, lineDash, } = item.attr;
     const selfMatrix = item.getTransform();
     const dragOffset = item.getDragOffset();
