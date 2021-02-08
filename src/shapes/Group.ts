@@ -236,9 +236,12 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._chunks = [];
   }
 
-  public getLeafNodesSize(ret:{size: number} = {size: 0}): number {
+  public getLeafNodesSize(ret:{size: number, limit: number} = {size: 0, limit: 1000000000}): number {
     this.eachChild(child => {
       ret.size++;
+      if (ret.size > ret.limit) {
+        return false;
+      }
       if (child.isGroup) {
         (child as any as Group).getLeafNodesSize(ret);
       }
@@ -309,10 +312,13 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     });
   }
 
-  public eachChild(callback: (child: T) => void) {
+  public eachChild(callback: (child: T) => any) {
     let node = this.firstChild as T;
     while (node) {
-      callback(node);
+      const ret = callback(node);
+      if (ret === false) {
+        break;
+      }
       node = node.nextSibling as T;
     }
     node = null;
