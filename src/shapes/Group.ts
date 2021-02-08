@@ -149,6 +149,22 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return this._chunks;
   }
 
+  public getOneChunk(): {parent: Group, items: Element[]} {
+    if (this._chunks.length > 0) {
+      return {parent: this, items: this._chunks[0]}
+    }
+    let ret: any;
+    this.eachChild(child => {
+      if (child.isGroup) {
+        ret = (child as any as Group).getOneChunk();
+      }
+      if (ret) {
+        return false;
+      }
+    });
+    return ret;
+  }
+
   // 递归获取chunks
   public getAllChunks(out: ChunkItem[] = []): ChunkItem[] {
     if (this._chunks.length > 0) {

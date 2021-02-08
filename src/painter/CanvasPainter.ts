@@ -95,7 +95,7 @@ export default class CanvasPainter implements Painter {
     const maxDirtyRects = this.render.maxDirtyRects;
     const dirtyElements = this.render.getDirtyElements();
     const dirytCount = dirtyElements.size;
-    const allChunks = this.render.getAllChunks();
+    const chunk = this.render.getRoot().getOneChunk();
     if (needUpdate) {
       if (
         !this._isFirstFrame &&
@@ -112,9 +112,8 @@ export default class CanvasPainter implements Painter {
       // console.log('ctx count: ', this._ctxCount)
       // console.log('paint count', this._repaintCount);
     }
-    if (allChunks.length > 0 && !this._isPixelPainter) {
-      const { parent, chunks } = allChunks[0];
-      this.paintChunk(parent, chunks[0]);
+    if (chunk && !this._isPixelPainter) {
+      this.paintChunk(chunk.parent, chunk.items);
     }
     this._isFirstFrame = false;
     showFPS && this._drawFPS();

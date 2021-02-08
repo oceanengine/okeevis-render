@@ -217,10 +217,6 @@ export default class Render extends EventFul {
     this._disposed = true;
   }
 
-  public getAllChunks(): ChunkItem[] {
-    return this._rootGroup.getAllChunks();
-  }
-
   public isBrowser() {
     return this._isBrowser;
   }
