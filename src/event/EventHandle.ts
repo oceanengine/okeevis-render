@@ -39,7 +39,7 @@ export interface DispatchTouchParam {
   touches: DispatchTouch[];
   changedTouches: DispatchTouch[];
 }
-const AUTO_DETECT_THROTTLE = 100;
+const AUTO_DETECT_THROTTLE = 500;
 
 export default class EventHandle {
   public render: Render;
@@ -278,7 +278,7 @@ export default class EventHandle {
       this._dispatchSyntheticEvent(dropEvent, target);
     }
 
-    if (event.type === 'mousemove' || event.type === 'wheel') {
+    if (event.type === 'mousemove' || event.type === 'wheel' || event.type === '_onFrame') {
       if (this.render.isBrowser() && !this._eventOnly) {
         const cursor = this._draggingTarget
           ? this._draggingTarget.getExtendAttr('cursor')
@@ -661,7 +661,7 @@ export default class EventHandle {
     const { x, y } = this._prevMousePosition;
     this._syntheticMouseEvent(
       {
-        type: 'mousemove',
+        type: '_onFrame',
         x,
         y,
         bubbles: true,
