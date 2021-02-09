@@ -220,7 +220,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this.dirtyBBox();
   }
 
-  public item(position: number): T {
+  public childAt(position: number): T {
     if (position < 0 || position >= this._length) {
       return null;
     }
