@@ -8,6 +8,7 @@ const dom = document.getElementById('root') as HTMLDivElement;
 const render = new Render(dom, {renderer: 'canvas'});
 render.showFPS = true;
 render.showBBox = false;
+render.maxDirtyRects = 1000;
 
 const ref = { current: null } as any;
 
@@ -16,8 +17,8 @@ const group = new Group({
   onMouseOver: e => e.target.setAttr({fill: 'red', fontSize: 24})
 });
 
-for (let i = 0; i < 20; i++) {
-  group.addChunk(makeText(1000))
+for (let i = 0; i < 100; i++) {
+  group.addChunk(makeText(5000))
 }
 (window as any).render = render
 

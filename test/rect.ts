@@ -7,12 +7,13 @@ const render = new Render(dom, {renderer: 'svg'})
 const rect = new Rect({
   x: 100,
   y: 100,
-  width: 100,
+  width: 0,
   height: 100,
   fill: 'blue',
   stroke: 'red',
-  lineWidth: 2,
-  r: 200,
-})
+  lineWidth: 20,
+});
+
+rect.stopAllAnimation().setAttr({scaleX: 0, scaleY: 0}).animateTo({scale: [2, 2]})
 
 render.add(rect)

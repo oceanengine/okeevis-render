@@ -392,7 +392,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     }
     this._dirty = true;
-    if (this.ownerRender) {
+    if (this.ownerRender && this._lastFrameTime) {
       this.ownerRender.dirty(dirtyElement || this);
       if (this.isGroup && this.ownerRender.renderer === 'canvas') {
         if (leafNodeSize > this.ownerRender.maxDirtyRects) {

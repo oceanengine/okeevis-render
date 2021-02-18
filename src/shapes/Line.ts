@@ -2,6 +2,7 @@ import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { BBox, lineBBox } from '../utils/bbox';
 import { pointInLineStroke } from '../geometry/contain/line';
+import line1px from '../utils/line1px';
 
 export interface LineConf extends CommonAttr {
   x1?: number;
@@ -27,6 +28,10 @@ export default class Line extends Shape<LineConf> {
       x2: 0,
       y2: 0,
     };
+  }
+
+  protected prevProcessAttr(attr: LineConf) {
+    line1px(attr);
   }
 
   public getAnimationKeys(): Array<keyof LineConf> {

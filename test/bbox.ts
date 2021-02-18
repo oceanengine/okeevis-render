@@ -92,6 +92,7 @@ const rect = new Rect({
   stroke: '#333',
   origin: [450, 450],
   rotation: 0.2,
+  scale: [3, 3],
   shadowBlur: 20,
   shadowColor: 'red',
   shadowOffsetX: 20,
@@ -136,7 +137,7 @@ const rect = new Rect({
 })
 
 
-// rect.animateTo({rotation: degToRad(360)}, 5000)
+rect.animateTo({rotation: degToRad(360)}, 5000)
 
 const polygon = new Polygon({
   fill: 'blue',
@@ -194,7 +195,8 @@ const group = new Group({
 });
 
 
-// group.animateTo({rotation: degToRad(360)}, 50000)
+// group.setAttr({scale: [0, 0]}).animateTo({scale: [3, 3]}, 50000)
+
 group.add(arc);
 group.add(circle)
 group.add(image);

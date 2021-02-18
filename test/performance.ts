@@ -21,8 +21,6 @@ const data = (window as any).data as any
 
 const rootGroup = new Group({
   draggable: true,
-  scaleX: 2,
-  scaleY: 2,
   onDragStart: (e: any) => {
     if (e.target !== rootGroup ) {
       return
@@ -102,7 +100,7 @@ data.edges.forEach((edge: any) => {
 })
 rootGroup.add(nodeGroup)
 rootGroup.add(edgeGroup)
-// rootGroup.add(labelGroup)
+rootGroup.add(labelGroup)
 render.add(rootGroup)
 console.log(rootGroup.getLeafNodesSize())
 render.resize(1920, 900)

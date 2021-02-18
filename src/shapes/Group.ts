@@ -97,7 +97,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
     if (item.parentNode === this) {
       this._moveToTail(item);
-      item.dirty();
+      dirty && item.dirty();
       return this;
     }
     if (!this.firstChild) {
