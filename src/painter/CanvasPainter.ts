@@ -338,7 +338,7 @@ export default class CanvasPainter implements Painter {
       // }
     }
 
-    if (!this._isPixelPainter && (this.render.showBBox || this.render.showBoundingRect)) {
+    if (!this._isPixelPainter && (this.render.showBBox || this.render.showBoundingRect || item.attr.showBBox || item.attr.showBoundingRect)) {
       this._drawBBox(item);
     }
 
@@ -588,10 +588,10 @@ export default class CanvasPainter implements Painter {
   }
 
   private _drawBBox(item: Element) {
-    if (this.render.showBBox) {
+    if (this.render.showBBox || item.attr.showBBox) {
       this._brushBoundingBBox(item, false);
     }
-    if (this.render.showBoundingRect) {
+    if (this.render.showBoundingRect || item.attr.showBoundingRect) {
       this._brushBoundingBBox(item, true);
     }
   }

@@ -73,6 +73,8 @@ export interface BaseAttr extends TransformConf, EventConf {
 
   cursor?: string;
   pointerEvents?: 'none' | 'auto';
+  showBBox?: boolean;
+  showBoundingRect?: boolean;
 }
 
 export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
