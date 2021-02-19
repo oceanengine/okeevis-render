@@ -2,7 +2,7 @@ import * as ES6Set from 'es6-set';
 import Painter from './abstract/Painter';
 import EventHandle from './event/EventHandle';
 import EventFul from './utils/Eventful';
-import Group, { ChunkItem } from './shapes/Group';
+import Group from './shapes/Group';
 import Element from './shapes/Element';
 import { getDomContentSize } from './utils/dom';
 import { requestAnimationFrame, cancelAnimationFrame } from './utils/rAF';
