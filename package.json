@@ -1,6 +1,6 @@
 {
-  "name": "@byted/lightcharts",
-  "version": "0.4.7",
+  "name": "@byted/bytedance-render",
+  "version": "2.0.0",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
