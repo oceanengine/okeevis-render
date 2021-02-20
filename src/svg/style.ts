@@ -137,7 +137,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     ret['stroke-dasharray'] = lineDash.join(' ');
   }
 
-  if (lineDashOffset >= 0) {
+  if (lineDashOffset !== undefined) {
     ret['stroke-dashoffset'] = lineDashOffset +'';
   }
 
