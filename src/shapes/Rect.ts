@@ -41,11 +41,7 @@ export default class Rect extends Shape<RectConf> {
     // 没有圆角的时候直接渲染矩形
     const {x, y, width, height, r } = this.attr;
     if (!r) {
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + width, y);
-      ctx.lineTo(x + width, y + height);
-      ctx.lineTo(x, y + height);
-      ctx.closePath();
+     ctx.rect(x, y, width, height);
     } else {
         // 1 2 3 4分别为左上 右上 右下 左下
         let r1: number;

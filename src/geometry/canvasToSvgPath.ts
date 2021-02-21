@@ -9,6 +9,9 @@ export default function canvasToSvgPath(pathList: PathAction[]): string {
       out += `M${params[0]},${params[1]} `;
     } else if (action === 'lineTo') {
       out += `L${params[0]},${params[1]} `;
+    } else if (action === 'rect') {
+      const [x, y, width, height] = params;
+      out += `M${x},${y}L${x + width},${y}L${x + width},${y + height}L${x},${y + height}z`;
     } else if (action === 'arc') {
       const [cx, cy, r, startAngle, endAngle] = params;
       const startPoint = getPointOnPolar(cx, cy, r, startAngle);
@@ -23,9 +26,9 @@ export default function canvasToSvgPath(pathList: PathAction[]): string {
       const endPoint = getPointOnPolar(cx, cy, r, endPointAngle);
       const isLargeArc = Math.abs(startAngle - endAngle) > Math.PI;
       const isClockWise = endAngle > startAngle;
-      out += `${i > 0 ? 'L' : "M"}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${isLargeArc ? 1 : 0} ${isClockWise ? 1 : 0} ${endPoint.x} ${
-        endPoint.y
-      }`;
+      out += `${i > 0 ? 'L' : 'M'}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${
+        isLargeArc ? 1 : 0
+      } ${isClockWise ? 1 : 0} ${endPoint.x} ${endPoint.y}`;
     } else if (action === 'arcTo') {
       // todo
     } else if (action === 'quadraticCurveTo') {
