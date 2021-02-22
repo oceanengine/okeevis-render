@@ -352,6 +352,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this;
   }
 
+  public removeAttr(attribute: keyof T) {
+    this.setAttr(attribute, undefined);
+  }
+
   public show() {
     this.setAttr('display', true as any);
   }
