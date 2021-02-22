@@ -394,7 +394,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     }
     this._dirty = true;
-    if (this.ownerRender && this._lastFrameTime) {
+    if (this.ownerRender) {
       this.ownerRender.dirty(dirtyElement || this);
       if (this.isGroup && this.ownerRender.renderer === 'canvas') {
         if (leafNodeSize > this.ownerRender.maxDirtyRects) {
@@ -558,9 +558,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
-    }
-    if (this.attr.onMounted) {
-      this.attr.onMounted();
     }
     this._mountClip();
   }
@@ -745,6 +742,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     // clip element maybe usesed for muti component
     if (!now) {
       return;
+    }
+    
+    if (!this._lastFrameTime) {
+      if (this.attr.onMounted) {
+        this.attr.onMounted();
+      }
     }
 
     if (this._lastFrameTime === now) {
