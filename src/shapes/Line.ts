@@ -9,6 +9,7 @@ export interface LineConf extends CommonAttr {
   y1?: number;
   x2?: number;
   y2?: number;
+  line1px?: boolean;
 }
 
 const shapeKeys: Array<keyof LineConf> = ['x1', 'y1', 'x2', 'y2'];
@@ -31,7 +32,7 @@ export default class Line extends Shape<LineConf> {
   }
 
   protected prevProcessAttr(attr: LineConf) {
-    line1px(attr);
+    attr.line1px !== false && line1px(attr);
   }
 
   public getAnimationKeys(): Array<keyof LineConf> {
