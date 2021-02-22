@@ -748,14 +748,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
     
-    if (!this._lastFrameTime) {
-      if (this.attr.onMounted) {
-        this.attr.onMounted();
-      }
-    }
-
     if (this._lastFrameTime === now) {
       return;
+    }
+
+    if (!this._lastFrameTime && this.attr.onMounted) {
+      this.attr.onMounted();
     }
 
     this._lastFrameTime = now;
