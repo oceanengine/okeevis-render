@@ -431,8 +431,10 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         deleteKeys.push(key);
       }
     }
-
+    
+    // todo 如果是svg渲染, 需要移除svg属性
     deleteKeys.forEach(delKey => prevElement.removeAttr(delKey as any));
+
     
     if (transitionProperty === 'none' || transitionProperty.length === 0) {
       for (let key in nextAttr) {
