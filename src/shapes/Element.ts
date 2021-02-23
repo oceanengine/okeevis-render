@@ -42,6 +42,7 @@ export interface BaseAttr extends TransformConf, EventConf {
   stroke?: ColorValue;
   strokeNoScale?: boolean;
   lineWidth?: number;
+  pickingBuffer?: number;
   lineDash?: number[];
   lineDashOffset?: number;
   lineJoin?: CanvasLineJoin;
@@ -583,7 +584,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public isInShape(x: number, y: number): boolean {
     const hasFill = this.hasFill();
     const hasStroke = this.hasStroke();
-    const lineWidth = this.getExtendAttr('lineWidth');
+    const lineWidth = this.getExtendAttr('lineWidth') + (this.attr.pickingBuffer || 0);
     return (
       (hasFill && this.isPointInFill(x, y)) || (hasStroke && this.isPointInStroke(x, y, lineWidth))
     )
