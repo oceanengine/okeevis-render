@@ -1,4 +1,4 @@
-import Element, { defaultCanvasContext } from '../shapes/Element';
+import Element, { defaultCanvasContext, ElementAttr, } from '../shapes/Element';
 import Group from '../shapes/Group';
 import * as mat3 from '../../js/mat3';
 import { SVG_NAMESPACE, XLINK_NAMESPACE, } from '../constant';
@@ -39,6 +39,30 @@ export interface SVGElementStyle {
   filter: string;
   cursor: string;
 }
+
+export const SVGAttributeMap: Record<keyof SVGElementStyle, keyof ElementAttr> = {
+  'clip-path': 'clip',
+  fill: 'fill',
+  stroke: 'stroke',
+  'stroke-width': 'lineWidth',
+  'stroke-linecap': 'lineCap',
+  'stroke-linjoin': 'lineJoin',
+  'stroke-miterlimit': 'miterLimit',
+  'stroke-dasharray': 'lineDash',
+  'stroke-dashoffset': 'lineDashOffset',
+  'font-size': 'fontSize',
+  'font-weight': 'fontWeight',
+  'font-family': 'fontFamily',
+  'font-style': 'fontStyle',
+  display: 'display',
+  // anchor: string;
+  // transform: string;
+  opacity: 'opacity';
+  'fill-opacity': 'fillOpacity',
+  'stroke-opacity': 'strokeOpacity',
+  // filter: 'filter',
+  cursor: 'cursor',
+} as any;
 
 export function getSVGRootAttributes(width: number, height: number): any {
   return {

@@ -9,7 +9,7 @@ import Element from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
 import { fpsRect, fpsText } from './fps';
 import SVGNode from '../abstract/Node';
-import { getSVGRootAttributes } from '../svg/style';
+import { getSVGRootAttributes, SVGAttributeMap, SVGElementStyle, } from '../svg/style';
 
 import { Gradient, LinearGradient, RadialGradient, Pattern, isGradient, isPattern } from '../color';
 
@@ -104,6 +104,12 @@ export default class SVGPainter implements Painter {
   public findDOMNode(node: Element): SVGElement {
     const id = node.id;
     return this._loadedSVGElements[id];
+  }
+
+  public removeNodeAttribute(node: Element, attr: string) {
+    if (attr in SVGAttributeMap) {
+      this.findDOMNode(node)?.removeAttribute(SVGAttributeMap[attr as keyof SVGElementStyle]);
+    }
   }
 
   public getBase64(): string {

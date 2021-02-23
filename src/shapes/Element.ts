@@ -1,6 +1,7 @@
 import Eventful from '../utils/Eventful';
 import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
+import SVGPainter from '../painter/SVGPainter';
 import Group, { GroupConf } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue, } from '../color';
@@ -18,7 +19,7 @@ import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
 import { Ref } from '../utils/ref';
-import { getSVGStyleAttributes } from '../svg/style';
+import { getSVGStyleAttributes, SVGAttributeMap } from '../svg/style';
 
 export type ElementAttr = GroupConf & ShapeConf;
 
@@ -336,7 +337,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
       this.dirty();
       const oldValue = this.attr[attr as keyof T];
-      this.attr[attr as keyof T] = value;
+      if (value !== undefined) {
+        this.attr[attr as keyof T] = value;
+      } else {
+        delete this.attr[attr as keyof T];
+        if (this.ownerRender && this.ownerRender.renderer === 'svg') {
+          this._removeSVGAttribute(attr as string);
+        }
+      }
       this.onAttrChange(attr as keyof T, value, oldValue);
     } else if (typeof attr === 'object') {
       this.prevProcessAttr(attr as T);
@@ -898,5 +906,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       mat3.multiply(out, out, selfTransform);
     }
     return out;
+  }
+
+  private _removeSVGAttribute(attr: string) {
+    (this.ownerRender.getPainter() as SVGPainter).removeNodeAttribute(this as any, attr);
   }
 }
