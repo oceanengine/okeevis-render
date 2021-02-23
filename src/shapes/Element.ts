@@ -259,7 +259,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let opacity = 1;
     // 透明度有继承叠加效果
     while (node) {
-      opacity *= node.attr.opacity || 1;
+      opacity *= node.attr.opacity >= 0 ? node.attr.opacity : 1;
       node = node.parentNode as any as Group;
     }
     return opacity;
