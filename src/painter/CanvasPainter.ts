@@ -423,6 +423,15 @@ export default class CanvasPainter implements Painter {
     const selfMatrix = item.getTransform();
     const dragOffset = item.getDragOffset();
     const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
+
+    // clip must in front of transform
+
+    if (clip) {
+      ctx.beginPath();
+      item.getClipElement().brush(ctx);
+      ctx.clip();
+    }
+
     if (hasDrag || selfMatrix !== IDENTRY_MATRIX) {
       if (!hasDrag) {
         ctx.transform(
@@ -451,12 +460,6 @@ export default class CanvasPainter implements Painter {
           globalMatrix[7],
         );
       }
-    }
-
-    if (clip) {
-      ctx.beginPath();
-      item.getClipElement().brush(ctx);
-      ctx.clip();
     }
 
     if (item.attr.lineWidth > 0) {
