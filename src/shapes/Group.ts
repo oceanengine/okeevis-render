@@ -315,13 +315,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       // todo clone matrix
       const dragOffset = nextElement.getDragOffset();
       prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
-      const {transitionDuration = defaultSetting.during, transitionEase = defaultSetting.ease, transitionProperty = 'all', transitionDelay = 0 } = nextElement.attr;
-      if (transitionProperty === 'none' || transitionProperty.length === 0) {
-        prevElement.setAttr(nextElement.attr);
-      } else {
-        const nextAttr = transitionProperty === 'all' ? nextElement.attr : lodash.pick(nextElement.attr, transitionProperty as any);
-        prevElement.stopAllAnimation().animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
-      }
+     this._diffUpdateElement(prevElement, nextElement);
     });
     result.added.forEach(index => {
       this.add(list[index]);
@@ -424,6 +418,31 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       } else {
         console.warn('dom not exist', item);
       }
+    }
+  }
+
+  private _diffUpdateElement(prevElement: Element, nextElement: Element) {
+    const prevAttr = prevElement.attr;
+    const nextAttr = nextElement.attr;
+    const {transitionDuration = defaultSetting.during, transitionEase = defaultSetting.ease, transitionProperty = 'all', transitionDelay = 0 } = nextElement.attr;
+    const deleteKeys: string[] = [];
+    for (let key in prevAttr) {
+      if (!(key in nextAttr)) {
+        deleteKeys.push(key);
+      }
+    }
+
+    deleteKeys.forEach(delKey => prevElement.removeAttr(delKey as any));
+    
+    if (transitionProperty === 'none' || transitionProperty.length === 0) {
+      for (let key in nextAttr) {
+        if (nextAttr[key as any as keyof typeof nextAttr] !== prevAttr[key as any as keyof typeof prevAttr]) {
+          prevElement.setAttr(key as any, nextAttr[key as any as keyof typeof nextAttr])
+        }
+      }
+    } else {
+      const nextAttr = transitionProperty === 'all' ? nextElement.attr : lodash.pick(nextElement.attr, transitionProperty as any);
+      prevElement.stopAllAnimation().animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
     }
   }
 }
