@@ -237,10 +237,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public getDefaultAttr(): T {
     return {
       display: true,
-      draggable: false,
-      opacity: 1,
-      rotation: 0,
-      strokeNoScale: false,
+      // opacity: 1,
+      // draggable: false,
+      // rotation: 0,
+      // strokeNoScale: false,
     } as T;
   }
 
@@ -254,12 +254,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getComputedOpacity(): number {
-    let node: Element<any> = this;
+    let node: Element<T> | Group = this;
     let opacity = 1;
     // 透明度有继承叠加效果
     while (node) {
-      opacity *= node.attr.opacity;
-      node = node.parentNode;
+      opacity *= node.attr.opacity || 1;
+      node = node.parentNode as any as Group;
     }
     return opacity;
   }
