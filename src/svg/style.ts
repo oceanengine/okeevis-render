@@ -57,7 +57,7 @@ export const SVGAttributeMap: Record<keyof SVGElementStyle, keyof ElementAttr> =
   display: 'display',
   // anchor: string;
   // transform: string;
-  opacity: 'opacity';
+  opacity: 'opacity',
   'fill-opacity': 'fillOpacity',
   'stroke-opacity': 'strokeOpacity',
   // filter: 'filter',
