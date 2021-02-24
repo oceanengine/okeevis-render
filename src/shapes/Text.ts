@@ -107,7 +107,7 @@ export default class Text extends Shape<TextConf> {
     const { needFill, needStroke } = this;
 
     if (!this.isMutiLine) {
-      if (needStroke) {
+      if (needStroke && ctx.strokeText) {
         if (this.attr.maxWidth > 0) {
           ctx.strokeText(text, this.attr.x, this.attr.y, this.attr.maxWidth);
         } else {
@@ -124,7 +124,7 @@ export default class Text extends Shape<TextConf> {
       return;
     }
     this.eachSpanList((rowText, x, y) => {
-      if (needStroke) {
+      if (needStroke && ctx.strokeText) {
         if (this.attr.maxWidth > 0) {
           ctx.strokeText(rowText, x, y, this.attr.maxWidth);
         } else {
