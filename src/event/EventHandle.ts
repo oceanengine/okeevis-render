@@ -151,7 +151,7 @@ export default class EventHandle {
 
     // console.log('gpu pick size ', gpuPickNodes.length);
 
-    if (gpuPickNodes.length > 0) {
+    if (gpuPickNodes.length > 0 && pixelPainter.getContext().getImageData) {
       pixelPainter.paintAt(x, y);
       // todo 考虑小程序getImageData兼容
       // const prevImageData = pixelPainter.getImageData(x, y);
