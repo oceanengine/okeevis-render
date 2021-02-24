@@ -3,6 +3,11 @@ import { BBox, unionBBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
 import { equalWithTolerance, getPointOnPolar } from '../utils/math';
 import canvasToSvgPath from './canvasToSvgPath';
 
+interface Point {
+  x: number;
+  y: number;
+}
+
 export interface PathAction {
   action:
     | 'moveTo'
@@ -37,12 +42,6 @@ const PathKeyPoints: Partial<Record<PathAction['action'], [number, number][]>> =
     [2, 3],
   ],
 };
-function getActionKeyPoints(action: PathAction['action'], params: any[]): [number, number][] {
-  return PathKeyPoints[action].map(item => {
-    const [xIndex, yIndex] = item;
-    return [params[xIndex], params[yIndex]];
-  });
-}
 
 export default class Path2D {
   private _pathList: PathAction[] = [];
@@ -208,19 +207,15 @@ export default class Path2D {
 
   public getPathBBox(): BBox {
     const pathList = this._pathList;
-    let points: [number, number][] = [];
-    const bboxList: BBox[] = [];
-    if (pathList.length === 0) {
-      return { x: 0, y: 0, width: 0, height: 0 };
-    }
+    const points: Point[] = [];
     for (let i = 0; i < pathList.length; i++) {
       const { action, params } = pathList[i];
       if (action === 'arc') {
         const [cx, cy, r, startAngle, endAngle] = params;
-        bboxList.push(arcBBox(cx, cy, r, startAngle, endAngle));
+        this._pushBBoxPoints(points, arcBBox(cx, cy, r, startAngle, endAngle));
       } else if (action === 'rect') {
         const [x, y, width, height] = params;
-        bboxList.push(rectBBox(x, y, width, height));
+        this._pushBBoxPoints(points, rectBBox(x, y, width, height));
       } else if (
         action === 'moveTo' ||
         action === 'lineTo' ||
@@ -228,19 +223,15 @@ export default class Path2D {
         action === 'quadraticCurveTo' ||
         action === 'arcTo'
       ) {
-        points = points.concat(getActionKeyPoints(action, params));
+        PathKeyPoints[action].forEach(item => {
+          const [xIndex, yIndex] = item;
+          const x = params[xIndex]; 
+          const y = params[yIndex];
+          points.push({x, y});
+        });
       }
     }
-    const filterZero = false;
-    return unionBBox([
-      polygonBBox(
-        points.map(vec2 => {
-          const [x, y] = vec2;
-          return { x, y };
-        }),
-      ),
-      ...bboxList,
-    ], filterZero);
+    return polygonBBox(points);
   }
 
   public compressMoveToCommand() {
@@ -300,5 +291,13 @@ export default class Path2D {
   public getPointAtPercent(percent: number): [number, number] {
     // todo
     return [0, 0];
+  }
+
+  private _pushBBoxPoints(points: Point[], bbox: BBox) {
+    const { x, y, width, height } = bbox;
+    points.push({x,  y});
+    points.push({x: x + width,  y});
+    points.push({x: x + width,  y: y + height});
+    points.push({x,  y: y + height});
   }
 }
