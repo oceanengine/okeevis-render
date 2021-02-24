@@ -349,6 +349,8 @@ export default class EventHandle {
       changedTouches: synthetichChangedTouches,
       original: nativeEvent,
       bubbles: true,
+      x: synthetichChangedTouches[0].x,
+      y: synthetichChangedTouches[0].y,
     };
 
     const event = new SyntheticTouchEvent(nativeEvent.type, touchEventParam);

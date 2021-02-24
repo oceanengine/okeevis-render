@@ -4,6 +4,8 @@ import Element from '../shapes/Element';
 export interface SyntheticTouchEventParams extends SyntheticEventParams {
   touches: SyntheticTouch[];
   changedTouches: SyntheticTouch[];
+  x: number;
+  y: number;
 }
 
 export interface SyntheticTouch {
@@ -21,9 +23,15 @@ export default class SyntheticTouchEvent extends SyntheticEvent<TouchEvent> {
 
   public changedTouches: SyntheticTouch[];
 
+  public x: number;
+
+  public y: number;
+
   public constructor(type: string, params: SyntheticTouchEventParams) {
     super(type, params);
     this.touches = params.touches;
     this.changedTouches = params.changedTouches;
+    this.x = params.x;
+    this.y = params.y;
   }
 }
