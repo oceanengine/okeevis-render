@@ -1,1 +1,1 @@
-import './progressive'
+import './sector'

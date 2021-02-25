@@ -2,19 +2,22 @@ import Render from '../src/render'
 import Sector from '../src/shapes/Sector'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {renderer: 'svg'})
+const render = new Render(dom, {renderer: 'canvas'})
 
 const shape = new Sector({
   cx: 200,
   cy: 200,
-  radius: 80,
+  radius: 100,
   start: -Math.PI / 2,
   end: 1,
-  radiusI:40,
+  radiusI:50,
   fill: 'blue',
   stroke: '#333',
   lineWidth: 2,
-  lineJoin: 'round'
+  lineJoin: 'round',
+  round: false,
+  cornerRadius: 25,
+
 })
 const shape2 = new Sector({
   cx: 200,
@@ -43,5 +46,6 @@ end: Math.PI * 2,
 stroke: 'red',
 lineWidth: 2,
 })
-render.add(shape3)
+
+render.add(shape)
 console.log(shape2)
