@@ -124,6 +124,41 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._mountNode(item);
   }
 
+  public insertBefore(newNode: T, referenceNode?: T) {
+    if (!referenceNode) {
+      return this.add(newNode);
+    }
+    if (referenceNode.prevSibling === newNode) {
+      return;
+    }
+    newNode.prevSibling = referenceNode.prevSibling;
+    referenceNode.prevSibling = newNode;
+    newNode.nextSibling = referenceNode;
+    if (newNode.prevSibling) {
+      newNode.prevSibling.nextSibling = newNode;
+    } else {
+      this.firstChild = newNode;
+    }
+    if (referenceNode.nextSibling === newNode) {
+      referenceNode.nextSibling = null;
+    }
+    if (newNode.parentNode === this && this.ownerRender) {
+      if (this.ownerRender.renderer === 'svg') {
+        const oldNode = this._findSVGDomNode(referenceNode);
+        const newDomNode = this._findSVGDomNode(newNode);
+        if (oldNode && newDomNode) {
+          oldNode.parentNode.insertBefore(newDomNode, oldNode);
+        }
+      } else {
+        newNode.dirty();
+      }
+    } else {
+      this._length += 1;
+      this._mountNode(newNode);
+    }
+
+  }
+
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
     return this;
@@ -131,7 +166,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public addChunk(items: T[] = []): this {
     if (items.length === 0) {
-      return;
     }
     this._chunks.push(items);
     return this;
@@ -284,16 +318,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     });
 
     result.ordered.forEach(([from, to], i) => {
-      // todo 实现位置移动
-      if (from === to) {
-        return;
-      }
-      if (from > to) {
-      }
-      if (from < to) {
-      }
-      // this._components.splice(from, 1)
-      // this._components.splice(to, 0, list[result.pureChanged[i][1]]);
+      this.insertBefore(prevList[from], prevList[from < to ? to + 1 : to]);
     });
 
     result.maintained.forEach(([from, to]) => {
@@ -412,7 +437,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     }
 
     if (this.ownerRender?.renderer === 'svg') {
-      const dom = (this.ownerRender.getPainter() as SVGPainter).findDOMNode(item);
+      const dom = this._findSVGDomNode(item);
       if (dom && dom.parentNode) {
         dom.parentNode.appendChild(dom);
       } else {
@@ -444,5 +469,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       const nextAttr = transitionProperty === 'all' ? nextElement.attr : lodash.pick(nextElement.attr, transitionProperty as any);
       prevElement.stopAllAnimation().animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
     }
+  }
+
+  private _findSVGDomNode(item: Element) {
+    return (this.ownerRender.getPainter() as SVGPainter).findDOMNode(item);
   }
 }
