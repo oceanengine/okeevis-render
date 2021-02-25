@@ -489,13 +489,12 @@ export default class CanvasPainter implements Painter {
 
     // group只支持color string, pattern,不支持渐变
     // todo 考虑小程序api setXXXX
-    if (stroke && !(item.isGroup && isGradient(stroke))) {
+    if (stroke && stroke !== 'none' && !(item.isGroup && isGradient(stroke))) {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, stroke, item));
     }
 
     if (
       !stroke &&
-      stroke !== 'none' &&
       isGradient(computedStroke) &&
       item.type !== 'group'
     ) {
