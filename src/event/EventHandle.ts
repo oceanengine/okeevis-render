@@ -209,7 +209,7 @@ export default class EventHandle {
     const mouseEventParam: SyntheticMouseEventParams = {
       x,
       y,
-      bubbles: nativeEvent.bubbles,
+      bubbles: true,
       original: nativeEvent,
       timeStamp: nativeEvent.timeStamp,
     };
