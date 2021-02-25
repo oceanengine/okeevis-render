@@ -49,7 +49,7 @@ export default class Sector extends Shape<SectorConf> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { cx, cy, radius, radiusI, start, end } = this.attr;
+    const { cx, cy, radius, radiusI, start, end, round, cornerRadius } = this.attr;
     if (equalWithTolerance(start, end)) {
       return;
     }
@@ -61,9 +61,29 @@ export default class Sector extends Shape<SectorConf> {
       return;
     }
     const anticlockwise = end < start;
-    ctx.arc(cx, cy, radiusI, end, start, !anticlockwise);
-    ctx.arc(cx, cy, radius, start, end, anticlockwise);
-    ctx.closePath();
+    if (round || !cornerRadius || cornerRadius === 0) {
+      let roundStart: number;
+      let roundEnd: number;
+      // 内弧
+      ctx.arc(cx, cy, radiusI, end, start, !anticlockwise);
+      if (round) {
+        const {x, y} = getPointOnPolar(cx, cy, (radius + radiusI) / 2, start);
+        roundStart = !anticlockwise ? start - Math.PI : start + Math.PI;
+        roundEnd = start;
+        ctx.arc(x, y, Math.abs(radius - radiusI) / 2, roundStart, roundEnd, anticlockwise);
+      }
+      // 外弧
+      ctx.arc(cx, cy, radius, start, end, anticlockwise);
+      if (round) {
+        const {x, y} = getPointOnPolar(cx, cy, (radius + radiusI) / 2, end);
+        roundStart = end;
+        roundEnd = !anticlockwise ? end + Math.PI : end - Math.PI;
+        ctx.arc(x, y, Math.abs(radius - radiusI) / 2, roundStart, roundEnd, anticlockwise);
+      }
+      ctx.closePath();
+    } else {
+
+    }
   }
 
   public isPointInFill(x: number, y: number): boolean {
