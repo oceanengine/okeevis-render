@@ -229,6 +229,11 @@ export default class Render extends EventFul {
     return renderToSVGString(this.getRoot(), this._width, this._height);
   }
 
+  public syntheticEvent(type: string, param: any) {
+    this._eventHandle.dispatch(type, param);
+    this._eventElementHandle.dispatch(type, param);
+  }
+
   public getEventHandle(): EventHandle {
     return this._eventHandle;
   }
