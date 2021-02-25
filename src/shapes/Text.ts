@@ -313,9 +313,7 @@ export default class Text extends Shape<TextConf> {
         rowLetterWidthList.push(letterWidth);
       }
     }
-    if (this.id === 231) {
-      debugger
-    }
+    
     return rowTextList;
   }
 }
