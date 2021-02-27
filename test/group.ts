@@ -48,7 +48,12 @@ const b2 = new Rect({
 render.add(group);
 
 group.addAll([a, b]);
-
+let i = 0;
 document.onclick = () => {
-  group.updateAll([b2, a2]);
+  i ++ 
+  if (i % 2 === 0) {
+    group.updateAll([]);
+  } else {
+    group.updateAll([a, b]);
+  }
 }

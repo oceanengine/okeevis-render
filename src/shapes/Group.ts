@@ -124,41 +124,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._mountNode(item);
   }
 
-  public insertBefore(newNode: T, referenceNode?: T) {
-    if (!referenceNode) {
-      return this.add(newNode);
-    }
-    if (referenceNode.prevSibling === newNode) {
-      return;
-    }
-    newNode.prevSibling = referenceNode.prevSibling;
-    referenceNode.prevSibling = newNode;
-    newNode.nextSibling = referenceNode;
-    if (newNode.prevSibling) {
-      newNode.prevSibling.nextSibling = newNode;
-    } else {
-      this.firstChild = newNode;
-    }
-    if (referenceNode.nextSibling === newNode) {
-      referenceNode.nextSibling = null;
-    }
-    if (newNode.parentNode === this && this.ownerRender) {
-      if (this.ownerRender.renderer === 'svg') {
-        const oldNode = this._findSVGDomNode(referenceNode);
-        const newDomNode = this._findSVGDomNode(newNode);
-        if (oldNode && newDomNode) {
-          oldNode.parentNode.insertBefore(newDomNode, oldNode);
-        }
-      } else {
-        newNode.dirty();
-      }
-    } else {
-      this._length += 1;
-      this._mountNode(newNode);
-    }
-
-  }
-
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
     return this;
@@ -241,8 +206,8 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     element.prevSibling = null;
     element.nextSibling = null;
     this._length--;
+    element.dirty();
     element.destroy();
-    this.dirty(element);
     this.dirtyBBox();
   }
 
@@ -314,11 +279,15 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     });
 
     result.removed.forEach(index => {
-      this.remove(prevList[index]);
+      const node = prevList[index]
+      const parentNode = node.parentNode;
+      node.parentNode = this;
+      this.remove(node);
+      node.parentNode = parentNode;
     });
 
     result.ordered.forEach(([from, to], i) => {
-      this.insertBefore(prevList[from], prevList[from < to ? to + 1 : to]);
+      // todo
     });
 
     result.maintained.forEach(([from, to]) => {
