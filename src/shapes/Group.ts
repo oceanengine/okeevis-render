@@ -283,7 +283,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       const parentNode = node.parentNode;
       node.parentNode = this;
       this.remove(node);
-      node.parentNode = parentNode;
+      if (parentNode !== this) {
+        node.parentNode = parentNode;
+      }
     });
 
     result.ordered.forEach(([from, to], i) => {
