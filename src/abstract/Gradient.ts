@@ -28,7 +28,7 @@ export default abstract class Gradient<T extends GradientOption = any> {
 
   public abstract clone(): Gradient<T>;
 
-  public abstract toCssString(): string;
+  public abstract toString(): string;
 
   public abstract getCanvasContextStyle(ctx: CanvasRenderingContext2D, bbox: BBox): CanvasGradient;
 

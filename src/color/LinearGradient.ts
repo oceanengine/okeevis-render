@@ -66,7 +66,7 @@ export default class LinearGradient extends Gradient<LinearGradientOption> {
     }
   }
 
-  public toCssString(): string {
+  public toString(): string {
     const option = this.option;
     const angle: number = Math.atan2(option.x1 - option.x2, option.y1 - option.y2);
     const stopStr: string = option.stops
