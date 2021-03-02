@@ -493,8 +493,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const shadowBBox = {
       x: x + shadowOffsetX - shadowBlur,
       y: y + shadowOffsetY - shadowBlur,
-      width: width + shadowBlur + shadowOffsetX,
-      height: height + shadowBlur + shadowOffsetY,
+      width: width + shadowBlur * 2 + shadowOffsetX,
+      height: height + shadowBlur * 2 + shadowOffsetY,
     };
     return ceilBBox(unionBBox([this._clientBoundingRect, shadowBBox]));
   }
