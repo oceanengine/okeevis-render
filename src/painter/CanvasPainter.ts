@@ -463,7 +463,8 @@ export default class CanvasPainter implements Painter {
     }
 
     if (item.attr.lineWidth > 0) {
-      styleHelper.setLineWidth(ctx, lineWidth);
+      const offset = this._isPixelPainter ? (item.attr.pickingBuffer || 0) : 0;
+      styleHelper.setLineWidth(ctx, lineWidth + offset);
     }
 
     if (lineCap) {
