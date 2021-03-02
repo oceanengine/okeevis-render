@@ -348,12 +348,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this.onAttrChange(attr as keyof T, value, oldValue);
     } else if (typeof attr === 'object') {
       this.prevProcessAttr(attr as T);
-      this.dirty();
-      const prevAttr = this.attr;
-      this.attr = { ...this.attr, ...(attr as T) };
+      let dirty = false;
       for (const key in attr as T) {
-        if (this.attr[key as keyof T] !== (prevAttr as T)[key]) {
-          this.onAttrChange(key as keyof T, (attr as T)[key], prevAttr[key as keyof T]);
+        const prevValue = this.attr[key as keyof T];
+        const nextValue = (attr as T)[key]
+        if (prevValue !== nextValue) {
+          if (!dirty) {
+            dirty = true;
+            this.dirty();
+          }
+          this.attr[key] = nextValue;
+          this.onAttrChange(key, nextValue, prevValue);
         }
       }
     }
