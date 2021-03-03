@@ -224,7 +224,7 @@ export function getAllShadows(group: Group, out: Array<Shadow> = []): Shadow[] {
     const { shadowColor, shadowBlur } = child.attr;
     if (shadowColor && shadowBlur >= 0) {
       const shadow = child.getShadowObj();
-      out.push(shadow);
+      out.indexOf(shadow) === -1 && out.push(shadow);
     }
     if (child.isGroup) {
       getAllShadows(child as Group, out);
