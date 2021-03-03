@@ -26,7 +26,7 @@ const b = new Rect({
   height: 100,
   fill: 'blue',
   shadowColor: 'red',
-  shadowBlur: 0,
+  shadowBlur: 40,
   shadowOffsetX: 0,
   shadowOffsetY: 0,
   onMouseEnter: e => {
@@ -59,10 +59,5 @@ render.add(group);
 group.addAll([a, b]);
 let i = 0;
 document.onclick = () => {
-  i ++ 
-  if (i % 2 === 0) {
-    group.updateAll([]);
-  } else {
-    group.updateAll([a, b]);
-  }
+  render.downloadImage('fdfsd')
 }

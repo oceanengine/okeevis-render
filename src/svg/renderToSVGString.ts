@@ -1,19 +1,22 @@
 import Group from '../shapes/Group';
-import { getAllDefsClips, getAllDefsGradientAndPattern, getSVGRootAttributes } from './style';
+import { getAllDefsClips, getAllDefsGradientAndPattern, getAllShadows, getSVGRootAttributes } from './style';
 import Element from '../shapes/Element';
 import SVGNode from '../abstract/Node';
 import { LinearGradient, RadialGradient, Pattern } from '../color';
+import Shadow from './Shadow';
 
 let renderingWidth: number;
 let renderingHeight: number;
 let renderingClips: Element[];
 let renderingGradientAndPatterns: Array<LinearGradient | RadialGradient | Pattern>;
+let renderingShadows: Shadow[];
 
 export function renderToSVGString(rootGroup: Group, width: number, height: number): string {
   renderingWidth = width;
   renderingHeight = height;
   renderingClips = getAllDefsClips(rootGroup);
   renderingGradientAndPatterns = getAllDefsGradientAndPattern(rootGroup);
+  renderingShadows = getAllShadows(rootGroup);
   const stringBuffer: string[] = [];
   getNodeString(rootGroup, stringBuffer, true);
   renderingClips = null;
@@ -61,6 +64,7 @@ function getNodeString(node: Element, stringBuffer: string[], isRoot = false) {
     stringBuffer.push('<defs>');
     renderingClips.forEach(clip => getClipString(clip, stringBuffer));
     renderingGradientAndPatterns.forEach(item => getGradientAndPatternString(item, stringBuffer));
+    renderingShadows.forEach(item => getCustomerNodeString(item.getSVGNode(), stringBuffer));
     stringBuffer.push('</defs>');
   }
 

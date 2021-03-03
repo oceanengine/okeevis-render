@@ -2,6 +2,7 @@ import Element, { defaultCanvasContext, ElementAttr, } from '../shapes/Element';
 import Group from '../shapes/Group';
 import * as mat3 from '../../js/mat3';
 import { SVG_NAMESPACE, XLINK_NAMESPACE, } from '../constant';
+import Shadow from '../svg/Shadow';
 
 import {
   getSVGColor,
@@ -213,6 +214,20 @@ export function getAllDefsGradientAndPattern(
     }
     if (child.isGroup) {
       getAllDefsGradientAndPattern(child as Group, out);
+    }
+  });
+  return out;
+}
+
+export function getAllShadows(group: Group, out: Array<Shadow> = []): Shadow[] {
+  group.eachChild(child => {
+    const { shadowColor, shadowBlur } = child.attr;
+    if (shadowColor && shadowBlur >= 0) {
+      const shadow = child.getShadowObj();
+      out.push(shadow);
+    }
+    if (child.isGroup) {
+      getAllShadows(child as Group, out);
     }
   });
   return out;
