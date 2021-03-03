@@ -104,10 +104,8 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   const matrix = node.getGlobalTransform();
   const clip = node.getClipElement();
 
-  ret.id = 'node-' + node.id;
-
   if (clip) {
-    ret['clip-path'] = `url(#node-${clip.id})`;
+    ret['clip-path'] = `url(#${getClipId(clip)})`;
   }
 
   if (!mat3.exactEquals(matrix, identityMatrix) && !node.isGroup) {
@@ -231,4 +229,8 @@ export function getAllShadows(group: Group, out: Array<Shadow> = []): Shadow[] {
     }
   });
   return out;
+}
+
+export function getClipId(node: Element) {
+  return `lightcharts-clip-${node.id}`;
 }

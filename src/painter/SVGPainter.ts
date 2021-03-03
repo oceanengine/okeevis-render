@@ -9,7 +9,7 @@ import Element from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
 import { fpsRect, fpsText } from './fps';
 import SVGNode from '../abstract/Node';
-import { getSVGRootAttributes, SVGAttributeMap, SVGElementStyle } from '../svg/style';
+import { getSVGRootAttributes, SVGAttributeMap, SVGElementStyle, getClipId, } from '../svg/style';
 import Shadow from '../svg/Shadow';
 
 import { Gradient, LinearGradient, RadialGradient, Pattern, isGradient, isPattern } from '../color';
@@ -210,7 +210,7 @@ export default class SVGPainter implements Painter {
       this._mountTextNode(svgDom, spanList);
     }
     if (isClip) {
-      const clip = this._createSVGElement('clipPath', { id: 'node-' + node.id });
+      const clip = this._createSVGElement('clipPath', { id: getClipId(node)});
       clip.appendChild(svgDom);
       appendNode = clip;
     }

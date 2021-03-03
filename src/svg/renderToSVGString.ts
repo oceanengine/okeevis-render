@@ -1,5 +1,5 @@
 import Group from '../shapes/Group';
-import { getAllDefsClips, getAllDefsGradientAndPattern, getAllShadows, getSVGRootAttributes } from './style';
+import { getAllDefsClips, getAllDefsGradientAndPattern, getAllShadows, getSVGRootAttributes, getClipId, } from './style';
 import Element from '../shapes/Element';
 import SVGNode from '../abstract/Node';
 import { LinearGradient, RadialGradient, Pattern } from '../color';
@@ -25,7 +25,7 @@ export function renderToSVGString(rootGroup: Group, width: number, height: numbe
 }
 
 function getClipString(node: Element, stringBuffer: string[]) {
-  stringBuffer.push(`<clipPath id="node-${node.id}">`);
+  stringBuffer.push(`<clipPath id="${getClipId(node)}">`);
   getNodeString(node, stringBuffer);
   stringBuffer.push('</clipPath>');
 }

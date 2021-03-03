@@ -21,7 +21,7 @@ export default class Pattern {
 
   public constructor(conf: PatternOption) {
     this.option = conf;
-    this.id = 'pattern-' + id++;
+    this.id = 'lightcharts-pattern-' + id++;
   }
 
   public getCanvasContextStyle(
