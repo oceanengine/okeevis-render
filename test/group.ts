@@ -59,5 +59,4 @@ render.add(group);
 group.addAll([a, b]);
 let i = 0;
 document.onclick = () => {
-  render.downloadImage('fdfsd')
 }
