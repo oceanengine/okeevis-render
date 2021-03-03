@@ -6,8 +6,8 @@ import Line from '../src/shapes/Line';
 import Circle from '../src/shapes/Circle';
 
 const dom = document.getElementById('root') as HTMLDivElement;
-const render = new Render(dom, {renderer: 'canvas'});
-
+const render = new Render(dom, {renderer: 'svg'});
+render.enableDirtyRect = true
 const group = new Group();
 const a = new Rect({
   key: 1,
@@ -24,7 +24,15 @@ const b = new Rect({
   y: 150,
   width: 100,
   height: 100,
-  fill: 'blue'
+  fill: 'blue',
+  shadowColor: 'red',
+  shadowBlur: 0,
+  shadowOffsetX: 0,
+  shadowOffsetY: 0,
+  onMouseEnter: e => {
+    e.target.animateTo({shadowBlur: 20});
+  },
+  onMouseLeave: e => e.target.animateTo({shadowBlur: 0})
 })
 
 const a2 = new Rect({
@@ -43,6 +51,7 @@ const b2 = new Rect({
   width: 100,
   height: 100,
   fill: 'blue',
+  
 })
 
 render.add(group);

@@ -20,6 +20,7 @@ import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
 import { Ref } from '../utils/ref';
 import { getSVGStyleAttributes, SVGAttributeMap } from '../svg/style';
+import Shadow from '../svg/Shadow';
 
 export type ElementAttr = GroupConf & ShapeConf;
 
@@ -201,6 +202,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _dragOffset: [number, number] = createVec2();
 
   private _lastFrameTime: number;
+
+  private _shadow: Shadow;
 
   public constructor(attr?: T) {
     super();
@@ -442,6 +445,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     node = null;
     return ret;
+  }
+
+  public getShadowObj(): Shadow {
+    if (!this._shadow) {
+      this._shadow = new Shadow();
+    }
+    this._shadow.setShadow(this.attr.shadowColor, this.attr.shadowBlur, this.attr.shadowOffsetX, this.attr.shadowOffsetY);
+    return this._shadow;
   }
 
   public getBBox(): BBox {

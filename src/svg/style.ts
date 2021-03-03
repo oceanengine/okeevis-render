@@ -96,6 +96,8 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     fontFamily,
     fontWeight,
     fontStyle,
+    shadowColor,
+    shadowBlur,
   } = node.attr;
   const ret: Partial<SVGElementStyle> = {};
   const matrix = node.getGlobalTransform();
@@ -175,6 +177,10 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
 
   if (miterLimit) {
     ret['stroke-miterlimit'] = miterLimit + '';
+  }
+
+  if (shadowColor && shadowBlur >= 0) {
+    ret['filter'] = `url(#${node.getShadowObj().id})`
   }
 
   return ret;

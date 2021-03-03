@@ -9,7 +9,8 @@ import Element from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
 import { fpsRect, fpsText } from './fps';
 import SVGNode from '../abstract/Node';
-import { getSVGRootAttributes, SVGAttributeMap, SVGElementStyle, } from '../svg/style';
+import { getSVGRootAttributes, SVGAttributeMap, SVGElementStyle } from '../svg/style';
+import Shadow from '../svg/Shadow';
 
 import { Gradient, LinearGradient, RadialGradient, Pattern, isGradient, isPattern } from '../color';
 
@@ -40,7 +41,7 @@ export default class SVGPainter implements Painter {
     LinearGradient | RadialGradient | Pattern
   > = new Es6Set();
 
-  private _dfsShadows: Es6Set<string> = new Es6Set();
+  private _dfsShadows: Es6Set<Shadow> = new Es6Set();
 
   private _isFirstFrame: boolean = false;
 
@@ -67,6 +68,7 @@ export default class SVGPainter implements Painter {
     if (this.render.needUpdate()) {
       this._updateGradientsAndPatterns();
       this.__updateClips();
+      this._updateShadows();
       if (this._isFirstFrame) {
         this.render.getRoot().eachChild(child => this._mountNode(this._svgRoot as any, child));
       } else {
@@ -163,6 +165,35 @@ export default class SVGPainter implements Painter {
     diffResult.removed.forEach(index => {
       this._removeNode(prevClips[index]);
     });
+  }
+
+  private _updateShadows() {
+    const prevShadows = setToArray(this._dfsShadows);
+    this._dfsShadows.clear();
+    this._getAllShadows(this.render.getRoot());
+    const currentShadows = setToArray(this._dfsShadows);
+    const diffResult = diff(prevShadows, currentShadows, obj => obj.id);
+    diffResult.added.forEach(index => {
+      const defObject = currentShadows[index];
+      const defsGradientPatterNode = this._mountDataNode(
+        this._svgDefElement,
+        defObject.getSVGNode(),
+      ) as any;
+      this._loadedDefsElements[defObject.id] = defsGradientPatterNode;
+    });
+
+    diffResult.removed.forEach(index => {
+      const defsObject = prevShadows[index];
+      const el = this._loadedDefsElements[defsObject.id];
+      el.parentNode.removeChild(el);
+      delete this._loadedDefsElements[defsObject.id];
+    });
+
+    diffResult.maintained.forEach(([from, to]) => {
+      const obj = prevShadows[from]
+      const dom = this._loadedDefsElements[obj.id].firstChild as any as SVGElement;
+      this._setElementAttr(dom, obj.getSVGNode().childNodes[0].svgAttr);
+    })
   }
 
   private _mountNode(parent: SVGElement, node: Element, isClip: boolean = false) {
@@ -316,12 +347,12 @@ export default class SVGPainter implements Painter {
   private _getAllShadows(group: Group) {
     group.eachChild(child => {
       const { shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY } = child.attr;
-      if (shadowColor && shadowBlur > 0) {
-        const key = [shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY].join('|');
-        this._dfsShadows.add(key);
+      if (shadowColor && shadowBlur >= 0) {
+        const shadow = child.getShadowObj();
+        this._dfsShadows.add(shadow);
       }
       if (child.isGroup) {
-        this._getAllDfsClips(child as Group);
+        this._getAllShadows(child as Group);
       }
     });
   }
