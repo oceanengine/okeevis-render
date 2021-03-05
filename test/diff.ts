@@ -9,6 +9,7 @@ const dom = document.getElementById('root') as HTMLDivElement;
 const render = new Render(dom, {renderer: 'canvas'});
 render.showFPS = true;
 render.showBBox = false;
+render.enableDirtyRect = false
 
 const ref = { current: null } as any;
 (window as any).render = render;
