@@ -1,7 +1,7 @@
 import Element, { defaultCanvasContext, ElementAttr, } from '../shapes/Element';
 import Group from '../shapes/Group';
 import * as mat3 from '../../js/mat3';
-import { SVG_NAMESPACE, XLINK_NAMESPACE, } from '../constant';
+import { SVG_NAMESPACE, XLINK_NAMESPACE, IDENTRY_MATRIX } from '../constant';
 import Shadow from '../svg/Shadow';
 
 import {
@@ -14,7 +14,12 @@ import {
   isPattern,
 } from '../color';
 
-const identityMatrix = mat3.create();
+function getSvgMatrix(matrix: mat3): string {
+  const transform = [matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]];
+  return `matrix(${transform.join(' ')})`;
+}
+
+// const identityMatrix = mat3.create();
 
 export interface SVGElementStyle {
   id: string;
@@ -101,17 +106,28 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     shadowBlur,
   } = node.attr;
   const ret: Partial<SVGElementStyle> = {};
-  const matrix = node.getGlobalTransform();
   const clip = node.getClipElement();
+
+  const selfMatrix = node.getTransform();
+  const dragOffset = node.getDragOffset();
+  const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
 
   if (clip) {
     ret['clip-path'] = `url(#${getClipId(clip)})`;
   }
 
-  if (!mat3.exactEquals(matrix, identityMatrix) && !node.isGroup) {
-    const transform = [matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]];
-    ret.transform = `matrix(${transform.join(' ')})`;
+  if (hasDrag || selfMatrix !== IDENTRY_MATRIX) {
+    if (!hasDrag) {
+      ret.transform = getSvgMatrix(selfMatrix)
+    } else {
+      const globalTransform = node.getGlobalTransform();
+      const parentTransform = node.parentNode.getGlobalTransform();
+      const out = mat3.create();
+      mat3.multiply(out, mat3.invert(out, parentTransform), globalTransform);
+      ret.transform = getSvgMatrix(out)
+    }
   }
+
 
   if (fill) {
     ret.fill = getSVGColor(fill);
