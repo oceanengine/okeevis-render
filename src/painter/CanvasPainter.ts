@@ -399,8 +399,8 @@ export default class CanvasPainter implements Painter {
       // todo 考虑dpr < 1 (缩放的场景)
       const w = 1;
       const h = 1;
-      canvas.width = w * this.render.dpr;
-      canvas.height = h * this.render.dpr;
+      canvas.width = Math.max(w * this.render.dpr, 1);
+      canvas.height = Math.max(h * this.render.dpr, 1);
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       this._canvas = canvas;
