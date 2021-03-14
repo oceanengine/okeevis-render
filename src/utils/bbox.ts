@@ -38,7 +38,7 @@ export function inBBox( bbox: BBox, x: number, y: number, lineWidth = 1): boolea
 export function bboxIntersect(a: BBox, b: BBox): boolean {
   return (
     Math.abs(a.x + a.width / 2 - (b.x + b.width / 2)) * 2 < a.width + b.width &&
-    Math.abs(a.y + a.height / 2) - (b.y + b.height / 2) * 2 < a.height + b.height
+    Math.abs(a.y + a.height / 2 - (b.y + b.height / 2)) * 2 < a.height + b.height
   );
 }
 
