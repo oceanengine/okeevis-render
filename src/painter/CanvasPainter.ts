@@ -169,6 +169,9 @@ export default class CanvasPainter implements Painter {
     }
     const renderBbox = {x: 0, y: 0, width: this.render.getWidth(), height: this.render.getHeight()};
     dirtyRegions = dirtyRegions.filter(region => bboxIntersect(region, renderBbox));
+    if (dirtyRegions.length === 0) {
+      return;
+    }
     this.paint(mergeDirtyRegions(dirtyRegions));
     // console.timeEnd('compute dirty rects');
   }
