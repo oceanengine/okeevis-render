@@ -137,7 +137,7 @@ const rect = new Rect({
 })
 
 
-rect.animateTo({rotation: degToRad(360)}, 5000)
+// rect.animateTo({rotation: degToRad(360)}, 5000)
 
 const polygon = new Polygon({
   fill: 'blue',
@@ -195,7 +195,7 @@ const group = new Group({
 });
 
 
-// group.setAttr({scale: [0, 0]}).animateTo({scale: [3, 3]}, 50000)
+group.setAttr({scale: [0, 0]}).animateTo({scale: [3, 3]}, 5000)
 
 group.add(arc);
 group.add(circle)

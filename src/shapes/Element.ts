@@ -890,9 +890,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public dirtyGlobalTransform() {
     this._absTransformDirty = true;
     this.dirtyClientBoundingRect();
-    if (this.ownerRender && this.ownerRender.renderer === 'svg') {
-      this.ownerRender.dirty(this);
-    }
   }
 
   public dirtyBBox() {
