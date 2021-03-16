@@ -422,21 +422,18 @@ export default class CanvasPainter implements Painter {
     this._ctx = this._canvas.getContext('2d');
   }
 
-  protected _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, computedFill: ColorValue, computedStroke: ColorValue, fillOpacity: number, strokeOpacity: number, lineWidth: number) {
-    this._ctxCount++;
-    const { clip, lineCap, lineJoin, miterLimit, stroke, fill,  fontSize, fontFamily, fontWeight, fontStyle, fontVariant, textBaseline, textAlign, blendMode, lineDashOffset, shadowBlur, shadowOffsetX, shadowOffsetY, shadowColor, lineDash, } = item.attr;
-    const selfMatrix = item.getTransform();
-    const dragOffset = item.getDragOffset();
-    const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
-
-    // clip must in front of transform
-
-    if (clip) {
+  private _applyClip(ctx: CanvasRenderingContext2D, item: Element) {
+    if (item.attr.clip) {
       ctx.beginPath();
       item.getClipElement().brush(ctx);
       ctx.clip();
     }
+  }
 
+  private _applyTransform(ctx: CanvasRenderingContext2D, item: Element) {
+    const selfMatrix = item.getTransform();
+    const dragOffset = item.getDragOffset();
+    const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
     if (hasDrag || selfMatrix !== IDENTRY_MATRIX) {
       if (!hasDrag) {
         ctx.transform(
@@ -465,6 +462,19 @@ export default class CanvasPainter implements Painter {
           globalMatrix[7],
         );
       }
+    }
+  }
+
+  private _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, computedFill: ColorValue, computedStroke: ColorValue, fillOpacity: number, strokeOpacity: number, lineWidth: number) {
+    this._ctxCount++;
+    const { lineCap, lineJoin, miterLimit, stroke, fill,  fontSize, fontFamily, fontWeight, fontStyle, fontVariant, textBaseline, textAlign, blendMode, lineDashOffset, shadowBlur, shadowOffsetX, shadowOffsetY, shadowColor, lineDash, } = item.attr;
+
+    if (item.isGroup) {
+      this._applyTransform(ctx, item);
+      this._applyClip(ctx, item);
+    } else {
+      this._applyClip(ctx, item);
+      this._applyTransform(ctx, item);
     }
 
     if (item.attr.lineWidth > 0) {
