@@ -140,7 +140,18 @@ export default class EventHandle {
       const inverMatrix = mat3.invert(matrix, absTransform);
       transformMat3(vecInverted, vecPoint, inverMatrix);
       const inShape = node.isInShape(vecInverted[0], vecInverted[1]);
-      const inClip = node.isInClip(vecInverted[0], vecInverted[1]);
+      let inClip = node.isInClip(vecInverted[0], vecInverted[1]);
+      let parentNode = node.parentNode;
+      while (parentNode && inClip) {
+        if (parentNode.attr.clip) {
+          const basePoint = parentNode.getBasePoint(x, y);
+          inClip = inClip && parentNode.isInClip(basePoint[0], basePoint[1]);
+        }
+        if (!inClip)  {
+          break;
+        }
+        parentNode = parentNode.parentNode;
+      }
       if (inShape && inClip) {
         geometryPickIndex = i;
         break;
