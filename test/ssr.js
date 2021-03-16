@@ -3,7 +3,7 @@ const canvas = createCanvas(600, 480);
 
 
 const {Render, Circle, Sector, } = require('../lib/index')
-const render = new Render(canvas)
+const render = new Render(canvas, {dpr: 2})
 render.add(new Circle({
   cx: 100,
   cy: 100,
