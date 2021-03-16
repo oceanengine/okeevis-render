@@ -621,10 +621,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
    */
   public isInClip(x: number, y: number): boolean {
    let inClip = true;
-   const [invertedX, invertedY] = this.getInvertedPoint(x, y);
    let node: Element<any> = this
+   let invertedX: number;
+   let invertedY: number;
     while (inClip && node) {
       if (node.attr.clip) {
+        [invertedX, invertedY] = node.getInvertedPoint(x, y);
         inClip = inClip && node.getClipElement().isPointInFill(invertedX, invertedY);
       }
       if (!inClip) {
