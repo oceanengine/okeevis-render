@@ -3,6 +3,7 @@ import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
+import { Vec2 } from '../utils/vec2';
 
 import {
   SyntheticEvent,
@@ -126,17 +127,20 @@ export default class EventHandle {
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;
 
+    const matrix = mat3.create();
+    const vecPoint: Vec2 = [x, y];
+    const vecInverted: Vec2 = [0, 0];
+
     for (let i = 0; i < pickNodes.length; i++) {
       const node = pickNodes[i];
       if (node.pickByGPU()) {
         continue;
       }
       const absTransform = node.getGlobalTransform();
-      const inverMatrix = mat3.invert(mat3.create(), absTransform);
-      const vec2: [number, number] = [0, 0];
-      transformMat3(vec2, [x, y], inverMatrix);
-      const inShape = node.isInShape(vec2[0], vec2[1]);
-      const inClip = node.isInClip(vec2[0], vec2[1]);
+      const inverMatrix = mat3.invert(matrix, absTransform);
+      transformMat3(vecInverted, vecPoint, inverMatrix);
+      const inShape = node.isInShape(vecInverted[0], vecInverted[1]);
+      const inClip = node.isInClip(vecInverted[0], vecInverted[1]);
       if (inShape && inClip) {
         geometryPickIndex = i;
         break;
