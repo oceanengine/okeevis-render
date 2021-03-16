@@ -57,7 +57,7 @@ export default class Image extends Shape<ImageConf> {
       );
   }
 
-  public isInShape(x: number, y: number): boolean {
+  protected isPointOnPath(x: number, y: number): boolean {
     return inBBox(this.getBBox(), x, y);
   }
 
