@@ -60,9 +60,9 @@ export default class Sector extends Shape<SectorConf> {
     }
     const delta = Math.abs(start - end);
     if (equalWithTolerance(delta, PI2) || delta > PI2) {
-      ctx.arc(cx, cy, radiusI, 0, PI2, true);
-      ctx.moveTo(cx + radius, cy);
-      ctx.arc(cx, cy, radius, PI2, 0, false);
+      ctx.arc(cx, cy, radius, PI2, 0, true);
+      ctx.moveTo(cx + radiusI, cy);
+      ctx.arc(cx, cy, radiusI, 0, PI2, false);
       return;
     }
     const anticlockwise = end < start;
