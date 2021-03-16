@@ -126,32 +126,16 @@ export default class EventHandle {
 
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;
-
-    const matrix = mat3.create();
-    const vecPoint: Vec2 = [x, y];
-    const vecInverted: Vec2 = [0, 0];
-
+    let inShape: boolean;
+    let inClip: boolean;
+    let node: Element;
     for (let i = 0; i < pickNodes.length; i++) {
-      const node = pickNodes[i];
+      node = pickNodes[i];
       if (node.pickByGPU()) {
         continue;
       }
-      const absTransform = node.getGlobalTransform();
-      const inverMatrix = mat3.invert(matrix, absTransform);
-      transformMat3(vecInverted, vecPoint, inverMatrix);
-      const inShape = node.isInShape(vecInverted[0], vecInverted[1]);
-      let inClip = node.isInClip(vecInverted[0], vecInverted[1]);
-      let parentNode = node.parentNode;
-      while (parentNode && inClip) {
-        if (parentNode.attr.clip) {
-          const basePoint = parentNode.getBasePoint(x, y);
-          inClip = inClip && parentNode.isInClip(basePoint[0], basePoint[1]);
-        }
-        if (!inClip)  {
-          break;
-        }
-        parentNode = parentNode.parentNode;
-      }
+      inShape = node.isInShape(x, y);
+      inClip = node.isInClip(x, y);
       if (inShape && inClip) {
         geometryPickIndex = i;
         break;

@@ -14,8 +14,8 @@ const clip = new Rect({
 })
 
 const group = new Group({
-  
-
+  translateX: 100,
+  clip,
 });
 const rect = new Rect({
   x: 0,
@@ -23,8 +23,9 @@ const rect = new Rect({
   width: 100,
   height: 100,
   fill: 'blue',
-  translateX: 100,
-  clip,
+ 
+  cursor: 'pointer',
+  onMouseEnter: e => console.log(e)
 })
 
 group.add(rect)

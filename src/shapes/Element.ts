@@ -189,9 +189,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _absTransform: mat3;
 
+  private _invertedMatrix: mat3;
+
   private _transformDirty: boolean = false;
 
   private _absTransformDirty: boolean = true; // 自身或祖先矩阵变化
+
+  private _invertedMatrixDirty: boolean = true;
 
   private _clientBoundingRect: BBox;
 
@@ -600,12 +604,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   };
 
 
-  /**
-   *
-   * @param x inverted x
-   * @param y inverted y
-   */
-  public isInShape(x: number, y: number): boolean {
+  public isInShape(ox: number, oy: number): boolean {
+    const [x, y] = this.getInvertedPoint(ox, oy);
     const hasFill = this.hasFill();
     const hasStroke = this.hasStroke();
     const lineWidth = this.getExtendAttr('lineWidth') + (this.attr.pickingBuffer || 0);
@@ -620,10 +620,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
    * @param y inverted y
    */
   public isInClip(x: number, y: number): boolean {
-    if (this.attr.clip) {
-      return this.getClipElement().isPointInFill(x, y);
+   let inClip = true;
+   const [invertedX, invertedY] = this.getInvertedPoint(x, y);
+   let node: Element<any> = this
+    while (inClip && node) {
+      if (node.attr.clip) {
+        inClip = inClip && node.getClipElement().isPointInFill(invertedX, invertedY);
+      }
+      if (!inClip) {
+        break;
+      }
+      node = node.parentNode;
     }
-    return true;
+    return inClip;
   }
   
 
@@ -634,14 +643,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  public getBasePoint(x: number, y: number): [number, number] {
-    const globalTransform = this.getGlobalTransform();
-    const inverMatrix = mat3.invert(mat3.create(), globalTransform);
+  public getInvertedPoint(x: number, y: number): [number, number] {
+    const inverMatrix = this.getInvertedGlobalTransform();
     const vec2: [number, number] = [0, 0];
     transformMat3(vec2, [x, y], inverMatrix);
     return vec2;
   }
-
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
     x && y && lineWidth;
@@ -862,6 +869,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._absTransform;
   }
 
+  public getInvertedGlobalTransform() {
+    if (!this._invertedMatrix || this._invertedMatrixDirty) {
+      if (!this._invertedMatrix) {
+        this._invertedMatrix = mat3.create();
+      }
+      this._invertedMatrix = mat3.invert(this._invertedMatrix, this.getGlobalTransform());
+      this._invertedMatrixDirty = false;
+    }
+    return this._invertedMatrix;
+  }
+
   public dirtyClientBoundingRect() {
     this._clientBoundingRectDirty = true;
     this.parentNode?.dirtyBBox();
@@ -895,6 +913,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public dirtyGlobalTransform() {
     this._absTransformDirty = true;
+    this._invertedMatrixDirty = true;
     this.dirtyClientBoundingRect();
     if (this.ownerRender && this.ownerRender.renderer === 'svg' && this.attr.strokeNoScale) {
       this.ownerRender.dirty(this);
