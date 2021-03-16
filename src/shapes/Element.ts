@@ -614,10 +614,18 @@ export default class Element<T extends CommonAttr = ElementAttr>
     )
   }
 
+  /**
+   *
+   * @param x inverted x
+   * @param y inverted y
+   */
   public isInClip(x: number, y: number): boolean {
-    const clips = this.getClipList();
-    return clips.every(clip => clip.isPointInFill(x, y));
+    if (this.attr.clip) {
+      return this.getClipElement().isPointInFill(x, y);
+    }
+    return true;
   }
+  
 
   public dirtyClipTarget(clip: Element) {
     const myclip = this.getClipElement();
@@ -626,16 +634,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  public getClipList(): Element[] {
-    const clips: Element[] = [];
-    let node: any = this;
-    while (node) {
-      const clip = node.getClipElement();
-      clip && clips.push(clip);
-      node = node.parentNode;
-    }
-    return clips;
+  public getBasePoint(x: number, y: number): [number, number] {
+    const globalTransform = this.getGlobalTransform();
+    const inverMatrix = mat3.invert(mat3.create(), globalTransform);
+    const vec2: [number, number] = [0, 0];
+    transformMat3(vec2, [x, y], inverMatrix);
+    return vec2;
   }
+
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
     x && y && lineWidth;
