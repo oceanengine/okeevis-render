@@ -270,7 +270,7 @@ export default class SVGPainter implements Painter {
       console.warn(`remove node has no parentNode`, node);
     }
     if (node.isClip) {
-      el.parentNode.parentNode.removeChild(el.parentNode);
+      el.parentNode?.parentNode.removeChild(el.parentNode);
     } else {
       el.parentNode?.removeChild(el);
     }
