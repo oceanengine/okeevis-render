@@ -523,7 +523,7 @@ export default class CanvasPainter implements Painter {
 
     /** 渐变样式无法继承 */
     if (!fill && isGradient(computedFill) && item.type !== 'group') {
-      styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, computedFill, item));
+      styleHelper.setFillStyle(ctx, getCtxColor(ctx, computedFill, item));
     }
 
     // todo 兼容小程序
