@@ -139,7 +139,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   if (lineWidth !== undefined && lineWidth >= 0) {
     ret['stroke-width'] = (node.attr.strokeNoScale ? node.getExtendAttr('lineWidth') : lineWidth) + '';
   }
-  if (opacity !== undefined && opacity !== 1) {
+  if (opacity !== undefined) {
     ret.opacity = opacity + '';
   }
   if (fillOpacity !== undefined) {
