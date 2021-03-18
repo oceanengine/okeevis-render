@@ -206,7 +206,7 @@ export default class Text extends Shape<TextConf> {
     return bbox;
   }
 
-  public isInShape(x: number, y: number): boolean {
+  protected isPointOnPath(x: number, y: number): boolean {
     return inBBox(this.getBBox(), x, y);
   }
 

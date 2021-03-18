@@ -603,9 +603,18 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return false;
   };
 
-
+  /**
+   * 未转换过的坐标
+   */
   public isInShape(ox: number, oy: number): boolean {
     const [x, y] = this.getInvertedPoint(ox, oy);
+    return this.isPointOnPath(x, y);
+  }
+
+  /**
+   * 转换过的坐标
+   */
+  protected isPointOnPath(x: number, y: number) {
     const hasFill = this.hasFill();
     const hasStroke = this.hasStroke();
     const lineWidth = this.getExtendAttr('lineWidth') + (this.attr.pickingBuffer || 0);

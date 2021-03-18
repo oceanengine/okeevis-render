@@ -385,6 +385,8 @@ export default class CanvasPainter implements Painter {
     const dpr = this.dpr;
     if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
       this._canvas = dom as HTMLCanvasElement;
+      this._canvas.width = width * dpr;
+      this._canvas.height = height * dpr;
     } else {
       const canvas = document.createElement('canvas');
       canvas.width = width * dpr;
