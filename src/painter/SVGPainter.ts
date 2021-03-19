@@ -266,11 +266,12 @@ export default class SVGPainter implements Painter {
 
   private _removeNode(node: Element) {
     const el = this._loadedSVGElements[node.id];
-    if (!el.parentNode) {
-      console.warn(`remove node has no parentNode`, node);
+    if (!el) {
+      node.clearDirty();
+      return;
     }
     if (node.isClip) {
-      el.parentNode.parentNode.removeChild(el.parentNode);
+      el.parentNode?.parentNode.removeChild(el.parentNode);
     } else {
       el.parentNode?.removeChild(el);
     }

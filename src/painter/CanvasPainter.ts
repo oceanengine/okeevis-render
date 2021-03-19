@@ -17,6 +17,7 @@ const contextKeys: Array<keyof ShapeConf> = [
   'fontSize',
   'blendMode',
   'lineCap',
+  'opacity',
   'fillOpacity',
   'strokeOpacity',
   'lineDashOffset',
@@ -522,7 +523,7 @@ export default class CanvasPainter implements Painter {
 
     /** 渐变样式无法继承 */
     if (!fill && isGradient(computedFill) && item.type !== 'group') {
-      styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, computedFill, item));
+      styleHelper.setFillStyle(ctx, getCtxColor(ctx, computedFill, item));
     }
 
     // todo 兼容小程序
@@ -590,6 +591,7 @@ export default class CanvasPainter implements Painter {
     if (fillOpacity !== 1 || strokeOpacity !== 1) {
       return true;
     }
+    
     const dragOffset = item.getDragOffset();
     const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
     if (hasDrag || item.getTransform() !== IDENTRY_MATRIX) {
