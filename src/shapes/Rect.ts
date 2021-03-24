@@ -49,6 +49,9 @@ export default class Rect extends Shape<RectConf> {
         let r3: number;
         let r4: number;
         if (lodash.isArray(r)) {
+            if (r.length === 0) {
+              r1 = r2 = r3 = r4 = 0;
+            }
             if (r.length === 1) {
               r1 = r2 = r3 = r4 = r[0];
             } else if (r.length === 2) {
@@ -58,7 +61,7 @@ export default class Rect extends Shape<RectConf> {
               r1 = r[0];
               r2 = r4 = r[1];
               r3 = r[2];
-            } else if (r.length === 4) {
+            } else if (r.length >= 4) {
               [r1, r2, r3, r4] = r;
             }
         } else {
