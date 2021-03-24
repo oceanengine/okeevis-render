@@ -421,14 +421,12 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     const prevAttr = prevElement.attr;
     const nextAttr = nextElement.attr;
     const {transitionDuration = defaultSetting.during, transitionEase = defaultSetting.ease, transitionProperty = 'all', transitionDelay = 0 } = nextElement.attr;
-    const deleteKeys: string[] = [];
+    
     for (let key in prevAttr) {
       if (!(key in nextAttr)) {
-        deleteKeys.push(key);
+        prevElement.removeAttr(key as any)
       }
     }
-    
-    deleteKeys.forEach(delKey => prevElement.removeAttr(delKey as any));
     
     if (transitionProperty === 'none' || transitionProperty.length === 0) {
       for (let key in nextAttr) {
