@@ -193,6 +193,7 @@ export default class Sector extends Shape<SectorConf> {
 
   public isPointInFill(x: number, y: number): boolean {
     const { cx, cy, radius, radiusI, start, end } = this.attr;
+    // todo round
     return isPointInSector(cx, cy, radius, radiusI, start, end, x, y);
   }
 
@@ -202,7 +203,12 @@ export default class Sector extends Shape<SectorConf> {
   }
 
   protected computeBBox(): BBox {
-    const { cx, cy, radius, radiusI, start, end } = this.attr;
+    let { cx, cy, radius, radiusI, start, end, round } = this.attr;
+    if (round) {
+      const delta = Math.asin((radius - radiusI) / radius) * (end > start ? 1 : -1);
+      start -= delta;
+      end += delta;
+    }
     return sectorBBox(cx, cy, radius, radiusI, start, end);
   }
 }
