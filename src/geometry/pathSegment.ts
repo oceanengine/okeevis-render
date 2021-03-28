@@ -74,22 +74,7 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
 
     if (action === 'rect') {
       out.push({
-        action: 'lineTo',
-        length: 0,
-        params: [0, 1]
-      })
-      out.push({
-        action: 'lineTo',
-        length: 0,
-        params: [0, 1]
-      })
-      out.push({
-        action: 'lineTo',
-        length: 0,
-        params: [0, 1]
-      })
-      out.push({
-        action: 'lineTo',
+        action,
         length: 0,
         params: [0, 1]
       })
