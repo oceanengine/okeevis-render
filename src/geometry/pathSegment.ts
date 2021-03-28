@@ -110,4 +110,5 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
       })
     }
   }
+  return out;
 }
