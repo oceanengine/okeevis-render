@@ -74,6 +74,9 @@ export default class Polyline extends Shape<PolylineConf> {
   }
 
   protected computeBBox(): BBox {
+    if (!this.attr.smooth) {
+      return polygonBBox(this.attr.pointList);
+    }
     return this.getPathData().getPathBBox();
   }
 
