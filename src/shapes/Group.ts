@@ -124,6 +124,36 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._mountNode(item);
   }
 
+  // https://developer.mozilla.org/zh-CN/docs/Web/API/Node/insertBefore
+  public insertBefore(newNode: T, refNode: T | null) {
+    if (!refNode) {
+      return this.add(newNode);
+    }
+    if (refNode.prevSibling === newNode || refNode.parentNode !== this || newNode === refNode) {
+      return;
+    }
+    if (newNode.parentNode) {
+      newNode.parentNode.remove(newNode);
+      if (this.ownerRender?.renderer === 'svg') {
+        const newDom = this._findSVGDomNode(newNode);
+        const prevDom = this._findSVGDomNode(refNode);
+        if (newDom && prevDom && prevDom.parentNode) {
+          prevDom.parentNode.insertBefore(newDom, prevDom);
+        }
+      }
+    }
+    newNode.nextSibling = refNode;
+    if (refNode.prevSibling) {
+      refNode.prevSibling.nextSibling = newNode;
+      newNode.prevSibling = refNode.prevSibling;
+    } else {
+      this.firstChild = newNode;
+    }
+    refNode.prevSibling = newNode;
+    this._length += 1;
+    this._mountNode(newNode);
+  }
+
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
     return this;
