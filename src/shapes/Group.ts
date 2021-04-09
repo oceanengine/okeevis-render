@@ -125,34 +125,34 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   // https://developer.mozilla.org/zh-CN/docs/Web/API/Node/insertBefore
-  public insertBefore(newNode: T, refNode: T | null) {
-    if (!refNode) {
-      return this.add(newNode);
-    }
-    if (refNode.prevSibling === newNode || refNode.parentNode !== this || newNode === refNode) {
-      return;
-    }
-    if (newNode.parentNode) {
-      newNode.parentNode.remove(newNode);
-      if (this.ownerRender?.renderer === 'svg') {
-        const newDom = this._findSVGDomNode(newNode);
-        const prevDom = this._findSVGDomNode(refNode);
-        if (newDom && prevDom && prevDom.parentNode) {
-          prevDom.parentNode.insertBefore(newDom, prevDom);
-        }
-      }
-    }
-    newNode.nextSibling = refNode;
-    if (refNode.prevSibling) {
-      refNode.prevSibling.nextSibling = newNode;
-      newNode.prevSibling = refNode.prevSibling;
-    } else {
-      this.firstChild = newNode;
-    }
-    refNode.prevSibling = newNode;
-    this._length += 1;
-    this._mountNode(newNode);
-  }
+  // public insertBefore(newNode: T, refNode: T | null) {
+  //   if (!refNode) {
+  //     return this.add(newNode);
+  //   }
+  //   if (refNode.prevSibling === newNode || refNode.parentNode !== this || newNode === refNode) {
+  //     return;
+  //   }
+  //   if (newNode.parentNode) {
+  //     newNode.parentNode.remove(newNode);
+  //     if (this.ownerRender?.renderer === 'svg') {
+  //       const newDom = this._findSVGDomNode(newNode);
+  //       const prevDom = this._findSVGDomNode(refNode);
+  //       if (newDom && prevDom && prevDom.parentNode) {
+  //         prevDom.parentNode.insertBefore(newDom, prevDom);
+  //       }
+  //     }
+  //   }
+  //   newNode.nextSibling = refNode;
+  //   if (refNode.prevSibling) {
+  //     refNode.prevSibling.nextSibling = newNode;
+  //     newNode.prevSibling = refNode.prevSibling;
+  //   } else {
+  //     this.firstChild = newNode;
+  //   }
+  //   refNode.prevSibling = newNode;
+  //   this._length += 1;
+  //   this._mountNode(newNode);
+  // }
 
   public addAll(items: T[]): this {
     items.forEach(item => this.add(item));
@@ -301,6 +301,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       this.addAll(list);
       return;
     }
+    const nextList = prevList.slice();
 
     const result = diff(prevList, list, (item, index) => {
       const attr = item.attr;
@@ -309,6 +310,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     });
 
     result.removed.forEach(index => {
+      nextList.splice(index, 1);
       const node = prevList[index]
       const parentNode = node.parentNode;
       node.parentNode = this;
@@ -319,7 +321,8 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     });
 
     result.ordered.forEach(([from, to], i) => {
-      // todo
+      nextList.splice(from, 1);
+      nextList.splice(to, 0, list[result.pureChanged[i][1]]);
     });
 
     result.maintained.forEach(([from, to]) => {
@@ -343,9 +346,18 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
      this._diffUpdateElement(prevElement, nextElement);
     });
+
     result.added.forEach(index => {
       this.add(list[index]);
+      nextList.splice(index, 0, list[index]);
     });
+
+    this.firstChild = nextList[0];
+    this.lastChild = nextList[nextList.length - 1];
+    for (let i= 0 ; i < nextList.length; i++) {
+      nextList[i].prevSibling = nextList[i - 1];
+      nextList[i].nextSibling = nextList[i + 1];
+    }
   }
 
   public eachChild(callback: (child: T) => any) {
