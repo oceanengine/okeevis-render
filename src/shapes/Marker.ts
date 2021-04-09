@@ -41,6 +41,7 @@ export default class Marker extends Element<MarkerAttr> {
     const point = path.getPointAtPercent(1);
     const ctx = painter.getContext();
     ctx.save();
+    ctx.translate(point[0], point[1]);
     painter.drawElement(ctx, this.attr.shape);
     ctx.restore();
   }

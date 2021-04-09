@@ -74,19 +74,10 @@ export default class Polyline extends Shape<PolylineConf> {
   }
 
   protected computeBBox(): BBox {
-    let points = this.attr.pointList || [];
-    if (this.attr.smooth && this.attr.smoothType === 'bezier') {
-      points = lodash.flatten(bezierSmooth(
-        points,
-        this.type === 'polygon',
-        this.attr.smoothConstraint,
-        this.attr.smoothMonotone,
-      ))
+    if (!this.attr.smooth) {
+      return polygonBBox(this.attr.pointList);
     }
-    if (this.attr.smooth && this.attr.smoothType === 'spline') {
-      points = catmullRom(points, false, 100);
-    }
-    return polygonBBox(points|| []);
+    return this.getPathData().getPathBBox();
   }
 
   public isPointInFill(x: number, y: number): boolean {

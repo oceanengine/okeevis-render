@@ -1,5 +1,5 @@
 import parsePath from './parsePath';
-import { BBox, unionBBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
+import { BBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
 import { equalWithTolerance, getPointOnPolar } from '../utils/math';
 import canvasToSvgPath from './canvasToSvgPath';
 
