@@ -33,6 +33,7 @@ export function setFontStyle(
   if (!ctx.setFontSize) {
     ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
   } else {
+    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
     ctx.setFontSize(fontSize);
   }
 }
