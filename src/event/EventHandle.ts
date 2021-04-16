@@ -291,6 +291,7 @@ export default class EventHandle {
   private _syntheticTouchEvent = (nativeEvent: TouchEvent, isNative: boolean = true) => {
     const { touches, changedTouches } = nativeEvent;
     const prevMouseTarget = this._prevMouseTarget;
+    this._lastMouseSyntheticTimestamp = Date.now();
     let allTouches = [...toTouchArray(touches), ...toTouchArray(changedTouches)];
     allTouches = lodash.uniq(allTouches) as Touch[];
     const touchesList: SyntheticTouch[] = allTouches.map(touch => {
