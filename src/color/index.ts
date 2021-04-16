@@ -7,12 +7,12 @@ import Element from '../shapes/Element';
 import * as lodash from '../utils/lodash';
 import { NAME_TRANSPARENT, RGBA_TRANSPARENT } from '../constant';
 
+export { Color };
 export type ColorValue = 'none' | string | LinearGradient | RadialGradient | Pattern | null;
-
 export { Gradient, LinearGradient, RadialGradient, Pattern };
 
 function brightenStringColor(color: string, ration: number): string {
-  const out  = Color(color).lighten(ration)
+  const out = Color(color).lighten(ration);
   const alpha = out.alpha();
   const red = out.red();
   const green = out.green();

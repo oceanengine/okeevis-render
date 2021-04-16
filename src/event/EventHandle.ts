@@ -3,7 +3,6 @@ import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
-import { Vec2 } from '../utils/vec2';
 
 import {
   SyntheticEvent,
@@ -18,8 +17,6 @@ import { SyntheticWheelEventParams } from './SyntheticWheelEvent';
 import { SyntheticTouchEventParams, SyntheticTouch } from './SyntheticTouchEvent';
 
 import { inBBox } from '../utils/bbox';
-import * as mat3 from '../../js/mat3';
-import { transformMat3 } from '../utils/vec2';
 import * as lodash from '../utils/lodash';
 
 function toTouchArray(touches: TouchList): Touch[] {
@@ -54,8 +51,6 @@ export default class EventHandle {
   private _dragStartMouse: { x: number; y: number } | null = null;
 
   private _dragStartTouchId: number;
-
-  private _prevTouchTarget: Record<number, Element> | null = null;
 
   private _eventOnly: boolean;
 
@@ -285,33 +280,7 @@ export default class EventHandle {
         this.render.getDom().style.cursor = cursor;
       }
       if (prevMouseTarget !== target) {
-        const mouseoutEvent = new SyntheticMouseEvent('mouseout', event);
-        const mouseoverEvent = new SyntheticMouseEvent('mouseover', event);
-        this._dispatchSyntheticEvent(mouseoutEvent, prevMouseTarget);
-        this._dispatchSyntheticEvent(mouseoverEvent, target);
-        const containSelf = true;
-        const prevTargetParentNodes = prevMouseTarget
-          ? prevMouseTarget.getAncestorNodes(containSelf)
-          : [];
-        const currentTargetParentNodes = target.getAncestorNodes(containSelf);
-        prevTargetParentNodes.forEach(prevNode => {
-          if (!prevNode.contains(target)) {
-            const mouseleaveEvent = new SyntheticMouseEvent('mouseleave', {
-              ...mouseEventParam,
-              bubbles: false,
-            });
-            this._dispatchSyntheticEvent(mouseleaveEvent, prevNode);
-          }
-        });
-        currentTargetParentNodes.forEach(currentNode => {
-          if (!currentNode.contains(prevMouseTarget)) {
-            const mouseenterEvent = new SyntheticMouseEvent('mouseenter', {
-              ...mouseEventParam,
-              bubbles: false,
-            });
-            this._dispatchSyntheticEvent(mouseenterEvent, currentNode);
-          }
-        });
+        this._synthetickOverOutEvent(prevMouseTarget, target, mouseEventParam);
       }
     }
 
@@ -321,7 +290,8 @@ export default class EventHandle {
 
   private _syntheticTouchEvent = (nativeEvent: TouchEvent, isNative: boolean = true) => {
     const { touches, changedTouches } = nativeEvent;
-
+    const prevMouseTarget = this._prevMouseTarget;
+    this._lastMouseSyntheticTimestamp = Date.now();
     let allTouches = [...toTouchArray(touches), ...toTouchArray(changedTouches)];
     allTouches = lodash.uniq(allTouches) as Touch[];
     const touchesList: SyntheticTouch[] = allTouches.map(touch => {
@@ -435,6 +405,24 @@ export default class EventHandle {
         this._dragStartMouse = null;
         this._prevMousePosition = null;
       }
+    }
+
+    // 合成mouseover mouseout
+    if (changedTouches.length) {
+      const target = synthetichChangedTouches[0].target;
+      if (target !== prevMouseTarget) {
+        const mouseEventParam: SyntheticMouseEventParams = {
+          x: synthetichChangedTouches[0].x,
+          y: synthetichChangedTouches[0].y,
+          bubbles: true,
+          original: nativeEvent,
+          timeStamp: nativeEvent.timeStamp,
+        };
+        this._synthetickOverOutEvent(prevMouseTarget, target, mouseEventParam);
+      }
+      this._prevMouseTarget = target;
+    } else {
+      this._prevMouseTarget = null;
     }
   };
 
@@ -671,4 +659,34 @@ export default class EventHandle {
       false,
     );
   };
+
+  private _synthetickOverOutEvent(prevMouseTarget: Element, target: Element, mouseEventParam: SyntheticMouseEventParams) {
+    const mouseoutEvent = new SyntheticMouseEvent('mouseout', mouseEventParam);
+    const mouseoverEvent = new SyntheticMouseEvent('mouseover', mouseEventParam);
+    this._dispatchSyntheticEvent(mouseoutEvent, prevMouseTarget);
+    this._dispatchSyntheticEvent(mouseoverEvent, target);
+    const containSelf = true;
+    const prevTargetParentNodes = prevMouseTarget
+      ? prevMouseTarget.getAncestorNodes(containSelf)
+      : [];
+    const currentTargetParentNodes = target.getAncestorNodes(containSelf);
+    prevTargetParentNodes.forEach(prevNode => {
+      if (!prevNode.contains(target)) {
+        const mouseleaveEvent = new SyntheticMouseEvent('mouseleave', {
+          ...mouseEventParam,
+          bubbles: false,
+        });
+        this._dispatchSyntheticEvent(mouseleaveEvent, prevNode);
+      }
+    });
+    currentTargetParentNodes.forEach(currentNode => {
+      if (!currentNode.contains(prevMouseTarget)) {
+        const mouseenterEvent = new SyntheticMouseEvent('mouseenter', {
+          ...mouseEventParam,
+          bubbles: false,
+        });
+        this._dispatchSyntheticEvent(mouseenterEvent, currentNode);
+      }
+    });
+  }
 }
