@@ -442,7 +442,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     } else {
       // 中间节点
       item.prevSibling.nextSibling = item.nextSibling;
-      item.nextSibling.prevSibling = item.prevSibling;
+      if (item.nextSibling) {
+        item.nextSibling.prevSibling = item.prevSibling;
+      }
       item.prevSibling = this.lastChild;
       this.lastChild.nextSibling = item;
       item.nextSibling = null;
