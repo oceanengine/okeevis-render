@@ -83,16 +83,17 @@ export default class Text extends Shape<TextConf> {
 
   public eachSpanList(callback: (text: string, x: number, y: number) => void) {
     const { x, y } = this.attr;
-    const { lineHeight, textBaseline } = this.getTextStyle();
+    const { fontSize, lineHeight, textBaseline } = this.getTextStyle();
     const textList = this._getInlineTextList();
+    const gap  = (lineHeight - fontSize) / 2;;
     textList.forEach((rowText, rowIndex) => {
       let rowY: number = y;
       if (textBaseline === 'top') {
-        rowY = y + rowIndex * lineHeight;
+        rowY = y + rowIndex * lineHeight + gap;
       } else if (textBaseline === 'middle') {
         rowY = y + (rowIndex + 0.5 - textList.length / 2) * lineHeight;
       } else if (textBaseline === 'bottom') {
-        rowY = y - (textList.length - 1 - rowIndex) * lineHeight;
+        rowY = y - (textList.length - 1 - rowIndex) * lineHeight - gap;
       }
       callback(rowText, x, rowY);
     });
@@ -103,6 +104,11 @@ export default class Text extends Shape<TextConf> {
     if (this._isEmpty) {
       return;
     }
+    // ctx.save();
+    // ctx.arc(this.attr.x, this.attr.y, 4, 0 , Math.PI * 2);
+    // ctx.fillStyle = 'red';
+    // ctx.fill();
+    // ctx.restore();
     const text = _text + '';
     const { needFill, needStroke } = this;
 
