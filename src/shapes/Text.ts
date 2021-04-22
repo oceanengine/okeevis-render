@@ -165,7 +165,7 @@ export default class Text extends Shape<TextConf> {
     }
     const { x, y } = this.attr;
     const textStyle = this.getTextStyle();
-    const { textAlign, textBaseline, lineHeight } = textStyle;
+    const { fontSize, textAlign, textBaseline, lineHeight } = textStyle;
     let textWidth: number;
     let textHeight: number;
 
@@ -174,7 +174,7 @@ export default class Text extends Shape<TextConf> {
       textHeight = lineHeight;
     } else {
       const inlineTextList = this._getInlineTextList();
-      textHeight = inlineTextList.length * lineHeight;
+      textHeight = inlineTextList.length * lineHeight - (lineHeight - fontSize);
       textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width)) || 0;
     }
 
