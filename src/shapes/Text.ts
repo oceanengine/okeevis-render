@@ -171,7 +171,7 @@ export default class Text extends Shape<TextConf> {
 
     if (!this.isMutiLine) {
       textWidth = measureText(this.attr.text + '', textStyle).width;
-      textHeight = lineHeight;
+      textHeight = fontSize;
     } else {
       const inlineTextList = this._getInlineTextList();
       textHeight = inlineTextList.length * lineHeight - (lineHeight - fontSize);
