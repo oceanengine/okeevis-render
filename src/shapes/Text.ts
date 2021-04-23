@@ -180,7 +180,7 @@ export default class Text extends Shape<TextConf> {
       textHeight = fontSize;
     } else {
       const inlineTextList = this._getInlineTextList();
-      textHeight = inlineTextList.length * lineHeight - (lineHeight - fontSize);
+      textHeight = inlineTextList.length * lineHeight;
       textWidth = lodash.max(inlineTextList.map(text => measureText(text, textStyle).width)) || 0;
     }
 
