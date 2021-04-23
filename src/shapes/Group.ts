@@ -322,9 +322,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
     result.ordered.forEach(([from, to], i) => {
       nextList.splice(from, 1);
-      nextList.splice(to, 0, prevList[from]);
+      nextList.splice(to, 0, prevList[result.pureChanged[i][0]]);
     });
-
+    
     result.maintained.forEach(([from, to]) => {
       const prevElement = prevList[from];
       const nextElement = list[to];
