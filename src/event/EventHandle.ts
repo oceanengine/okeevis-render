@@ -150,21 +150,23 @@ export default class EventHandle {
       // todo 考虑小程序getImageData兼容
       // const prevImageData = pixelPainter.getImageData(x, y);
       const imageData = pixelPainter.getImageData(0, 0, 1, 1);
-      const pickValue = imageData.data;
-      const r0 = pickValue[0];
-      const g0 = pickValue[1];
-      const b0 = pickValue[2];
+      if (imageData) {
+        const pickValue = imageData.data;
+        const r0 = pickValue[0];
+        const g0 = pickValue[1];
+        const b0 = pickValue[2];
 
-      for (let i = 0; i < pickNodes.length; i++) {
-        const node = pickNodes[i];
-        if (!node.pickByGPU()) {
-          continue;
-        }
-        const [r, g, b] = node.pickRGB;
-        const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
-        if (gap < 3) {
-          gpuPickIndex = i;
-          break;
+        for (let i = 0; i < pickNodes.length; i++) {
+          const node = pickNodes[i];
+          if (!node.pickByGPU()) {
+            continue;
+          }
+          const [r, g, b] = node.pickRGB;
+          const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
+          if (gap < 3) {
+            gpuPickIndex = i;
+            break;
+          }
         }
       }
     }
@@ -662,7 +664,11 @@ export default class EventHandle {
     );
   };
 
-  private _synthetickOverOutEvent(prevMouseTarget: Element, target: Element, mouseEventParam: SyntheticMouseEventParams) {
+  private _synthetickOverOutEvent(
+    prevMouseTarget: Element,
+    target: Element,
+    mouseEventParam: SyntheticMouseEventParams,
+  ) {
     const mouseoutEvent = new SyntheticMouseEvent('mouseout', mouseEventParam);
     const mouseoverEvent = new SyntheticMouseEvent('mouseover', mouseEventParam);
     this._dispatchSyntheticEvent(mouseoutEvent, prevMouseTarget);

@@ -2,16 +2,16 @@ import Render from '../src/render'
 import Text from '../src/shapes/Text'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {renderer: 'svg'})
+const render = new Render(dom, {renderer: 'canvas'})
 render.showFPS = true;
 render.showBBox = true;
 const fontSize = 30;
 const textAlign = 'left'
 const text = 'Tenfdsfdsdddddddddddddfdsst'
-const textBaseline = 'middle'
+const textBaseline = 'bottom'
 const y = 200;
 const lineHeight = 40;
-const truncate = undefined as any
+const truncate = {outerWidth: 100} as any
 const maxWidth = 1000;
 const textEl = new Text({
   draggable: true,

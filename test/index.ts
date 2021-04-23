@@ -1,1 +1,1 @@
-import './performance'
+import './text'
