@@ -16,8 +16,9 @@ import Wheel from '../src/event/SyntheticWheelEvent'
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom, {renderer: 'canvas'});
-render.showFPS = true;
+render.showFPS = false;
 const data = (window as any).data as any
+(window as any).render = render;
 
 const rootGroup = new Group({
   draggable: true,
