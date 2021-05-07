@@ -557,15 +557,26 @@ export default class EventHandle {
       return;
     }
     const dom = this.render.getDom();
-    dom.addEventListener('wheel', this._syntheticMouseEvent);
+    // https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/addEventListener
+    let passiveSupported = false;
+    try {
+      const options = Object.defineProperty({}, "passive", {
+        get: function() {
+          passiveSupported = true;
+        }
+      });
+
+      window.addEventListener("test", null, options);
+    } catch(err) {}
+    dom.addEventListener('wheel', this._syntheticMouseEvent, passiveSupported ? { passive: false } : false);
     dom.addEventListener('contextmenu', this._syntheticMouseEvent);
     dom.addEventListener('mousedown', this._syntheticMouseEvent);
     dom.addEventListener('mouseup', this._syntheticMouseEvent);
     dom.addEventListener('mousemove', this._syntheticMouseEvent);
     dom.addEventListener('click', this._syntheticMouseEvent);
     dom.addEventListener('dblclick', this._syntheticMouseEvent);
-    dom.addEventListener('touchstart', this._syntheticTouchEvent);
-    dom.addEventListener('touchmove', this._syntheticTouchEvent);
+    dom.addEventListener('touchstart', this._syntheticTouchEvent, passiveSupported ? { passive: true } : false);
+    dom.addEventListener('touchmove', this._syntheticTouchEvent, passiveSupported ? { passive: false } : false);
     dom.addEventListener('touchend', this._syntheticTouchEvent);
     dom.addEventListener('touchcancel', this._syntheticTouchEvent);
     dom.addEventListener('mouseleave', this._handleMouseLeave);
