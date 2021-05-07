@@ -96,8 +96,8 @@ export default class Render extends EventFul {
       this._height = option.height || 150;
     }
     this._eventHandle = new EventHandle(this);
-    this._eventElementHandle = new EventHandle(this, true)
-    this._loop();
+    this._eventElementHandle = new EventHandle(this, true);
+    this.nextTick();
   }
 
   public resize(width: number, height: number) {
@@ -107,15 +107,17 @@ export default class Render extends EventFul {
   }
 
   public refresh() {
-    this.dirty();
+    this._needUpdate = true;
+    this.nextTick();
   }
 
   public refreshImmediately() {
-    this.dirty();
+    this._needUpdate = true;
     this._onFrame();
   }
 
   public dirty(el?: Element<any>) {
+    this.nextTick();
     this._needUpdate = true;
     // todo svg下不能限制dirtyElements数量
     if (el && this._renderer === 'svg') {
@@ -248,6 +250,7 @@ export default class Render extends EventFul {
     if (this._disposed || this._isOnframe) {
       return;
     }
+    this._requestAnimationFrameId = null;
     this._isOnframe = true;
     this._rootGroup.onFrame(now);
     this._painter?.onFrame(now);
@@ -263,11 +266,12 @@ export default class Render extends EventFul {
     if (timeRemaining > 5) {
       this._rootGroup.getBoundingClientRect();
     }
-    requestAnimationFrame(this._onFrame);
     this._isOnframe = false;
   };
 
-  private _loop() {
-    this._requestAnimationFrameId = requestAnimationFrame(this._onFrame);
+  public nextTick() {
+    if (!this._requestAnimationFrameId) {
+      this._requestAnimationFrameId = requestAnimationFrame(this._onFrame);
+    }
   }
 }

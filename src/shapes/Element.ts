@@ -783,6 +783,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected addAnimation(option: AnimateOption<T>) {
     this._animations.push(option);
+    this.ownerRender?.nextTick();
   }
 
   public stopAllAnimation(gotoEnd: boolean = false): this {
@@ -845,6 +846,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     animate.onFrame && animate.onFrame(progress);
     progress >= 1 && this._animations.shift();
     animate = null;
+    if (this._animations.length > 0) {
+      this.ownerRender.nextTick();
+    }
   }
 
   public getClipElement(): Shape {

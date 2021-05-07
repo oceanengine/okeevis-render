@@ -163,11 +163,13 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     if (items.length === 0) {
     }
     this._chunks.push(items);
+    this.ownerRender?.nextTick();
     return this;
   }
 
   public replaceChunks(chunks: T[][]) {
     this._chunks = chunks;
+    this.ownerRender?.nextTick();
   }
 
   public clearChunks() {
@@ -214,6 +216,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public mountChunk(chunkItems: T[]) {
     this._chunks = this._chunks.filter(chunk => chunk !== chunkItems);
     chunkItems.forEach(item => this.add(item, false));
+    if (this._chunks.length > 0) {
+      this.ownerRender.nextTick();
+    }
   }
 
   public remove(element: T) {
