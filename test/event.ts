@@ -33,7 +33,7 @@ const shape1 = new Circle({
     return { x: e.dx, y: e.dy };
   },
   onMounted() {
-    shape1.animateTo({ cx: 400 }, 10000);
+    shape1.animateTo({ cx: 400 }, 1400);
   },
 });
 shape1.on('dblclick', (e: any) => console.log('dblclick from on'));
