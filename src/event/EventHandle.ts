@@ -374,7 +374,7 @@ export default class EventHandle {
 
     if (nativeEvent.type === 'touchmove') {
       const touch = this._findTouch(touchesList, dragStartTouchId);
-      if (this._draggingTarget) {
+      if (this._draggingTarget && touch) {
         if (this._getHandleGroup() === this.render.getRoot()) {
           nativeEvent.preventDefault && nativeEvent.preventDefault();
         }
