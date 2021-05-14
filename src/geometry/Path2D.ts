@@ -229,6 +229,10 @@ export default class Path2D {
           const y = params[yIndex];
           points.push({x, y});
         });
+      } else if (action === 'ellipse') {
+        // todo ellipsis bbox
+        const [cx, cy, rx, ry, ration, startAngle, endAngle] = params;
+        this._pushBBoxPoints(points, arcBBox(cx, cy, rx, startAngle, endAngle));
       }
     }
     return polygonBBox(points);

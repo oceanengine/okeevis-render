@@ -12,23 +12,8 @@ export default function canvasToSvgPath(pathList: PathAction[]): string {
     } else if (action === 'rect') {
       const [x, y, width, height] = params;
       out += `M${x},${y}L${x + width},${y}L${x + width},${y + height}L${x},${y + height}z`;
-    } else if (action === 'arc') {
-      const [cx, cy, r, startAngle, endAngle] = params;
-      const startPoint = getPointOnPolar(cx, cy, r, startAngle);
-      // todo 注意2PI的情况
-      const delta = endAngle - startAngle;
-      let endPointAngle: number = endAngle;
-      if (endAngle - startAngle >= PI2 || equalWithTolerance(delta, PI2)) {
-        endPointAngle = startAngle + PI2 - 1e-4;
-      } else if (endAngle - startAngle <= -PI2 || equalWithTolerance(delta, -PI2)) {
-        endPointAngle = startAngle - PI2 + 1e-4;
-      }
-      const endPoint = getPointOnPolar(cx, cy, r, endPointAngle);
-      const isLargeArc = Math.abs(startAngle - endAngle) > Math.PI;
-      const isClockWise = endAngle > startAngle;
-      out += `${i > 0 ? 'L' : 'M'}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${
-        isLargeArc ? 1 : 0
-      } ${isClockWise ? 1 : 0} ${endPoint.x} ${endPoint.y}`;
+    } else if (action === 'arc' || action === 'ellipse') {
+      out += getArcPath(pathList[i], i);
     } else if (action === 'arcTo') {
       // todo
     } else if (action === 'quadraticCurveTo') {
@@ -40,4 +25,31 @@ export default function canvasToSvgPath(pathList: PathAction[]): string {
     }
   }
   return out;
+}
+
+function getArcPath(pathAction: PathAction, i: number): string {
+  const { action, params } = pathAction;
+  let [cx, cy, r, startAngle, endAngle] = params;
+  if (action === 'ellipse') {
+    cx = params[0];
+    cy = params[1];
+    r = params[2];
+    startAngle = params[5];
+    endAngle = params[6];
+  }
+  const startPoint = getPointOnPolar(cx, cy, r, startAngle);
+  // todo 注意2PI的情况
+  const delta = endAngle - startAngle;
+  let endPointAngle: number = endAngle;
+  if (endAngle - startAngle >= PI2 || equalWithTolerance(delta, PI2)) {
+    endPointAngle = startAngle + PI2 - 1e-4;
+  } else if (endAngle - startAngle <= -PI2 || equalWithTolerance(delta, -PI2)) {
+    endPointAngle = startAngle - PI2 + 1e-4;
+  }
+  const endPoint = getPointOnPolar(cx, cy, r, endPointAngle);
+  const isLargeArc = Math.abs(startAngle - endAngle) > Math.PI;
+  const isClockWise = endAngle > startAngle;
+ return`${i > 0 ? 'L' : 'M'}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${
+    isLargeArc ? 1 : 0
+  } ${isClockWise ? 1 : 0} ${endPoint.x} ${endPoint.y}`;
 }
