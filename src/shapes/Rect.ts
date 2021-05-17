@@ -40,6 +40,9 @@ export default class Rect extends Shape<RectConf> {
   public brush(ctx: CanvasRenderingContext2D): void {
     // 没有圆角的时候直接渲染矩形
     const {x, y, width, height, r } = this.attr;
+    if (width === 0 || height === 0) {
+      return;
+    }
     if (!r) {
      ctx.rect(x, y, width, height);
     } else {
