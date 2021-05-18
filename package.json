@@ -1,6 +1,6 @@
 {
   "name": "@byted/light-render",
-  "version": "0.9.36",
+  "version": "0.9.37",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
