@@ -1,4 +1,4 @@
-import * as ES6Set from 'es6-set';
+import ES6Set from './utils/set';
 import Painter from './abstract/Painter';
 import EventHandle from './event/EventHandle';
 import EventFul from './utils/Eventful';

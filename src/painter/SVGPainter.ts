@@ -1,4 +1,4 @@
-import * as Es6Set from 'es6-set';
+import Es6Set from '../utils/set';
 import { diff } from '@egjs/list-differ';
 import Painter from '../abstract/Painter';
 import { registerPainter } from './index';
