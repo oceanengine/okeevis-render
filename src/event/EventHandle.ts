@@ -519,6 +519,7 @@ export default class EventHandle {
     if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg') {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
+    // todo 考虑父节点矩阵的偏移
     if (event as Touch) {
       const { left, top } = this.render.getDom().getBoundingClientRect();
       const { clientX, clientY } = event;
