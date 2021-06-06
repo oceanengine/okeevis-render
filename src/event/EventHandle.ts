@@ -521,7 +521,7 @@ export default class EventHandle {
     }
     // todo 考虑父节点矩阵的偏移
     if (event as Touch) {
-      return getTouchOffsetPosition(this.render.getDom() as HTMLDivElement, event as Touch);
+      return getTouchOffsetPosition(this.render.getDom() as HTMLDivElement, event.clientX, event.clientY);
     }
   }
 
