@@ -15,7 +15,7 @@ import { SyntheticDragEventParams } from './SyntheticDragEvent';
 import { SyntheticMouseEventParams } from './SyntheticMouseEvent';
 import { SyntheticWheelEventParams } from './SyntheticWheelEvent';
 import { SyntheticTouchEventParams, SyntheticTouch } from './SyntheticTouchEvent';
-
+import { getTouchOffsetPosition } from '../utils/touch-offset';
 import { inBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 
@@ -521,9 +521,7 @@ export default class EventHandle {
     }
     // todo 考虑父节点矩阵的偏移
     if (event as Touch) {
-      const { left, top } = this.render.getDom().getBoundingClientRect();
-      const { clientX, clientY } = event;
-      return { x: clientX - left, y: clientY - top };
+      return getTouchOffsetPosition(this.render.getDom() as HTMLDivElement, event as Touch);
     }
   }
 
