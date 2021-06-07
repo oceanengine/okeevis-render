@@ -34,9 +34,9 @@ export function getTouchOffsetPosition(
   clientX: number,
   clientY: number,
 ): { x: number; y: number } {
-  const { left, top } = dom.getBoundingClientRect();
   const hasTransform = isDomHasTransform(dom);
   if (!hasTransform) {
+    const { left, top } = dom.getBoundingClientRect();
     return { x: clientX - left, y: clientY - top };
   }
   if (!(dom as any)[DOM_PROPERTY]) {
