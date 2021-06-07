@@ -15,7 +15,7 @@ import { SyntheticDragEventParams } from './SyntheticDragEvent';
 import { SyntheticMouseEventParams } from './SyntheticMouseEvent';
 import { SyntheticWheelEventParams } from './SyntheticWheelEvent';
 import { SyntheticTouchEventParams, SyntheticTouch } from './SyntheticTouchEvent';
-
+import { getTouchOffsetPosition } from '../utils/touch-offset';
 import { inBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 
@@ -519,11 +519,7 @@ export default class EventHandle {
     if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg') {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
-    if (event as Touch) {
-      const { left, top } = this.render.getDom().getBoundingClientRect();
-      const { clientX, clientY } = event;
-      return { x: clientX - left, y: clientY - top };
-    }
+    return getTouchOffsetPosition(this.render.getDom() as HTMLDivElement, event.clientX, event.clientY);
   }
 
   private _getHandleGroup() {

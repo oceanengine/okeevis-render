@@ -21,7 +21,7 @@ export interface TextConf extends CommonAttr {
   truncate?: {
     outerWidth?: number;
     outerHeight?: number;
-    ellipse?: string;
+    ellipsis?: string;
   };
 }
 export const shapeKeys: Array<keyof TextConf> = [
@@ -266,8 +266,8 @@ export default class Text extends Shape<TextConf> {
     }
     const textList = text.split('');
     const rowTextList = [];
-    const { outerWidth, outerHeight, ellipse = '...' } = truncate;
-    const ellipseWidth = measureText(ellipse, textStyle).width;
+    const { outerWidth, outerHeight, ellipsis = '...' } = truncate;
+    const ellipseWidth = measureText(ellipsis, textStyle).width;
 
     if (lodash.isNumber(outerHeight) && outerHeight < lineHeight) {
       return [];
@@ -308,7 +308,7 @@ export default class Text extends Shape<TextConf> {
             break;
           }
         }
-        rowTextList[rowIndex] = tempStr + ellipse;
+        rowTextList[rowIndex] = tempStr + ellipsis;
         break;
       } else {
         rowTextList.push(letter);

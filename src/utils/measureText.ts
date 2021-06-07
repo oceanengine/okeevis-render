@@ -1,4 +1,4 @@
-import * as ES6Set from 'es6-set';
+import ES6Set from '../utils/set';
 import { TextConf } from '../shapes/Text';
 import LRUMap from './LRU';
 import * as styleHelper from '../canvas/style';

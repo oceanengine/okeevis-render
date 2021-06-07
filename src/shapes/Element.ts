@@ -259,6 +259,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (eventKey) {
       (this.attr[eventKey] as Function).apply(null, params);
     }
+    this.attr.onEvent?.apply(null, params);
   }
 
   public getComputedOpacity(): number {
