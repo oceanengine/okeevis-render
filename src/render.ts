@@ -29,6 +29,7 @@ export default class Render extends EventFul {
   public maxDirtyRects: number = 128;
 
   // public showDirtyRect: boolean = false;
+  public simulateClickEvent?: boolean = false;
 
   public showBoundingRect: boolean = false;
 
@@ -241,9 +242,9 @@ export default class Render extends EventFul {
   }
 
   protected onEvent(type: string, ...params: any[]) {
-   if (this.eventListener) {
-     this.eventListener.call(null, type, params);
-   }
+    if (this.eventListener) {
+      this.eventListener.call(null, type, params);
+    }
   }
 
   private _onFrame = (now?: number) => {
