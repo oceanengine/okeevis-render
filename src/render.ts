@@ -29,7 +29,7 @@ export default class Render extends EventFul {
   public maxDirtyRects: number = 128;
 
   // public showDirtyRect: boolean = false;
-  public simulateClickEvent?: boolean = false;
+  public simulateClickEvent: boolean = false;
 
   public showBoundingRect: boolean = false;
 
