@@ -14,12 +14,12 @@ export { Gradient, LinearGradient, RadialGradient, Pattern };
 function brightenStringColor(color: string, ration: number): string {
   const out = Color(color).lighten(ration);
   const alpha = out.alpha();
-  const red = out.red();
-  const green = out.green();
-  const blue = out.blue();
   if (alpha === 1) {
     return out.hex();
   }
+  const red = Math.round(out.red());
+  const green = Math.round(out.green());
+  const blue = Math.round(out.blue());
   return `rgba(${[red, green, blue, alpha].join(',')})`;
 }
 

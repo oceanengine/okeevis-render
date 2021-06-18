@@ -58,6 +58,10 @@ export default class EventHandle {
 
   private _lastMouseSyntheticTimestamp: number;
 
+  private _touchStartInfo: SyntheticTouchEvent;
+
+  private _cancelClick: boolean = true;
+
   public constructor(render: Render, eventOnly: boolean = false) {
     this.render = render;
     this._PixelPainter = new CanvasPainter(render, true);
@@ -322,6 +326,7 @@ export default class EventHandle {
       bubbles: true,
       x: synthetichChangedTouches[0].x,
       y: synthetichChangedTouches[0].y,
+      timeStamp: Date.now(),
     };
 
     const event = new SyntheticTouchEvent(nativeEvent.type, touchEventParam);
@@ -342,10 +347,14 @@ export default class EventHandle {
       dy: null,
       bubbles: true,
       original: nativeEvent,
-      timeStamp: Date.now(),
+      timeStamp: nativeEvent.timeStamp || Date.now(),
     };
     let dragStartTouchId: number = this._dragStartTouchId;
     if (nativeEvent.type === 'touchstart') {
+      if (this.render.simulateClickEvent) {
+        this._touchStartInfo = event;
+        this._cancelClick = false;
+      }
       // 暂只支持单个目标拖动
       let dragStartTarget: Element;
       synthetichChangedTouches.forEach(touch => {
@@ -373,6 +382,15 @@ export default class EventHandle {
     }
 
     if (nativeEvent.type === 'touchmove') {
+      if (this.render.simulateClickEvent && this._touchStartInfo) {
+        const {x: prevX, y: prevY} = this._touchStartInfo;
+        const dx = Math.abs(event.x - prevX);
+        const dy = Math.abs(event.y - prevY);
+        const touchBoundary = 10;
+        if (dx > touchBoundary || dy > touchBoundary) {
+          this._cancelClick = true;
+        }
+      }
       const touch = this._findTouch(touchesList, dragStartTouchId);
       if (this._draggingTarget && touch) {
         if (this._getHandleGroup() === this.render.getRoot()) {
@@ -393,6 +411,20 @@ export default class EventHandle {
     }
 
     if (nativeEvent.type === 'touchend' || nativeEvent.type === 'touchcancel') {
+      if (this.render.simulateClickEvent && this._touchStartInfo) {
+        if (!this._cancelClick && (event.timeStamp - this._touchStartInfo.timeStamp) < 300) {
+          const clickEvent = new SyntheticMouseEvent('click', {
+            x: event.x,
+            y: event.y,
+            original: {x: event.x, y: event.y},
+            bubbles: true,
+            timeStamp: event.timeStamp,
+          });
+          this._dispatchSyntheticEvent(clickEvent, event.changedTouches[0].target);
+        }
+        this._cancelClick = false;
+        this._touchStartInfo = null;
+      }
       const inTouch = !!this._findTouch(synthetichTouches, dragStartTouchId);
       const touch = this._findTouch(synthetichChangedTouches, dragStartTouchId);
       if (this._draggingTarget && !inTouch) {

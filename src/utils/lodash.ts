@@ -23,12 +23,15 @@ import pick = require('lodash/pick');
 import omit = require('lodash/omit');
 import toNumber = require('lodash/toNumber');
 import flatten = require('lodash/flatten');
-import throttle = require('lodash/throttle');
-import cloneDeep = require('lodash/cloneDeep')
-import root = require('lodash/_root');
+import cloneDeep = require('lodash/cloneDeep');
+import { throttle as _throttle, debounce as _debounce } from 'throttle-debounce'
 
-if (typeof root !== 'undefined' && !root.Date) {
-  root.Date = Date;
+export function throttle(callback: (...args: any[]) => any, delay: number) {
+  return _throttle(delay, false, callback);
+}
+
+export function debounce(callback:  (...args: any[]) => any, delay: number) {
+  return _debounce(delay, false, callback);
 }
 
 export {
@@ -53,6 +56,5 @@ export {
   omit,
   toNumber,
   flatten,
-  throttle,
   cloneDeep,
 };
