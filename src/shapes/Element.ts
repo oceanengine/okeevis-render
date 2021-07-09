@@ -18,7 +18,7 @@ import { Vec2, transformMat3, vec2BBox, createVec2 } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
-import { Ref } from '../utils/ref';
+import { RefObject } from '../utils/ref';
 import { getSVGStyleAttributes, SVGAttributeMap } from '../svg/style';
 import Shadow from '../svg/Shadow';
 
@@ -34,7 +34,7 @@ const reuseBBoxVectors: Vec2[] = [createVec2(), createVec2(), createVec2(), crea
 
 export interface BaseAttr extends TransformConf, EventConf {
   key?: string | number;
-  ref?: Ref<Element>;
+  ref?: RefObject<Element>;
   data?: any;
   display?: boolean;
   // 已废弃属性
@@ -67,7 +67,7 @@ export interface BaseAttr extends TransformConf, EventConf {
     | 'copy'
     | 'xor';
 
-  clip?: Shape | Ref<Shape>;
+  clip?: Shape | RefObject<Shape>;
 
   shadowColor?: string;
   shadowBlur?: number;
@@ -579,7 +579,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._mountClip();
     }
     if (key === 'ref' && newValue) {
-      (newValue as Ref<any>).current = this;
+      (newValue as RefObject<any>).current = this;
     }
     if (key === 'lineWidth') {
       this.dirtyClientBoundingRect();
