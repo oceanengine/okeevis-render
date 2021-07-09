@@ -1,7 +1,7 @@
 
-export type Ref<T> = { current?: T };
+export type RefObject<T=any> = { current?: T };
 
-export function createRef<T = any>(value?: T): Ref<T> {
+export function createRef<T = any>(value?: T): RefObject<T> {
   return {
     current: value
   }

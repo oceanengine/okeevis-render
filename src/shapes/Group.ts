@@ -335,6 +335,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       const nextElement = list[to];
       
       if (prevElement === nextElement) {
+        prevElement.ownerRender = nextElement.ownerRender = this.ownerRender;
         return;
       }
      
