@@ -427,7 +427,7 @@ export default class EventHandle {
       }
       const inTouch = !!this._findTouch(synthetichTouches, dragStartTouchId);
       const touch = this._findTouch(synthetichChangedTouches, dragStartTouchId);
-      if (this._draggingTarget && !inTouch) {
+      if (this._draggingTarget && !inTouch && touch) {
         const dragParam = {
           ...dragEventParam,
           x: touch.x,
