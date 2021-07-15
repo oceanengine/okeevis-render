@@ -22,7 +22,9 @@ export default class  SyntheticEvent<T extends MouseEvent | TouchEvent = MouseEv
   public timeStamp: number;
 
   public preventDefault(): void {
-    this.original.stopPropagation();
+    if (this.original.preventDefault) {
+      this.original.preventDefault();
+    }
   }
 
   public stopPropagation(): void {
