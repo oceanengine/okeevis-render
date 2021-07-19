@@ -418,6 +418,10 @@ export default class CanvasPainter implements Painter {
       try {
         const canvasCreator = getCanvasCreator();
         this._canvas = canvasCreator(this.render.dpr, this.render.dpr);
+        // taro模拟了document.createElement环境, 但无法创建真正的canvas
+        if (!this._canvas.getContext) {
+          throw new Error('not a canvas');
+        }
       } catch (err) {
         this._canvas = this.render.getDom() as HTMLCanvasElement;
       }
