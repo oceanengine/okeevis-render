@@ -1,1 +1,1 @@
-import './event'
+import './rich-text'
