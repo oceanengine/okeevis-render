@@ -18,13 +18,30 @@ const windowCancelAnimationFrame =
     window.mozCancelAnimationFrame ||
     window.oCancelAnimationFrame);
 
-export const requestAnimationFrame = windowAnimationFrame
+ let requestAnimationFrame = windowAnimationFrame
   ? windowAnimationFrame.bind(window)
   : timerRaf;
 
-export const cancelAnimationFrame = windowCancelAnimationFrame
+let cancelAnimationFrame = windowCancelAnimationFrame
   ? windowCancelAnimationFrame.bind(window)
   : timerCaf;
+
+export function setRequestAnimationFrame(raf: Function) {
+  requestAnimationFrame = raf;
+}
+
+export function setCancelAnimationFrame(cancelRaf: Function) {
+  cancelAnimationFrame = cancelRaf;
+}
+
+export function getRequestAnimationFrame(): Function {
+  return requestAnimationFrame;
+}
+
+export function getCancelAnimationFrame(): Function {
+  return cancelAnimationFrame;
+}
+
 
 function timerRaf(callback: Function): number {
   const currTime = new Date().getTime();

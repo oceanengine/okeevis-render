@@ -5,7 +5,7 @@ import EventFul from './utils/Eventful';
 import Group from './shapes/Group';
 import Element from './shapes/Element';
 import { getDomContentSize } from './utils/dom';
-import { requestAnimationFrame, cancelAnimationFrame } from './utils/rAF';
+import { getRequestAnimationFrame, getCancelAnimationFrame } from './utils/rAF';
 import { addContext, removeContext } from './utils/measureText';
 import { getPainter } from './painter';
 import { renderToSVGString } from './svg/renderToSVGString';
@@ -205,7 +205,7 @@ export default class Render extends EventFul {
 
   public dispose() {
     // todo polyfill
-    cancelAnimationFrame(this._requestAnimationFrameId);
+    getCancelAnimationFrame()(this._requestAnimationFrameId);
     if (this._painter) {
       removeContext(this._painter.getContext());
       this._painter.dispose();
@@ -272,7 +272,7 @@ export default class Render extends EventFul {
 
   public nextTick() {
     if (!this._requestAnimationFrameId) {
-      this._requestAnimationFrameId = requestAnimationFrame(this._onFrame);
+      this._requestAnimationFrameId = getRequestAnimationFrame()(this._onFrame);
     }
   }
 }
