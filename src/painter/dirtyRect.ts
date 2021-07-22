@@ -69,6 +69,7 @@ function increaseArea(rect1: BBox, rect2: BBox): number {
   const totalLeftY = Math.min(p1_y, p3_y);
   const totalRightX = Math.max(p2_x, p4_x);
   const totalRightY = Math.max(p2_y, p4_y);
+
   const totalArea = (totalRightY - totalLeftY) * (totalRightX - totalLeftX);
   return totalArea - (r1Area + r21Area);
 }
