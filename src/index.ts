@@ -22,3 +22,4 @@ export { RefObject, createRef } from './utils/ref';
 export { setCanvasCreator } from './canvas/createCanvas';
 export { setImageLoader } from './utils/imageLoader';
 export { registerPainter } from './painter';
+export { setRequestAnimationFrame, setCancelAnimationFrame, getRequestAnimationFrame, getCancelAnimationFrame } from './utils/rAF';
