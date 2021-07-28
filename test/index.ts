@@ -1,1 +1,1 @@
-import './rich-text'
+import './image'

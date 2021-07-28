@@ -188,3 +188,35 @@ export function polygonBBox(points: Array<{ x: number; y: number }>): BBox {
     height: maxY - minY,
   };
 }
+
+export type BoxAlign = 'left' | 'right' | 'center';
+export type BoxVerticalAlign = 'top' | 'middle' | 'bottom';
+
+export function alignBox(
+  outBox: BBox,
+  width: number,
+  height: number,
+  align: BoxAlign,
+  verticalAlign: BoxVerticalAlign,
+): {x: number, y: number} {
+  const { x: boxX, y: boxY, width: boxWidth, height: boxHeight } = outBox;
+  let x: number = boxX;
+  let y: number = boxY;
+  if (align === 'left') {
+    x = boxX;
+  } else if (align === 'center') {
+    x = boxX + (boxWidth - width) / 2;
+  } else if (align === 'right') {
+    x = boxX + boxWidth - width;
+  }
+
+  if (verticalAlign === 'top') {
+    y = boxY;
+  } else if (verticalAlign === 'middle') {
+    y = boxY + (boxHeight - height) / 2;
+  } else if (verticalAlign === 'bottom') {
+    y = boxY + boxHeight - height;
+  }
+
+  return { x, y };
+}
