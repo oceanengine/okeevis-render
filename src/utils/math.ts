@@ -1,3 +1,4 @@
+import { isNumber } from './lodash';
 
 export const PI2 = Math.PI * 2;
 export function equalWithTolerance(a: number, b: number, tolerance: number = 1e-6) {
@@ -27,4 +28,18 @@ export function normalizeAngle(angle: number): number {
   let rad = angle % PI2;
   rad =  rad < 0 ? rad + PI2 : rad;
   return rad;
+}
+
+/**
+ * 求一个可能为百分比的数值
+ * @param percentOrNumber 输入值,如 '50%' 或 50
+ * @param fullValue 用来计算百分比的乘数
+ */
+ export function getPercentOrNumberValue(
+  percentOrNumber: string | number,
+  fullValue: number,
+): number {
+  return isNumber(percentOrNumber)
+    ? percentOrNumber
+    : (fullValue * parseInt(percentOrNumber, 10)) / 100;
 }

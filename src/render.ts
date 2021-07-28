@@ -150,7 +150,7 @@ export default class Render extends EventFul {
     this._rootGroup.prepend(element);
   }
 
-  public add(element: Element) {
+  public add(element: Element<any>) {
     this._rootGroup.add(element);
   }
 
@@ -166,7 +166,7 @@ export default class Render extends EventFul {
     this._rootGroup.clear();
   }
 
-  public updateAll(elements: Element[]) {
+  public updateAll(elements: Element<any>[]) {
     this._rootGroup.updateAll(elements);
   }
 

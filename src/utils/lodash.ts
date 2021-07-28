@@ -11,6 +11,7 @@ import isFunction = require('lodash/isFunction');
 import isObject = require('lodash/isObject');
 import min = require('lodash/min');
 import max = require('lodash/max');
+import sum=require('lodash/sum');
 import isArray = require('lodash/isArray');
 import findIndex = require('lodash/findIndex');
 import find = require('lodash/find');
@@ -24,6 +25,7 @@ import omit = require('lodash/omit');
 import toNumber = require('lodash/toNumber');
 import flatten = require('lodash/flatten');
 import cloneDeep = require('lodash/cloneDeep');
+import set = require('lodash/set');
 import { throttle as _throttle, debounce as _debounce } from 'throttle-debounce'
 
 export function throttle(callback: (...args: any[]) => any, delay: number) {
@@ -44,6 +46,7 @@ export {
   isObject,
   min,
   max,
+  sum,
   isArray,
   findIndex,
   find,
@@ -57,4 +60,5 @@ export {
   toNumber,
   flatten,
   cloneDeep,
+  set,
 };
