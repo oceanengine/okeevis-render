@@ -4,7 +4,7 @@
  */
 import CustomElement from '../shapes/CustomElement';
 import { createRef, } from '../utils/ref';
-import Rect from '../shapes/rect';
+import Rect from '../shapes/Rect';
 import Group from '../shapes/Group';
 import VNode from './vnode';
 import parseVNode from './parser';
