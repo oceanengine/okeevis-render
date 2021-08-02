@@ -150,7 +150,7 @@ export default class Render extends EventFul {
     this._rootGroup.prepend(element);
   }
 
-  public add(element: Element<any>) {
+  public add(element: Element) {
     this._rootGroup.add(element);
   }
 

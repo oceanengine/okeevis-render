@@ -22,7 +22,7 @@ import { RefObject } from '../utils/ref';
 import { getSVGStyleAttributes, SVGAttributeMap } from '../svg/style';
 import Shadow from '../svg/Shadow';
 
-export type ElementAttr = GroupConf & ShapeConf;
+export type ElementAttr = GroupConf & ShapeConf & {[key: string]: any};
 
 export const defaultSetting: { during: number; ease: EasingName } = {
   during: 300,

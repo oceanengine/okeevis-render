@@ -110,7 +110,7 @@ export default class SVGPainter implements Painter {
 
   public removeNodeAttribute(node: Element, attr: string) {
     if (attr in SVGAttributeMap) {
-      this.findDOMNode(node)?.removeAttribute(SVGAttributeMap[attr as keyof SVGElementStyle]);
+      this.findDOMNode(node)?.removeAttribute((SVGAttributeMap as any)[attr]);
     }
   }
 

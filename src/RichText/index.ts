@@ -15,6 +15,8 @@ export interface RichTextConf {
 
 
 export default class RichText extends CustomElement<RichTextConf> {
+  public type = 'richText';
+
   private _rootNode: VNode;
 
   private _needRelayout: boolean;
@@ -89,6 +91,9 @@ export default class RichText extends CustomElement<RichTextConf> {
   }
 
   protected render(): Group {
+    if (!this._rootNode) {
+      return;
+    }
     this.layout();
     const group = new Group({shadowBlur: 0});
     group.setAttr({shadowBlur: 0});

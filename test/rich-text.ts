@@ -1,5 +1,6 @@
 import Render from '../src/render'
 import RichText from '../src/RichText'
+import Group from '../src/shapes/Group';
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom,)
@@ -26,7 +27,8 @@ const nextRich = new RichText({
   fill: 'red',
   draggable: true,
 });
-
+const group = new Group();
+group.add(nextRich);
 (window as any).rich = rich;
  render.add(rich);
 
