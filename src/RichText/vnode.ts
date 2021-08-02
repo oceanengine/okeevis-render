@@ -6,7 +6,7 @@ import Element from '../shapes/Element';
 import { BBox } from '../utils/bbox';
 import { TextConf } from '../shapes/Text';
 import { PaddingOption } from './flexlayout'
-import Rich from './index';
+import Rich from './rich-obj';
 
 export interface ShadowStyle {
   shadowColor?: string;
@@ -172,7 +172,7 @@ export default class VNode<T extends VNodeProps = VNodeProps> {
   public getExtendAttr(attr: keyof (TextConf | VNodeProps)) {
     const value = this.getClosestNodeProps(attr);
     if (value === undefined) {
-      return this.ownerDocument.getExtendAttr(attr)
+      return this.ownerDocument.conf[attr];
     }
     return value;
   }

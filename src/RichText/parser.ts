@@ -2,7 +2,7 @@
  * @desc vdom parser
  */
 import parserLibary = require('htmlparser2/lib/Parser');
-import Rich from './index';
+import Rich from './rich-obj';
 import VNode, { VNodeProps, NodeAttributeParser, attributeList } from './vnode';
 import VBox from './nodes/vbox';
 import HBox from './nodes/hbox';

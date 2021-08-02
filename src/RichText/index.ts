@@ -7,21 +7,16 @@ import { createRef, } from '../utils/ref';
 import Rect from '../shapes/Rect';
 import Group from '../shapes/Group';
 import VNode from './vnode';
-import parseVNode from './parser';
+import RichObj from './rich-obj';
 
 export interface RichTextConf {
   rich?: boolean;
 }
 
-
 export default class RichText extends CustomElement<RichTextConf> {
   public type = 'richText';
 
-  private _rootNode: VNode;
-
-  private _needRelayout: boolean;
-
-  private _relayouted: boolean;
+  private _richObj: RichObj;
 
   public getDefaultAttr() {
     return {
@@ -37,53 +32,10 @@ export default class RichText extends CustomElement<RichTextConf> {
   protected onAttrChange(key: any, newvalue: any, oldvalue: any) {
     super.onAttrChange(key, newvalue, oldvalue);
     if (key === 'text') {
-     this._rootNode = parseVNode(newvalue, this)[0];
+     this._richObj = new RichObj(this.attr);
     }
   }
 
-  public needRelayout() {
-    if (!this._relayouted) {
-      this._needRelayout = true;
-    }
-  }
-
-  private layout(): void {
-    this._rootNode.computeSize();
-    const textAlign = this.getExtendAttr('textAlign');
-    const textBaseline = this.getExtendAttr('textBaseline');
-    const { x = 0, y = 0 } = this.attr;
-    const [width, height] = this._rootNode.minSize;
-    let left: number = x;
-    let top: number = y;
-    if (textAlign === 'left') {
-      left = x;
-    } else if (textAlign === 'center') {
-      left = x - width / 2;
-    } else if (textAlign === 'right') {
-      left = x - width;
-    }
-    if (textBaseline === 'top') {
-      top = y;
-    } else if (textBaseline === 'middle') {
-      top = y - height / 2;
-    } else if (textBaseline === 'bottom') {
-      top = y - height;
-    }
-    this._rootNode.bbox.x = left;
-    this._rootNode.bbox.y = top;
-    this._rootNode.bbox.width = width;
-    this._rootNode.bbox.height = height;
-    this._rootNode.layout();
-    if (this._needRelayout) {
-      this._relayouted = true;
-      this._needRelayout = false;
-      this.layout();
-    }
-  }
-
-  public hasRelayouted(): boolean {
-    return this._relayouted;
-  }
 
   private renderNode(node: VNode, group: Group) {
     group.add(node.render());
@@ -91,19 +43,20 @@ export default class RichText extends CustomElement<RichTextConf> {
   }
 
   protected render(): Group {
-    if (!this._rootNode) {
+    if (!this._richObj) {
       return;
     }
-    this.layout();
+    const rootNode = this._richObj.node;
+    this._richObj.layout();
     const group = new Group({shadowBlur: 0});
     group.setAttr({shadowBlur: 0});
-    this.renderNode(this._rootNode, group);
-    if (this._rootNode.props.borderRadius) {
+    this.renderNode(rootNode, group);
+    if (rootNode.props.borderRadius) {
       const clipRef = createRef();
       const rect = new Rect({
         ref: clipRef,
-        ...this._rootNode.bbox,
-        r: this._rootNode.props.borderRadius,
+        ...rootNode.bbox,
+        r: rootNode.props.borderRadius,
         fill: 'none',
         stroke: 'none'
       });
