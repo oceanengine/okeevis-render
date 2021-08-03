@@ -390,14 +390,15 @@ export default class Group<T extends Element<any> = Element> extends Element<Gro
     return ret;
   }
 
-  public getAllLeafNodes(ret: Shape[] = [], ignoreInvisible = false, ignoreMute = false): Shape[] {
+  public getAllLeafNodes(ret: Shape[], ignoreInvisible = false, ignoreMute = false): Shape[] {
     this.eachChild(item => {
+      const isGroup = item.isGroup;
       if (item.attr.display === false && ignoreInvisible) {
         return;
       }
-      if (!item.isGroup && !(item.getExtendAttr('pointerEvents') === 'none' && ignoreMute)) {
+      if (!isGroup && !(item.getExtendAttr('pointerEvents') === 'none' && ignoreMute)) {
         ret.push((item as any) as Shape);
-      } else if (item.isGroup) {
+      } else if (isGroup) {
         ((item as any) as Group).getAllLeafNodes(ret, ignoreInvisible, ignoreMute);
       }
     });
