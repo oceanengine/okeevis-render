@@ -108,7 +108,7 @@ export default class VText extends VNode {
     const parent = this.parentNode as Box;
     const parentBBox = parent.getContentBox();
     // fix float error
-    const outerWidth = parentBBox.width * 1.0000001;
+    const outerWidth = parentBBox.width + 1;
     const outerHeight = lineHeight * (this.parentNode.props.lineClamp || 1);
     const ellipsis = this.parentNode.props.ellipsis;
     return {
