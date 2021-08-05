@@ -20,7 +20,7 @@ class CustomElement extends Group {
    this.update(); 
   }
 
-  protected get observedAttributes(): string[] {
+  protected getObservedAttr(): string[] {
     return []
   }
 
@@ -63,7 +63,7 @@ declare class MyClass<T> extends Element<T & GroupConf> {
   /**
    * 监听属性
    */
-  protected get observedAttributes(): string[];
+  protected getObservedAttr(): string[];
   /**
    * 是否更新
    */

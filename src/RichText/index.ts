@@ -25,7 +25,7 @@ export default class RichText extends CustomElement<RichTextConf> {
     }
   }
 
-  protected get observedAttributes() {
+  protected getObservedAttr() {
     return ['text', 'textAlign', 'textBaseline', 'x', 'y', 'fontSize']
   }
 
