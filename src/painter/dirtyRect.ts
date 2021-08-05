@@ -1,4 +1,4 @@
-import { BBox } from '../utils/bbox';
+import { BBox, unionBBox } from '../utils/bbox';
 
 /**  https://idom.me/articles/841.html
  * 1. 如果两个矩形合并后总面积小于两个矩形各自面积之和,则允许合并, 并且优先合并相交面积最大的两个矩形
@@ -7,8 +7,7 @@ import { BBox } from '../utils/bbox';
  * */
 export default function mergeDirtyRegions(mergedRects: BBox[]): BBox[] {
   mergedRects = mergedRects.filter(box => box.width > 0 && box.height > 0);
-  unionRect(mergedRects);
-  return mergedRects;
+  return [unionBBox(mergedRects)];
 }
 
 /**
