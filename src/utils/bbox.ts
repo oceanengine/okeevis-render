@@ -1,5 +1,6 @@
 import { equalWithTolerance, PI2 } from './math';
 import Point from './Point';
+import * as lodash from './lodash';
 
 export interface BBox {
   x: number;
@@ -219,4 +220,19 @@ export function alignBox(
   }
 
   return { x, y };
+}
+
+export function clipRectInBox(rectAttr: BBox, minX: number, maxX: number, minY: number, maxY: number) {
+  let x1 = Math.min(rectAttr.x, rectAttr.x + rectAttr.width);
+  let x2 = Math.max(rectAttr.x, rectAttr.x + rectAttr.width);
+  let y1 = Math.min(rectAttr.y, rectAttr.y + rectAttr.height);
+  let y2 = Math.max(rectAttr.y, rectAttr.y + rectAttr.height);
+  x1 = lodash.clamp(x1, minX, maxX);
+  x2 = lodash.clamp(x2, minX, maxX);
+  y1 = lodash.clamp(y1, minY, maxY);
+  y2 = lodash.clamp(y2, minY, maxY);
+  rectAttr.x = x1;
+  rectAttr.y = y1;
+  rectAttr.width = x2 - x1;
+  rectAttr.height = y2 - y1;
 }

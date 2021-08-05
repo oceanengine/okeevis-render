@@ -45,7 +45,7 @@ class CustomElement extends Group {
 
   protected onAttrChange(key: any, value: any, oldValue: any) {
     super.onAttrChange(key, value, oldValue);
-    if (this.observedAttributes.indexOf(key) !== -1) {
+    if (this.getObservedAttr().indexOf(key) !== -1) {
       this._updated = false;
     }
   }
