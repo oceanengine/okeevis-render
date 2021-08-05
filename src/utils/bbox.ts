@@ -222,7 +222,11 @@ export function alignBox(
   return { x, y };
 }
 
-export function clipRectInBox(rectAttr: BBox, minX: number, maxX: number, minY: number, maxY: number) {
+export function clipRectInBox(rectAttr: BBox, x: number, y: number, width: number, height: number) {
+  const minX = x;
+  const minY = y;
+  const maxX = x + width;
+  const maxY = y + height;
   let x1 = Math.min(rectAttr.x, rectAttr.x + rectAttr.width);
   let x2 = Math.max(rectAttr.x, rectAttr.x + rectAttr.width);
   let y1 = Math.min(rectAttr.y, rectAttr.y + rectAttr.height);
