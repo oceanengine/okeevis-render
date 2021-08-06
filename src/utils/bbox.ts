@@ -1,5 +1,6 @@
 import { equalWithTolerance, PI2 } from './math';
 import Point from './Point';
+import * as lodash from './lodash';
 
 export interface BBox {
   x: number;
@@ -187,4 +188,55 @@ export function polygonBBox(points: Array<{ x: number; y: number }>): BBox {
     width: maxX - minX,
     height: maxY - minY,
   };
+}
+
+export type BoxAlign = 'left' | 'right' | 'center';
+export type BoxVerticalAlign = 'top' | 'middle' | 'bottom';
+
+export function alignBox(
+  outBox: BBox,
+  width: number,
+  height: number,
+  align: BoxAlign,
+  verticalAlign: BoxVerticalAlign,
+): {x: number, y: number} {
+  const { x: boxX, y: boxY, width: boxWidth, height: boxHeight } = outBox;
+  let x: number = boxX;
+  let y: number = boxY;
+  if (align === 'left') {
+    x = boxX;
+  } else if (align === 'center') {
+    x = boxX + (boxWidth - width) / 2;
+  } else if (align === 'right') {
+    x = boxX + boxWidth - width;
+  }
+
+  if (verticalAlign === 'top') {
+    y = boxY;
+  } else if (verticalAlign === 'middle') {
+    y = boxY + (boxHeight - height) / 2;
+  } else if (verticalAlign === 'bottom') {
+    y = boxY + boxHeight - height;
+  }
+
+  return { x, y };
+}
+
+export function clipRectInBox(rectAttr: BBox, x: number, y: number, width: number, height: number) {
+  const minX = x;
+  const minY = y;
+  const maxX = x + width;
+  const maxY = y + height;
+  let x1 = Math.min(rectAttr.x, rectAttr.x + rectAttr.width);
+  let x2 = Math.max(rectAttr.x, rectAttr.x + rectAttr.width);
+  let y1 = Math.min(rectAttr.y, rectAttr.y + rectAttr.height);
+  let y2 = Math.max(rectAttr.y, rectAttr.y + rectAttr.height);
+  x1 = lodash.clamp(x1, minX, maxX);
+  x2 = lodash.clamp(x2, minX, maxX);
+  y1 = lodash.clamp(y1, minY, maxY);
+  y2 = lodash.clamp(y2, minY, maxY);
+  rectAttr.x = x1;
+  rectAttr.y = y1;
+  rectAttr.width = x2 - x1;
+  rectAttr.height = y2 - y1;
 }

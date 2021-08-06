@@ -21,6 +21,13 @@ export default class  SyntheticEvent<T extends MouseEvent | TouchEvent = MouseEv
   
   public timeStamp: number;
 
+  public constructor(type: string, params: SyntheticEventParams) {
+    this.type = type;
+    this.original = params.original;
+    this.bubbles = params.bubbles;
+    this.timeStamp = params.timeStamp || Date.now();
+  }
+
   public preventDefault(): void {
     if (this.original.preventDefault) {
       this.original.preventDefault();
@@ -29,13 +36,5 @@ export default class  SyntheticEvent<T extends MouseEvent | TouchEvent = MouseEv
 
   public stopPropagation(): void {
     this.isPropagationStopped = true;
-  }
-
-  public constructor(type: string, params: SyntheticEventParams) {
-    this.type = type;
-    this.original = params.original;
-    this.bubbles = params.bubbles;
-    this.timeStamp = params.timeStamp || Date.now();
-  }
-  
+  }  
 }

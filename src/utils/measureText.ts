@@ -1,9 +1,15 @@
 import ES6Set from '../utils/set';
 import { TextConf } from '../shapes/Text';
 import LRUMap from './LRU';
+
 import * as styleHelper from '../canvas/style';
 
-const textSizeLRUMap = new LRUMap<TextMetrics>(3000);
+export interface TextSize {
+  readonly width: number;
+  readonly height: number;
+}
+
+const textSizeLRUMap = new LRUMap<TextSize>(3000);
 
 
 
@@ -31,7 +37,7 @@ export function removeContext(ctx: CanvasRenderingContext2D) {
   canvasContextPool.delete(ctx);
 }
 
-export  function measureTextList(textList: string[], textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getContext()): TextMetrics[] {
+export  function measureTextList(textList: string[], textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getContext()): TextSize[] {
   ctx.save();
   initTextContext(ctx, textStyle);
   const sizeList = textList.map(text => measureText(text, textStyle, ctx, false))
@@ -39,7 +45,7 @@ export  function measureTextList(textList: string[], textStyle: TextConf = {}, c
   return sizeList;
 }
 
-export  function measureText(text: string, textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getContext(), setContext = true): TextMetrics {
+export  function measureText(text: string, textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getContext(), setContext = true): TextSize {
   const cacheKey = getCacheKey(text, textStyle);
   const cacheSize = textSizeLRUMap.get(cacheKey);
   if (cacheSize) {
@@ -47,7 +53,9 @@ export  function measureText(text: string, textStyle: TextConf = {}, ctx: Canvas
   }
   setContext && ctx.save();
   setContext && initTextContext(ctx, textStyle);
-  const size = ctx.measureText(text);
+  const width = ctx.measureText(text).width;
+  const height = textStyle.fontSize;
+  const size = {width, height};
   textSizeLRUMap.set(cacheKey, size);
   setContext && ctx.restore();
   return size;

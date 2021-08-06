@@ -147,7 +147,7 @@ export default class Text extends Shape<TextConf> {
     });
   }
 
-  protected measureText(): TextMetrics {
+  protected measureText(): {width: number; height: number} {
     const textStyle = this.getTextStyle();
     const text = this._isEmpty ? '' : this.attr.text + '';
     return measureText(text, textStyle);

@@ -12,6 +12,7 @@ export { default as Polyline, PolylineConf } from './shapes/Polyline';
 export { default as Rect, RectConf } from './shapes/Rect';
 export { default as Sector, SectorConf } from './shapes/Sector';
 export { default as Text, TextConf } from './shapes/Text';
+export { default as RichText } from './RichText';
 export { default as Shape, ShapeConf } from './shapes/Shape';
 export { default as CompoundPath, CompoundPathConf } from './shapes/CompoundPath';
 export { default as LinearGradient } from './color/LinearGradient';

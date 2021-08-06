@@ -81,7 +81,7 @@ export default class Render extends EventFul {
     this._renderer = option.renderer || 'canvas';
     this._dom = dom;
     if (dom) {
-      if (typeof (dom as HTMLCanvasElement).getContext === 'function') {
+      if (typeof (dom as HTMLCanvasElement).getContext === 'function' && !this._isBrowser) {
         this._width = (dom as HTMLCanvasElement).width;
         this._height = (dom as HTMLCanvasElement).height;
       } else {
@@ -166,7 +166,7 @@ export default class Render extends EventFul {
     this._rootGroup.clear();
   }
 
-  public updateAll(elements: Element[]) {
+  public updateAll(elements: Element<any>[]) {
     this._rootGroup.updateAll(elements);
   }
 

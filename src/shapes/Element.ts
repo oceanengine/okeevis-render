@@ -22,7 +22,7 @@ import { RefObject } from '../utils/ref';
 import { getSVGStyleAttributes, SVGAttributeMap } from '../svg/style';
 import Shadow from '../svg/Shadow';
 
-export type ElementAttr = GroupConf & ShapeConf;
+export type ElementAttr = GroupConf & ShapeConf & {[key: string]: any};
 
 export const defaultSetting: { during: number; ease: EasingName } = {
   during: 300,
@@ -209,6 +209,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _shadow: Shadow;
 
+  private _inTransaction: boolean = false;
+
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
@@ -332,7 +334,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     };
   }
 
-  public setAttr<U extends keyof T | T>(
+  public setAttr<U extends (keyof T | T)>(
     attr: U,
     value?: U extends keyof T ? T[U] : undefined,
   ): this {
@@ -371,6 +373,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     }
 
+    if (!this._inTransaction) {
+      this.update();
+    }
+
     return this;
   }
 
@@ -384,6 +390,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public hide() {
     this.setAttr('display', false as any);
+  }
+
+  public startAttrTransaction() {
+    this._inTransaction = true;
+  }
+
+  public endAttrTransaction() {
+    this._inTransaction = false;
+    this.update();
   }
 
   public get isClip(): boolean {
@@ -552,7 +567,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return vec2BBox(reuseBBoxVectors, out);
   }
 
-  public created() {
+  protected created() {
     // do nothing
   }
 
@@ -584,6 +599,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (key === 'lineWidth') {
       this.dirtyClientBoundingRect();
     }
+  }
+
+  protected update() {
+    // nothing
   }
 
   public mounted() {
@@ -830,6 +849,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         ? animate.ease(progress)
         : easingFunctions[animate.ease || 'Linear'](progress);
     let fn: Function = interpolate;
+    this.startAttrTransaction();
     for (const key in animate.to) {
       if (key === 'fill' || key === 'stroke' || key === 'shadowColor') {
         fn = interpolateColor;
@@ -850,6 +870,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this._animations.length > 0) {
       this.ownerRender.nextTick();
     }
+    this.endAttrTransaction();
   }
 
   public getClipElement(): Shape {

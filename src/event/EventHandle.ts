@@ -115,12 +115,9 @@ export default class EventHandle {
     let pickNodes = this._getHandleGroup()
       .getAllLeafNodes([], ignoreInvisibleNodes, ignoreMute)
       .reverse();
-
-    this._getHandleGroup().resetPickRGB();
-
     // 过渡掉不在包围盒中的
     pickNodes = pickNodes.filter(
-      node => node.attr.display && inBBox(node.getBoundingClientRect(), x, y),
+      node => inBBox(node.getBoundingClientRect(), x, y),
     );
 
     let geometryPickIndex: number = -1;
@@ -173,6 +170,7 @@ export default class EventHandle {
           }
         }
       }
+      gpuPickNodes.forEach(node => node.resetPickRGB());
     }
 
     if (geometryPickIndex >= 0 || gpuPickIndex >= 0) {

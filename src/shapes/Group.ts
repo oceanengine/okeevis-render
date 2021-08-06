@@ -1,5 +1,6 @@
 import { diff } from '@egjs/list-differ';
 import Element, { defaultSetting } from './Element';
+import { TypeCustomElement } from './CustomElement';
 import Shape from './Shape';
 import { TextConf, shapeKeys } from './Text';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
@@ -18,7 +19,7 @@ export interface ChunkItem {
   chunks: Element[][];
 }
 
-export default class Group<T extends Element = Element> extends Element<GroupConf> {
+export default class Group<T extends Element<any> = Element> extends Element<GroupConf> {
   public type = 'group';
 
   public svgTagName = 'g';
@@ -44,7 +45,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     };
   }
   
-  public onAttrChange(key: any, value: any, oldValue: any) {
+  protected onAttrChange(key: any, value: any, oldValue: any) {
     super.onAttrChange(key, value, oldValue);
     if (shapeKeys.indexOf(key) !== -1) {
       this.dirtyTextChildBBox();
@@ -389,14 +390,15 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return ret;
   }
 
-  public getAllLeafNodes(ret: Shape[] = [], ignoreInvisible = false, ignoreMute = false): Shape[] {
+  public getAllLeafNodes(ret: Shape[], ignoreInvisible = false, ignoreMute = false): Shape[] {
     this.eachChild(item => {
+      const isGroup = item.isGroup;
       if (item.attr.display === false && ignoreInvisible) {
         return;
       }
-      if (!item.isGroup && !(item.getExtendAttr('pointerEvents') === 'none' && ignoreMute)) {
+      if (!isGroup && !(item.getExtendAttr('pointerEvents') === 'none' && ignoreMute)) {
         ret.push((item as any) as Shape);
-      } else if (item.isGroup) {
+      } else if (isGroup) {
         ((item as any) as Group).getAllLeafNodes(ret, ignoreInvisible, ignoreMute);
       }
     });
@@ -471,7 +473,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     const prevAttr = prevElement.attr;
     const nextAttr = nextElement.attr;
     const {transitionDuration = defaultSetting.during, transitionEase = defaultSetting.ease, transitionProperty = 'all', transitionDelay = 0 } = nextElement.attr;
-    
+    prevElement.startAttrTransaction();
     for (let key in prevAttr) {
       if (!(key in nextAttr)) {
         prevElement.removeAttr(key as any)
@@ -479,15 +481,17 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     }
     
     if (transitionProperty === 'none' || transitionProperty.length === 0) {
-      for (let key in nextAttr) {
-        if (nextAttr[key as any as keyof typeof nextAttr] !== prevAttr[key as any as keyof typeof prevAttr]) {
-          prevElement.setAttr(key as any, nextAttr[key as any as keyof typeof nextAttr])
-        }
-      }
+       prevElement.setAttr(nextAttr)
     } else {
+      // todo 指定transitionProperty数组时, 非过渡属性无法更新
       const nextAttr = transitionProperty === 'all' ? nextElement.attr : lodash.pick(nextElement.attr, transitionProperty as any);
       prevElement.stopAllAnimation().animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
     }
+    if ((prevElement as TypeCustomElement).$$CustomType) {
+      (prevElement as TypeCustomElement).skipUpdate();
+    }
+    prevElement.endAttrTransaction();
+    // todo 如果是自定义渲染的话, 当前的key变化不影响不触发重新渲染
   }
 
   private _findSVGDomNode(item: Element) {

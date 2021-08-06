@@ -51,13 +51,27 @@ export default class Path2D {
       this._pathList = parsePath(svgPath) as PathAction[];
     }
   }
-
+  
   public setPathList(pathList: PathAction[]) {
     this._pathList = pathList;
   }
 
   public getPathList(): PathAction[] {
     return this._pathList;
+  }
+
+  public connectPath(path: Path2D) {
+    const lastAction = this._pathList[this._pathList.length - 1];
+    const pathList=  path.getPathList().slice();
+    const firstAction = pathList[0];
+    if (lastAction && firstAction) {
+      const {x, y } = this.getActionEndPoint(lastAction);
+      const [x1, y1] = firstAction.params;
+      if (firstAction.action === 'moveTo' && equalWithTolerance(x, x1) && equalWithTolerance(y, y1)) {
+        pathList.shift();
+      }
+    }
+    this._pathList = this._pathList.concat(pathList);
   }
 
   public closePath(): this {
@@ -238,44 +252,32 @@ export default class Path2D {
     return polygonBBox(points);
   }
 
-  public compressMoveToCommand() {
-    let endX = 0;
-    let endY = 0;
-    let prevMoveToParam: [number, number];
-    const mergeIndex: number[] = [];
-    const pathList = this._pathList;
-    for (let i = 0; i < pathList.length; i++) {
-      const { action, params } = pathList[i];
-      if (action === 'moveTo') {
-        if (i !== 0) {
-          if (equalWithTolerance(endX, params[0]) && equalWithTolerance(endY, params[1])) {
-            mergeIndex.push(i);
-          }
-        }
-        prevMoveToParam = params as [number, number];
-      } else if (action === 'lineTo') {
-        endX = params[0];
-        endY = params[1];
-      } else if (action === 'arcTo') {
-        endX = params[2];
-        endY = params[3];
-      } else if (action === 'arc') {
-        const [cx, cy, r, end] = params;
-        const endPoint = getPointOnPolar(cx, cy, r, end);
-        endX = endPoint.x;
-        endY = endPoint.y;
-      } else if (action === 'bezierCurveTo') {
-        endX = params[4];
-        endY = params[5];
-      } else if (action === 'quadraticCurveTo') {
-        endX = params[2];
-        endY = params[3];
-      } else if (action === 'closePath') {
-        endX = prevMoveToParam[0];
-        endY = prevMoveToParam[1];
-      }
+  private getActionEndPoint(pathAction: PathAction): {x: number; y: number} {
+    let endX: number;
+    let endY: number;
+    const {action ,params} = pathAction;
+    if (action === 'lineTo') {
+      endX = params[0];
+      endY = params[1];
+    } else if (action === 'arcTo') {
+      endX = params[2];
+      endY = params[3];
+    } else if (action === 'arc') {
+      const [cx, cy, r, end] = params;
+      const endPoint = getPointOnPolar(cx, cy, r, end);
+      endX = endPoint.x;
+      endY = endPoint.y;
+    } else if (action === 'bezierCurveTo') {
+      endX = params[4];
+      endY = params[5];
+    } else if (action === 'quadraticCurveTo') {
+      endX = params[2];
+      endY = params[3];
+    };
+    return {
+      x: endX,
+      y: endY
     }
-    this._pathList = pathList.filter((path, index) => mergeIndex.indexOf(index) === -1);
   }
 
   public getSVGPathString(): string {
