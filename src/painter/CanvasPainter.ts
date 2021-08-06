@@ -494,7 +494,7 @@ export default class CanvasPainter implements Painter {
     }
 
     // 文本和图像自己检测, 不走gpu,不故考虑fontSize
-    if (this._isPixelPainter && item.type !== 'group') {
+    if (this._isPixelPainter && !item.isGroup) {
       const rgb = item.pickRGB;
       const pickColor = `rgb(${rgb.join(',')})`;
       styleHelper.setFillStyle(ctx, pickColor);
@@ -511,7 +511,7 @@ export default class CanvasPainter implements Painter {
     if (
       !stroke &&
       isGradient(computedStroke) &&
-      item.type !== 'group'
+      !item.isGroup
     ) {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, computedStroke, item));
     }
@@ -526,7 +526,7 @@ export default class CanvasPainter implements Painter {
     }
 
     /** 渐变样式无法继承 */
-    if (!fill && isGradient(computedFill) && item.type !== 'group') {
+    if (!fill && isGradient(computedFill) && !item.isGroup) {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, computedFill, item));
     }
 
