@@ -109,16 +109,13 @@ export default class EventHandle {
     // console.time('pick');
     const pixelPainter = this._PixelPainter;
     const ignoreInvisibleNodes = true;
-    const ignoreMute = true; // pointerevent none
     let target: Element;
     // 初步过滤掉不显示和不触发事件的元素
     let pickNodes = this._getHandleGroup()
-      .getAllLeafNodes([], ignoreInvisibleNodes, ignoreMute)
+      .getAllLeafNodes([], ignoreInvisibleNodes)
       .reverse();
     // 过渡掉不在包围盒中的
-    pickNodes = pickNodes.filter(
-      node => inBBox(node.getBoundingClientRect(), x, y),
-    );
+    pickNodes = pickNodes.filter(node =>  inBBox(node.getBoundingClientRect(), x, y) && node.getExtendAttr('pointerEvents') !== 'none');
 
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;
@@ -182,7 +179,6 @@ export default class EventHandle {
       }
       target = pickNodes[pickIndex];
     }
-
     // console.timeEnd('pick');
     return target || this._getHandleGroup();
   }
