@@ -95,12 +95,12 @@
     const node = new CNode(obj);
     node.ownerDocument = this;
     obj.children?.forEach((child: VNodeObject | string) => {
-      if (typeof child === 'string') {
-        node.appendChild(new TextNode({
-          value: child
-        }))
-      } else if (typeof child === 'object') {
+      if (child && typeof child === 'object' && child.type) {
         node.appendChild(this._createRichNode(child));
+      } else {
+        node.appendChild(new TextNode({
+          value: child as string,
+        }))
       }
     });
     return node;
