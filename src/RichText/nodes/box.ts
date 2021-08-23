@@ -1,7 +1,9 @@
 /**
  * vbox
  */
+import Group from '../../shapes/Group';
 import Rect, { RectConf } from '../../shapes/Rect';
+import { createRef, } from '../../utils/ref';
 import { BBox } from '../../utils/bbox';
 import { getPadding } from '../flexlayout';
 import VNode, { VNodeProps } from '../vnode';
@@ -27,15 +29,32 @@ export default class Box extends VNode {
     this.props = { ...this.defaultProps, ...props };
   }
 
-  public render(): Rect {
+  public render(): Group {
+    const group = new Group({
+      ...this.getEvents(),
+    });
     const isRoot = !this.parentNode;
+    if (this.props.borderRadius && isRoot) {
+      const clipRef = createRef();
+      const rect = new Rect({
+        ref: clipRef,
+        ...this.bbox,
+        r: this.props.borderRadius,
+        fill: 'none',
+        stroke: 'none'
+      });
+      group.setAttr('clip', clipRef);
+      group.add(rect);
+    }
     const attr: RectConf = {
       ...this.bbox,
       ...this.getStyle(),
-      ...this.getEvents(),
       ...this.props.boxShadow,
     };
-    return isRoot ? new Rect(rect1px(attr)) : new Rect(attr);
+    const rect = isRoot ? new Rect(rect1px(attr)) : new Rect(attr);
+    group.add(rect);
+    this.children.forEach(child => group.add(child.render()));
+    return group;
   }
 
   public getContentSize(): [number, number] {

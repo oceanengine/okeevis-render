@@ -9,7 +9,7 @@ const rich = new RichText({
   rich: true,
   x: 100,
   y: 0,
-  text: '<hbox borderWidth="3" borderColor="red" width="100"  height="100" background="#f7f7f7">test</hbox>',
+  text: '<hbox borderRadius="20" borderWidth="3" borderColor="red" width="100"  height="100" background="#f7f7f7">test</hbox>',
   textAlign: 'center',
   textBaseline: 'top',
   fontSize: 12,
@@ -28,6 +28,7 @@ const nextRich = new RichText({
     color: 'blue',
     children: ['test'],
     pack: 'center',
+    onClick: e => console.log(e)
   },
   textAlign: 'center',
   textBaseline: 'top',

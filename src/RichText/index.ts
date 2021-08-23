@@ -3,10 +3,8 @@
  * @author liwensheng
  */
 import CustomElement from '../shapes/CustomElement';
-import { createRef, } from '../utils/ref';
-import Rect from '../shapes/Rect';
-import Group from '../shapes/Group';
-import VNode, { VNodeProps } from './vnode';
+import Element from '../shapes/Element';
+import { VNodeProps } from './vnode';
 import RichObj from './rich-obj';
 import { EventConf } from '../event';
 
@@ -41,32 +39,12 @@ export default class RichText extends CustomElement<RichTextConf> {
   }
 
 
-  private renderNode(node: VNode, group: Group) {
-    group.add(node.render());
-    node.children.forEach(child => this.renderNode(child, group));
-  }
-
-  protected render(): Group {
+  protected render(): Element {
     if (!this._richObj) {
       return;
     }
     const rootNode = this._richObj.node;
     this._richObj.layout();
-    const group = new Group({ shadowBlur: 0 });
-    group.setAttr({ shadowBlur: 0 });
-    this.renderNode(rootNode, group);
-    if (rootNode.props.borderRadius) {
-      const clipRef = createRef();
-      const rect = new Rect({
-        ref: clipRef,
-        ...rootNode.bbox,
-        r: rootNode.props.borderRadius,
-        fill: 'none',
-        stroke: 'none'
-      });
-      group.setAttr('clip', clipRef);
-      group.add(rect);
-    }
-    return group;
+    return rootNode.render();
   }
 }
