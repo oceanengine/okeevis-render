@@ -49,6 +49,7 @@ export default class VText extends VNode {
       lineHeight: this.getExtendAttr('lineHeight') as number,
       fill: color,
       truncate: ellipsis && this.getTruncate(),
+      ...this.getEvents(),
     });
   }
 

@@ -6,11 +6,15 @@ import CustomElement from '../shapes/CustomElement';
 import { createRef, } from '../utils/ref';
 import Rect from '../shapes/Rect';
 import Group from '../shapes/Group';
-import VNode from './vnode';
+import VNode, { VNodeProps } from './vnode';
 import RichObj from './rich-obj';
+import { EventConf } from '../event';
+
+export type VNodeObject = VNodeProps & { type: string, children?: VNodeObject[] | string[]} & EventConf;
 
 export interface RichTextConf {
   rich?: boolean;
+  text: string | VNodeObject;
 }
 
 export default class RichText extends CustomElement<RichTextConf> {
@@ -32,7 +36,7 @@ export default class RichText extends CustomElement<RichTextConf> {
   protected onAttrChange(key: any, newvalue: any, oldvalue: any) {
     super.onAttrChange(key, newvalue, oldvalue);
     if (key === 'text') {
-     this._richObj = new RichObj(this.attr);
+      this._richObj = new RichObj(this.attr);
     }
   }
 
@@ -48,8 +52,8 @@ export default class RichText extends CustomElement<RichTextConf> {
     }
     const rootNode = this._richObj.node;
     this._richObj.layout();
-    const group = new Group({shadowBlur: 0});
-    group.setAttr({shadowBlur: 0});
+    const group = new Group({ shadowBlur: 0 });
+    group.setAttr({ shadowBlur: 0 });
     this.renderNode(rootNode, group);
     if (rootNode.props.borderRadius) {
       const clipRef = createRef();

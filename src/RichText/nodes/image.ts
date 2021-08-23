@@ -20,6 +20,7 @@ export default class VImage extends VNode {
   public render(): Image {
     return new Image({
       ...this.bbox,
+      ...this.getEvents(),
       src: this.props.src,
     });
   }

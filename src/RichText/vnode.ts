@@ -7,6 +7,7 @@ import { BBox } from '../utils/bbox';
 import { TextConf } from '../shapes/Text';
 import { PaddingOption } from './flexlayout'
 import Rich from './rich-obj';
+import {  EventConf } from '../event';
 
 export interface ShadowStyle {
   shadowColor?: string;
@@ -123,7 +124,7 @@ export default class VNode<T extends VNodeProps = VNodeProps> {
 
   public type: string;
 
-  public props: T;
+  public props: T & EventConf;
 
   public parentNode: VNode = null;
 
@@ -185,7 +186,7 @@ export default class VNode<T extends VNodeProps = VNodeProps> {
     // blank;
   }
 
-  public getStyle(): ElementStyle {
+  protected getStyle(): ElementStyle {
     const { borderColor, borderRadius, background, borderWidth } = this.props;
     return {
       stroke: borderColor,
@@ -193,6 +194,17 @@ export default class VNode<T extends VNodeProps = VNodeProps> {
       fill: background,
       lineWidth: borderWidth,
     }
+  }
+
+  protected getEvents(): EventConf {
+    const events: Record<string, Function> = {};
+    for (const key in this.props) {
+      const value = this.props[key as keyof EventConf];
+      if (typeof value === 'function') {
+        events[key] = value;
+      }
+    }
+    return events;
   }
 
   protected getClampSize(size: number, sizeType: 'width' | 'height'): number {

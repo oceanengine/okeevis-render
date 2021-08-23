@@ -32,6 +32,7 @@ export default class Box extends VNode {
     const attr: RectConf = {
       ...this.bbox,
       ...this.getStyle(),
+      ...this.getEvents(),
       ...this.props.boxShadow,
     };
     return isRoot ? new Rect(rect1px(attr)) : new Rect(attr);

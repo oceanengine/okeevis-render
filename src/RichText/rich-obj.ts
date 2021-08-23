@@ -4,8 +4,14 @@
  */
  import * as lodash from '../utils/lodash';
  import VNode from './vnode';
- import parseVNode from './parser';
- import { TextConf as RichTextConf } from '../shapes/Text';
+ import TextNode from './nodes/text';
+ import parseVNode, { TagsMap } from './parser';
+ import { TextConf } from '../shapes/Text';
+ import { VNodeObject } from './index';
+
+ export interface RichTextConf extends Omit<TextConf, 'text'> {
+   text?: string | VNodeObject;
+ }
  /**
   * rich text
   */
@@ -25,6 +31,10 @@
  
    public init(): void {
      let { text } = this.conf;
+     if (text && typeof text === 'object' && text.type) {
+      this.node = this._createRichNode(text);
+      return;
+     }
      if (lodash.isNull(text) || lodash.isUndefined(text)) {
        text = '';
      } else {
@@ -78,5 +88,21 @@
  
    public getBoxSize(): { width: number; height: number } {
      return { width: this.node.bbox.width, height: this.node.bbox.height };
+   }
+
+   private _createRichNode(obj: VNodeObject): VNode {
+    const CNode = TagsMap[obj.type.toLowerCase() as keyof typeof TagsMap];
+    const node = new CNode(obj);
+    node.ownerDocument = this;
+    obj.children?.forEach((child: VNodeObject | string) => {
+      if (typeof child === 'string') {
+        node.appendChild(new TextNode({
+          value: child
+        }))
+      } else if (typeof child === 'object') {
+        node.appendChild(this._createRichNode(child));
+      }
+    });
+    return node;
    }
  }

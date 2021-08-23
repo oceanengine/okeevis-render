@@ -16,7 +16,7 @@ import * as lodash from '../utils/lodash';
 // old version modulex.exports = Parser
 const Parser = typeof parserLibary === 'function' ? parserLibary : parserLibary.Parser;
 
-const TagsMap = {
+export const TagsMap = {
   vbox: VBox,
   hbox: HBox,
   image: Image,
