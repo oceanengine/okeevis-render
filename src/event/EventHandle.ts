@@ -197,6 +197,9 @@ export default class EventHandle {
   // }
 
   private _syntheticMouseEvent = (nativeEvent: MouseEvent, isNative: boolean = true) => {
+    if (this.render.simulateClickEvent && nativeEvent.type === 'click') {
+      return;
+    }
     // todo统一mousewheel事件
     const { x, y } = isNative ? this._getMousePosition(nativeEvent) : nativeEvent;
     const target = this.pickTarget(x, y);
