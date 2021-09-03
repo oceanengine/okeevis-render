@@ -62,6 +62,8 @@ export default class EventHandle {
 
   private _cancelClick: boolean = true;
 
+  private _hasTouchEvent: boolean = false;
+
   public constructor(render: Render, eventOnly: boolean = false) {
     this.render = render;
     this._PixelPainter = new CanvasPainter(render, true);
@@ -195,6 +197,9 @@ export default class EventHandle {
   // }
 
   private _syntheticMouseEvent = (nativeEvent: MouseEvent, isNative: boolean = true) => {
+    if (this.render.simulateClickEvent && nativeEvent.type === 'click') {
+      return;
+    }
     // todo统一mousewheel事件
     const { x, y } = isNative ? this._getMousePosition(nativeEvent) : nativeEvent;
     const target = this.pickTarget(x, y);
@@ -283,12 +288,14 @@ export default class EventHandle {
         this._synthetickOverOutEvent(prevMouseTarget, target, mouseEventParam);
       }
     }
-
-    this._prevMousePosition = { x, y };
-    this._prevMouseTarget = target;
+    if (!this._hasTouchEvent) {
+      this._prevMousePosition = { x, y };
+      this._prevMouseTarget = target;
+    }
   };
 
   private _syntheticTouchEvent = (nativeEvent: TouchEvent, isNative: boolean = true) => {
+    this._hasTouchEvent = true;
     const { touches, changedTouches } = nativeEvent;
     const prevMouseTarget = this._prevMouseTarget;
     this._lastMouseSyntheticTimestamp = Date.now();
@@ -708,6 +715,7 @@ export default class EventHandle {
     target: Element,
     mouseEventParam: SyntheticMouseEventParams,
   ) {
+    this._prevMouseTarget = target;
     const mouseoutEvent = new SyntheticMouseEvent('mouseout', mouseEventParam);
     const mouseoverEvent = new SyntheticMouseEvent('mouseover', mouseEventParam);
     this._dispatchSyntheticEvent(mouseoutEvent, prevMouseTarget);

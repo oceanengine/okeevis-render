@@ -77,4 +77,4 @@ declare class MyClass<T> extends Element<T & GroupConf> {
 
 export type TypeCustomElement<T = {}> = MyClass<T>;
 
-export default CustomElement as any as new <T>(attr?: T & GroupConf) => MyClass<T>;
+export default CustomElement as any as new <T>(attr?: T & Omit<GroupConf, 'text'>) => MyClass<T>;

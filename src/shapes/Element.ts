@@ -164,6 +164,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public nextSibling: Element = null;
 
   public ownerRender: Render | null = null;
+
+  public isClip: boolean;
  
   public pickRGB: [number, number, number];
 
@@ -399,10 +401,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public endAttrTransaction() {
     this._inTransaction = false;
     this.update();
-  }
-
-  public get isClip(): boolean {
-    return this.ownerRender && !this.parentNode;
   }
 
   public get isGroup(): boolean {
@@ -965,6 +963,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _mountClip() {
     const clip = this.getClipElement();
     if (clip && this.ownerRender) {
+      clip.isClip = true;
       clip.ownerRender = this.ownerRender;
     }
   }
