@@ -708,6 +708,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public destroy() {
+    if (this._animations.length) {
+      this.ownerRender.__removeFrameableElement(this);
+    }
     this.parentNode = null;
     this.ownerRender = null;
     this.prevSibling = this.nextSibling = this.firstChild = this.lastChild = null;
