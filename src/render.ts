@@ -276,7 +276,8 @@ export default class Render extends EventFul {
     this._needUpdate = false;
     this._dirtyElements.clear();
     const chunkSize = this.chunksElement.size;
-    if (chunkSize === 0) {
+    const frameAbleSize = this._frameAbleElement.size;
+    if (chunkSize === 0 && frameAbleSize === 0) {
       const currentTime =
         typeof window !== 'undefined' && window.performance && window.performance.now
           ? window.performance.now()
@@ -287,7 +288,7 @@ export default class Render extends EventFul {
       }
     }
     this._isOnframe = false;
-    if (this._frameAbleElement.size || chunkSize > 0) {
+    if (frameAbleSize > 0 || chunkSize > 0) {
       this.nextTick();
     }
   };
