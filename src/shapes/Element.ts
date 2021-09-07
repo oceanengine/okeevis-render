@@ -187,17 +187,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _bboxDirty: boolean = true;
 
-  private _transform: mat3 = IDENTRY_MATRIX;
+  private _transform: mat3;
 
   private _absTransform: mat3;
-
-  private _invertedMatrix: mat3;
 
   private _transformDirty: boolean = false;
 
   private _absTransformDirty: boolean = true; // 自身或祖先矩阵变化
-
-  private _invertedMatrixDirty: boolean = true;
 
   private _clientBoundingRect: BBox;
 
@@ -557,10 +553,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const hasStroke = this.hasStroke();
     const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
     const offsetLineWidth = (Math.sqrt(2) / 2) * lineWidth;
+    const matrix = this.getGlobalTransform(true);
     x -= offsetLineWidth;
     y -= offsetLineWidth;
     width += offsetLineWidth * 2;
     height += offsetLineWidth * 2;
+    if (!matrix) {
+      return {x, y, width, height};
+    }
     reuseBBoxVectors[0][0] = x;
     reuseBBoxVectors[0][1] = y;
     reuseBBoxVectors[1][0] = x + width;
@@ -575,7 +575,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     //   [x + width, y + height],
     //   [x, y + height],
     // ];
-    const matrix = this.getGlobalTransform();
     reuseBBoxVectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
     return vec2BBox(reuseBBoxVectors, out);
   }
@@ -691,10 +690,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getInvertedPoint(x: number, y: number): [number, number] {
-    const inverMatrix = this.getInvertedGlobalTransform();
-    const vec2: [number, number] = [0, 0];
-    transformMat3(vec2, [x, y], inverMatrix);
-    return vec2;
+    const globalTransform = this.getGlobalTransform(true);
+    if (globalTransform) {
+      const out = mat3.create();
+      const inverMatrix = mat3.invert(out, globalTransform);
+      const vec2: [number, number] = [0, 0];
+      transformMat3(vec2, [x, y], inverMatrix);
+      return vec2;
+    } else {
+      return [x, y];
+    }
+   
   }
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
@@ -910,31 +916,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   /* ************ TransformAble Begin ******************* */
 
-  public getTransform(): mat3 {
+  public getTransform(nullable: boolean = false): mat3 {
     if (!this._transform || this._transformDirty) {
       this._transform = this._computeTransform();
       this._transformDirty = false;
     }
-    return this._transform;
+    return nullable ? this._transform  : (this._transform || IDENTRY_MATRIX);
   }
 
-  public getGlobalTransform(): mat3 {
+  public getGlobalTransform(nullable: boolean = false): mat3 {
     if (!this._absTransform || this._absTransformDirty) {
       this._absTransform = this._computeGlobalTransform();
       this._absTransformDirty = false;
     }
-    return this._absTransform;
-  }
-
-  public getInvertedGlobalTransform() {
-    if (!this._invertedMatrix || this._invertedMatrixDirty) {
-      if (!this._invertedMatrix) {
-        this._invertedMatrix = mat3.create();
-      }
-      this._invertedMatrix = mat3.invert(this._invertedMatrix, this.getGlobalTransform());
-      this._invertedMatrixDirty = false;
-    }
-    return this._invertedMatrix;
+    return nullable ? this._absTransform : (this._absTransform || IDENTRY_MATRIX);
   }
 
   public dirtyClientBoundingRect() {
@@ -944,7 +939,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeTransform(): mat3 {
-    const out = this._transform === IDENTRY_MATRIX ? mat3.create() : mat3.identity(this._transform);
+    const out = this._transform ? mat3.identity(this._transform) : mat3.create();
     const {
       rotation = 0,
       originX = 0,
@@ -955,13 +950,24 @@ export default class Element<T extends CommonAttr = ElementAttr>
       translateY = 0,
       matrix,
     } = this.attr;
-    (translateX !== 0 || translateY !== 0) && mat3.translate(out, out, [translateX, translateY]);
-    rotation !== 0 && transformUtils.rotate(out, rotation, originX, originY);
-    (scaleX !== 1 || scaleY !== 1) && transformUtils.scale(out, scaleX, scaleY, originX, originY);
+    let flagDirty = false;
+    if (translateX !== 0 || translateY !== 0) {
+      flagDirty = true;
+      mat3.translate(out, out, [translateX, translateY]);
+    }
+    if (rotation !== 0) {
+      flagDirty = true;
+      transformUtils.rotate(out, rotation, originX, originY);
+    }
+    if (scaleX !== 1 || scaleY !== 1) {
+      flagDirty = true;
+      transformUtils.scale(out, scaleX, scaleY, originX, originY);
+    }
     if (matrix) {
+      flagDirty = true;
       mat3.multiply(out, out, matrix);
     }
-    return out;
+    return flagDirty ? out : null;
   }
 
   public dirtyTransform() {
@@ -971,7 +977,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public dirtyGlobalTransform() {
     this._absTransformDirty = true;
-    this._invertedMatrixDirty = true;
     this.dirtyClientBoundingRect();
     if (this.ownerRender && this.ownerRender.renderer === 'svg' && this.attr.strokeNoScale) {
       this.ownerRender.dirty(this);
@@ -992,17 +997,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeGlobalTransform(): mat3 {
-    const parentTransform = this.parentNode ? this.parentNode.getGlobalTransform() : IDENTRY_MATRIX;
-    const selfTransform = this.getTransform();
-    const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.create();
+    const parentTransform: mat3 | null = this.parentNode ? this.parentNode.getGlobalTransform(true) : null;
+    const selfTransform = this.getTransform(true);
     const [dx, dy] = this._dragOffset;
+    if (!parentTransform && !selfTransform && dx === 0 && dy === 0) {
+      return null;
+    }
+    const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.create();
     if (dx !== 0 || dy !== 0) {
       mat3.translate(out, out,this._dragOffset);
     }
-    if (!mat3.exactEquals(parentTransform, IDENTRY_MATRIX)) {
+    if (parentTransform) {
       mat3.multiply(out, out, parentTransform);
     }
-    if (!mat3.exactEquals(selfTransform, IDENTRY_MATRIX)) {
+    if (selfTransform) {
       mat3.multiply(out, out, selfTransform);
     }
     return out;
