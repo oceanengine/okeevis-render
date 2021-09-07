@@ -41,7 +41,7 @@ export default class Render extends EventFul {
 
   public eventListener: Function;
 
-  public chunksElement: ES6Set<Element> = new ES6Set();
+  public chunksElement: ES6Set<Group> = new ES6Set();
 
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
@@ -171,6 +171,7 @@ export default class Render extends EventFul {
   }
 
   public updateAll(elements: Element<any>[]) {
+    this.chunksElement.clear();
     this._rootGroup.updateAll(elements);
   }
 
@@ -283,7 +284,7 @@ export default class Render extends EventFul {
       this._rootGroup.getBoundingClientRect();
     }
     this._isOnframe = false;
-    if (this._frameAbleElement.size) {
+    if (this._frameAbleElement.size || this.chunksElement.size) {
       this.nextTick();
     }
   };
@@ -291,6 +292,24 @@ export default class Render extends EventFul {
   public nextTick() {
     if (!this._requestAnimationFrameId) {
       this._requestAnimationFrameId = getRequestAnimationFrame()(this._onFrame);
+    }
+  }
+
+  public getOneChunk(): {parent: Group, items: Element[]} {
+    let parent: Group;
+    let items: Element[];
+    if (!this.chunksElement.size) {
+      return;
+    }
+    this.chunksElement.forEach(group => {
+      if (!parent) {
+        parent = group;
+        items = group.getChunks()[0];
+      }
+    });
+    return {
+      parent,
+      items
     }
   }
 }

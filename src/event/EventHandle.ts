@@ -113,11 +113,13 @@ export default class EventHandle {
     const ignoreInvisibleNodes = true;
     let target: Element;
     // 初步过滤掉不显示和不触发事件的元素
-    let pickNodes = this._getHandleGroup()
-      .getAllLeafNodes([], ignoreInvisibleNodes)
+    function filter(node: Element): boolean {
+      return inBBox(node.getBoundingClientRect(), x, y) && node.getExtendAttr('pointerEvents') !== 'none'
+    }
+    const pickNodes = this._getHandleGroup()
+      .getAllLeafNodes([], filter)
       .reverse();
     // 过渡掉不在包围盒中的
-    pickNodes = pickNodes.filter(node =>  inBBox(node.getBoundingClientRect(), x, y) && node.getExtendAttr('pointerEvents') !== 'none');
 
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;
