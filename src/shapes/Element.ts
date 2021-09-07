@@ -207,11 +207,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _dragOffset: [number, number] = createVec2();
 
+  private _currentPaintArea: BBox;
+
+  private _currentPaintAreaDirty: boolean = true;
+
   private _lastFrameTime: number;
 
   private _shadow: Shadow;
 
   private _inTransaction: boolean = false;
+
+  private _hasBeenPainted: boolean = false;
 
   public constructor(attr?: T) {
     super();
@@ -413,7 +419,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._dirtyRect = undefined;
       return;
     }
-    if (!this._dirty && this._lastFrameTime) {
+    if (!this._dirty && this._hasBeenPainted) {
       this._dirtyRect = this.getCurrentDirtyRect();
     }
   }
@@ -447,6 +453,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public clearDirty() {
+    this._hasBeenPainted = true;
     this._dirty = false;
   }
 
@@ -505,6 +512,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getCurrentDirtyRect(): BBox {
+    if (!this._currentPaintArea || this._currentPaintAreaDirty) {
+     this._currentPaintArea = this.computeCurrentDirtyRect();
+     this._currentPaintAreaDirty = false;
+    }
+    return this._currentPaintArea;
+  }
+
+  protected computeCurrentDirtyRect(): BBox {
     const shadowBlur = this.getExtendAttr('shadowBlur');
     if (shadowBlur === 0) {
       return ceilBBox(this.getBoundingClientRect());
@@ -609,6 +624,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
+      if (this.attr.onMounted || this._animations.length) {
+        this.ownerRender.__addFrameableElement(this);
+      }
     }
     this._mountClip();
   }
@@ -801,7 +819,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected addAnimation(option: AnimateOption<T>) {
     this._animations.push(option);
-    this.ownerRender?.nextTick();
+    this.ownerRender?.__addFrameableElement(this);
   }
 
   public stopAllAnimation(gotoEnd: boolean = false): this {
@@ -832,6 +850,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (!this._animations.length) {
+      this.ownerRender?.__removeFrameableElement(this as any);
       return;
     }
 
@@ -865,8 +884,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     animate.onFrame && animate.onFrame(progress);
     progress >= 1 && this._animations.shift();
     animate = null;
-    if (this._animations.length > 0) {
-      this.ownerRender.nextTick();
+    if (!this._animations.length) {
+        this.ownerRender?.__removeFrameableElement(this);
     }
     this.endAttrTransaction();
   }
@@ -917,6 +936,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public dirtyClientBoundingRect() {
     this._clientBoundingRectDirty = true;
+    this._currentPaintAreaDirty = true;
     this.parentNode?.dirtyBBox();
   }
 

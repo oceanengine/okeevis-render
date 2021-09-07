@@ -276,11 +276,6 @@ export default class Group<T extends Element<any> = Element> extends Element<Gro
     return current as T;
   }
 
-  public onFrame(now: number) {
-    super.onFrame(now);
-    this.eachChild(child => child.onFrame(now));
-  }
-
   public destroy() {
     super.destroy();
     this.clear();

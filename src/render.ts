@@ -41,6 +41,8 @@ export default class Render extends EventFul {
 
   public eventListener: Function;
 
+  public chunksElement: ES6Set<Element> = new ES6Set();
+
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
   private _width: number;
@@ -60,6 +62,8 @@ export default class Render extends EventFul {
   private _eventGroop: Group = new Group();
 
   private _dirtyElements: ES6Set<Element> = new ES6Set();
+
+  private _frameAbleElement: ES6Set<Element> = new ES6Set();
 
   private _painter: Painter;
 
@@ -173,6 +177,7 @@ export default class Render extends EventFul {
   public addEventElement(element: Element) {
     this._eventGroop.add(element);
   }
+  
 
   public removeEventElement(element: Element) {
     this._eventGroop.remove(element);
@@ -213,6 +218,8 @@ export default class Render extends EventFul {
     this.removeAllListeners();
     this._eventHandle.dispose();
     this._eventElementHandle.dispose();
+    this._frameAbleElement.clear();
+    this.chunksElement.clear();
     this._rootGroup.clear();
     this._eventGroop.clear();
     this._rootGroup = null;
@@ -241,6 +248,14 @@ export default class Render extends EventFul {
     return this._eventHandle;
   }
 
+  public __addFrameableElement(element: Element<any>) {
+    this._frameAbleElement.add(element);
+  }
+
+  public __removeFrameableElement(element: Element<any>) {
+    this._frameAbleElement.delete(element);
+  }
+
   protected onEvent(type: string, ...params: any[]) {
     if (this.eventListener) {
       this.eventListener.call(null, type, params);
@@ -253,7 +268,7 @@ export default class Render extends EventFul {
     }
     this._requestAnimationFrameId = null;
     this._isOnframe = true;
-    this._rootGroup.onFrame(now);
+    this._frameAbleElement.forEach(item => item.onFrame(now));
     this._painter?.onFrame(now);
     this._eventHandle.onFrame();
     this._eventElementHandle.onFrame();
@@ -268,6 +283,9 @@ export default class Render extends EventFul {
       this._rootGroup.getBoundingClientRect();
     }
     this._isOnframe = false;
+    if (this._frameAbleElement.size) {
+      this.nextTick();
+    }
   };
 
   public nextTick() {
