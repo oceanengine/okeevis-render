@@ -275,16 +275,19 @@ export default class Render extends EventFul {
     this._eventElementHandle.onFrame();
     this._needUpdate = false;
     this._dirtyElements.clear();
-    const currentTime =
-      typeof window !== 'undefined' && window.performance && window.performance.now
-        ? window.performance.now()
-        : Date.now();
-    const timeRemaining = 16 - (currentTime - now);
-    if (timeRemaining > 5) {
-      this._rootGroup.getBoundingClientRect();
+    const chunkSize = this.chunksElement.size;
+    if (chunkSize === 0) {
+      const currentTime =
+        typeof window !== 'undefined' && window.performance && window.performance.now
+          ? window.performance.now()
+          : Date.now();
+      const timeRemaining = 16 - (currentTime - now);
+      if (timeRemaining > 5) {
+        this._rootGroup.getBoundingClientRect();
+      }
     }
     this._isOnframe = false;
-    if (this._frameAbleElement.size || this.chunksElement.size) {
+    if (this._frameAbleElement.size || chunkSize > 0) {
       this.nextTick();
     }
   };
