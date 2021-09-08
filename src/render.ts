@@ -172,6 +172,7 @@ export default class Render extends EventFul {
 
   public updateAll(elements: Element<any>[]) {
     this.chunksElement.clear();
+    this._frameAbleElement.clear();
     this._rootGroup.updateAll(elements);
   }
 
