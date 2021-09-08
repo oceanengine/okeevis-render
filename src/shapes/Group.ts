@@ -264,17 +264,30 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     this._chunks = [];
   }
 
-  public getLeafNodesSize(ret:{size: number, limit: number} = {size: 0, limit: 1000000000}): number {
-    this.eachChild(child => {
-      ret.size++;
-      if (ret.size > ret.limit) {
-        return false;
+  public getLeafNodesSize(max: number = Number.MAX_SAFE_INTEGER): number {
+    if (this.size >= max) {
+      return max;
+    }
+    const nodes = this.childNodes;
+    let count = 0 ;
+    while (nodes.length) {
+      const node = nodes.pop() as Group;
+      count++;
+      if (count >= max) {
+        break;
       }
-      if (child.isGroup) {
-        (child as any as Group).getLeafNodesSize(ret);
+      if(node.isGroup) {
+        if (node.size > max) {
+          return max;
+        }
+        (node as Group).eachChild(child => {
+          if (nodes.length < max) {
+            nodes.push(child);
+          }
+        })
       }
-    })
-    return ret.size;
+    }
+    return count;
   }
 
   public updateAll(list: T[]) {
@@ -344,13 +357,10 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     }
   }
 
-  public eachChild(callback: (child: T) => any) {
+  public eachChild(callback: (child: T) => void) {
     let node = this.firstChild as T;
     while (node) {
-      const ret = callback(node);
-      if (ret === false) {
-        break;
-      }
+      callback(node);
       node = node.nextSibling as T;
     }
     node = null;

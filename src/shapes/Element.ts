@@ -428,7 +428,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let leafNodeSize = 1;
     if (this.ownerRender && this.ownerRender.renderer === 'canvas' && this.ownerRender.enableDirtyRect) {
       if (this.isGroup) {
-        leafNodeSize = (this as  any as Group).getLeafNodesSize({size: 0, limit: this.ownerRender.maxDirtyRects + 1});
+        leafNodeSize = (this as  any as Group).getLeafNodesSize(this.ownerRender.maxDirtyRects + 1);
         this.beforeDirty(leafNodeSize)
       } else {
         this.beforeDirty(leafNodeSize);
