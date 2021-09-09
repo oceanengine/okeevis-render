@@ -252,6 +252,7 @@ export default class Render extends EventFul {
 
   public __addFrameableElement(element: Element<any>) {
     this._frameAbleElement.add(element);
+    this.nextTick();
   }
 
   public __removeFrameableElement(element: Element<any>) {
