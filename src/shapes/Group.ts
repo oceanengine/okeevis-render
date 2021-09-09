@@ -291,7 +291,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public updateAll(list: T[]) {
-    this._chunks = [];
+    this.replaceChunks([]);
     const prevList = this.children();
     if (prevList.length === 0) {
       this.addAll(list);
