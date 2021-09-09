@@ -62,8 +62,6 @@ export default class EventHandle {
 
   private _cancelClick: boolean = true;
 
-  private _hasTouchEvent: boolean = false;
-
   public constructor(render: Render, eventOnly: boolean = false) {
     this.render = render;
     this._PixelPainter = new CanvasPainter(render, true);
@@ -290,14 +288,13 @@ export default class EventHandle {
         this._synthetickOverOutEvent(prevMouseTarget, target, mouseEventParam);
       }
     }
-    if (!this._hasTouchEvent) {
+    if (event.type === 'mousemove') {
       this._prevMousePosition = { x, y };
       this._prevMouseTarget = target;
     }
   };
 
   private _syntheticTouchEvent = (nativeEvent: TouchEvent, isNative: boolean = true) => {
-    this._hasTouchEvent = true;
     const { touches, changedTouches } = nativeEvent;
     const prevMouseTarget = this._prevMouseTarget;
     this._lastMouseSyntheticTimestamp = Date.now();
