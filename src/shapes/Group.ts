@@ -259,6 +259,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   }
 
   public destroy() {
+    if (this._chunks.length) {
+      this.clearChunks();
+    }
     super.destroy();
     this.clear();
     this._chunks = [];
