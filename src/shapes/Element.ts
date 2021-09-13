@@ -215,6 +215,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _hasBeenPainted: boolean = false;
 
+  private _inFrameAble: boolean;
+
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
@@ -560,7 +562,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     width += offsetLineWidth * 2;
     height += offsetLineWidth * 2;
     if (!matrix) {
-      return {x, y, width, height};
+      out.x = x;
+      out.y = y;
+      out.width = width;
+      out.height = height;
+      return out;
     }
     reuseBBoxVectors[0][0] = x;
     reuseBBoxVectors[0][1] = y;
@@ -625,7 +631,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
       if (this.attr.onMounted || this._animations.length) {
-        this.ownerRender.__addFrameableElement(this);
+        this._addToFrame();
       }
     }
     this._mountClip();
@@ -715,8 +721,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public destroy() {
-    if (this._animations.length) {
-      this.ownerRender.__removeFrameableElement(this);
+    if (this._inFrameAble) {
+      this._removeFromFrame();
     }
     this.parentNode = null;
     this.ownerRender = null;
@@ -829,7 +835,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected addAnimation(option: AnimateOption<T>) {
     this._animations.push(option);
-    this.ownerRender?.__addFrameableElement(this);
+    this._addToFrame();
   }
 
   public stopAllAnimation(gotoEnd: boolean = false): this {
@@ -860,7 +866,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (!this._animations.length) {
-      this.ownerRender?.__removeFrameableElement(this as any);
+      this._removeFromFrame();
       return;
     }
 
@@ -895,7 +901,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     progress >= 1 && this._animations.shift();
     animate = null;
     if (!this._animations.length) {
-        this.ownerRender?.__removeFrameableElement(this);
+      this._removeFromFrame();
     }
     this.endAttrTransaction();
   }
@@ -1019,5 +1025,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _removeSVGAttribute(attr: string) {
     (this.ownerRender.getPainter() as SVGPainter).removeNodeAttribute(this as any, attr);
+  }
+
+  private _addToFrame() {
+    if (this.ownerRender) {
+      this._inFrameAble = true;
+      this.ownerRender.__addFrameableElement(this);
+    }
+  }
+
+  private _removeFromFrame() {
+    this._inFrameAble = false;
+    this.ownerRender?.__removeFrameableElement(this);
   }
 }
