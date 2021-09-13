@@ -417,6 +417,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._dirtyRect = undefined;
       return;
     }
+    if (!this.visible()) {
+      this._dirtyRect = null;
+      return;
+    }
     if (!this._dirty && this._hasBeenPainted) {
       this._dirtyRect = this.getCurrentDirtyRect();
     }
@@ -500,13 +504,21 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._clientBoundingRect;
   }
 
-  public getDirtyRects(): [BBox] | [BBox, BBox] {
+  public getDirtyRects(): [BBox] | BBox[] {
     const prevBBox = this._dirtyRect;
-    const currentBBox = this.getCurrentDirtyRect();
-    if (prevBBox) {
-      return [prevBBox, currentBBox];
+    const currentBBox = this.visible() ? this.getCurrentDirtyRect() : null;
+    return [prevBBox, currentBBox].filter(val => val);
+  }
+
+  public visible() {
+    let node = this as any as Element;;
+    while (node) {
+      if (node.attr.display === false) {
+        return false;
+      }
+      node = node.parentNode;
     }
-    return [currentBBox];
+    return true;
   }
 
   public getCurrentDirtyRect(): BBox {
