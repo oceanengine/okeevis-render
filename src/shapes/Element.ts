@@ -518,6 +518,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   protected computeCurrentDirtyRect(): BBox {
+    if (this.attr.display === false) {
+      return createZeroBBox();
+    }
     const shadowBlur = this.getExtendAttr('shadowBlur');
     if (shadowBlur === 0) {
       return ceilBBox(this.getBoundingClientRect());
