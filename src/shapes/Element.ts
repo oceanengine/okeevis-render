@@ -597,12 +597,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (newValue === oldValue) {
       return;
     }
+
     if (transformKeys.indexOf(key as keyof CommonAttr) !== -1) {
       this.dirtyTransform();
     }
+    
     if (key === 'display') {
       this.dirtyBBox();
     }
+
+    if (key === 'shadowBlur') {
+      this._currentPaintAreaDirty = true;
+    }
+
     if (this.shapeKeys.indexOf(key) !== -1) {
       this.dirtyBBox();
     }
