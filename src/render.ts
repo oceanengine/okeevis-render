@@ -41,6 +41,8 @@ export default class Render extends EventFul {
 
   public eventListener: Function;
 
+  public chunksElement: ES6Set<Group> = new ES6Set();
+
   private _dom: HTMLDivElement | HTMLCanvasElement;
 
   private _width: number;
@@ -60,6 +62,8 @@ export default class Render extends EventFul {
   private _eventGroop: Group = new Group();
 
   private _dirtyElements: ES6Set<Element> = new ES6Set();
+
+  private _frameAbleElement: ES6Set<Element> = new ES6Set();
 
   private _painter: Painter;
 
@@ -167,12 +171,15 @@ export default class Render extends EventFul {
   }
 
   public updateAll(elements: Element<any>[]) {
+    this.chunksElement.clear();
+    this._frameAbleElement.clear();
     this._rootGroup.updateAll(elements);
   }
 
   public addEventElement(element: Element) {
     this._eventGroop.add(element);
   }
+  
 
   public removeEventElement(element: Element) {
     this._eventGroop.remove(element);
@@ -213,6 +220,8 @@ export default class Render extends EventFul {
     this.removeAllListeners();
     this._eventHandle.dispose();
     this._eventElementHandle.dispose();
+    this._frameAbleElement.clear();
+    this.chunksElement.clear();
     this._rootGroup.clear();
     this._eventGroop.clear();
     this._rootGroup = null;
@@ -241,6 +250,15 @@ export default class Render extends EventFul {
     return this._eventHandle;
   }
 
+  public __addFrameableElement(element: Element<any>) {
+    this._frameAbleElement.add(element);
+    this.nextTick();
+  }
+
+  public __removeFrameableElement(element: Element<any>) {
+    this._frameAbleElement.delete(element);
+  }
+
   protected onEvent(type: string, ...params: any[]) {
     if (this.eventListener) {
       this.eventListener.call(null, type, params);
@@ -253,26 +271,51 @@ export default class Render extends EventFul {
     }
     this._requestAnimationFrameId = null;
     this._isOnframe = true;
-    this._rootGroup.onFrame(now);
+    this._frameAbleElement.forEach(item => item.onFrame(now));
     this._painter?.onFrame(now);
     this._eventHandle.onFrame();
     this._eventElementHandle.onFrame();
     this._needUpdate = false;
     this._dirtyElements.clear();
-    const currentTime =
-      typeof window !== 'undefined' && window.performance && window.performance.now
-        ? window.performance.now()
-        : Date.now();
-    const timeRemaining = 16 - (currentTime - now);
-    if (timeRemaining > 5) {
-      this._rootGroup.getBoundingClientRect();
+    const chunkSize = this.chunksElement.size;
+    const frameAbleSize = this._frameAbleElement.size;
+    if (chunkSize === 0 && frameAbleSize === 0) {
+      const currentTime =
+        typeof window !== 'undefined' && window.performance && window.performance.now
+          ? window.performance.now()
+          : Date.now();
+      const timeRemaining = 16 - (currentTime - now);
+      if (timeRemaining > 5) {
+        this._rootGroup.getBoundingClientRect();
+      }
     }
     this._isOnframe = false;
+    if (frameAbleSize > 0 || chunkSize > 0) {
+      this.nextTick();
+    }
   };
 
   public nextTick() {
     if (!this._requestAnimationFrameId) {
       this._requestAnimationFrameId = getRequestAnimationFrame()(this._onFrame);
+    }
+  }
+
+  public getOneChunk(): {parent: Group, items: Element[]} {
+    let parent: Group;
+    let items: Element[];
+    if (!this.chunksElement.size) {
+      return;
+    }
+    this.chunksElement.forEach(group => {
+      if (!parent) {
+        parent = group;
+        items = group.getChunks()[0];
+      }
+    });
+    return {
+      parent,
+      items
     }
   }
 }

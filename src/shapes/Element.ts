@@ -187,17 +187,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _bboxDirty: boolean = true;
 
-  private _transform: mat3 = IDENTRY_MATRIX;
+  private _transform: mat3;
 
   private _absTransform: mat3;
-
-  private _invertedMatrix: mat3;
 
   private _transformDirty: boolean = false;
 
   private _absTransformDirty: boolean = true; // 自身或祖先矩阵变化
-
-  private _invertedMatrixDirty: boolean = true;
 
   private _clientBoundingRect: BBox;
 
@@ -207,11 +203,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _dragOffset: [number, number] = createVec2();
 
+  private _currentPaintArea: BBox;
+
+  private _currentPaintAreaDirty: boolean = true;
+
   private _lastFrameTime: number;
 
   private _shadow: Shadow;
 
   private _inTransaction: boolean = false;
+
+  private _hasBeenPainted: boolean = false;
+
+  private _inFrameAble: boolean;
 
   public constructor(attr?: T) {
     super();
@@ -413,7 +417,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._dirtyRect = undefined;
       return;
     }
-    if (!this._dirty && this._lastFrameTime) {
+    if (!this.visible()) {
+      this._dirtyRect = null;
+      return;
+    }
+    if (!this._dirty && this._hasBeenPainted) {
       this._dirtyRect = this.getCurrentDirtyRect();
     }
   }
@@ -426,7 +434,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let leafNodeSize = 1;
     if (this.ownerRender && this.ownerRender.renderer === 'canvas' && this.ownerRender.enableDirtyRect) {
       if (this.isGroup) {
-        leafNodeSize = (this as  any as Group).getLeafNodesSize({size: 0, limit: this.ownerRender.maxDirtyRects + 1});
+        leafNodeSize = (this as  any as Group).getLeafNodesSize(this.ownerRender.maxDirtyRects + 1);
         this.beforeDirty(leafNodeSize)
       } else {
         this.beforeDirty(leafNodeSize);
@@ -447,6 +455,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public clearDirty() {
+    this._hasBeenPainted = true;
     this._dirty = false;
   }
 
@@ -495,27 +504,44 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._clientBoundingRect;
   }
 
-  public getDirtyRects(): [BBox] | [BBox, BBox] {
+  public getDirtyRects(): [BBox] | BBox[] {
     const prevBBox = this._dirtyRect;
-    const currentBBox = this.getCurrentDirtyRect();
-    if (prevBBox) {
-      return [prevBBox, currentBBox];
+    const currentBBox = this.visible() ? this.getCurrentDirtyRect() : null;
+    return [prevBBox, currentBBox].filter(val => val);
+  }
+
+  public visible() {
+    let node = this as any as Element;;
+    while (node) {
+      if (node.attr.display === false) {
+        return false;
+      }
+      node = node.parentNode;
     }
-    return [currentBBox];
+    return true;
   }
 
   public getCurrentDirtyRect(): BBox {
+    if (!this._currentPaintArea || this._currentPaintAreaDirty) {
+     this._currentPaintArea = this.computeCurrentDirtyRect();
+     this._currentPaintAreaDirty = false;
+    }
+    return this._currentPaintArea;
+  }
+
+  protected computeCurrentDirtyRect(): BBox {
     const shadowBlur = this.getExtendAttr('shadowBlur');
     if (shadowBlur === 0) {
       return ceilBBox(this.getBoundingClientRect());
     }
     // 计算当前dirtyRect
-    const { x, y, width, height } = this.getBoundingClientRect();
+    const boundingRect = this.getBoundingClientRect();;
+    const { x, y, width, height } = boundingRect;
     // 暂不考虑miter尖角影响, 默认使用了bevel
     // const miterLimit = this.getExtendAttr('miterLimit');
     // const lineJoin = this.getExtendAttr('lineJoin');
     if (shadowBlur === 0) {
-      return ceilBBox({ x, y, width, height });
+      return ceilBBox(boundingRect);
     }
     const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
     const shadowOffsetY = this.getExtendAttr('shadowOffsetY');
@@ -542,10 +568,18 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const hasStroke = this.hasStroke();
     const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
     const offsetLineWidth = (Math.sqrt(2) / 2) * lineWidth;
+    const matrix = this.getGlobalTransform(true);
     x -= offsetLineWidth;
     y -= offsetLineWidth;
     width += offsetLineWidth * 2;
     height += offsetLineWidth * 2;
+    if (!matrix) {
+      out.x = x;
+      out.y = y;
+      out.width = width;
+      out.height = height;
+      return out;
+    }
     reuseBBoxVectors[0][0] = x;
     reuseBBoxVectors[0][1] = y;
     reuseBBoxVectors[1][0] = x + width;
@@ -560,7 +594,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     //   [x + width, y + height],
     //   [x, y + height],
     // ];
-    const matrix = this.getGlobalTransform();
     reuseBBoxVectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
     return vec2BBox(reuseBBoxVectors, out);
   }
@@ -609,6 +642,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
+      if (this.attr.onMounted || this._animations.length) {
+        this._addToFrame();
+      }
     }
     this._mountClip();
   }
@@ -673,10 +709,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public getInvertedPoint(x: number, y: number): [number, number] {
-    const inverMatrix = this.getInvertedGlobalTransform();
-    const vec2: [number, number] = [0, 0];
-    transformMat3(vec2, [x, y], inverMatrix);
-    return vec2;
+    const globalTransform = this.getGlobalTransform(true);
+    if (globalTransform) {
+      const out = mat3.create();
+      const inverMatrix = mat3.invert(out, globalTransform);
+      const vec2: [number, number] = [0, 0];
+      transformMat3(vec2, [x, y], inverMatrix);
+      return vec2;
+    } else {
+      return [x, y];
+    }
+   
   }
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
@@ -690,6 +733,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public destroy() {
+    if (this._inFrameAble) {
+      this._removeFromFrame();
+    }
     this.parentNode = null;
     this.ownerRender = null;
     this.prevSibling = this.nextSibling = this.firstChild = this.lastChild = null;
@@ -801,7 +847,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected addAnimation(option: AnimateOption<T>) {
     this._animations.push(option);
-    this.ownerRender?.nextTick();
+    this._addToFrame();
   }
 
   public stopAllAnimation(gotoEnd: boolean = false): this {
@@ -832,6 +878,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (!this._animations.length) {
+      this._removeFromFrame();
       return;
     }
 
@@ -865,8 +912,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     animate.onFrame && animate.onFrame(progress);
     progress >= 1 && this._animations.shift();
     animate = null;
-    if (this._animations.length > 0) {
-      this.ownerRender.nextTick();
+    if (!this._animations.length) {
+      this._removeFromFrame();
     }
     this.endAttrTransaction();
   }
@@ -888,40 +935,30 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   /* ************ TransformAble Begin ******************* */
 
-  public getTransform(): mat3 {
+  public getTransform(nullable: boolean = false): mat3 {
     if (!this._transform || this._transformDirty) {
       this._transform = this._computeTransform();
       this._transformDirty = false;
     }
-    return this._transform;
+    return nullable ? this._transform  : (this._transform || IDENTRY_MATRIX);
   }
 
-  public getGlobalTransform(): mat3 {
+  public getGlobalTransform(nullable: boolean = false): mat3 {
     if (!this._absTransform || this._absTransformDirty) {
       this._absTransform = this._computeGlobalTransform();
       this._absTransformDirty = false;
     }
-    return this._absTransform;
-  }
-
-  public getInvertedGlobalTransform() {
-    if (!this._invertedMatrix || this._invertedMatrixDirty) {
-      if (!this._invertedMatrix) {
-        this._invertedMatrix = mat3.create();
-      }
-      this._invertedMatrix = mat3.invert(this._invertedMatrix, this.getGlobalTransform());
-      this._invertedMatrixDirty = false;
-    }
-    return this._invertedMatrix;
+    return nullable ? this._absTransform : (this._absTransform || IDENTRY_MATRIX);
   }
 
   public dirtyClientBoundingRect() {
     this._clientBoundingRectDirty = true;
+    this._currentPaintAreaDirty = true;
     this.parentNode?.dirtyBBox();
   }
 
   private _computeTransform(): mat3 {
-    const out = this._transform === IDENTRY_MATRIX ? mat3.create() : mat3.identity(this._transform);
+    const out = this._transform ? mat3.identity(this._transform) : mat3.create();
     const {
       rotation = 0,
       originX = 0,
@@ -932,13 +969,24 @@ export default class Element<T extends CommonAttr = ElementAttr>
       translateY = 0,
       matrix,
     } = this.attr;
-    (translateX !== 0 || translateY !== 0) && mat3.translate(out, out, [translateX, translateY]);
-    rotation !== 0 && transformUtils.rotate(out, rotation, originX, originY);
-    (scaleX !== 1 || scaleY !== 1) && transformUtils.scale(out, scaleX, scaleY, originX, originY);
+    let flagDirty = false;
+    if (translateX !== 0 || translateY !== 0) {
+      flagDirty = true;
+      mat3.translate(out, out, [translateX, translateY]);
+    }
+    if (rotation !== 0) {
+      flagDirty = true;
+      transformUtils.rotate(out, rotation, originX, originY);
+    }
+    if (scaleX !== 1 || scaleY !== 1) {
+      flagDirty = true;
+      transformUtils.scale(out, scaleX, scaleY, originX, originY);
+    }
     if (matrix) {
+      flagDirty = true;
       mat3.multiply(out, out, matrix);
     }
-    return out;
+    return flagDirty ? out : null;
   }
 
   public dirtyTransform() {
@@ -948,7 +996,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public dirtyGlobalTransform() {
     this._absTransformDirty = true;
-    this._invertedMatrixDirty = true;
     this.dirtyClientBoundingRect();
     if (this.ownerRender && this.ownerRender.renderer === 'svg' && this.attr.strokeNoScale) {
       this.ownerRender.dirty(this);
@@ -969,17 +1016,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeGlobalTransform(): mat3 {
-    const parentTransform = this.parentNode ? this.parentNode.getGlobalTransform() : IDENTRY_MATRIX;
-    const selfTransform = this.getTransform();
-    const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.create();
+    const parentTransform: mat3 | null = this.parentNode ? this.parentNode.getGlobalTransform(true) : null;
+    const selfTransform = this.getTransform(true);
     const [dx, dy] = this._dragOffset;
+    if (!parentTransform && !selfTransform && dx === 0 && dy === 0) {
+      return null;
+    }
+    const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.create();
     if (dx !== 0 || dy !== 0) {
       mat3.translate(out, out,this._dragOffset);
     }
-    if (!mat3.exactEquals(parentTransform, IDENTRY_MATRIX)) {
+    if (parentTransform) {
       mat3.multiply(out, out, parentTransform);
     }
-    if (!mat3.exactEquals(selfTransform, IDENTRY_MATRIX)) {
+    if (selfTransform) {
       mat3.multiply(out, out, selfTransform);
     }
     return out;
@@ -987,5 +1037,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _removeSVGAttribute(attr: string) {
     (this.ownerRender.getPainter() as SVGPainter).removeNodeAttribute(this as any, attr);
+  }
+
+  private _addToFrame() {
+    if (this.ownerRender) {
+      this._inFrameAble = true;
+      this.ownerRender.__addFrameableElement(this);
+    }
+  }
+
+  private _removeFromFrame() {
+    this._inFrameAble = false;
+    this.ownerRender?.__removeFrameableElement(this);
   }
 }

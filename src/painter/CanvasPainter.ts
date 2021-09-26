@@ -96,7 +96,7 @@ export default class CanvasPainter implements Painter {
     const maxDirtyRects = this.render.maxDirtyRects;
     const dirtyElements = this.render.getDirtyElements();
     const dirytCount = dirtyElements.size;
-    const chunk = this.render.getRoot().getOneChunk();
+    const chunk = this.render.getOneChunk();
     if (needUpdate) {
       if (
         !this._isFirstFrame &&

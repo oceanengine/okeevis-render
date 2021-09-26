@@ -7,7 +7,7 @@ import Circle from '../src/shapes/Circle';
 
 const dom = document.getElementById('root') as HTMLDivElement;
 const render = new Render(dom, {renderer: 'canvas'});
-render.showFPS = true;
+render.showFPS = false;
 render.showBBox = false;
 render.enableDirtyRect = false
 
