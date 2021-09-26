@@ -1,3 +1,8 @@
+# 0.9.50 (2021-09-26)
+* [event] pick性能优化
+* [onFrame] animate, chunk集中管理
+* [element] 矩阵计算加速
+
 # 0.9.49 (2021-09-03)
 * [feat] [rich]　支持json富文本
 * [event] touch合成事件时，当前target不受lcick影响
