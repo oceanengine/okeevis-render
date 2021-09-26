@@ -88,7 +88,7 @@ export default class SVGPainter implements Painter {
         });
       }
     }
-    const chunk = this.render.getRoot().getOneChunk();
+    const chunk = this.render.getOneChunk();
     if (chunk) {
       this._paintChunk(chunk.parent, chunk.items);
     }

@@ -19,7 +19,7 @@ export interface ChunkItem {
   chunks: Element[][];
 }
 
-export default class Group<T extends Element<any> = Element> extends Element<GroupConf> {
+export default class Group<T extends Element = Element> extends Element<GroupConf> {
   public type = 'group';
 
   public svgTagName = 'g';
@@ -78,6 +78,9 @@ export default class Group<T extends Element<any> = Element> extends Element<Gro
 
   public mounted() {
     super.mounted();
+    if (this._chunks.length) {
+      this.onChunkChange();
+    }
     this.eachChild(child => child.mounted());
   }
 
@@ -164,61 +167,40 @@ export default class Group<T extends Element<any> = Element> extends Element<Gro
     if (items.length === 0) {
     }
     this._chunks.push(items);
-    this.ownerRender?.nextTick();
+    this.onChunkChange();
     return this;
   }
 
   public replaceChunks(chunks: T[][]) {
     this._chunks = chunks;
-    this.ownerRender?.nextTick();
+    this.onChunkChange();
   }
 
   public clearChunks() {
     this._chunks = [];
+    this.onChunkChange();
   }
 
   public getChunks(): T[][] {
     return this._chunks;
   }
 
-  public getOneChunk(): {parent: Group, items: Element[]} {
-    if (this._chunks.length > 0) {
-      return {parent: this, items: this._chunks[0]}
+  protected onChunkChange() {
+    if (this.ownerRender) {
+      if (this._chunks.length) {
+        this.ownerRender.chunksElement.add(this);
+        this.ownerRender.nextTick();
+      } else {
+        this.ownerRender.chunksElement.delete(this);
+      }
     }
-    let ret: any;
-    this.eachChild(child => {
-      if (child.isGroup) {
-        ret = (child as any as Group).getOneChunk();
-      }
-      if (ret) {
-        return false;
-      }
-    });
-    return ret;
-  }
-
-  // 递归获取chunks
-  public getAllChunks(out: ChunkItem[] = []): ChunkItem[] {
-    if (this._chunks.length > 0) {
-      out.push({
-        parent: this,
-        chunks: this._chunks,
-      });
-    }
-    this.eachChild(child => {
-      if (child.isGroup) {
-        const childGroup = (child as any) as Group;
-        childGroup.getAllChunks(out);
-      }
-    });
-    return out;
   }
 
   public mountChunk(chunkItems: T[]) {
     this._chunks = this._chunks.filter(chunk => chunk !== chunkItems);
     chunkItems.forEach(item => this.add(item, false));
-    if (this._chunks.length > 0) {
-      this.ownerRender.nextTick();
+    if (this._chunks.length === 0) {
+      this.ownerRender.chunksElement.delete(this);
     }
   }
 
@@ -276,32 +258,45 @@ export default class Group<T extends Element<any> = Element> extends Element<Gro
     return current as T;
   }
 
-  public onFrame(now: number) {
-    super.onFrame(now);
-    this.eachChild(child => child.onFrame(now));
-  }
-
   public destroy() {
+    if (this._chunks.length) {
+      this.clearChunks();
+    }
     super.destroy();
     this.clear();
     this._chunks = [];
   }
 
-  public getLeafNodesSize(ret:{size: number, limit: number} = {size: 0, limit: 1000000000}): number {
-    this.eachChild(child => {
-      ret.size++;
-      if (ret.size > ret.limit) {
-        return false;
+  public getLeafNodesSize(max: number = Number.MAX_SAFE_INTEGER): number {
+    if (this.size >= max) {
+      return max;
+    }
+    const nodes = this.childNodes;
+    let count = 0 ;
+    while (nodes.length) {
+      const node = nodes.pop() as Group;
+      count++;
+      if (count >= max) {
+        break;
       }
-      if (child.isGroup) {
-        (child as any as Group).getLeafNodesSize(ret);
+      if(node.isGroup) {
+        if (node.size > max) {
+          return max;
+        }
+        (node as Group).eachChild(child => {
+          if (nodes.length < max) {
+            nodes.push(child);
+          }
+        })
       }
-    })
-    return ret.size;
+    }
+    return count;
   }
 
   public updateAll(list: T[]) {
-    this._chunks = [];
+    if (this._chunks.length) {
+      this.replaceChunks([]);
+    }
     const prevList = this.children();
     if (prevList.length === 0) {
       this.addAll(list);
@@ -367,13 +362,10 @@ export default class Group<T extends Element<any> = Element> extends Element<Gro
     }
   }
 
-  public eachChild(callback: (child: T) => any) {
+  public eachChild(callback: (child: T) => void) {
     let node = this.firstChild as T;
     while (node) {
-      const ret = callback(node);
-      if (ret === false) {
-        break;
-      }
+      callback(node);
       node = node.nextSibling as T;
     }
     node = null;
@@ -390,15 +382,17 @@ export default class Group<T extends Element<any> = Element> extends Element<Gro
     return ret;
   }
 
-  public getAllLeafNodes(ret: Shape[], ignoreInvisible = false): Shape[] {
+  public getAllLeafNodes(ret: Shape[], filter: Function): Shape[] {
     this.eachChild(item => {
-      if (item.attr.display === false && ignoreInvisible) {
+      if (item.attr.display === false) {
         return;
       }
       if (!item.isGroup) {
-        ret.push((item as any) as Shape);
+        if (filter(item)) {
+          ret.push((item as any) as Shape);
+        }
       } else {
-        ((item as any) as Group).getAllLeafNodes(ret, ignoreInvisible);
+        ((item as any) as Group).getAllLeafNodes(ret, filter);
       }
     });
     return ret;
