@@ -297,13 +297,14 @@ export default class Path2D {
     const segments = getPathSegments(this, []);
     let sumLen = 0;
     for (let i = 0; i < segments.length; i++) {
-      sumLen += getSegmentLength(segments[i]);
-      if (sumLen >= len) {
-        const sublen = sumLen - len;
-        return getPointAtSegment(sublen, segments[i]);
+      const segmentLength = getSegmentLength(segments[i]);
+      if ((sumLen + segmentLength) >= len) {
+        const sublen = len - sumLen;
+        return getPointAtSegment(sublen / segmentLength , segments[i]);
       }
+      sumLen += segmentLength;
     }
-    return null;
+    return getPointAtSegment(0, segments[0]);
   }
 
   public getPointAtPercent(percent: number): [number, number] {

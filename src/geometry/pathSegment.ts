@@ -26,8 +26,7 @@ function arcLength(r: number, startAngle: number, endAngle: number): number {
   return theta * r;
 }
 
-function bezierLength(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number): number {
-  const z = 1;
+function bezierLength(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number, z = 1): number {
   var z2 = z / 2,
     n = 12,
     Tvalues = [-.1252, .1252, -.3678, .3678, -.5873, .5873, -.7699, .7699, -.9041, .9041, -.9816, .9816],
@@ -43,36 +42,54 @@ function bezierLength(x1: number, y1: number, x2: number, y2: number, x3: number
   return z2 * sum;
 }
 
-function pointAtLine(length: number, x1: number, y1: number, x2: number, y2: number): SegmentPoint {
-  const totalLength = lineLength(x1, y1, x2, y2);
-  const percent = length / totalLength;
+function pointAtLine(t: number, x1: number, y1: number, x2: number, y2: number): SegmentPoint {
   return {
-    x: x1 + (x2 - x1) * percent,
-    y: y1 + (y2 - y1) * percent,
-    alpha: 0,
+    x: x1 + (x2 - x1) * t,
+    y: y1 + (y2 - y1) * t,
+    alpha: (y2 - y1) / (x2 - x1)
   }
 }
 
-function pointAtArc(length: number, cx: number, cy: number, r: number, startAngle: number, endAngle: number): SegmentPoint {
-  const totalLength = arcLength(r, startAngle, endAngle);
-  const percent = length / totalLength;
-  const angle = startAngle + percent * (endAngle - startAngle);
+function pointAtArc(t: number, cx: number, cy: number, r: number, startAngle: number, endAngle: number): SegmentPoint {
+  const angle = startAngle + t * (endAngle - startAngle);
+  const antiClockwise = startAngle > endAngle;
+  const theta = angle + (antiClockwise ? Math.PI / 2 : -Math.PI / 2);
   return {
     x: cx + Math.cos(angle) * r,
     y: cy + Math.sin(angle) * r,
-    alpha: 0,
+    alpha: Math.atan(theta)
   }
 }
 
-function pointAtBezier(length: number, x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): SegmentPoint {
-  const totalLength = bezierLength(x0, y0, x1, y1, x2, y2, x3, y3);
-  const percent = length / totalLength;
+function pointAtBezier(t: number, p1x: number, p1y: number, c1x: number, c1y: number, c2x: number, c2y: number, p2x: number, p2y: number): SegmentPoint {
+  var t1 = 1 - t,
+      t13 = Math.pow(t1, 3),
+      t12 = Math.pow(t1, 2),
+      t2 = t * t,
+      t3 = t2 * t,
+      x = t13 * p1x + t12 * 3 * t * c1x + t1 * 3 * t * t * c2x + t3 * p2x,
+      y = t13 * p1y + t12 * 3 * t * c1y + t1 * 3 * t * t * c2y + t3 * p2y,
+      mx = p1x + 2 * t * (c1x - p1x) + t2 * (c2x - 2 * c1x + p1x),
+      my = p1y + 2 * t * (c1y - p1y) + t2 * (c2y - 2 * c1y + p1y),
+      nx = c1x + 2 * t * (c2x - c1x) + t2 * (p2x - 2 * c2x + c1x),
+      ny = c1y + 2 * t * (c2y - c1y) + t2 * (p2y - 2 * c2y + c1y),
+      // ax = t1 * p1x + t * c1x,
+      // ay = t1 * p1y + t * c1y,
+      // cx = t1 * c2x + t * p2x,
+      // cy = t1 * c2y + t * p2y,
+      alpha = 90 - Math.atan2(mx - nx, my - ny) * 180 / Math.PI;
+  // (mx > nx || my < ny) && (alpha += 180);
   return {
-    x: 0,
-    y: 0,
-    alpha: 0,
-  }
+      x: x,
+      y: y,
+      // m: {x: mx, y: my},
+      // n: {x: nx, y: ny},
+      // start: {x: ax, y: ay},
+      // end: {x: cx, y: cy},
+      alpha: alpha
+  };
 }
+
 
 export function getSegmentLength(segment: Segment): number {
   if (segment.type === 'line') {
@@ -88,14 +105,13 @@ export function getSegmentLength(segment: Segment): number {
     return bezierLength.apply(null, segment.params);
   }
 }
-
-export function getPointAtSegment(length: number, segment: Segment): SegmentPoint {
-  const segmentFn = {
-    line: pointAtLine,
-    arc: pointAtArc,
-    bezier: pointAtBezier,
-  }
-  return segmentFn[segment.type].apply(null, [length, ...segment.params]);
+const segmentFn = {
+  line: pointAtLine,
+  arc: pointAtArc,
+  bezier: pointAtBezier,
+}
+export function getPointAtSegment(t: number, segment: Segment): SegmentPoint {
+  return segmentFn[segment.type].apply(null, [t, ...segment.params]);
 }
 
 export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
