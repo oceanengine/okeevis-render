@@ -75,12 +75,18 @@ function pointAtBezier(length: number, x0: number, y0: number, x1: number, y1: n
 }
 
 export function getSegmentLength(segment: Segment): number {
-  const segmentFn = {
-    line: lineLength,
-    arc: arcLength,
-    bezier: bezierLength,
+  if (segment.type === 'line') {
+    return lineLength.apply(null, segment.params);
   }
-  return segmentFn[segment.type].apply(null, segment.params);
+  if (segment.type === 'arc') {
+    const r = segment.params[2];
+    const start = segment.params[3];
+    const end = segment.params[4];
+    return arcLength(r, start, end);
+  }
+  if (segment.type === 'bezier') {
+    return bezierLength.apply(null, segment.params);
+  }
 }
 
 export function getPointAtSegment(length: number, segment: Segment): SegmentPoint {
@@ -99,7 +105,7 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
   let endX: number;
   let endY: number;
   let action: PathAction['action'];
-  let params: any[];
+  let params: number[];
   let currentPath: PathAction;
   for (let i = 0; i < pathList.length; i++) {
     currentPath = pathList[i];
@@ -112,7 +118,7 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
       endY = params[1];
     }
     if (action === 'lineTo') {
-      const [x, y] = params[0];
+      const [x, y] = params;
       out.push({
         type: 'line',
         params: [endX, endY, x, y]
@@ -145,8 +151,8 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
     if (action === 'bezierCurveTo') {
       const [x2, y2, x3, y3, x4, y4] = params
       out.push({
-       type: 'bezier',
-       params: [endX, endY, x2, y2, x3, y3, x4, y4],
+        type: 'bezier',
+        params: [endX, endY, x2, y2, x3, y3, x4, y4],
       })
       endX = x4;
       endY = y4;
@@ -174,13 +180,13 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
       endY = y;
     }
     if (action === 'quadraticCurveTo') {
-      
+
     }
 
     if (action === 'closePath') {
       out.push({
         type: 'line',
-        params: [startX, startY, params[0], params[1]],
+        params: [endX, endY, startX, startY],
       });
       endX = params[0];
       endY = params[1];
