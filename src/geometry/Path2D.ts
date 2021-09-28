@@ -1,7 +1,11 @@
+import * as lodash from '../utils/lodash';
 import parsePath from './parsePath';
 import { BBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
 import { equalWithTolerance, getPointOnPolar } from '../utils/math';
 import canvasToSvgPath from './canvasToSvgPath';
+import { getPathSegments, getSegmentLength, getPointAtSegment, SegmentPoint } from './pathSegment';
+
+export type PointOnPath = SegmentPoint;
 
 interface Point {
   x: number;
@@ -285,13 +289,21 @@ export default class Path2D {
   }
 
   public getTotalLength(): number {
-    // todo
-    return 0;
+    const segments = getPathSegments(this, []);
+    return lodash.sum(segments.map(item => getSegmentLength(item)));
   }
 
-  public getPointAtLength(len: number) {
-    // todo
-    return 0;
+  public getPointAtLength(len: number): PointOnPath {
+    const segments = getPathSegments(this, []);
+    let sumLen = 0;
+    for (let i = 0; i < segments.length; i++) {
+      sumLen += getSegmentLength(segments[i]);
+      if (sumLen >= len) {
+        const sublen = sumLen - len;
+        return getPointAtSegment(sublen, segments[i]);
+      }
+    }
+    return null;
   }
 
   public getPointAtPercent(percent: number): [number, number] {

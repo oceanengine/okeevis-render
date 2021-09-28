@@ -12,7 +12,7 @@ import { SectorConf } from './Sector';
 import { TextConf } from './Text';
 import { EllipseConf } from './Ellipse';
 import { CompoundPathConf } from './CompoundPath';
-import Path2D from '../geometry/Path2D';
+import Path2D, { PointOnPath } from '../geometry/Path2D';
 
 export type ShapeConf = ArcConf &
   CircleConf &
@@ -42,10 +42,18 @@ export default class Shape<T extends CommonAttr = ShapeConf> extends Element<T> 
     }
     return ret;
   }
-  
-  public getPathData() {
+
+  public getPathData(): Path2D {
     const path = new Path2D();
     this.brush(path as any);
     return path;
+  }
+
+  public getTotalLength(): number {
+    return this.getPathData().getTotalLength();
+  }
+
+  public getPointAtLength(len: number): PointOnPath {
+    return this.getPathData().getPointAtLength(len);
   }
 }

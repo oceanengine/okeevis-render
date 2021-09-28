@@ -2,13 +2,11 @@ import Path2d, { PathAction } from './Path2D';
 import { getPointOnPolar, PI2, equalWithTolerance } from '../utils/math';
 
 interface Segment {
-  action: PathAction['action'];
-  length: number;
-  startPoint?: [number, number];
-  params: any[];
+  type: 'line' | 'arc' | 'bezier';
+  params: number[];
 }
 
-interface SegmentPoint {
+export interface SegmentPoint {
   x: number;
   y: number;
   alpha: number; //  angle of derivative
@@ -76,6 +74,24 @@ function pointAtBezier(length: number, x0: number, y0: number, x1: number, y1: n
   }
 }
 
+export function getSegmentLength(segment: Segment): number {
+  const segmentFn = {
+    line: lineLength,
+    arc: arcLength,
+    bezier: bezierLength,
+  }
+  return segmentFn[segment.type].apply(null, segment.params);
+}
+
+export function getPointAtSegment(length: number, segment: Segment): SegmentPoint {
+  const segmentFn = {
+    line: pointAtLine,
+    arc: pointAtArc,
+    bezier: pointAtBezier,
+  }
+  return segmentFn[segment.type].apply(null, [length, ...segment.params]);
+}
+
 export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
   const pathList = path.getPathList();
   let startX: number;
@@ -85,7 +101,6 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
   let action: PathAction['action'];
   let params: any[];
   let currentPath: PathAction;
-  let length: number;
   for (let i = 0; i < pathList.length; i++) {
     currentPath = pathList[i];
     action = currentPath.action;
@@ -98,12 +113,9 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
     }
     if (action === 'lineTo') {
       const [x, y] = params[0];
-      length = Math.sqrt((x - endX) ** 2 + (y - endY) ** 2);
       out.push({
-        action,
-        params,
-        length,
-        startPoint: [endX, endY],
+        type: 'line',
+        params: [endX, endY, x, y]
       });
       endX = x;
       endY = y;
@@ -111,19 +123,19 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
     if (action === 'arc') {
       const [cx, cy, r, start, end, antiClockwise] = params;
       const startPoint = getPointOnPolar(cx, cy, r, start);
-      const length = Math.abs(end - start) * r;
+      const endPoint = getPointOnPolar(cx, cy, r, end);
       if (i > 0) {
         out.push({
-          action: 'lineTo',
-          params: [startPoint.x, startPoint.y],
-          length: 0,
+          type: 'line',
+          params: [endX, endY, startPoint.x, startPoint.y],
         });
       }
       out.push({
-        action,
-        params,
-        length,
+        type: 'arc',
+        params: [cx, cy, r, start, end],
       })
+      endX = endPoint.x;
+      endY = endPoint.y;
     }
 
     if (action === 'arcTo') {
@@ -131,34 +143,47 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
     }
 
     if (action === 'bezierCurveTo') {
+      const [x2, y2, x3, y3, x4, y4] = params
       out.push({
-        action,
-        length: 0,
-        params,
+       type: 'bezier',
+       params: [endX, endY, x2, y2, x3, y3, x4, y4],
       })
+      endX = x4;
+      endY = y4;
     }
 
     if (action === 'rect') {
+      const [x, y, width, height] = params;
       out.push({
-        action,
-        length: 0,
-        params: [0, 1]
-      })
+        type: 'line',
+        params: [x, y, x + width, y],
+      });
+      out.push({
+        type: 'line',
+        params: [x + width, y, x + width, y + height],
+      });
+      out.push({
+        type: 'line',
+        params: [x + width, y + height, x, y + height],
+      });
+      out.push({
+        type: 'line',
+        params: [x, y + height, x, y],
+      });
+      endX = x;
+      endY = y;
     }
     if (action === 'quadraticCurveTo') {
-      out.push({
-        action,
-        length: 0,
-        params,
-      })
+      
     }
 
     if (action === 'closePath') {
       out.push({
-        action: 'lineTo',
-        length: 0,
-        params,
-      })
+        type: 'line',
+        params: [startX, startY, params[0], params[1]],
+      });
+      endX = params[0];
+      endY = params[1];
     }
   }
   return out;
