@@ -12,7 +12,7 @@ const rect = new Rect({
   x: 0,
   y: 0,
   width: 20,
-  height: 20,
+  height: 40,
   fill: 'red'
 })
 
@@ -20,9 +20,9 @@ const marker = new Marker({
   shape: rect,
   x: 0,
   y: 0,
-  width: 100,
-  height: 100,
-  orient: 'auto'
+  width: 20,
+  height: 40,
+  orient: 'auto-start-reverse'
 });
 
 const line = new Line({
@@ -31,6 +31,8 @@ const line = new Line({
   x2: 300,
   y2: 300,
   markerEnd: marker,
+  markerMid: marker,
+  markerStart: marker,
   stroke: 'blue',
   lineWidth: 1,
   lineCap: 'square',

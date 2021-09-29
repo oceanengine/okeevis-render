@@ -43,21 +43,21 @@ export default class Marker extends Element<MarkerAttr> {
     } else if (position === 'end') {
       percent = 1;
     }
-    const point = path.getPointAtPercent(1);
-    if (rotate === 'auto' || position !== 'start') {
+    const point = path.getPointAtPercent(percent);
+    if (orient === 'auto' || orient === 'auto-start-reverse') {
       rotate = Math.atan(point.alpha);
     }
-    if (rotate === 'auto-start-reverse' && position === 'start') {
+    if (orient === 'auto-start-reverse' && position === 'start') {
       rotate = Math.atan(point.alpha) - Math.PI;
     }
     const ctx = painter.getContext();
     ctx.save();
     ctx.translate(point.x, point.y);
     if (orient !== 0) {
-      ctx.rotate(rotate as number);
+      ctx.rotate(-rotate as number);
     }
     ctx.scale(sx, sy);
-    ctx.translate(x, y);
+    ctx.translate(-bbox.width / 2, position === 'middle' ? -bbox.height/ 2: 0);
     painter.drawElement(ctx,shape);
     ctx.restore();
   }
