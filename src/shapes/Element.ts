@@ -13,6 +13,7 @@ import interpolateColor from '../interpolate/interpolateColor';
 import { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
 import Shape, { ShapeConf } from './Shape';
+import Marker from './Marker';
 import * as mat3 from '../../js/mat3';
 import { Vec2, transformMat3, vec2BBox, createVec2 } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
@@ -37,6 +38,9 @@ export interface BaseAttr extends TransformConf, EventConf {
   ref?: RefObject<Element>;
   data?: any;
   display?: boolean;
+  markerStart?: Marker;
+  markerMid?: Marker;
+  markerEnd?: Marker;
   // 已废弃属性
   zIndex?: number;
 

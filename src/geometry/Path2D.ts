@@ -307,9 +307,9 @@ export default class Path2D {
     return getPointAtSegment(0, segments[0]);
   }
 
-  public getPointAtPercent(percent: number): [number, number] {
-    // todo
-    return [0, 0];
+  public getPointAtPercent(percent: number): PointOnPath {
+    const totalLen = this.getTotalLength();
+    return this.getPointAtLength(totalLen * percent);
   }
 
   private _pushBBoxPoints(points: Point[], bbox: BBox) {
@@ -319,4 +319,5 @@ export default class Path2D {
     points.push({x: x + width,  y: y + height});
     points.push({x,  y: y + height});
   }
+  
 }
