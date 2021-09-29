@@ -57,7 +57,7 @@ export default class Marker extends Element<MarkerAttr> {
       ctx.rotate(-rotate as number);
     }
     ctx.scale(sx, sy);
-    ctx.translate(-bbox.width / 2, position === 'middle' ? -bbox.height/ 2: 0);
+    ctx.translate(-bbox.width / 2, (position === 'middle' || typeof orient === 'number') ? -bbox.height/ 2: 0);
     painter.drawElement(ctx,shape);
     ctx.restore();
   }

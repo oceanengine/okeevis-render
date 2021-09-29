@@ -5,7 +5,7 @@ import Marker from '../src/shapes/Marker';
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom)
-render.enableDirtyRect = false
+render.enableDirtyRect = true;
 
 
 const rect = new Rect({
@@ -22,7 +22,7 @@ const marker = new Marker({
   y: 0,
   width: 20,
   height: 40,
-  orient: 'auto-start-reverse'
+  orient: 'auto'
 });
 
 const line = new Line({
@@ -30,12 +30,13 @@ const line = new Line({
   y1: 200,
   x2: 300,
   y2: 300,
+  draggable: true,
   markerEnd: marker,
   markerMid: marker,
   markerStart: marker,
   stroke: 'blue',
-  lineWidth: 1,
-  lineCap: 'square',
+  lineWidth: 10,
+  lineCap: 'butt',
   origin: [300, 300],
 })
 
