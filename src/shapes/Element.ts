@@ -225,6 +225,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.created();
   }
 
+  public get dataset(): unknown {
+    return this.attr.data;
+  }
+
   public getAnimationKeys(): Array<keyof T> {
     return [
       'fill',
@@ -269,6 +273,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this.attr.onEvent?.apply(null, params);
   }
+  
 
   public getComputedOpacity(): number {
     let node: Element<T> | Group = this;
