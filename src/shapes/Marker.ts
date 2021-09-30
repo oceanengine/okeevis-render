@@ -3,6 +3,7 @@ import Shape from './Shape';
 import { BBox } from '../utils/bbox';
 import CanvasPainter from '../painter/CanvasPainter';
 import * as mat3 from '../../js/mat3';
+import * as lodash from '../utils/lodash';
 
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/orient
 export interface MarkerAttr extends CommonAttr {
@@ -12,6 +13,7 @@ export interface MarkerAttr extends CommonAttr {
   width?: number;
   height?: number;
   orient?: 'auto' | 'auto-start-reverse' | number;
+  markerUnits?: 'strokeWidth' | 'userSpaceOnUse';
 }
 
 export type MarkerPosition = 'start' | 'end' | 'middle';
@@ -57,15 +59,22 @@ export default class Marker extends Element<MarkerAttr> {
   }
 
   public getSvgAttributes(): any {
-    const { x, y, width, height, shape } = this.attr;
+    const { x, y, width, height, orient, shape, markerUnits } = this.attr;
+    const shapeBBox = shape.getBBox();
     return {
-      id: `lightcharts-marker-${this.id}`,
+      id: this.getMarkerId(),
       refX: x,
       refY: y,
       markerWidth: width,
       markerHeight: height,
-      children: [shape],
+      viewBox: [shapeBBox.x, shapeBBox.y, shapeBBox.width, shapeBBox.height].join(' '),
+      orient: lodash.isNumber(orient) ? orient * 180 / Math.PI : orient,
+      markerUnits,
     }
+  }
+
+  public getMarkerId() {
+    return `lighthcarts-marker-${this.id}`;
   }
 
   private _getMarkerMatrix(parent: Shape, position: MarkerPosition): mat3 {
@@ -92,12 +101,11 @@ export default class Marker extends Element<MarkerAttr> {
       rotate = Math.atan(point.alpha) - Math.PI;
     }
     mat3.translate(out, out, [point.x, point.y]);
-
     if (rotate !== 0) {
-      mat3.rotate(out, out, -rotate);
+      mat3.rotate(out, out, rotate as number);
     }
     mat3.scale(out, out, [sx, sy]);
-    mat3.translate(out, out, [-bbox.width / 2, (position === 'middle' || typeof orient === 'number') ? -bbox.height / 2 : 0])
+    mat3.translate(out, out, [-x, -y]);
     return out;
   }
 }
