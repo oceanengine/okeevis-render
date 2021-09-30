@@ -77,7 +77,7 @@ function pointAtBezier(t: number, p1x: number, p1y: number, c1x: number, c1y: nu
     // ay = t1 * p1y + t * c1y,
     // cx = t1 * c2x + t * p2x,
     // cy = t1 * c2y + t * p2y,
-    alpha = 90 - Math.atan2(mx - nx, my - ny) * 180 / Math.PI;
+    alpha = Math.PI / 2 - Math.atan2(mx - nx, my - ny);
   // (mx > nx || my < ny) && (alpha += 180);
   return {
     x: x,
@@ -86,7 +86,7 @@ function pointAtBezier(t: number, p1x: number, p1y: number, c1x: number, c1y: nu
     // n: {x: nx, y: ny},
     // start: {x: ax, y: ay},
     // end: {x: cx, y: cy},
-    alpha: alpha
+    alpha: Math.tan(alpha)
   };
 }
 

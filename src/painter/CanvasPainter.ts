@@ -328,15 +328,18 @@ export default class CanvasPainter implements Painter {
       }
 
       // render marker
-      if (item.attr.markerStart) {
-        item.attr.markerStart.renderMarker(this, item as Shape, 'start');
+      if (!this._isPixelPainter) {
+        if (item.attr.markerStart) {
+          item.attr.markerStart.renderMarker(this, item as Shape, 'start');
+        }
+        if (item.attr.markerMid) {
+          item.attr.markerMid.renderMarker(this, item as Shape, 'middle');
+        }
+        if (item.attr.markerEnd) {
+          item.attr.markerEnd.renderMarker(this, item as Shape, 'end');
+        }
       }
-      if (item.attr.markerMid) {
-        item.attr.markerMid.renderMarker(this, item as Shape, 'middle');
-      }
-      if (item.attr.markerEnd) {
-        item.attr.markerEnd.renderMarker(this, item as Shape, 'end');
-      }
+      
     } else {
       // const batchBrush = current.attr._batchBrush;
       // if (batchBrush) {

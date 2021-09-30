@@ -8,41 +8,36 @@ const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom, {renderer: 'canvas'})
 render.enableDirtyRect = true;
 
-const arrow = Path.fromSvgPath("M 0 0 L 10 5 L 0 10 z").setAttr({
+const arrow = Path.fromSvgPath("M 0 0 L 5 2 L 0 4 z").setAttr({
   fill: 'red',
 })
 
 const rect = new Rect({
   x: 0,
   y: 0,
-  width: 20,
-  height: 40,
+  width: 5,
+  height: 4,
   fill: 'red',
   fillOpacity: 0.2,
 })
 
 const marker = new Marker({
   shape: arrow,
-  x: 5,
-  y: 5,
+  x: 0,
+  y: 2,
   width: 10,
   height: 10,
-  orient: 'auto-start-reverse'
+  orient: 'auto'
 });
 
-const line = new Line({
-  x1: 200,
-  y1: 200,
-  x2: 300,
-  y2: 300,
+const line = Path.fromSvgPath('M 100,0 C 150,0 150,100 200,100').setAttr({
   draggable: true,
   markerEnd: marker,
   markerStart: marker,
   stroke: 'blue',
   lineWidth: 1,
   lineCap: 'butt',
-  origin: [300, 300],
-  pickingBuffer: 60
+  pickingBuffer: 60,
 })
 
 render.add(line)
