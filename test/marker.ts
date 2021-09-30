@@ -7,7 +7,6 @@ const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom)
 render.enableDirtyRect = true;
 
-
 const rect = new Rect({
   x: 0,
   y: 0,
@@ -38,6 +37,7 @@ const line = new Line({
   lineWidth: 10,
   lineCap: 'butt',
   origin: [300, 300],
+  showBoundingRect: true,
 })
 
 render.add(line)

@@ -49,10 +49,11 @@ export default class Marker extends Element<MarkerAttr> {
   }
 
   public getMarkerDirtyRect(parent: Shape, position: MarkerPosition): BBox {
+    const globalMatrix = parent.getGlobalTransform();
     const matrix = this._getMarkerMatrix(parent, position);
     const { x, y, width, height } = this.attr.shape.getCurrentDirtyRect();
     const out = {x: 0, y :0, width: 0, height: 0};
-    return this.computeBBoxWithTransform(out, x, y, width, height, matrix);
+    return this.computeBBoxWithTransform(out, x, y, width, height, mat3.multiply(matrix, globalMatrix, matrix));
   }
 
   public getSvgAttributes(): any {
