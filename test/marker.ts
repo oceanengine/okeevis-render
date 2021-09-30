@@ -37,7 +37,6 @@ const line = new Line({
   lineWidth: 10,
   lineCap: 'butt',
   origin: [300, 300],
-  showBoundingRect: true,
 })
 
 render.add(line)
