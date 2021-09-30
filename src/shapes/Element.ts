@@ -530,28 +530,38 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.attr.display === false) {
       return createZeroBBox();
     }
-    const shadowBlur = this.getExtendAttr('shadowBlur');
-    if (shadowBlur === 0) {
-      return ceilBBox(this.getBoundingClientRect());
-    }
-    // 计算当前dirtyRect
+    const { markerStart, markerMid, markerEnd } = this.attr;
     const boundingRect = this.getBoundingClientRect();;
     const { x, y, width, height } = boundingRect;
-    // 暂不考虑miter尖角影响, 默认使用了bevel
-    // const miterLimit = this.getExtendAttr('miterLimit');
-    // const lineJoin = this.getExtendAttr('lineJoin');
-    if (shadowBlur === 0) {
+    const shadowBlur = this.getExtendAttr('shadowBlur');
+    const hasSubBox = shadowBlur > 0 || markerStart || markerMid || markerEnd;
+    if (!hasSubBox) {
       return ceilBBox(boundingRect);
     }
-    const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
-    const shadowOffsetY = this.getExtendAttr('shadowOffsetY');
-    const shadowBBox = {
-      x: x + shadowOffsetX - shadowBlur,
-      y: y + shadowOffsetY - shadowBlur,
-      width: width + shadowBlur * 2 + shadowOffsetX,
-      height: height + shadowBlur * 2 + shadowOffsetY,
-    };
-    return ceilBBox(unionBBox([this._clientBoundingRect, shadowBBox]));
+    const boxList: BBox[] = [boundingRect];
+    if (shadowBlur > 0) {
+      const shadowOffsetX = this.getExtendAttr('shadowOffsetX');
+      const shadowOffsetY = this.getExtendAttr('shadowOffsetY');
+      boxList.push({
+        x: x + shadowOffsetX - shadowBlur,
+        y: y + shadowOffsetY - shadowBlur,
+        width: width + shadowBlur * 2 + shadowOffsetX,
+        height: height + shadowBlur * 2 + shadowOffsetY,
+      });
+    }
+    if (markerStart || markerMid || markerEnd) {
+      if (markerStart) {
+        boxList.push(markerStart.getMarkerDirtyRect(this as unknown as Shape, 'start'));
+      }
+      if (markerMid) {
+        boxList.push(markerMid.getMarkerDirtyRect(this as unknown as Shape, 'middle'));
+      }
+      if (markerEnd) {
+        boxList.push(markerEnd.getMarkerDirtyRect(this as unknown as Shape, 'end'));
+      }
+    }
+    
+    return ceilBBox(unionBBox(boxList));
   }
 
   protected computeBBox(): BBox {
@@ -580,6 +590,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
       out.height = height;
       return out;
     }
+    return this.computeBBoxWithTransform(out, x, y, width, height, matrix);
+  }
+
+  protected computeBBoxWithTransform(out: BBox, x: number,y: number, width: number, height: number, matrix: mat3): BBox {
     reuseBBoxVectors[0][0] = x;
     reuseBBoxVectors[0][1] = y;
     reuseBBoxVectors[1][0] = x + width;
@@ -595,7 +609,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     //   [x, y + height],
     // ];
     reuseBBoxVectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
-    return vec2BBox(reuseBBoxVectors, out);
+    return vec2BBox(reuseBBoxVectors, out); 
   }
 
   protected created() {

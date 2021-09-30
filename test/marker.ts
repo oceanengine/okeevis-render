@@ -22,7 +22,7 @@ const marker = new Marker({
   y: 0,
   width: 20,
   height: 40,
-  orient: 'auto'
+  orient: Math.PI / 4
 });
 
 const line = new Line({
