@@ -31,6 +31,7 @@ export default class Marker extends Element<MarkerAttr> {
       width: 3,
       height: 3,
       orient: 0,
+      markerUnits: 'strokeWidth'
     } as MarkerAttr
   }
 
@@ -80,10 +81,11 @@ export default class Marker extends Element<MarkerAttr> {
   private _getMarkerMatrix(parent: Shape, position: MarkerPosition): mat3 {
     const out = mat3.create();
     const path = parent.getPathData();
-    const { x, y, width, height, orient, shape } = this.attr;
+    const { x, y, width, height, orient, shape, markerUnits } = this.attr;
     const bbox = shape.getBBox();
     const sx = width / bbox.width;
     const sy = height / bbox.height;
+    let lineWidthScale = 1;
     let rotate = orient;
     let percent = 0;
     if (position === 'start') {
@@ -92,6 +94,9 @@ export default class Marker extends Element<MarkerAttr> {
       percent = 0.5;
     } else if (position === 'end') {
       percent = 1;
+    }
+    if (markerUnits === 'strokeWidth') {
+      lineWidthScale = parent.getExtendAttr('lineWidth');
     }
     const point = path.getPointAtPercent(percent);
     if (orient === 'auto' || orient === 'auto-start-reverse') {
@@ -104,7 +109,7 @@ export default class Marker extends Element<MarkerAttr> {
     if (rotate !== 0) {
       mat3.rotate(out, out, rotate as number);
     }
-    mat3.scale(out, out, [sx, sy]);
+    mat3.scale(out, out, [sx * lineWidthScale, sy * lineWidthScale]);
     mat3.translate(out, out, [-x, -y]);
     return out;
   }
