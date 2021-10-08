@@ -312,6 +312,13 @@ export default class Path2D {
     return this.getPointAtLength(totalLen * percent);
   }
 
+  public clone(): Path2D {
+    const path = new Path2D();
+    const pathList = lodash.cloneDeep(this._pathList);
+    path.setPathList(pathList);
+    return path;
+  }
+
   private _pushBBoxPoints(points: Point[], bbox: BBox) {
     const { x, y, width, height } = bbox;
     points.push({x,  y});
