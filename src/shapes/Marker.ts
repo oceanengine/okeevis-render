@@ -100,10 +100,10 @@ export default class Marker extends Element<MarkerAttr> {
     }
     const point = path.getPointAtPercent(percent);
     if (orient === 'auto' || orient === 'auto-start-reverse') {
-      rotate = Math.atan(point.alpha);
+      rotate = point.alpha;
     }
     if (orient === 'auto-start-reverse' && position === 'start') {
-      rotate = Math.atan(point.alpha) - Math.PI;
+      rotate = point.alpha - Math.PI;
     }
     mat3.translate(out, out, [point.x, point.y]);
     if (rotate !== 0) {

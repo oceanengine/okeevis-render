@@ -46,18 +46,18 @@ function pointAtLine(t: number, x1: number, y1: number, x2: number, y2: number):
   return {
     x: x1 + (x2 - x1) * t,
     y: y1 + (y2 - y1) * t,
-    alpha: (y2 - y1) / (x2 - x1)
+    alpha: Math.atan2(y2 - y1, x2 - x1)
   }
 }
 
 function pointAtArc(t: number, cx: number, cy: number, r: number, startAngle: number, endAngle: number): SegmentPoint {
   const angle = startAngle + t * (endAngle - startAngle);
   const antiClockwise = startAngle > endAngle;
-  const theta = angle + (antiClockwise ? Math.PI / 2 : -Math.PI / 2);
+  const theta = angle + (antiClockwise ? -Math.PI / 2 : Math.PI / 2);
   return {
     x: cx + Math.cos(angle) * r,
     y: cy + Math.sin(angle) * r,
-    alpha: Math.atan(theta)
+    alpha: theta
   }
 }
 
@@ -77,8 +77,8 @@ function pointAtBezier(t: number, p1x: number, p1y: number, c1x: number, c1y: nu
     // ay = t1 * p1y + t * c1y,
     // cx = t1 * c2x + t * p2x,
     // cy = t1 * c2y + t * p2y,
-    alpha = Math.PI / 2 - Math.atan2(mx - nx, my - ny);
-  // (mx > nx || my < ny) && (alpha += 180);
+    alpha = Math.PI / 2 - Math.atan2(mx - nx, my - ny) + Math.PI;
+   // (mx > nx || my < ny) && (alpha += Math.PI);
   return {
     x: x,
     y: y,
@@ -86,7 +86,7 @@ function pointAtBezier(t: number, p1x: number, p1y: number, c1x: number, c1y: nu
     // n: {x: nx, y: ny},
     // start: {x: ax, y: ay},
     // end: {x: cx, y: cy},
-    alpha: Math.tan(alpha)
+    alpha
   };
 }
 
