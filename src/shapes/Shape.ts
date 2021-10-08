@@ -56,4 +56,8 @@ export default class Shape<T extends CommonAttr = ShapeConf> extends Element<T> 
   public getPointAtLength(len: number): PointOnPath {
     return this.getPathData().getPointAtLength(len);
   }
+
+  public getPoint(ration: number): PointOnPath {
+    return this.getPathData().getPointAtPercent(ration);
+  }
 }

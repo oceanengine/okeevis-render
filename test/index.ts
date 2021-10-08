@@ -1,1 +1,1 @@
-import './marker'
+import './animateMotion'

@@ -22,6 +22,7 @@ import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
 import { RefObject } from '../utils/ref';
 import { getSVGStyleAttributes, SVGAttributeMap } from '../svg/style';
 import Shadow from '../svg/Shadow';
+import Path2D from '../geometry/Path2D';
 
 export type ElementAttr = GroupConf & ShapeConf & {[key: string]: any};
 
@@ -848,6 +849,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
+  public animateMotion(path: Path2D, during = 300) {
+    this.animateTo({} as T, {
+      ease: 'Linear',
+      during: during,
+      onFrame: (t: number) => {
+        const point = path.getPointAtPercent(t);
+        const matrix = mat3.create();
+        mat3.translate(matrix, matrix, [point.x, point.y]);
+        //mat3.rotate(matrix, matrix, point.alpha - Math.PI / 2);
+        this.setAttr('matrix', matrix as any);
+      }
+    })
+  }
+
   // eslint-disable-next-line no-unused-vars
   protected prevProcessAttr(attr: T) {
     if (attr.position) {
@@ -865,6 +880,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       attr.originY = attr.origin[1];
     }
   }
+  
 
   protected addAnimation(option: AnimateOption<T>) {
     this._animations.push(option);
