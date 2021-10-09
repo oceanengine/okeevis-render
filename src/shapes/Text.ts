@@ -48,6 +48,8 @@ export default class Text extends Shape<TextConf> {
   public svgTagName = 'text';
 
   public shapeKeys = shapeKeys;
+  
+  private _isOverflow: boolean = false;
 
   private get _isEmpty(): boolean {
     const { text } = this.attr;
@@ -216,6 +218,18 @@ export default class Text extends Shape<TextConf> {
     return inBBox(this.getBBox(), x, y);
   }
 
+  protected onEvent(type: string, ...params: any[]) {
+    super.onEvent(type, ...params);
+    if (this._isOverflow && this.ownerRender.isBrowser()) {
+      if (type === 'mouseenter') {
+        this.ownerRender.getDom().title = this.attr.text + '';
+      }
+      if (type === 'mouseleave') {
+        this.ownerRender.getDom().removeAttribute('title');
+      }
+    }
+  }
+
   public getSvgAttributes() {
     let anchor: 'start' | 'end' | 'middle';
     let dy = 0;
@@ -254,6 +268,7 @@ export default class Text extends Shape<TextConf> {
   }
 
   private _getInlineTextList(): string[] {
+    this._isOverflow = false;
     const { text: _text, truncate } = this.attr;
     const textStyle = this.getTextStyle();
     const { lineHeight } = textStyle;
@@ -309,6 +324,7 @@ export default class Text extends Shape<TextConf> {
           }
         }
         rowTextList[rowIndex] = tempStr + ellipsis;
+        this._isOverflow = true;
         break;
       } else {
         rowTextList.push(letter);
