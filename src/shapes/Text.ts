@@ -73,6 +73,10 @@ export default class Text extends Shape<TextConf> {
     };
   }
 
+  public isOverflow(): boolean {
+    return this._isOverflow;
+  }
+
   public getAnimationKeys(): Array<keyof TextConf> {
     return [...super.getAnimationKeys(), 'x', 'y', 'fontSize'];
   }
