@@ -11,6 +11,7 @@ import { fpsRect, fpsText } from './fps';
 import SVGNode from '../abstract/Node';
 import { getSVGRootAttributes, SVGAttributeMap, SVGElementStyle, getClipId, } from '../svg/style';
 import Shadow from '../svg/Shadow';
+import Marker from '../shapes/Marker';
 
 import { Gradient, LinearGradient, RadialGradient, Pattern, isGradient, isPattern } from '../color';
 
@@ -43,6 +44,8 @@ export default class SVGPainter implements Painter {
 
   private _dfsShadows: Es6Set<Shadow> = new Es6Set();
 
+  private _dfsMarkers: Es6Set<Marker> = new Es6Set();
+
   private _isFirstFrame: boolean = false;
 
   private _canvas: HTMLCanvasElement;
@@ -69,6 +72,7 @@ export default class SVGPainter implements Painter {
       this._updateGradientsAndPatterns();
       this.__updateClips();
       this._updateShadows();
+      this._updateMarkers();
       if (this._isFirstFrame) {
         this.render.getRoot().eachChild(child => this._mountNode(this._svgRoot as any, child));
       } else {
@@ -160,10 +164,24 @@ export default class SVGPainter implements Painter {
     const currentClips = setToArray(this._defsClipElements);
     const diffResult = diff(prevClips, currentClips, clip => clip.id);
     diffResult.added.forEach(index => {
-      this._mountNode(this._svgDefElement, currentClips[index], true);
+      this._mountNode(this._svgDefElement, currentClips[index], 1);
     });
     diffResult.removed.forEach(index => {
       this._removeNode(prevClips[index]);
+    });
+  }
+
+  private _updateMarkers() {
+    const prevMarkers = setToArray(this._dfsMarkers);
+    this._dfsMarkers.clear();
+    this._getAllMarkers(this.render.getRoot());
+    const currentMarkers = setToArray(this._dfsMarkers);
+    const diffResult = diff(prevMarkers, currentMarkers, marker => marker.id);
+    diffResult.added.forEach(index => {
+      this._mountNode(this._svgDefElement, currentMarkers[index], 2);
+    });
+    diffResult.removed.forEach(index => {
+      this._removeNode(prevMarkers[index]);
     });
   }
 
@@ -196,7 +214,9 @@ export default class SVGPainter implements Painter {
     })
   }
 
-  private _mountNode(parent: SVGElement, node: Element, isClip: boolean = false) {
+  private _mountNode(parent: SVGElement, node: Element, type: number = 0) {
+    const isClip = type === 1;
+    const isMarker = type === 2;
     if (this._loadedSVGElements[node.id]) {
       return;
     }
@@ -213,6 +233,9 @@ export default class SVGPainter implements Painter {
       const clip = this._createSVGElement('clipPath', { id: getClipId(node)});
       clip.appendChild(svgDom);
       appendNode = clip;
+    }
+    if (isMarker) {
+      this._mountNode(svgDom, (node as Marker).attr.shape);
     }
     this._loadedSVGElements[id] = svgDom;
 
@@ -328,6 +351,21 @@ export default class SVGPainter implements Painter {
       }
       if (child.isGroup) {
         this._getAllDfsClips(child as Group);
+      }
+    });
+  }
+
+  private _getAllMarkers(group: Group) {
+    group.eachChild(child => {
+      const { markerStart, markerMid, markerEnd } = child.attr;
+      if (markerStart) {
+        this._dfsMarkers.add(markerStart);
+      }
+      if (markerMid) {
+        this._dfsMarkers.add(markerMid);
+      }
+      if (markerEnd) {
+        this._dfsMarkers.add(markerEnd);
       }
     });
   }
