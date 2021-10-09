@@ -849,15 +849,27 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  public animateMotion(path: Path2D, during = 300) {
+  public animateMotion(animateConf: {path: Path2D; rotate?: number | 'auto' | 'auto-reverse'; during?: number; ease?: EasingName;callback?: Function;delay?:number;}) {
+    const { path, rotate = 0, during = 300, ease = "Linear", callback, delay = 0} = animateConf;
     this.animateTo({} as T, {
-      ease: 'Linear',
-      during: during,
+      ease,
+      during,
+      delay,
+      callback,
       onFrame: (t: number) => {
         const point = path.getPointAtPercent(t);
         const matrix = mat3.create();
+        let theta: number = rotate as number;
+        if (rotate === 'auto') {
+          theta =  point.alpha + Math.PI / 2;
+        }
+        if (rotate === 'auto-reverse') {
+          theta = point.alpha - Math.PI / 2;
+        }
         mat3.translate(matrix, matrix, [point.x, point.y]);
-        //mat3.rotate(matrix, matrix, point.alpha - Math.PI / 2);
+        if (theta !== 0) {
+          mat3.rotate(matrix, matrix, theta);
+        }
         this.setAttr('matrix', matrix as any);
       }
     })

@@ -55,14 +55,23 @@ const shpaeLine = new Line({
   lineWidth: 1,
   stroke: 'red',
 })
+;
+[bezier, shapeRect, shapeCircle,shapeArc , shpaeLine].forEach(item => {
+  const circle = Path.fromSvgPath("M 0 0 L 10 4 L 0 8 z").setAttr({
+    fill: 'red',
+    lineWidth: 0,
+  });
+  render.add(circle)
+  circle.animateMotion({
+    path: item.getPathData(),
+    during: 3000,
+    rotate: 'auto',
+  })
 
-const circle = arrow
-circle.animateMotion(shpaeLine.getPathData(), 3000)
+})
 
-render.add(circle);
 render.add(bezier)
 render.add(shapeRect)
 render.add(shapeCircle)
 render.add(shapeArc)
 render.add(shpaeLine)
-console.log(render)
