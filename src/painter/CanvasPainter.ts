@@ -647,11 +647,7 @@ export default class CanvasPainter implements Painter {
 
   private _brushRect(ctx: CanvasRenderingContext2D, rect: BBox) {
     const { x, y, width, height } = rect;
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + width, y);
-    ctx.lineTo(x + width, y + height);
-    ctx.lineTo(x, y + height);
-    ctx.closePath();
+    ctx.rect(x, y, width, height);
   }
 
   private _handleDocumentVisibilityChange = () => {
