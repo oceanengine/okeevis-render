@@ -2,8 +2,9 @@
 
 
 export function pointInCircle(cx: number, cy: number, r: number, x: number, y: number): boolean {
-  const distance = Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2));
-  return distance <= r;
+  const dx = x - cx;
+  const dy = y - cy;
+  return (dx * dx + dy * dy) < r * r;
 }
 
 export function pointInCircleStroke(cx: number, cy: number, r: number, lineWidth: number, x: number, y: number) {
