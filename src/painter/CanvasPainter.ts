@@ -212,16 +212,14 @@ export default class CanvasPainter implements Painter {
     ctx.restore();
   }
 
-  public paint(dirtyRegions?: BBox[]) {
+  public paint(dirtyRegion?: BBox) {
     // console.time('paint');
     const ctx = this._canvas.getContext('2d');
     const dpr = this.dpr;
-    if (!dirtyRegions) {
+    if (!dirtyRegion) {
       ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
     } else {
-      dirtyRegions.forEach(region =>
-        ctx.clearRect(region.x * dpr, region.y * dpr, region.width * dpr, region.height * dpr),
-      );
+      ctx.clearRect(dirtyRegion.x * dpr, dirtyRegion.y * dpr, dirtyRegion.width * dpr, dirtyRegion.height * dpr);
     }
     ctx.save();
     if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
@@ -233,17 +231,17 @@ export default class CanvasPainter implements Painter {
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
     // todo 初始化LineWidth = 0;
 
-    if (dirtyRegions) {
+    if (dirtyRegion) {
       ctx.beginPath();
-      dirtyRegions.forEach(region => this._brushRect(ctx, region));
+      this._brushRect(ctx, dirtyRegion);
       ctx.clip();
     }
-    this.render.getRoot().eachChild(item => this.drawElement(ctx, item, dirtyRegions));
+    this.render.getRoot().eachChild(item => this.drawElement(ctx, item, dirtyRegion));
     ctx.restore();
     // console.timeEnd('paint');
   }
 
-  public drawElement(ctx: CanvasRenderingContext2D, item: Element, dirtyRegions?: BBox[]) {
+  public drawElement(ctx: CanvasRenderingContext2D, item: Element, dirtyRegion?: BBox) {
     item.clearDirty();
 
     if (!item.attr.display) {
@@ -254,9 +252,9 @@ export default class CanvasPainter implements Painter {
       return;
     }
 
-    if (dirtyRegions) {
+    if (dirtyRegion) {
       const bbox = item.getCurrentDirtyRect();
-      const isDirty = dirtyRegions.some(region => bboxIntersect(region, bbox));
+      const isDirty = bboxIntersect(dirtyRegion, bbox);
       if (!isDirty) {
         return;
       }
@@ -346,7 +344,7 @@ export default class CanvasPainter implements Painter {
       //   ctx.beginPath();
       // }
 
-      (item as Group).eachChild(child => this.drawElement(ctx, child, dirtyRegions));
+      (item as Group).eachChild(child => this.drawElement(ctx, child, dirtyRegion));
 
       // if (batchBrush) {
       //   if (fill && fill !== 'none') {
