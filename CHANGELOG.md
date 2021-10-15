@@ -1,3 +1,6 @@
+# 0.9.52
+* [feat] marker支持
+* [feat] 多行文本溢出时hover显示全文
 # 0.9.49 (2021-09-03)
 * [feat] [rich]　支持json富文本
 * [event] touch合成事件时，当前target不受lcick影响
