@@ -3,6 +3,8 @@ import { CommonAttr } from './Element';
 import { BBox, circleBBox, } from '../utils/bbox';
 import {pointInCircle, pointInCircleStroke, } from '../geometry/contain/circle'
 
+const PI2 = Math.PI * 2;
+
 export interface CircleConf extends CommonAttr {
   cx?: number;
   cy?: number;
@@ -30,7 +32,7 @@ export default class Circle extends Shape<CircleConf> {
 
   public brush(ctx: CanvasRenderingContext2D) {
     const {cx, cy, radius} = this.attr;
-    ctx.arc(cx, cy, Math.max(radius, 0), 0, Math.PI * 2, true);
+    ctx.arc(cx, cy, Math.max(radius, 0), 0, PI2, true);
   }
 
   public isPointInFill(x: number, y: number): boolean {

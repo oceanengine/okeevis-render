@@ -44,6 +44,9 @@ export interface SVGElementStyle {
   'stroke-opacity': string;
   filter: string;
   cursor: string;
+  "marker-start": string;
+  "marker-mid": string;
+  "marker-end": string;
 }
 
 export const SVGAttributeMap: Record<keyof SVGElementStyle, keyof ElementAttr> = {
@@ -104,6 +107,9 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     fontStyle,
     shadowColor,
     shadowBlur,
+    markerStart,
+    markerMid,
+    markerEnd
   } = node.attr;
   const ret: Partial<SVGElementStyle> = {};
   const clip = node.getClipElement();
@@ -196,6 +202,16 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
 
   if (shadowColor && shadowBlur >= 0) {
     ret['filter'] = `url(#${node.getShadowObj().id})`
+  }
+  
+  if (markerStart) {
+    ret["marker-start"] = `url(#${markerStart.getMarkerId()})`;
+  }
+  if (markerMid) {
+    ret["marker-mid"] = `url(#${markerMid.getMarkerId()})`;
+  }
+  if (markerEnd) {
+    ret["marker-end"] = `url(#${markerEnd.getMarkerId()})`;
   }
 
   return ret;
