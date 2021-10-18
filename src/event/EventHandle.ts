@@ -625,15 +625,16 @@ export default class EventHandle {
     }
     const isRoot = this.render.getRoot() === target;
 
-    if (isRoot) {
-      this.render.dispatch(event.type, event);
-    }
 
     if (event instanceof SyntheticMouseEvent) {
       if (count === 0) {
         event.target = target;
       }
       (event as SyntheticMouseEvent).currentTarget = target;
+    }
+
+    if (isRoot) {
+      this.render.dispatch(event.type, event);
     }
 
     const { bubbles, isPropagationStopped } = event;
