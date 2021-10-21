@@ -308,6 +308,15 @@ export default class Path2D {
   }
 
   public getPointAtPercent(percent: number): PointOnPath {
+    if (percent === 0 || percent === 1) {
+      const segments = getPathSegments(this, []);
+      if (percent === 0) {
+        return getPointAtSegment(0, segments[0]);
+      }
+      if (percent === 1) {
+        return getPointAtSegment(1, segments[segments.length -1]);
+      }
+    }
     const totalLen = this.getTotalLength();
     return this.getPointAtLength(totalLen * percent);
   }
