@@ -3,7 +3,6 @@ import { CommonAttr } from './Element';
 import { getImage } from '../utils/imageLoader';
 import { BBox, rectBBox, inBBox, alignBox, BoxAlign, BoxVerticalAlign } from '../utils/bbox';
 
-
 export interface ImageConf extends CommonAttr {
   x?: number;
   y?: number;
@@ -14,10 +13,23 @@ export interface ImageConf extends CommonAttr {
   /**
    * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/preserveAspectRatio
    */
-  preserveAspectRatio?: 'none' | 'xMinYMin' | 'xMidYMin' | 'xMaxYMin' | 'xMinYMid' | 'xMidYMid' | 'xMaxYMid' | 'xMinYMax' | 'xMidYMax' | 'xMaxYMax';
+  preserveAspectRatio?:
+    | 'none'
+    | 'xMinYMin'
+    | 'xMidYMin'
+    | 'xMaxYMin'
+    | 'xMinYMid'
+    | 'xMidYMid'
+    | 'xMaxYMid'
+    | 'xMinYMax'
+    | 'xMidYMax'
+    | 'xMaxYMax';
 }
 
-const boxAlign: Record<Exclude<ImageConf['preserveAspectRatio'], 'none'>, [BoxAlign, BoxVerticalAlign]> = {
+const boxAlign: Record<
+  Exclude<ImageConf['preserveAspectRatio'], 'none'>,
+  [BoxAlign, BoxVerticalAlign]
+> = {
   xMinYMin: ['left', 'top'],
   xMidYMin: ['center', 'top'],
   xMaxYMin: ['right', 'top'],
@@ -72,7 +84,10 @@ export default class Image extends Shape<ImageConf> {
       if (image.width && image.height && preserveAspectRatio !== 'none') {
         ctx.drawImage(
           image,
-          0, 0, image.width, image.height,
+          0,
+          0,
+          image.width,
+          image.height,
           x,
           y,
           width >= 0 ? width : image.width,
@@ -81,9 +96,7 @@ export default class Image extends Shape<ImageConf> {
       } else {
         ctx.drawImage(image, x, y, width, height);
       }
-
     }
-
   }
 
   protected isPointOnPath(x: number, y: number): boolean {
@@ -97,9 +110,9 @@ export default class Image extends Shape<ImageConf> {
       y: this.attr.y,
       width: this.attr.width,
       height: this.attr.height,
-      "xlink:href": this.attr.src,
-      'preserveAspectRatio': this.attr.preserveAspectRatio || 'none',
-    }
+      'xlink:href': this.attr.src,
+      preserveAspectRatio: this.attr.preserveAspectRatio || 'none',
+    };
   }
 
   protected computeBBox(): BBox {
@@ -121,13 +134,17 @@ export default class Image extends Shape<ImageConf> {
     let outWidth = width;
     let outHeight = height;
     if (width / height > imageWidth / imageHeight) {
-      outWidth = height *  imageWidth / imageHeight;
+      outWidth = (height * imageWidth) / imageHeight;
     } else {
-      outHeight = width * imageHeight / imageWidth;
+      outHeight = (width * imageHeight) / imageWidth;
     }
-    const { x: imageX, y: imageY } = alignBox({ x, y, width, height }, outWidth, outHeight, align, verticalAlign);
+    const { x: imageX, y: imageY } = alignBox(
+      { x, y, width, height },
+      outWidth,
+      outHeight,
+      align,
+      verticalAlign,
+    );
     return { x: imageX, y: imageY, width: outWidth, height: outHeight };
   }
-
-
 }

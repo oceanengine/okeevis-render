@@ -37,7 +37,7 @@ export default class Shadow {
         x: '-100%',
         y: '-100%',
         width: '300%',
-        height: '300%'
+        height: '300%',
       },
       childNodes: [
         {

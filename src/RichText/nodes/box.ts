@@ -3,7 +3,7 @@
  */
 import Group from '../../shapes/Group';
 import Rect, { RectConf } from '../../shapes/Rect';
-import { createRef, } from '../../utils/ref';
+import { createRef } from '../../utils/ref';
 import { BBox } from '../../utils/bbox';
 import { getPadding } from '../flexlayout';
 import VNode, { VNodeProps } from '../vnode';
@@ -19,7 +19,7 @@ export default class Box extends VNode {
     align: 'start',
     pack: 'start',
     flex: 0,
-    background: 'rgba(0,0,0,0)'
+    background: 'rgba(0,0,0,0)',
   };
 
   public children: VNode[];
@@ -41,7 +41,7 @@ export default class Box extends VNode {
         ...this.bbox,
         r: this.props.borderRadius,
         fill: 'none',
-        stroke: 'none'
+        stroke: 'none',
       });
       group.setAttr('clip', clipRef);
       group.add(rect);

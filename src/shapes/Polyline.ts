@@ -26,7 +26,7 @@ const shapeKeys: Array<keyof PolylineConf> = [
 ];
 
 export default class Polyline extends Shape<PolylineConf> {
-  public type = 'polyline';  
+  public type = 'polyline';
 
   public shapeKeys = shapeKeys;
 
@@ -89,8 +89,8 @@ export default class Polyline extends Shape<PolylineConf> {
     const points = this.attr.pointList;
     return pointInPolygonStroke(points, false, lineWidth, x, y);
   }
-  
-  public  pickByGPU(): boolean {
+
+  public pickByGPU(): boolean {
     return this.attr.smooth;
   }
 }

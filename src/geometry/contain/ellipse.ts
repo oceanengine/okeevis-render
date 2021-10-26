@@ -6,7 +6,7 @@ export function pointInEllipseFill(
   x: number,
   y: number,
 ): boolean {
-  return (x - cx) ** 2 / rx ** 2 + (y - cy) ** 2/ ry ** 2 <= 1;
+  return (x - cx) ** 2 / rx ** 2 + (y - cy) ** 2 / ry ** 2 <= 1;
 }
 
 export function pointInEllipseStroke(

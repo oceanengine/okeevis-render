@@ -37,10 +37,7 @@ export default class Point {
    * @param distance  number
    */
   public angleMoveTo(angle: number, distance: number): this {
-    return this.moveBy(
-      distance * Math.cos(angle),
-      distance * Math.sin(angle),
-    );
+    return this.moveBy(distance * Math.cos(angle), distance * Math.sin(angle));
   }
 
   public distanceTo(x: number, y: number): number {
@@ -52,7 +49,7 @@ export default class Point {
   }
 
   public getAngleTo(x: number, y: number): number {
-    return Math.atan2(y - this.y, x - this.x,);
+    return Math.atan2(y - this.y, x - this.x);
   }
 
   /**
@@ -77,5 +74,4 @@ export default class Point {
     this.y = cy + scale * distance * Math.sin(angle);
     return this;
   }
-  
 }

@@ -1,7 +1,7 @@
 import Shape from './Shape';
-import  {CommonAttr, } from './Element';
+import { CommonAttr } from './Element';
 import Path2D from '../geometry/Path2D';
-import { BBox, } from '../utils/bbox';
+import { BBox } from '../utils/bbox';
 
 export interface PathConf extends CommonAttr {
   pathData?: Path2D;
@@ -12,21 +12,17 @@ const shapeKeys: Array<keyof PathConf> = ['pathData', 'brush'];
 export default class Path extends Shape<PathConf> {
   public type = 'path';
 
-
   public shapeKeys = shapeKeys;
 
   public static fromSvgPath(inputPath: string, attr?: PathConf): Path {
     return new Path({
       ...attr,
       pathData: new Path2D(inputPath),
-    })
+    });
   }
 
   public getAnimationKeys(): Array<keyof PathConf> {
-    return [
-      ...super.getAnimationKeys(),
-     'pathData',
-    ];
+    return [...super.getAnimationKeys(), 'pathData'];
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
@@ -38,7 +34,7 @@ export default class Path extends Shape<PathConf> {
   }
 
   protected computeBBox(): BBox {
-    return this.attr.pathData?.getPathBBox() || {x: 0, y: 0, width: 0, height: 0}
+    return this.attr.pathData?.getPathBBox() || { x: 0, y: 0, width: 0, height: 0 };
   }
 
   protected prevProcessAttr(attr: PathConf) {
@@ -48,7 +44,7 @@ export default class Path extends Shape<PathConf> {
 
   private _setAttrPathData(attr: PathConf) {
     if (attr && attr.brush) {
-      const path = new Path2D()
+      const path = new Path2D();
       attr.brush(path);
       attr.pathData = path;
     }

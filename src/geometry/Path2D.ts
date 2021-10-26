@@ -55,7 +55,7 @@ export default class Path2D {
       this._pathList = parsePath(svgPath) as PathAction[];
     }
   }
-  
+
   public setPathList(pathList: PathAction[]) {
     this._pathList = pathList;
   }
@@ -66,12 +66,16 @@ export default class Path2D {
 
   public connectPath(path: Path2D) {
     const lastAction = this._pathList[this._pathList.length - 1];
-    const pathList=  path.getPathList().slice();
+    const pathList = path.getPathList().slice();
     const firstAction = pathList[0];
     if (lastAction && firstAction) {
-      const {x, y } = this.getActionEndPoint(lastAction);
+      const { x, y } = this.getActionEndPoint(lastAction);
       const [x1, y1] = firstAction.params;
-      if (firstAction.action === 'moveTo' && equalWithTolerance(x, x1) && equalWithTolerance(y, y1)) {
+      if (
+        firstAction.action === 'moveTo' &&
+        equalWithTolerance(x, x1) &&
+        equalWithTolerance(y, y1)
+      ) {
         pathList.shift();
       }
     }
@@ -240,9 +244,9 @@ export default class Path2D {
       ) {
         PathKeyPoints[action].forEach(item => {
           const [xIndex, yIndex] = item;
-          const x = params[xIndex]; 
+          const x = params[xIndex];
           const y = params[yIndex];
-          points.push({x, y});
+          points.push({ x, y });
         });
       } else if (action === 'ellipse') {
         // todo ellipsis bbox
@@ -253,10 +257,10 @@ export default class Path2D {
     return polygonBBox(points);
   }
 
-  private getActionEndPoint(pathAction: PathAction): {x: number; y: number} {
+  private getActionEndPoint(pathAction: PathAction): { x: number; y: number } {
     let endX: number;
     let endY: number;
-    const {action ,params} = pathAction;
+    const { action, params } = pathAction;
     if (action === 'lineTo') {
       endX = params[0];
       endY = params[1];
@@ -274,11 +278,11 @@ export default class Path2D {
     } else if (action === 'quadraticCurveTo') {
       endX = params[2];
       endY = params[3];
-    };
+    }
     return {
       x: endX,
-      y: endY
-    }
+      y: endY,
+    };
   }
 
   public getSVGPathString(): string {
@@ -295,9 +299,9 @@ export default class Path2D {
     let sumLen = 0;
     for (let i = 0; i < segments.length; i++) {
       const segmentLength = getSegmentLength(segments[i]);
-      if ((sumLen + segmentLength) >= len) {
+      if (sumLen + segmentLength >= len) {
         const sublen = len - sumLen;
-        return getPointAtSegment(sublen / segmentLength , segments[i]);
+        return getPointAtSegment(sublen / segmentLength, segments[i]);
       }
       sumLen += segmentLength;
     }
@@ -311,7 +315,7 @@ export default class Path2D {
         return getPointAtSegment(0, segments[0]);
       }
       if (percent === 1) {
-        return getPointAtSegment(1, segments[segments.length -1]);
+        return getPointAtSegment(1, segments[segments.length - 1]);
       }
     }
     const totalLen = this.getTotalLength();
@@ -327,10 +331,9 @@ export default class Path2D {
 
   private _pushBBoxPoints(points: Point[], bbox: BBox) {
     const { x, y, width, height } = bbox;
-    points.push({x,  y});
-    points.push({x: x + width,  y});
-    points.push({x: x + width,  y: y + height});
-    points.push({x,  y: y + height});
+    points.push({ x, y });
+    points.push({ x: x + width, y });
+    points.push({ x: x + width, y: y + height });
+    points.push({ x, y: y + height });
   }
-  
 }

@@ -31,7 +31,7 @@ function interpolatedPosition(P0: Point, P1: Point, P2: Point, P3: Point, u: num
 
   const y: number = P0.y * f1 + P1.y * f2 + P2.y * f3 + P3.y * f4;
 
-  return {x, y};
+  return { x, y };
 }
 
 let nodesLeft: number = 0;

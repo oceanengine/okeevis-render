@@ -11,7 +11,6 @@ export interface GradientOption {
   stops: ColorStop[];
 }
 
-
 let id: number = 1;
 
 export default abstract class Gradient<T extends GradientOption = any> {
@@ -33,5 +32,4 @@ export default abstract class Gradient<T extends GradientOption = any> {
   public abstract getCanvasContextStyle(ctx: CanvasRenderingContext2D, bbox: BBox): CanvasGradient;
 
   public abstract getSVGNode(): SVGNode;
-
 }

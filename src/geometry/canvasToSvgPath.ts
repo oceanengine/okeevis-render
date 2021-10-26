@@ -48,7 +48,7 @@ function getArcPath(pathAction: PathAction, i: number): string {
   const endPoint = getPointOnPolar(cx, cy, r, endPointAngle);
   const isLargeArc = Math.abs(startAngle - endAngle) > Math.PI;
   const isClockWise = endAngle > startAngle;
- return`${i > 0 ? 'L' : 'M'}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${
+  return `${i > 0 ? 'L' : 'M'}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${
     isLargeArc ? 1 : 0
   } ${isClockWise ? 1 : 0} ${endPoint.x} ${endPoint.y}`;
 }

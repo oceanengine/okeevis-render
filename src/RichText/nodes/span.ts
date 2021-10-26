@@ -26,7 +26,7 @@ export default class Span extends VNode {
     });
     this.children.forEach(child => {
       group.add(child.render());
-    })
+    });
     return group;
   }
 

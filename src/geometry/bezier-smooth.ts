@@ -31,10 +31,10 @@ export default (
 
 function getRate(P0: Point, P1: Point, P2: Point, first: boolean = false): number {
   return 0.25;
-//   const l1: number = Math.sqrt(Math.pow(P1.x - P0.x, 2) + Math.pow(P1.y - P0.y, 2));
-//   const l2: number = Math.sqrt(Math.pow(P2.x - P1.x, 2) + Math.pow(P2.y - P1.y, 2));
+  //   const l1: number = Math.sqrt(Math.pow(P1.x - P0.x, 2) + Math.pow(P1.y - P0.y, 2));
+  //   const l2: number = Math.sqrt(Math.pow(P2.x - P1.x, 2) + Math.pow(P2.y - P1.y, 2));
 
-//   return first ? l1 / (l1 + l2) : l2 / (l1 + l2);
+  //   return first ? l1 / (l1 + l2) : l2 / (l1 + l2);
 }
 
 function isMonotonicity(P0: Point, P1: Point, P2: Point, key: 'x' | 'y'): boolean {

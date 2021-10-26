@@ -1,9 +1,7 @@
-import Group, { GroupConf } from './Group'
+import Group, { GroupConf } from './Group';
 import Element from './Element';
 
-
 class CustomElement extends Group {
-
   public get isGroup() {
     return true;
   }
@@ -17,11 +15,11 @@ class CustomElement extends Group {
   }
 
   public forceUpdate() {
-   this.update(); 
+    this.update();
   }
 
   protected getObservedAttr(): string[] {
-    return []
+    return [];
   }
 
   protected created() {
@@ -53,19 +51,20 @@ class CustomElement extends Group {
   protected render(): Element | Element[] {
     return null;
   }
-
 }
 
 declare class MyClass<T> extends Element<T & GroupConf> {
   public $$CustomType: boolean;
 
   public skipUpdate(): void;
-  protected getObservedAttr(): string[];
-  protected shouldUpdate(): boolean;
-  protected render(): Element | Element[];
 
+  protected getObservedAttr(): string[];
+
+  protected shouldUpdate(): boolean;
+
+  protected render(): Element | Element[];
 }
 
 export type TypeCustomElement<T = {}> = MyClass<T>;
 
-export default CustomElement as any as new <T>(attr?: T & Omit<GroupConf, 'text'>) => MyClass<T>;
+export default (CustomElement as any) as new <T>(attr?: T & Omit<GroupConf, 'text'>) => MyClass<T>;

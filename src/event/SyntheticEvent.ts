@@ -1,12 +1,10 @@
-
 export interface SyntheticEventParams {
   original?: any;
   bubbles: boolean;
   timeStamp?: number;
 }
 
-
-export default class  SyntheticEvent<T extends MouseEvent | TouchEvent = MouseEvent | TouchEvent> {
+export default class SyntheticEvent<T extends MouseEvent | TouchEvent = MouseEvent | TouchEvent> {
   public type: string;
 
   public syntheticType: string;
@@ -18,7 +16,7 @@ export default class  SyntheticEvent<T extends MouseEvent | TouchEvent = MouseEv
   // public isDefaultPrevented: boolean;
 
   public bubbles: boolean;
-  
+
   public timeStamp: number;
 
   public constructor(type: string, params: SyntheticEventParams) {
@@ -36,5 +34,5 @@ export default class  SyntheticEvent<T extends MouseEvent | TouchEvent = MouseEv
 
   public stopPropagation(): void {
     this.isPropagationStopped = true;
-  }  
+  }
 }

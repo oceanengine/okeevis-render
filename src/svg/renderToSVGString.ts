@@ -1,5 +1,11 @@
 import Group from '../shapes/Group';
-import { getAllDefsClips, getAllDefsGradientAndPattern, getAllShadows, getSVGRootAttributes, getClipId, } from './style';
+import {
+  getAllDefsClips,
+  getAllDefsGradientAndPattern,
+  getAllShadows,
+  getSVGRootAttributes,
+  getClipId,
+} from './style';
 import Element from '../shapes/Element';
 import SVGNode from '../abstract/Node';
 import { LinearGradient, RadialGradient, Pattern } from '../color';

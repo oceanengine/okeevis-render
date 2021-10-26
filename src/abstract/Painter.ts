@@ -1,7 +1,4 @@
-
-
 export default abstract class Painter {
-
   public abstract resize(width: number, height: number): void;
 
   public abstract onFrame(now?: number): void;

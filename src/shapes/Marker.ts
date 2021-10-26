@@ -18,7 +18,6 @@ export interface MarkerAttr extends CommonAttr {
 
 export type MarkerPosition = 'start' | 'end' | 'middle';
 
-
 export default class Marker extends Element<MarkerAttr> {
   public type = 'marker';
 
@@ -31,22 +30,15 @@ export default class Marker extends Element<MarkerAttr> {
       width: 3,
       height: 3,
       orient: 0,
-      markerUnits: 'strokeWidth'
-    } as MarkerAttr
+      markerUnits: 'strokeWidth',
+    } as MarkerAttr;
   }
 
   public renderMarker(painter: CanvasPainter, parent: Shape, position: MarkerPosition) {
     const matrix = this._getMarkerMatrix(parent, position);
     const ctx = painter.getContext();
     ctx.save();
-    ctx.transform(
-      matrix[0],
-      matrix[1],
-      matrix[3],
-      matrix[4],
-      matrix[6],
-      matrix[7],
-    );
+    ctx.transform(matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]);
     painter.drawElement(ctx, this.attr.shape);
     ctx.restore();
   }
@@ -55,8 +47,15 @@ export default class Marker extends Element<MarkerAttr> {
     const globalMatrix = parent.getGlobalTransform();
     const matrix = this._getMarkerMatrix(parent, position);
     const { x, y, width, height } = this.attr.shape.getCurrentDirtyRect();
-    const out = {x: 0, y :0, width: 0, height: 0};
-    return this.computeBBoxWithTransform(out, x, y, width, height, mat3.multiply(matrix, globalMatrix, matrix));
+    const out = { x: 0, y: 0, width: 0, height: 0 };
+    return this.computeBBoxWithTransform(
+      out,
+      x,
+      y,
+      width,
+      height,
+      mat3.multiply(matrix, globalMatrix, matrix),
+    );
   }
 
   public getSvgAttributes(): any {
@@ -69,9 +68,9 @@ export default class Marker extends Element<MarkerAttr> {
       markerWidth: width,
       markerHeight: height,
       viewBox: [shapeBBox.x, shapeBBox.y, shapeBBox.width, shapeBBox.height].join(' '),
-      orient: lodash.isNumber(orient) ? orient * 180 / Math.PI : orient,
+      orient: lodash.isNumber(orient) ? (orient * 180) / Math.PI : orient,
       markerUnits,
-    }
+    };
   }
 
   public getMarkerId() {
@@ -89,7 +88,7 @@ export default class Marker extends Element<MarkerAttr> {
     let rotate = orient;
     let percent = 0;
     if (position === 'start') {
-      percent = 0
+      percent = 0;
     } else if (position === 'middle') {
       percent = 0.5;
     } else if (position === 'end') {
