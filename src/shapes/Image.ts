@@ -7,8 +7,7 @@ import { BBox, rectBBox, inBBox, alignBox, BoxAlign, BoxVerticalAlign } from '..
 export interface ImageConf extends CommonAttr {
   x?: number;
   y?: number;
-  // 只有一个时自适应宽高,参照小程序规则
-  // 注意ie下兼容性,domImage先append 后remove
+  // ie support, must append to body first
   width?: number;
   height?: number;
   src?: string;
@@ -121,7 +120,6 @@ export default class Image extends Shape<ImageConf> {
     const imageHeight = image.height;
     let outWidth = width;
     let outHeight = height;
-    // 横向缩放，纵向铺满
     if (width / height > imageWidth / imageHeight) {
       outWidth = height *  imageWidth / imageHeight;
     } else {

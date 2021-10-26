@@ -60,17 +60,8 @@ declare class MyClass<T> extends Element<T & GroupConf> {
   public $$CustomType: boolean;
 
   public skipUpdate(): void;
-  /**
-   * 监听属性
-   */
   protected getObservedAttr(): string[];
-  /**
-   * 是否更新
-   */
   protected shouldUpdate(): boolean;
-  /**
-   * 渲染
-   */
   protected render(): Element | Element[];
 
 }

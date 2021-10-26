@@ -12,7 +12,6 @@ export {
   SyntheticWheelEvent,
 }
 
-// todo 和react一致
 export interface EventConf {
   draggable?: boolean;
   onEvent?: (event: SyntheticEvent) => void;

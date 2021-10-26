@@ -33,8 +33,8 @@ export default class Point {
 
   /**
    *
-   * @param angle 弧度制
-   * @param distance  距离
+   * @param angle rad
+   * @param distance  number
    */
   public angleMoveTo(angle: number, distance: number): this {
     return this.moveBy(
@@ -57,7 +57,7 @@ export default class Point {
 
   /**
    *
-   * @param angle 弧度制
+   * @param angle rad
    * @param cx
    * @param cy
    */

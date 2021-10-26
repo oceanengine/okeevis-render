@@ -3,7 +3,7 @@ import * as mat3 from '../../js/mat3';
 /**
  * 
  * @param matrix mat3
- * @param angle 旋转弧度
+ * @param angle rad
  * @param originX 
  * @param originY 
  */

@@ -316,7 +316,6 @@ export default class Text extends Shape<TextConf> {
         rowLetterWidthList.push(letterWidth);
         rowTextList[rowIndex] += letter;
       } else if (outerHeight && rowHeight + lineHeight > outerHeight) {
-        // 变省略号
         let tempWidth = 0;
         let tempStr = '';
         for (let j = 0; j < rowLetterWidthList.length; j++) {

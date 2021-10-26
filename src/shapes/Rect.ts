@@ -38,7 +38,6 @@ export default class Rect extends Shape<RectConf> {
   }
 
   public brush(ctx: CanvasRenderingContext2D): void {
-    // 没有圆角的时候直接渲染矩形
     const {x, y, width, height, r } = this.attr;
     if (width === 0 || height === 0) {
       return;
@@ -46,7 +45,7 @@ export default class Rect extends Shape<RectConf> {
     if (!r) {
      ctx.rect(x, y, width, height);
     } else {
-        // 1 2 3 4分别为左上 右上 右下 左下
+        // topleft topright bottomright bottomleft
         let r1: number;
         let r2: number;
         let r3: number;

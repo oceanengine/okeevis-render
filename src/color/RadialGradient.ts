@@ -70,7 +70,6 @@ export default class RadialGradient extends Gradient<RadialGradientOption> {
 
   public toString(): string {
     const { cx, cy, stops } = this.option;
-    // TODO 有结束参数的实现上有问题
     const stopStr = stops
       .map(stop => {
         return `${stop.color} ${stop.offset * 100}%`;

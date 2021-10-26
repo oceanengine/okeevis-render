@@ -19,7 +19,6 @@ export default class VBox extends Box {
   public layout(): void {
     const contentBox = this.getContentBox();
 
-    // 基础宽度分配 非弹性元素
     this.children.forEach(child => {
       const propsHeight = child.props.height as number;
       const minHeight = child.minSize[1];
@@ -40,7 +39,6 @@ export default class VBox extends Box {
     const contentHeight = lodash.sum(this.children.map(child => child.bbox.height));
     const leftHeight = contentBox.height - contentHeight;
 
-    // 剩余宽度分配 flex
     const flexItems = this.children.filter(child => child.props.flex > 0);
     const flexValues = flexItems.map(item => item.props.flex);
     const totalFlex = lodash.sum(flexValues);
@@ -49,7 +47,6 @@ export default class VBox extends Box {
       item.bbox.height += flexGrow[index];
     });
 
-    // 处理对齐分配坐标 或者高度
     flexLayout(
       contentBox,
       this.children.map(child => child.bbox),
@@ -58,7 +55,6 @@ export default class VBox extends Box {
       this.props.pack,
     );
 
-    // 递归处理
     this.children.forEach(child => child.layout());
   }
 }

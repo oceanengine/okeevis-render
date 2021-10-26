@@ -8,10 +8,6 @@ import * as lodash from '../utils/lodash';
 import SVGPainter from '../painter/SVGPainter';
 
 export interface GroupConf extends TextConf {
-  /**
-   * 废弃属性, 合并绘制路径,并没有什么用, 但是保留作为测试用.
-   */
-  _batchBrush?: boolean;
 }
 
 export interface ChunkItem {
@@ -41,7 +37,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public getDefaultAttr(): GroupConf {
     return {
       ...super.getDefaultAttr(),
-      _batchBrush: false,
     };
   }
   
@@ -441,7 +436,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       this.lastChild = last.nextSibling = item;
       item.nextSibling = null;
     } else {
-      // 中间节点
       item.prevSibling.nextSibling = item.nextSibling;
       if (item.nextSibling) {
         item.nextSibling.prevSibling = item.prevSibling;
@@ -476,7 +470,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     if (transitionProperty === 'none' || transitionProperty.length === 0) {
        prevElement.setAttr(nextAttr)
     } else {
-      // todo 指定transitionProperty数组时, 非过渡属性无法更新
+      // todo transition property array support
       const nextAttr = transitionProperty === 'all' ? nextElement.attr : lodash.pick(nextElement.attr, transitionProperty as any);
       prevElement.stopAllAnimation().animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
     }
@@ -484,7 +478,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       (prevElement as TypeCustomElement).skipUpdate();
     }
     prevElement.endAttrTransaction();
-    // todo 如果是自定义渲染的话, 当前的key变化不影响不触发重新渲染
   }
 
   private _findSVGDomNode(item: Element) {

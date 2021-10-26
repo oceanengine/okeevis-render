@@ -58,7 +58,7 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                loader: 'style-loader!css-loader', //添加对样式表的处理
+                loader: 'style-loader!css-loader',
             },
         ],
     },

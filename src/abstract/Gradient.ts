@@ -1,7 +1,7 @@
 import { BBox } from '../utils/bbox';
 import SVGNode from './Node';
 
-// todo 支持全局坐标系的gradient, 此时不用切换上下文
+// todo global coord gradient support
 
 export interface ColorStop {
   offset: number;

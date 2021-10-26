@@ -163,7 +163,7 @@ const sector = new Sector({
 const text = new Text({
   x: 50,
   y: 480,
-  text: '文本文本',
+  text: 'texttext',
   fontSize: 50,
   lineHeight: 50,
   fill: 'blue',

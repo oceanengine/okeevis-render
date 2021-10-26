@@ -31,7 +31,6 @@ export const defaultSetting: { during: number; ease: EasingName } = {
   ease: 'CubicOut',
 };
 
-// 对象重用
 const reuseBBoxVectors: Vec2[] = [createVec2(), createVec2(), createVec2(), createVec2()];
 
 export interface BaseAttr extends TransformConf, EventConf {
@@ -42,8 +41,8 @@ export interface BaseAttr extends TransformConf, EventConf {
   markerStart?: Marker;
   markerMid?: Marker;
   markerEnd?: Marker;
-  // 已废弃属性
-  zIndex?: number;
+
+  zIndex?: number; // deprecated
 
   fill?: ColorValue;
   stroke?: ColorValue;
@@ -92,26 +91,25 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionDelay?: number;
 }
 
-// 可继承(不可跨级)
 export const defaultCanvasContext: ShapeConf = {
   fill: 'none',
   stroke: 'none',
   lineWidth: 1,
   lineDash: null,
   lineDashOffset: 0,
-  lineJoin: 'bevel', // canvas默认miter
+  lineJoin: 'bevel', // default to be miter
   lineCap: 'butt',
   miterLimit: 10,
   fillOpacity: 1,
   strokeOpacity: 1,
   blendMode: 'source-over',
-  fontSize: 12, // 非canvas默认
+  fontSize: 12, // not default canvas context value
   fontFamily: 'sans-serif',
   fontWeight: 'normal',
   fontStyle: 'normal',
   fontVariant: 'normal',
   textAlign: 'start',
-  textBaseline: 'bottom', // canvas默认值'alphabetic',
+  textBaseline: 'bottom', // canvas default value 'alphabetic',
   shadowColor: RGBA_TRANSPARENT,
   shadowBlur: 0,
   shadowOffsetX: 0,
@@ -198,7 +196,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _transformDirty: boolean = false;
 
-  private _absTransformDirty: boolean = true; // 自身或祖先矩阵变化
+  private _absTransformDirty: boolean = true;
 
   private _clientBoundingRect: BBox;
 
@@ -283,7 +281,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public getComputedOpacity(): number {
     let node: Element<T> | Group = this;
     let opacity = 1;
-    // 透明度有继承叠加效果
     while (node) {
       opacity *= node.attr.opacity ?? 1;
       node = node.parentNode as any as Group;
@@ -293,7 +290,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public getExtendAttr<U extends keyof T>(key: U): T[U] {
     let value: T[U] = (defaultCanvasContext as T)[key];
-    // 透明度有继承叠加效果
     let node: Element<any> = this;
     while (node) {
       if (typeof node.attr[key] !== 'undefined') {
@@ -496,7 +492,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._bbox;
   }
 
-  // todo 计算boundRect同时计算dirtyRect
   public getBoundingClientRect(): BBox {
     if (this.attr.display === false) {
       return createZeroBBox();
@@ -679,17 +674,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return false;
   };
 
-  /**
-   * 未转换过的坐标
-   */
   public isInShape(ox: number, oy: number): boolean {
     const [x, y] = this.getInvertedPoint(ox, oy);
     return this.isPointOnPath(x, y);
   }
 
-  /**
-   * 转换过的坐标
-   */
   protected isPointOnPath(x: number, y: number) {
     const hasFill = this.hasFill();
     const hasStroke = this.hasStroke();

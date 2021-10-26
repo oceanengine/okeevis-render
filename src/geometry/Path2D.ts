@@ -107,9 +107,6 @@ export default class Path2D {
     return this;
   }
 
-  /**
-   * 三次贝塞尔曲线
-   */
   public bezierCurveTo(
     x1: number,
     y1: number,
