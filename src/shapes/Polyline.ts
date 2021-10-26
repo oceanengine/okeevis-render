@@ -1,6 +1,5 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import * as lodash from '../utils/lodash';
 import { BBox, polygonBBox } from '../utils/bbox';
 import { pointInPolygonFill, pointInPolygonStroke } from '../geometry/contain/polygon';
 import bezierSmooth from '../geometry/bezier-smooth';

@@ -58,7 +58,7 @@ export default class Pattern {
   }
 
   public getSVGNode(): SVGNode {
-    const { image, repeat } = this.option;
+    const { image } = this.option;
     const { width, height, src } = image as HTMLImageElement;
     return {
       svgTagName: 'pattern',

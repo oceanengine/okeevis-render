@@ -159,6 +159,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public addChunk(items: T[] = []): this {
     if (items.length === 0) {
+      return this;
     }
     this._chunks.push(items);
     this.onChunkChange();
@@ -475,13 +476,13 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       prevElement.setAttr(nextAttr);
     } else {
       // todo transition property array support
-      const nextAttr =
+      const transitionAttr =
         transitionProperty === 'all'
-          ? nextElement.attr
-          : lodash.pick(nextElement.attr, transitionProperty as any);
+          ? nextAttr
+          : lodash.pick(nextAttr, transitionProperty as any);
       prevElement
         .stopAllAnimation()
-        .animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
+        .animateTo(transitionAttr, transitionDuration, transitionEase, null, transitionDelay);
     }
     if ((prevElement as TypeCustomElement).$$CustomType) {
       (prevElement as TypeCustomElement).skipUpdate();

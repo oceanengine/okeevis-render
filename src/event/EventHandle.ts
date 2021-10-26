@@ -108,7 +108,6 @@ export default class EventHandle {
   public pickTarget(x: number, y: number): Element {
     // console.time('pick');
     const pixelPainter = this._PixelPainter;
-    const ignoreInvisibleNodes = true;
     let target: Element;
     function filter(node: Element): boolean {
       return (
@@ -135,7 +134,7 @@ export default class EventHandle {
       }
     }
 
-    const gpuPickNodes = pickNodes.filter(node => node.pickByGPU());
+    const gpuPickNodes = pickNodes.filter(gpuNode => gpuNode.pickByGPU());
     gpuPickNodes.forEach((item, index) => {
       item.pickRGB = valueToRgb(index + 1);
     });

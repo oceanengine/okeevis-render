@@ -1,5 +1,4 @@
 /* eslint-disable */
-
 export type EasingName = keyof typeof easing;
 export type EasingFunction = (k: number) => number;
 const easing = {
@@ -98,9 +97,9 @@ const easing = {
     return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
   },
   ElasticIn: (k: number): number => {
-    var s;
-    var a = 0.1;
-    var p = 0.4;
+    let s;
+    let a = 0.1;
+    const p = 0.4;
     if (k === 0) {
       return 0;
     }
@@ -116,9 +115,9 @@ const easing = {
     return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin(((k - s) * (2 * Math.PI)) / p));
   },
   ElasticOut: (k: number): number => {
-    var s;
-    var a = 0.1;
-    var p = 0.4;
+    let s;
+    let a = 0.1;
+    const p = 0.4;
     if (k === 0) {
       return 0;
     }
@@ -134,9 +133,9 @@ const easing = {
     return a * Math.pow(2, -10 * k) * Math.sin(((k - s) * (2 * Math.PI)) / p) + 1;
   },
   ElasticInOut: (k: number): number => {
-    var s;
-    var a = 0.1;
-    var p = 0.4;
+    let s;
+    let a = 0.1;
+    const p = 0.4;
     if (k === 0) {
       return 0;
     }
@@ -155,15 +154,15 @@ const easing = {
     return a * Math.pow(2, -10 * (k -= 1)) * Math.sin(((k - s) * (2 * Math.PI)) / p) * 0.5 + 1;
   },
   BackIn: (k: number): number => {
-    var s = 1.70158;
+    const s = 1.70158;
     return k * k * ((s + 1) * k - s);
   },
   BackOut: (k: number): number => {
-    var s = 1.70158;
+    const s = 1.70158;
     return --k * k * ((s + 1) * k + s) + 1;
   },
   BackInOut: (k: number): number => {
-    var s = 1.70158 * 1.525;
+    const s = 1.70158 * 1.525;
     if ((k *= 2) < 1) {
       return 0.5 * (k * k * ((s + 1) * k - s));
     }
@@ -175,13 +174,13 @@ const easing = {
   BounceOut: (k: number): number => {
     if (k < 1 / 2.75) {
       return 7.5625 * k * k;
-    } else if (k < 2 / 2.75) {
+    } if (k < 2 / 2.75) {
       return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
-    } else if (k < 2.5 / 2.75) {
+    } if (k < 2.5 / 2.75) {
       return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
-    } else {
+    } 
       return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
-    }
+    
   },
   BounceInOut: (k: number): number => {
     if (k < 0.5) {

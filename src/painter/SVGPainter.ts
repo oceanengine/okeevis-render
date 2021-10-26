@@ -9,7 +9,7 @@ import Element from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
 import { fpsRect, fpsText } from './fps';
 import SVGNode from '../abstract/Node';
-import { getSVGRootAttributes, SVGAttributeMap, SVGElementStyle, getClipId } from '../svg/style';
+import { getSVGRootAttributes, SVGAttributeMap, getClipId } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Marker from '../shapes/Marker';
 
@@ -209,7 +209,7 @@ export default class SVGPainter implements Painter {
       delete this._loadedDefsElements[defsObject.id];
     });
 
-    diffResult.maintained.forEach(([from, to]) => {
+    diffResult.maintained.forEach(([from]) => {
       const obj = prevShadows[from];
       const dom = (this._loadedDefsElements[obj.id].firstChild as any) as SVGElement;
       this._setElementAttr(dom, obj.getSVGNode().childNodes[0].svgAttr);
@@ -390,7 +390,7 @@ export default class SVGPainter implements Painter {
 
   private _getAllShadows(group: Group) {
     group.eachChild(child => {
-      const { shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY } = child.attr;
+      const { shadowColor, shadowBlur } = child.attr;
       if (shadowColor && shadowBlur >= 0) {
         const shadow = child.getShadowObj();
         this._dfsShadows.add(shadow);

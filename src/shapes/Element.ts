@@ -20,7 +20,7 @@ import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
 import { RefObject } from '../utils/ref';
-import { getSVGStyleAttributes, SVGAttributeMap } from '../svg/style';
+import { getSVGStyleAttributes } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
 
@@ -912,7 +912,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._addToFrame();
   }
 
-  public stopAllAnimation(gotoEnd: boolean = false): this {
+  // todo gotoend support
+  public stopAllAnimation(): this {
     // todo goToEnd
     this._animations.length = 0;
     return this;
