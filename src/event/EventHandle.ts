@@ -108,14 +108,13 @@ export default class EventHandle {
   public pickTarget(x: number, y: number): Element {
     // console.time('pick');
     const pixelPainter = this._PixelPainter;
-    const ignoreInvisibleNodes = true;
     let target: Element;
     function filter(node: Element): boolean {
-      return inBBox(node.getBoundingClientRect(), x, y) && node.getExtendAttr('pointerEvents') !== 'none'
+      return (
+        inBBox(node.getBoundingClientRect(), x, y) && node.getExtendAttr('pointerEvents') !== 'none'
+      );
     }
-    const pickNodes = this._getHandleGroup()
-      .getAllLeafNodes([], filter)
-      .reverse();
+    const pickNodes = this._getHandleGroup().getAllLeafNodes([], filter).reverse();
 
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;
@@ -135,7 +134,7 @@ export default class EventHandle {
       }
     }
 
-    const gpuPickNodes = pickNodes.filter(node => node.pickByGPU());
+    const gpuPickNodes = pickNodes.filter(gpuNode => gpuNode.pickByGPU());
     gpuPickNodes.forEach((item, index) => {
       item.pickRGB = valueToRgb(index + 1);
     });
@@ -371,7 +370,7 @@ export default class EventHandle {
 
     if (nativeEvent.type === 'touchmove') {
       if (this.render.simulateClickEvent && this._touchStartInfo) {
-        const {x: prevX, y: prevY} = this._touchStartInfo;
+        const { x: prevX, y: prevY } = this._touchStartInfo;
         const dx = Math.abs(event.x - prevX);
         const dy = Math.abs(event.y - prevY);
         const touchBoundary = 10;
@@ -400,11 +399,11 @@ export default class EventHandle {
 
     if (nativeEvent.type === 'touchend' || nativeEvent.type === 'touchcancel') {
       if (this.render.simulateClickEvent && this._touchStartInfo) {
-        if (!this._cancelClick && (event.timeStamp - this._touchStartInfo.timeStamp) < 300) {
+        if (!this._cancelClick && event.timeStamp - this._touchStartInfo.timeStamp < 300) {
           const clickEvent = new SyntheticMouseEvent('click', {
             x: event.x,
             y: event.y,
-            original: {x: event.x, y: event.y},
+            original: { x: event.x, y: event.y },
             bubbles: true,
             timeStamp: event.timeStamp,
           });
@@ -535,7 +534,11 @@ export default class EventHandle {
     if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg') {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
-    return getTouchOffsetPosition(this.render.getDom() as HTMLDivElement, event.clientX, event.clientY);
+    return getTouchOffsetPosition(
+      this.render.getDom() as HTMLDivElement,
+      event.clientX,
+      event.clientY,
+    );
   }
 
   private _getHandleGroup() {
@@ -572,7 +575,7 @@ export default class EventHandle {
     let passiveSupported = false;
     try {
       const options = Object.defineProperty({}, 'passive', {
-        get: function () {
+        get() {
           passiveSupported = true;
         },
       });
@@ -612,7 +615,6 @@ export default class EventHandle {
       return;
     }
     const isRoot = this.render.getRoot() === target;
-
 
     if (event instanceof SyntheticMouseEvent) {
       if (count === 0) {

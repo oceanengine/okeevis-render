@@ -1,4 +1,3 @@
-
 export interface TransformConf {
   rotation?: number;
   translateX?: number;

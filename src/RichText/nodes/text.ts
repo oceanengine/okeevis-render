@@ -25,8 +25,8 @@ export default class VText extends VNode {
     const parent = this.parentNode as Box;
     const { x: left, y: top, width, height } = this.bbox;
     let x = left;
-    let y = top;
-    let textAlign: CanvasTextAlign= 'left';
+    const y = top;
+    let textAlign: CanvasTextAlign = 'left';
     const ellipsis = parent.props.ellipsis !== undefined;
     if (ellipsis) {
       if (parent.type === 'hbox') {

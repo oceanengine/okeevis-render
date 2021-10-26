@@ -25,7 +25,7 @@ export type ShapeConf = ArcConf &
   SectorConf &
   TextConf &
   CompoundPathConf &
-  EllipseConf
+  EllipseConf;
 
 export default class Shape<T extends CommonAttr = ShapeConf> extends Element<T> {
   public svgTagName = 'path';

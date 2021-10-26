@@ -36,6 +36,6 @@ export default class SyntheticWheelEvent extends SyntheticMouseEvent {
     this.deltaX = params.deltaX;
     this.deltaY = params.deltaY;
     this.deltaZ = params.deltaZ;
-    this.normalizeWheel = params.normalizeWheel
+    this.normalizeWheel = params.normalizeWheel;
   }
 }

@@ -38,93 +38,93 @@ export default class Rect extends Shape<RectConf> {
   }
 
   public brush(ctx: CanvasRenderingContext2D): void {
-    const {x, y, width, height, r } = this.attr;
+    const { x, y, width, height, r } = this.attr;
     if (width === 0 || height === 0) {
       return;
     }
     if (!r) {
-     ctx.rect(x, y, width, height);
+      ctx.rect(x, y, width, height);
     } else {
-        // topleft topright bottomright bottomleft
-        let r1: number;
-        let r2: number;
-        let r3: number;
-        let r4: number;
-        if (lodash.isArray(r)) {
-            if (r.length === 0) {
-              r1 = r2 = r3 = r4 = 0;
-            }
-            if (r.length === 1) {
-              r1 = r2 = r3 = r4 = r[0];
-            } else if (r.length === 2) {
-              r1 = r3 = r[0];
-              r2 = r4  = r[1];
-            } else if (r.length === 3) {
-              r1 = r[0];
-              r2 = r4 = r[1];
-              r3 = r[2];
-            } else if (r.length >= 4) {
-              [r1, r2, r3, r4] = r;
-            }
-        } else {
-            r1 = r2 = r3 = r4 = this.attr.r as number;
+      // topleft topright bottomright bottomleft
+      let r1: number;
+      let r2: number;
+      let r3: number;
+      let r4: number;
+      if (lodash.isArray(r)) {
+        if (r.length === 0) {
+          r1 = r2 = r3 = r4 = 0;
         }
-        const absWidth: number = Math.abs(width / 2);
-        const absHeight: number = Math.abs(height / 2);
-        const rect = this.getBBox();
-        r1 = Math.min(r1, absWidth, absHeight);
-        r2 = Math.min(r2, absWidth, absHeight);
-        r3 = Math.min(r3, absWidth, absHeight);
-        r4 = Math.min(r4, absWidth, absHeight);
+        if (r.length === 1) {
+          r1 = r2 = r3 = r4 = r[0];
+        } else if (r.length === 2) {
+          r1 = r3 = r[0];
+          r2 = r4 = r[1];
+        } else if (r.length === 3) {
+          r1 = r[0];
+          r2 = r4 = r[1];
+          r3 = r[2];
+        } else if (r.length >= 4) {
+          [r1, r2, r3, r4] = r;
+        }
+      } else {
+        r1 = r2 = r3 = r4 = this.attr.r as number;
+      }
+      const absWidth: number = Math.abs(width / 2);
+      const absHeight: number = Math.abs(height / 2);
+      const rect = this.getBBox();
+      r1 = Math.min(r1, absWidth, absHeight);
+      r2 = Math.min(r2, absWidth, absHeight);
+      r3 = Math.min(r3, absWidth, absHeight);
+      r4 = Math.min(r4, absWidth, absHeight);
 
-        const c1: Point = {
-            x: rect.x + r1,
-            y: rect.y + r1,
-        };
-        const c2: Point = {
-            x: rect.x + rect.width - r2,
-            y: rect.y + r2,
-        };
-        const c3: Point = {
-            x: rect.x + rect.width - r3,
-            y: rect.y + +rect.height - r3,
-        };
-        const c4: Point = {
-            x: rect.x + r4,
-            y: rect.y + rect.height - r4,
-        };
+      const c1: Point = {
+        x: rect.x + r1,
+        y: rect.y + r1,
+      };
+      const c2: Point = {
+        x: rect.x + rect.width - r2,
+        y: rect.y + r2,
+      };
+      const c3: Point = {
+        x: rect.x + rect.width - r3,
+        y: rect.y + +rect.height - r3,
+      };
+      const c4: Point = {
+        x: rect.x + r4,
+        y: rect.y + rect.height - r4,
+      };
 
-        const p1: Point = {
-            x: rect.x + r1,
-            y: rect.y,
-        };
-        const p2: Point = {
-            x: rect.x + rect.width - r2,
-            y: rect.y,
-        };
-        const p4: Point = {
-            x: rect.x + rect.width,
-            y: rect.y + rect.height - r3,
-        };
-        const p6: Point = {
-            x: rect.x + r4,
-            y: rect.y + rect.height,
-        };
-        const p8: Point = {
-            x: rect.x,
-            y: rect.y + r1,
-        };
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.arc(c2.x, c2.y, r2, Math.PI * 1.5, Math.PI * 2, false);
-        ctx.lineTo(p4.x, p4.y);
-        ctx.arc(c3.x, c3.y, r3, Math.PI * 0, Math.PI * 0.5, false);
-        ctx.lineTo(p6.x, p6.y);
-        ctx.arc(c4.x, c4.y, r4, Math.PI * 0.5, Math.PI * 1, false);
-        ctx.lineTo(p8.x, p8.y);
-        ctx.arc(c1.x, c1.y, r1, Math.PI * 1, Math.PI * 1.5, false);
+      const p1: Point = {
+        x: rect.x + r1,
+        y: rect.y,
+      };
+      const p2: Point = {
+        x: rect.x + rect.width - r2,
+        y: rect.y,
+      };
+      const p4: Point = {
+        x: rect.x + rect.width,
+        y: rect.y + rect.height - r3,
+      };
+      const p6: Point = {
+        x: rect.x + r4,
+        y: rect.y + rect.height,
+      };
+      const p8: Point = {
+        x: rect.x,
+        y: rect.y + r1,
+      };
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.arc(c2.x, c2.y, r2, Math.PI * 1.5, Math.PI * 2, false);
+      ctx.lineTo(p4.x, p4.y);
+      ctx.arc(c3.x, c3.y, r3, Math.PI * 0, Math.PI * 0.5, false);
+      ctx.lineTo(p6.x, p6.y);
+      ctx.arc(c4.x, c4.y, r4, Math.PI * 0.5, Math.PI * 1, false);
+      ctx.lineTo(p8.x, p8.y);
+      ctx.arc(c1.x, c1.y, r1, Math.PI * 1, Math.PI * 1.5, false);
     }
-}
+  }
 
   public isPointInFill(x: number, y: number): boolean {
     return inBBox(this.getBBox(), x, y);

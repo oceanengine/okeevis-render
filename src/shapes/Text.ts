@@ -48,7 +48,7 @@ export default class Text extends Shape<TextConf> {
   public svgTagName = 'text';
 
   public shapeKeys = shapeKeys;
-  
+
   private _isOverflow: boolean = false;
 
   private get _isEmpty(): boolean {
@@ -91,7 +91,7 @@ export default class Text extends Shape<TextConf> {
     const { x, y } = this.attr;
     const { fontSize, lineHeight, textBaseline } = this.getTextStyle();
     const textList = this._getInlineTextList();
-    const gap  = (lineHeight - fontSize) / 2;;
+    const gap = (lineHeight - fontSize) / 2;
     textList.forEach((rowText, rowIndex) => {
       let rowY: number = y;
       if (textBaseline === 'top') {
@@ -153,7 +153,7 @@ export default class Text extends Shape<TextConf> {
     });
   }
 
-  protected measureText(): {width: number; height: number} {
+  protected measureText(): { width: number; height: number } {
     const textStyle = this.getTextStyle();
     const text = this._isEmpty ? '' : this.attr.text + '';
     return measureText(text, textStyle);
@@ -338,7 +338,7 @@ export default class Text extends Shape<TextConf> {
         rowLetterWidthList.push(letterWidth);
       }
     }
-    
+
     return rowTextList;
   }
 }

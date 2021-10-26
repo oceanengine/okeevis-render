@@ -5,9 +5,9 @@ import * as lodash from '../utils/lodash';
 import Element from '../shapes/Element';
 import { BBox } from '../utils/bbox';
 import { TextConf } from '../shapes/Text';
-import { PaddingOption } from './flexlayout'
+import { PaddingOption } from './flexlayout';
 import Rich from './rich-obj';
-import {  EventConf } from '../event';
+import { EventConf } from '../event';
 
 export interface ShadowStyle {
   shadowColor?: string;
@@ -15,7 +15,6 @@ export interface ShadowStyle {
   shadowOffsetX?: number;
   shadowOffsetY?: number;
 }
-
 
 export interface VNodeProps {
   flex?: number;
@@ -72,7 +71,12 @@ function parseNumberOrString(attr: string): string | number {
 
 function parseBoxShadow(attr: string): ShadowStyle {
   const [a, b, c, shadowColor] = attr.split(/\s+/);
-  return { shadowOffsetX: parseFloat(a), shadowOffsetY: parseFloat(b), shadowBlur: parseFloat(c), shadowColor };
+  return {
+    shadowOffsetX: parseFloat(a),
+    shadowOffsetY: parseFloat(b),
+    shadowBlur: parseFloat(c),
+    shadowColor,
+  };
 }
 
 export const NodeAttributeParser: Record<
@@ -192,7 +196,7 @@ export default class VNode<T extends VNodeProps = VNodeProps> {
       r: borderRadius,
       fill: background,
       lineWidth: borderWidth,
-    }
+    };
   }
 
   protected getEvents(): EventConf {

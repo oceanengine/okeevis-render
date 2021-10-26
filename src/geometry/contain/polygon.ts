@@ -9,7 +9,7 @@ interface Point {
 function isEdgePoind(points: Point[], x: number, y: number): boolean {
   let flag: boolean = false;
 
-  for (let j: number = 0; j < points.length; j = j + 1) {
+  for (let j: number = 0; j < points.length; j += 1) {
     const current = points[j];
     if (equalWithTolerance(current.x, x) && equalWithTolerance(current.y, y)) {
       flag = true;
@@ -22,7 +22,7 @@ function isEdgePoind(points: Point[], x: number, y: number): boolean {
 
 export function pointInPolygonFill(pointList: Point[], x: number, y: number): boolean {
   let countNum: number = 0;
-  for (let i: number = 0; i < pointList.length; i = i + 1) {
+  for (let i: number = 0; i < pointList.length; i += 1) {
     const p1: Point = pointList[i];
     const p2: Point = pointList[(i + 1) % pointList.length];
 
@@ -42,7 +42,7 @@ export function pointInPolygonFill(pointList: Point[], x: number, y: number): bo
       continue;
     }
     if (vertex > x) {
-      countNum = countNum + 1;
+      countNum += 1;
     }
   }
 

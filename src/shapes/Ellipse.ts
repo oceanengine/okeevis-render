@@ -4,7 +4,7 @@
  */
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { BBox, circleBBox } from '../utils/bbox';
+import { BBox } from '../utils/bbox';
 import { pointInEllipseFill, pointInEllipseStroke } from '../geometry/contain/ellipse';
 
 export interface EllipseConf extends CommonAttr {

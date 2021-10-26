@@ -1,12 +1,12 @@
 import Painter from '../abstract/Painter';
 import { registerPainter } from './index';
 import Render from '../render';
-import Element, { defaultCanvasContext, } from '../shapes/Element';
+import Element, { defaultCanvasContext } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
-import { BBox, bboxIntersect, } from '../utils/bbox';
+import { BBox, bboxIntersect } from '../utils/bbox';
 import mergeDirtyRegions from './dirtyRect';
-import { getCtxColor, isGradient, isTransparent, ColorValue} from '../color';
+import { getCtxColor, isGradient, isTransparent, ColorValue } from '../color';
 import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
@@ -34,7 +34,6 @@ const contextKeys: Array<keyof ShapeConf> = [
   'lineDash',
   'clip',
 ];
-
 
 export default class CanvasPainter implements Painter {
   public render: Render;
@@ -167,7 +166,12 @@ export default class CanvasPainter implements Painter {
       const el = dirtyElements[i];
       el.getDirtyRects().forEach(rect => dirtyRegions.push(rect));
     }
-    const renderBbox = {x: 0, y: 0, width: this.render.getWidth(), height: this.render.getHeight()};
+    const renderBbox = {
+      x: 0,
+      y: 0,
+      width: this.render.getWidth(),
+      height: this.render.getHeight(),
+    };
     dirtyRegions = dirtyRegions.filter(region => bboxIntersect(region, renderBbox));
     if (dirtyRegions.length === 0) {
       return;
@@ -205,7 +209,15 @@ export default class CanvasPainter implements Painter {
       const lineWidth = current.getExtendAttr('lineWidth');
       const stroke = current.getExtendAttr('stroke');
       const fill = current.getExtendAttr('fill');
-      this._setElementCanvasContext(ctx, current, fill, stroke, fillOpacity, strokeOpacity, lineWidth);
+      this._setElementCanvasContext(
+        ctx,
+        current,
+        fill,
+        stroke,
+        fillOpacity,
+        strokeOpacity,
+        lineWidth,
+      );
     });
     chunk.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
@@ -218,7 +230,12 @@ export default class CanvasPainter implements Painter {
     if (!dirtyRegion) {
       ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
     } else {
-      ctx.clearRect(dirtyRegion.x * dpr, dirtyRegion.y * dpr, dirtyRegion.width * dpr, dirtyRegion.height * dpr);
+      ctx.clearRect(
+        dirtyRegion.x * dpr,
+        dirtyRegion.y * dpr,
+        dirtyRegion.width * dpr,
+        dirtyRegion.height * dpr,
+      );
     }
     ctx.save();
     if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
@@ -286,7 +303,9 @@ export default class CanvasPainter implements Painter {
     if (opacity === 0 && !this._isPixelPainter) {
       return;
     }
-    const hasSelfContext = this._isPixelPainter ? true : this._hasSelfContext(item, fill, fillOpacity, stroke, strokeOpacity);
+    const hasSelfContext = this._isPixelPainter
+      ? true
+      : this._hasSelfContext(item, fill, fillOpacity, stroke, strokeOpacity);
 
     if (hasSelfContext) {
       ctx.save();
@@ -334,7 +353,6 @@ export default class CanvasPainter implements Painter {
           item.attr.markerEnd.renderMarker(this, item as Shape, 'end');
         }
       }
-      
     } else {
       // const batchBrush = current.attr._batchBrush;
       // if (batchBrush) {
@@ -353,7 +371,13 @@ export default class CanvasPainter implements Painter {
       // }
     }
 
-    if (!this._isPixelPainter && (this.render.showBBox || this.render.showBoundingRect || item.attr.showBBox || item.attr.showBoundingRect)) {
+    if (
+      !this._isPixelPainter &&
+      (this.render.showBBox ||
+        this.render.showBoundingRect ||
+        item.attr.showBBox ||
+        item.attr.showBoundingRect)
+    ) {
       this._drawBBox(item);
     }
 
@@ -471,12 +495,41 @@ export default class CanvasPainter implements Painter {
     }
   }
 
-  private _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, computedFill: ColorValue, computedStroke: ColorValue, fillOpacity: number, strokeOpacity: number, lineWidth: number) {
+  private _setElementCanvasContext(
+    ctx: CanvasRenderingContext2D,
+    item: Element<GroupConf>,
+    computedFill: ColorValue,
+    computedStroke: ColorValue,
+    fillOpacity: number,
+    strokeOpacity: number,
+    lineWidth: number,
+  ) {
     this._ctxCount++;
-    const {clip, lineCap, lineJoin, miterLimit, stroke, fill,  fontSize, fontFamily, fontWeight, fontStyle, fontVariant, textBaseline, textAlign, blendMode, lineDashOffset, shadowBlur, shadowOffsetX, shadowOffsetY, shadowColor, lineDash, } = item.attr;
+    const {
+      clip,
+      lineCap,
+      lineJoin,
+      miterLimit,
+      stroke,
+      fill,
+      fontSize,
+      fontFamily,
+      fontWeight,
+      fontStyle,
+      fontVariant,
+      textBaseline,
+      textAlign,
+      blendMode,
+      lineDashOffset,
+      shadowBlur,
+      shadowOffsetX,
+      shadowOffsetY,
+      shadowColor,
+      lineDash,
+    } = item.attr;
 
     this._applyTransform(ctx, item);
-    
+
     if (clip) {
       ctx.beginPath();
       item.getClipElement().brush(ctx);
@@ -484,7 +537,7 @@ export default class CanvasPainter implements Painter {
     }
 
     if (item.attr.lineWidth > 0) {
-      const offset = this._isPixelPainter ? (item.attr.pickingBuffer || 0) : 0;
+      const offset = this._isPixelPainter ? item.attr.pickingBuffer || 0 : 0;
       styleHelper.setLineWidth(ctx, lineWidth + offset);
     }
 
@@ -512,20 +565,12 @@ export default class CanvasPainter implements Painter {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, stroke, item));
     }
 
-    if (
-      !stroke &&
-      isGradient(computedStroke) &&
-      !item.isGroup
-    ) {
+    if (!stroke && isGradient(computedStroke) && !item.isGroup) {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, computedStroke, item));
     }
 
     // gradient color can't be extended
-    if (
-      fill &&
-      fill !== 'none' &&
-      !(item.isGroup && isGradient(fill))
-    ) {
+    if (fill && fill !== 'none' && !(item.isGroup && isGradient(fill))) {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, fill, item));
     }
 
@@ -533,19 +578,13 @@ export default class CanvasPainter implements Painter {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, computedFill, item));
     }
 
-    if (
-      fontSize  ||
-      fontFamily ||
-      fontWeight ||
-      fontVariant ||
-      fontStyle
-    ) {
+    if (fontSize || fontFamily || fontWeight || fontVariant || fontStyle) {
       const _fontSize = item.getExtendAttr('fontSize');
       const _fontFamily = item.getExtendAttr('fontFamily');
       const _fontWeight = item.getExtendAttr('fontWeight');
       const _fontStyle = item.getExtendAttr('fontStyle');
       // tood gc optimize
-      styleHelper.setFontStyle(ctx, _fontSize,_fontFamily,_fontWeight, _fontStyle);
+      styleHelper.setFontStyle(ctx, _fontSize, _fontFamily, _fontWeight, _fontStyle);
     }
 
     if (textBaseline) {
@@ -573,19 +612,17 @@ export default class CanvasPainter implements Painter {
     }
 
     if (shadowBlur > 0 && !isTransparent(shadowColor)) {
-      styleHelper.setShadow(
-        ctx,
-        shadowOffsetX,
-        shadowOffsetY,
-        shadowBlur,
-        shadowColor,
-      );
+      styleHelper.setShadow(ctx, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor);
     }
-
-   
   }
 
-  protected _hasSelfContext(item: Element<ShapeConf>, fill: ColorValue, fillOpacity: number, stroke: ColorValue, strokeOpacity: number): boolean {
+  protected _hasSelfContext(
+    item: Element<ShapeConf>,
+    fill: ColorValue,
+    fillOpacity: number,
+    stroke: ColorValue,
+    strokeOpacity: number,
+  ): boolean {
     if (contextKeys.some(key => item.attr[key] !== undefined)) {
       return true;
     }
@@ -596,7 +633,7 @@ export default class CanvasPainter implements Painter {
     if (fillOpacity !== 1 || strokeOpacity !== 1) {
       return true;
     }
-    
+
     const dragOffset = item.getDragOffset();
     const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
     if (hasDrag || item.getTransform() !== IDENTRY_MATRIX) {

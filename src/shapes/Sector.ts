@@ -199,7 +199,9 @@ export default class Sector extends Shape<SectorConf> {
   }
 
   protected computeBBox(): BBox {
-    let { cx, cy, radius, radiusI, start, end, round } = this.attr;
+    const { cx, cy, radius, radiusI, start: ostart, end: oend, round } = this.attr;
+    let start = ostart;
+    let end = oend;
     if (round) {
       const delta = Math.asin((radius - radiusI) / radius) * (end > start ? 1 : -1);
       start -= delta;

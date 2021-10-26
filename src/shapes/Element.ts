@@ -4,7 +4,7 @@ import CanvasPainter from '../painter/CanvasPainter';
 import SVGPainter from '../painter/SVGPainter';
 import Group, { GroupConf } from './Group';
 import * as lodash from '../utils/lodash';
-import { ColorValue, } from '../color';
+import { ColorValue } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
 import easingFunctions, { EasingName } from '../animate/ease';
 import { interpolate } from '../interpolate';
@@ -20,11 +20,11 @@ import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
 import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
 import { RefObject } from '../utils/ref';
-import { getSVGStyleAttributes, SVGAttributeMap } from '../svg/style';
+import { getSVGStyleAttributes } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
 
-export type ElementAttr = GroupConf & ShapeConf & {[key: string]: any};
+export type ElementAttr = GroupConf & ShapeConf & { [key: string]: any };
 
 export const defaultSetting: { during: number; ease: EasingName } = {
   during: 300,
@@ -169,7 +169,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public ownerRender: Render | null = null;
 
   public isClip: boolean;
- 
+
   public pickRGB: [number, number, number];
 
   public readonly shapeKeys: Array<keyof T> = [];
@@ -179,7 +179,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public strokeAble: boolean = true;
 
   public needFill: boolean = false;
-  
+
   public needStroke: boolean = false;
 
   private _dirty: boolean = true;
@@ -276,14 +276,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this.attr.onEvent?.apply(null, params);
   }
-  
 
   public getComputedOpacity(): number {
     let node: Element<T> | Group = this;
     let opacity = 1;
     while (node) {
       opacity *= node.attr.opacity ?? 1;
-      node = node.parentNode as any as Group;
+      node = (node.parentNode as any) as Group;
     }
     return opacity;
   }
@@ -346,7 +345,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     };
   }
 
-  public setAttr<U extends (keyof T | T)>(
+  public setAttr<U extends keyof T | T>(
     attr: U,
     value?: U extends keyof T ? T[U] : undefined,
   ): this {
@@ -373,7 +372,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       let dirty = false;
       for (const key in attr as T) {
         const prevValue = this.attr[key as keyof T];
-        const nextValue = (attr as T)[key]
+        const nextValue = (attr as T)[key];
         if (prevValue !== nextValue) {
           if (!dirty) {
             dirty = true;
@@ -419,7 +418,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public beforeDirty(leafNodeSize: number) {
     const maxDirtyLimit = this.ownerRender.maxDirtyRects;
-    if (!this.ownerRender.enableDirtyRect || this.ownerRender.getDirtyElements().size > maxDirtyLimit || leafNodeSize > maxDirtyLimit) {
+    if (
+      !this.ownerRender.enableDirtyRect ||
+      this.ownerRender.getDirtyElements().size > maxDirtyLimit ||
+      leafNodeSize > maxDirtyLimit
+    ) {
       this._dirtyRect = undefined;
       return;
     }
@@ -434,10 +437,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public dirty(dirtyElement: Element = null) {
     let leafNodeSize = 1;
-    if (this.ownerRender && this.ownerRender.renderer === 'canvas' && this.ownerRender.enableDirtyRect) {
+    if (
+      this.ownerRender &&
+      this.ownerRender.renderer === 'canvas' &&
+      this.ownerRender.enableDirtyRect
+    ) {
       if (this.isGroup) {
-        leafNodeSize = (this as  any as Group).getLeafNodesSize(this.ownerRender.maxDirtyRects + 1);
-        this.beforeDirty(leafNodeSize)
+        leafNodeSize = ((this as any) as Group).getLeafNodesSize(
+          this.ownerRender.maxDirtyRects + 1,
+        );
+        this.beforeDirty(leafNodeSize);
       } else {
         this.beforeDirty(leafNodeSize);
       }
@@ -480,7 +489,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (!this._shadow) {
       this._shadow = new Shadow();
     }
-    this._shadow.setShadow(this.attr.shadowColor, this.attr.shadowBlur, this.attr.shadowOffsetX, this.attr.shadowOffsetY);
+    this._shadow.setShadow(
+      this.attr.shadowColor,
+      this.attr.shadowBlur,
+      this.attr.shadowOffsetX,
+      this.attr.shadowOffsetY,
+    );
     return this._shadow;
   }
 
@@ -516,8 +530,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public getCurrentDirtyRect(): BBox {
     if (!this._currentPaintArea || this._currentPaintAreaDirty) {
-     this._currentPaintArea = this.computeCurrentDirtyRect();
-     this._currentPaintAreaDirty = false;
+      this._currentPaintArea = this.computeCurrentDirtyRect();
+      this._currentPaintAreaDirty = false;
     }
     return this._currentPaintArea;
   }
@@ -527,7 +541,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return createZeroBBox();
     }
     const { markerStart, markerMid, markerEnd } = this.attr;
-    const boundingRect = this.getBoundingClientRect();;
+    const boundingRect = this.getBoundingClientRect();
     const { x, y, width, height } = boundingRect;
     const shadowBlur = this.getExtendAttr('shadowBlur');
     const hasSubBox = shadowBlur > 0 || markerStart || markerMid || markerEnd;
@@ -547,16 +561,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     if (markerStart || markerMid || markerEnd) {
       if (markerStart) {
-        boxList.push(markerStart.getMarkerDirtyRect(this as unknown as Shape, 'start'));
+        boxList.push(markerStart.getMarkerDirtyRect((this as unknown) as Shape, 'start'));
       }
       if (markerMid) {
-        boxList.push(markerMid.getMarkerDirtyRect(this as unknown as Shape, 'middle'));
+        boxList.push(markerMid.getMarkerDirtyRect((this as unknown) as Shape, 'middle'));
       }
       if (markerEnd) {
-        boxList.push(markerEnd.getMarkerDirtyRect(this as unknown as Shape, 'end'));
+        boxList.push(markerEnd.getMarkerDirtyRect((this as unknown) as Shape, 'end'));
       }
     }
-    
+
     return ceilBBox(unionBBox(boxList));
   }
 
@@ -589,7 +603,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this.computeBBoxWithTransform(out, x, y, width, height, matrix);
   }
 
-  protected computeBBoxWithTransform(out: BBox, x: number,y: number, width: number, height: number, matrix: mat3): BBox {
+  protected computeBBoxWithTransform(
+    out: BBox,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    matrix: mat3,
+  ): BBox {
     reuseBBoxVectors[0][0] = x;
     reuseBBoxVectors[0][1] = y;
     reuseBBoxVectors[1][0] = x + width;
@@ -605,7 +626,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     //   [x, y + height],
     // ];
     reuseBBoxVectors.forEach(vec2 => transformMat3(vec2, vec2, matrix));
-    return vec2BBox(reuseBBoxVectors, out); 
+    return vec2BBox(reuseBBoxVectors, out);
   }
 
   protected created() {
@@ -620,7 +641,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (transformKeys.indexOf(key as keyof CommonAttr) !== -1) {
       this.dirtyTransform();
     }
-    
+
     if (key === 'display') {
       this.dirtyBBox();
     }
@@ -672,7 +693,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public pickByGPU(): boolean {
     return false;
-  };
+  }
 
   public isInShape(ox: number, oy: number): boolean {
     const [x, y] = this.getInvertedPoint(ox, oy);
@@ -685,7 +706,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const lineWidth = this.getExtendAttr('lineWidth') + (this.attr.pickingBuffer || 0);
     return (
       (hasFill && this.isPointInFill(x, y)) || (hasStroke && this.isPointInStroke(x, y, lineWidth))
-    )
+    );
   }
 
   /**
@@ -694,10 +715,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
    * @param y inverted y
    */
   public isInClip(x: number, y: number): boolean {
-   let inClip = true;
-   let node: Element<any> = this
-   let invertedX: number;
-   let invertedY: number;
+    let inClip = true;
+    let node: Element<any> = this;
+    let invertedX: number;
+    let invertedY: number;
     while (inClip && node) {
       if (node.attr.clip) {
         [invertedX, invertedY] = node.getInvertedPoint(x, y);
@@ -710,7 +731,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     return inClip;
   }
-  
 
   public dirtyClipTarget(clip: Element) {
     const myclip = this.getClipElement();
@@ -727,10 +747,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
       const vec2: [number, number] = [0, 0];
       transformMat3(vec2, [x, y], inverMatrix);
       return vec2;
-    } else {
-      return [x, y];
     }
-   
+    return [x, y];
   }
 
   public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
@@ -822,7 +840,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         stopped: false,
         from: animateFromAttr as T,
         to: animateToAttr,
-       ...(defaultSetting as any),
+        ...(defaultSetting as any),
         ...duringOrConf,
       });
     } else {
@@ -838,8 +856,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  public animateMotion(animateConf: {path: Path2D; rotate?: number | 'auto' | 'auto-reverse'; during?: number; ease?: EasingName;callback?: Function;delay?:number;}) {
-    const { path, rotate = 0, during = 300, ease = "Linear", callback, delay = 0} = animateConf;
+  public animateMotion(animateConf: {
+    path: Path2D;
+    rotate?: number | 'auto' | 'auto-reverse';
+    during?: number;
+    ease?: EasingName;
+    callback?: Function;
+    delay?: number;
+  }) {
+    const { path, rotate = 0, during = 300, ease = 'Linear', callback, delay = 0 } = animateConf;
     this.animateTo({} as T, {
       ease,
       during,
@@ -850,7 +875,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         const matrix = mat3.create();
         let theta: number = rotate as number;
         if (rotate === 'auto') {
-          theta =  point.alpha + Math.PI / 2;
+          theta = point.alpha + Math.PI / 2;
         }
         if (rotate === 'auto-reverse') {
           theta = point.alpha - Math.PI / 2;
@@ -860,8 +885,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
           mat3.rotate(matrix, matrix, theta);
         }
         this.setAttr('matrix', matrix as any);
-      }
-    })
+      },
+    });
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -881,14 +906,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
       attr.originY = attr.origin[1];
     }
   }
-  
 
   protected addAnimation(option: AnimateOption<T>) {
     this._animations.push(option);
     this._addToFrame();
   }
 
-  public stopAllAnimation(gotoEnd: boolean = false): this {
+  // todo gotoend support
+  public stopAllAnimation(): this {
     // todo goToEnd
     this._animations.length = 0;
     return this;
@@ -899,7 +924,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (!now) {
       return;
     }
-    
+
     if (this._lastFrameTime === now) {
       return;
     }
@@ -978,7 +1003,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._transform = this._computeTransform();
       this._transformDirty = false;
     }
-    return nullable ? this._transform  : (this._transform || IDENTRY_MATRIX);
+    return nullable ? this._transform : this._transform || IDENTRY_MATRIX;
   }
 
   public getGlobalTransform(nullable: boolean = false): mat3 {
@@ -986,7 +1011,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._absTransform = this._computeGlobalTransform();
       this._absTransformDirty = false;
     }
-    return nullable ? this._absTransform : (this._absTransform || IDENTRY_MATRIX);
+    return nullable ? this._absTransform : this._absTransform || IDENTRY_MATRIX;
   }
 
   public dirtyClientBoundingRect() {
@@ -1054,7 +1079,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeGlobalTransform(): mat3 {
-    const parentTransform: mat3 | null = this.parentNode ? this.parentNode.getGlobalTransform(true) : null;
+    const parentTransform: mat3 | null = this.parentNode
+      ? this.parentNode.getGlobalTransform(true)
+      : null;
     const selfTransform = this.getTransform(true);
     const [dx, dy] = this._dragOffset;
     if (!parentTransform && !selfTransform && dx === 0 && dy === 0) {
@@ -1062,7 +1089,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.create();
     if (dx !== 0 || dy !== 0) {
-      mat3.translate(out, out,this._dragOffset);
+      mat3.translate(out, out, this._dragOffset);
     }
     if (parentTransform) {
       mat3.multiply(out, out, parentTransform);

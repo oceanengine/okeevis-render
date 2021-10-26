@@ -13,7 +13,6 @@ function isDomHasTransform(dom: HTMLDivElement) {
   return false;
 }
 
-
 const DOM_PROPERTY = '__lightrendermarkers';
 
 export function getTouchOffsetPosition(
@@ -29,13 +28,13 @@ export function getTouchOffsetPosition(
   if (!(dom as any)[DOM_PROPERTY]) {
     (dom as any)[DOM_PROPERTY] = {};
   }
-  const info = (dom as any)[DOM_PROPERTY] as {rects: HTMLDivElement[]}
+  const info = (dom as any)[DOM_PROPERTY] as { rects: HTMLDivElement[] };
   if (!info.rects) {
     appendRects(dom, info);
   }
   const [a1, a2, a3] = info.rects.map(rect => rect.getBoundingClientRect());
   const [b1, b2, b3] = info.rects.map(rect => {
-    return {left: rect.offsetLeft, top: rect.offsetTop};
+    return { left: rect.offsetLeft, top: rect.offsetTop };
   });
   const matrixClient = mat3.fromValues(a1.left, a1.top, 1, a2.left, a2.top, 1, a3.left, a3.top, 1);
   const invertedMatrixed = mat3.invert(mat3.create(), matrixClient);
@@ -46,7 +45,7 @@ export function getTouchOffsetPosition(
   const matrix = mat3.multiply(mat3.create(), matrixSource, invertedMatrixed);
   const result = [clientX, clientY] as any;
   transformMat3(result, result, matrix);
-  return {x: result[0],y : result[1]};
+  return { x: result[0], y: result[1] };
 }
 
 function appendRects(dom: HTMLDivElement, info: any) {

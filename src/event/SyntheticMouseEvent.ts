@@ -7,7 +7,6 @@ export interface SyntheticMouseEventParams extends SyntheticEventParams {
 }
 
 export default class SyntheticMouseEvent extends SyntheticEvent<MouseEvent> {
-
   public syntheticType = 'mouse';
 
   public x: number;
@@ -23,6 +22,6 @@ export default class SyntheticMouseEvent extends SyntheticEvent<MouseEvent> {
   public constructor(type: string, params: SyntheticMouseEventParams) {
     super(type, params);
     this.x = params.x;
-    this. y = params.y;
+    this.y = params.y;
   }
 }

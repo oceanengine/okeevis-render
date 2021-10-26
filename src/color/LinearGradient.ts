@@ -44,7 +44,7 @@ export default class LinearGradient extends Gradient<LinearGradientOption> {
   }
 
   public getSVGNode(): SVGNode {
-    const {x1, y1, x2, y2, stops, } = this.option;
+    const { x1, y1, x2, y2, stops } = this.option;
     return {
       svgTagName: 'linearGradient',
       svgAttr: {
@@ -60,10 +60,10 @@ export default class LinearGradient extends Gradient<LinearGradientOption> {
           svgAttr: {
             offset: stop.offset * 100 + '%',
             'stop-color': stop.color,
-          }
-        }
-      })
-    }
+          },
+        };
+      }),
+    };
   }
 
   public toString(): string {

@@ -1,4 +1,4 @@
-import SyntheticMouseEvent, {SyntheticMouseEventParams, } from './SyntheticMouseEvent';
+import SyntheticMouseEvent, { SyntheticMouseEventParams } from './SyntheticMouseEvent';
 
 export interface SyntheticDragEventParams extends SyntheticMouseEventParams {
   startX: number;
@@ -11,7 +11,7 @@ export interface SyntheticDragEventParams extends SyntheticMouseEventParams {
 
 export default class SyntheticDragEvent extends SyntheticMouseEvent {
   public syntheticType = 'dnd';
-  
+
   public startX: number;
 
   public startY: number;
@@ -22,8 +22,8 @@ export default class SyntheticDragEvent extends SyntheticMouseEvent {
 
   public dx: number;
 
-  public dy: number; 
-  
+  public dy: number;
+
   public constructor(type: string, params: SyntheticDragEventParams) {
     super(type, params);
     this.startX = params.startX;
@@ -33,5 +33,4 @@ export default class SyntheticDragEvent extends SyntheticMouseEvent {
     this.dx = params.dx;
     this.dy = params.dy;
   }
-
 }

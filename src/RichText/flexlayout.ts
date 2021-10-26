@@ -1,8 +1,8 @@
 /**
  * @desc flex layout
  */
- import { BBox } from '../utils/bbox';
- import * as lodash from '../utils/lodash';
+import { BBox } from '../utils/bbox';
+import * as lodash from '../utils/lodash';
 
 type BoxAlign = 'start' | 'center' | 'end';
 
