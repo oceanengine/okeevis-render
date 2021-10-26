@@ -37,7 +37,6 @@ export interface VNodeProps {
   fontFamily?: string;
   fontWeight?: string;
   lineClamp?: number;
-  // 暂时不支持lineHeight
   lineHeight?: number;
   src?: string;
   value?: string;

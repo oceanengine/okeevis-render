@@ -31,11 +31,6 @@ export function inBBox( bbox: BBox, x: number, y: number, lineWidth = 1): boolea
   return x >= bbox.x - lineWidth / 2 && x <= bbox.x + bbox.width + lineWidth / 2 && y >= bbox.y  - lineWidth / 2 && y <= bbox.y + bbox.height + lineWidth / 2;
 }
 
-/**
- * 用来判断两个矩形是否相交
- * @param a 相交矩形a
- * @param b 相交矩形b
- */
 export function bboxIntersect(a: BBox, b: BBox): boolean {
   return (
     Math.abs(a.x + a.width / 2 - (b.x + b.width / 2)) * 2 < a.width + b.width &&
@@ -119,7 +114,6 @@ export function arcBBox(cx: number, cy: number, r: number, start: number, end: n
       height: 0,
     };
   }
-  // 找圆弧中心点切线平移形成包围盒
   const delta = Math.abs(end - start);
   const xRange = [cx - r, cx + r];
   const yRange = [cy - r, cy + r];

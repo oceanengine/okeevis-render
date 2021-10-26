@@ -2,11 +2,10 @@ export function downloadBase64(base64: string, name: string) {
   const ismsie = !!(window as any).ActiveXObject || 'ActiveXObject' in window
     const isedge = navigator.userAgent.indexOf('Edge') > -1;
     const a: HTMLAnchorElement = document.createElement('a');
-    a.href = base64; // 将画布内的信息导出为png图片数据
-    a.download = name || document.title; // 设定下载名称
+    a.href = base64;
+    a.download = name || document.title;
     a.target = '_blank';
     // for Chrome and Firefox
-    // 来自echarts
     if (
         typeof MouseEvent === 'function' &&
         !(ismsie || isedge)

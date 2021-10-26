@@ -21,7 +21,6 @@ function setToArray<T>(set: Es6Set<T>, out: T[] = []): T[] {
   });
   return out;
 }
-// todo 支持渐变, 剪切, 阴影
 
 export default class SVGPainter implements Painter {
   public render: Render;

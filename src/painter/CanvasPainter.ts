@@ -49,7 +49,6 @@ export default class CanvasPainter implements Painter {
 
   private _isPixelPainter: boolean = false;
 
-  // 首帧强制走全屏刷新逻辑
   private _isFirstFrame: boolean = true;
 
   private _paintPosition: [number, number];
@@ -66,7 +65,7 @@ export default class CanvasPainter implements Painter {
     this.dpr = isPixelPainter ? 1 : render.dpr;
     isPixelPainter ? this._initPixelCanvas() : this._initCanvas();
     if (this.render.isBrowser() && !isPixelPainter) {
-      // 浏览器窗口切换时, 脏矩形有点问题
+      // tab switch must redraw
       document.addEventListener('visibilitychange', this._handleDocumentVisibilityChange);
     }
   }
@@ -106,7 +105,7 @@ export default class CanvasPainter implements Painter {
       ) {
         this.paintInDirtyRegion();
       } else {
-        // 全屏刷新
+        // full screen paint
         this.paint();
       }
       // console.log('dirty-size: ', dirytCount)
@@ -225,11 +224,9 @@ export default class CanvasPainter implements Painter {
     if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
-    // 改变默认的canvas上下文
     styleHelper.setFontStyle(ctx, defaultCanvasContext.fontSize, defaultCanvasContext.fontFamily);
     styleHelper.setTextBaseline(ctx, defaultCanvasContext.textBaseline);
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
-    // todo 初始化LineWidth = 0;
 
     if (dirtyRegion) {
       ctx.beginPath();
@@ -416,7 +413,6 @@ export default class CanvasPainter implements Painter {
   private _initPixelCanvas() {
     if (this.render.isBrowser()) {
       const canvas = document.createElement('canvas');
-      // todo 考虑dpr < 1 (缩放的场景)
       const w = 1;
       const h = 1;
       canvas.width = Math.max(w * this.render.dpr, 1);
@@ -430,7 +426,6 @@ export default class CanvasPainter implements Painter {
       try {
         const canvasCreator = getCanvasCreator();
         this._canvas = canvasCreator(this.render.dpr, this.render.dpr);
-        // taro模拟了document.createElement环境, 但无法创建真正的canvas
         if (!this._canvas.getContext) {
           throw new Error('not a canvas');
         }
@@ -505,7 +500,6 @@ export default class CanvasPainter implements Painter {
       styleHelper.setMiterLimit(ctx, miterLimit);
     }
 
-    // 文本和图像自己检测, 不走gpu,不故考虑fontSize
     if (this._isPixelPainter && !item.isGroup) {
       const rgb = item.pickRGB;
       const pickColor = `rgb(${rgb.join(',')})`;
@@ -514,8 +508,6 @@ export default class CanvasPainter implements Painter {
       return;
     }
 
-    // group只支持color string, pattern,不支持渐变
-    // todo 考虑小程序api setXXXX
     if (stroke && stroke !== 'none' && !(item.isGroup && isGradient(stroke))) {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, stroke, item));
     }
@@ -528,7 +520,7 @@ export default class CanvasPainter implements Painter {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, computedStroke, item));
     }
 
-    /** 渐变样式无法继承 */
+    // gradient color can't be extended
     if (
       fill &&
       fill !== 'none' &&
@@ -537,12 +529,10 @@ export default class CanvasPainter implements Painter {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, fill, item));
     }
 
-    /** 渐变样式无法继承 */
     if (!fill && isGradient(computedFill) && !item.isGroup) {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, computedFill, item));
     }
 
-    // todo 兼容小程序
     if (
       fontSize  ||
       fontFamily ||
@@ -566,7 +556,6 @@ export default class CanvasPainter implements Painter {
       styleHelper.setTextAlign(ctx, textAlign);
     }
 
-    // 透明度相同时不用复用alpha
     if (fillOpacity === strokeOpacity && fillOpacity !== 1) {
       styleHelper.setGlobalAlpha(ctx, fillOpacity);
     }
@@ -652,7 +641,6 @@ export default class CanvasPainter implements Painter {
 
   private _handleDocumentVisibilityChange = () => {
     if (document.visibilityState === 'visible') {
-      // 在下一帧强制走全屏刷新逻辑
       this._isFirstFrame = true;
     }
   };

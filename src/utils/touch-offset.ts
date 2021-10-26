@@ -1,6 +1,3 @@
-/**
- * from github https://github.com/Geylnu/touch-offset
- */
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from './vec2';
 
@@ -16,16 +13,6 @@ function isDomHasTransform(dom: HTMLDivElement) {
   return false;
 }
 
-/**
- * 移动端事件缺乏offsetX offsetY, 需要自己计算
- * 目前有两种办法
- * 1. 根据父节点的矩阵层层计算 https://juejin.cn/post/6844903902593155080
- * 2. zrender做法, 在四个角落插入0*0的div, 根据client矩阵和四个div的offsetParent得到的坐标, 计算出二者转换的矩阵
- * 参考链接  仿射变换 https://zhuanlan.zhihu.com/p/23199679
- * @param x pageX
- * @param y pageY
- * @param dom
- */
 
 const DOM_PROPERTY = '__lightrendermarkers';
 

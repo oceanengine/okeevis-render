@@ -28,7 +28,6 @@ export function pointInArcFill(
   const { x: endX, y: endY } = getPointOnPolar(cx, cy, r, endAngle);
   const { x: midX, y: midY } = getPointOnPolar(cx, cy, r, oppositeMidAngle);
   const lineVec = [endX - startX, endY - startY] as Vec2;
-  // 寻找一个在图形外部的参考点, 判断同侧关系
   const outSideVec: Vec2 = !isLargeArc
     ? [cx - startX, cy - startY]
     : [midX - startX, midY - startY];

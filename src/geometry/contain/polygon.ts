@@ -26,17 +26,13 @@ export function pointInPolygonFill(pointList: Point[], x: number, y: number): bo
     const p1: Point = pointList[i];
     const p2: Point = pointList[(i + 1) % pointList.length];
 
-    // 平行线
     if (p1.y === p2.y) {
       continue;
     }
-
-    // 最高点都不到该点的
     if (Math.max(p1.y, p2.y) < y) {
       continue;
     }
 
-    // 最低点都不到该点的
     if (Math.min(p1.y, p2.y) > y) {
       continue;
     }
@@ -50,7 +46,6 @@ export function pointInPolygonFill(pointList: Point[], x: number, y: number): bo
     }
   }
 
-  // 奇数在内部 偶数在外部
   return countNum % 2 === 1;
 }
 

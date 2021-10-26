@@ -38,7 +38,6 @@ function getArcPath(pathAction: PathAction, i: number): string {
     endAngle = params[6];
   }
   const startPoint = getPointOnPolar(cx, cy, r, startAngle);
-  // todo 注意2PI的情况
   const delta = endAngle - startAngle;
   let endPointAngle: number = endAngle;
   if (endAngle - startAngle >= PI2 || equalWithTolerance(delta, PI2)) {

@@ -1,6 +1,3 @@
-/**
- * @desc 解析svg path路径,生成供canvas调用参数
- */
 
 /* eslint-disable */
 
@@ -20,7 +17,6 @@ export interface PathRecord {
     params: number[];
 }
 enum svgPathCommand {
-    // 绝对坐标
     M = 'M',
     L = 'L',
     H = 'H',
@@ -31,7 +27,6 @@ enum svgPathCommand {
     T = 'T',
     A = 'A',
     Z = 'Z',
-    // 相对坐标
     m = 'm',
     l = 'l',
     h = 'h',
@@ -43,7 +38,6 @@ enum svgPathCommand {
     a = 'a',
     z = 'z',
 }
-// 参数长度必须和命令所需参数一致
 const svgCommandParamSize: { [key: string]: number } = {
     m: 2,
     l: 2,
@@ -76,7 +70,6 @@ const svgCommandList: string[] = [
     'z',
 ];
 
-// 对称点
 function getSymmetricPoint(
     x: number,
     y: number,
@@ -85,7 +78,6 @@ function getSymmetricPoint(
 ): number[] {
     return [cx * 2 - x, cy * 2 - y];
 }
-// 合法path定义, 以m或M开头,合法指令,合法参数
 export default function parsePathString(inputPath: string): PathRecord[] {
     // tslint:disable
     const pathString: string = inputPath.trim();
@@ -141,7 +133,6 @@ export default function parsePathString(inputPath: string): PathRecord[] {
         const isEnd: boolean = i === strLen - 1;
         if (isLetter && !isE) {
             if (currentExpect === expectType.NUMBER) {
-                // 期望数字却得到字母
                 throw new Error(
                     `Error path, Expected number, ${pathString.slice(0, i)}`,
                 );
@@ -149,7 +140,6 @@ export default function parsePathString(inputPath: string): PathRecord[] {
             const isSvgPathCommand: boolean =
                 svgCommandList.indexOf(currentStr.toLowerCase()) !== -1;
             if (isSvgPathCommand) {
-                // 将已有命令入栈,新的参数重置
                 if (isNumbering) {
                     pushParsedNumber();
                 }
@@ -163,7 +153,6 @@ export default function parsePathString(inputPath: string): PathRecord[] {
                     currentCommand === svgPathCommand.z ||
                     currentCommand === svgPathCommand.Z
                 ) {
-                    // 如果是闭合路径, 期望下一个是命令
                     currentExpect = expectType.COMMAND;
                 } else {
                     currentExpect = expectType.NUMBER;
@@ -176,23 +165,18 @@ export default function parsePathString(inputPath: string): PathRecord[] {
             if (currentExpect === expectType.COMMAND) {
                 throw new Error('Error path, Expexct ');
             }
-            // 数字或点号都算数字,连在一起当数字解析
             isNumbering = true;
             bufferedNumberString += currentStr;
             currentExpect = expectType.ANY;
         } else if (isWhiteSpace) {
-            // 空白
             if (isNumbering) {
-                // 数字后空白, 解析当前数字
                 pushParsedNumber();
                 bufferedNumberString = '';
                 isNumbering = false;
             } else {
-                // 忽略
                 continue;
             }
         } else if (isComma) {
-            // 逗号必须在数字后
             if (!isNumbering && currentParams.length === 0) {
                 throw new Error('Error, excpected number');
             }
@@ -202,11 +186,9 @@ export default function parsePathString(inputPath: string): PathRecord[] {
             }
             bufferedNumberString = '';
         } else {
-            // 不合法的字符串
             throw new Error('illegal string in path');
         }
         if (isEnd) {
-            // 结束数字解析, 整个解析结束, 入栈
             if (isNumbering) {
                 pushParsedNumber();
             }
@@ -461,7 +443,7 @@ function conversionFromEndPointToCenterParameterization(
     y1: number,
     rx: number,
     ry: number,
-    xAxisRotation: number, // 以角度计
+    xAxisRotation: number,
     fA: number,
     fS: number,
     x2: number,
@@ -473,7 +455,7 @@ function conversionFromEndPointToCenterParameterization(
     let theta1: number = 0;
     let delta_theta: number = 0;
     if (rx == 0.0 || ry == 0.0) {
-        return -1; // 半径为0
+        return -1;
     }
     const s_phi: number = Math.sin(phi);
     const c_phi: number = Math.cos(phi);

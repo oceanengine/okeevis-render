@@ -110,14 +110,12 @@ export default class EventHandle {
     const pixelPainter = this._PixelPainter;
     const ignoreInvisibleNodes = true;
     let target: Element;
-    // 初步过滤掉不显示和不触发事件的元素
     function filter(node: Element): boolean {
       return inBBox(node.getBoundingClientRect(), x, y) && node.getExtendAttr('pointerEvents') !== 'none'
     }
     const pickNodes = this._getHandleGroup()
       .getAllLeafNodes([], filter)
       .reverse();
-    // 过渡掉不在包围盒中的
 
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;
@@ -139,7 +137,6 @@ export default class EventHandle {
 
     const gpuPickNodes = pickNodes.filter(node => node.pickByGPU());
     gpuPickNodes.forEach((item, index) => {
-      // 颜色空间大约有40W个,基本够用.
       item.pickRGB = valueToRgb(index + 1);
     });
 
@@ -147,7 +144,6 @@ export default class EventHandle {
 
     if (gpuPickNodes.length > 0 && pixelPainter.getContext().getImageData) {
       pixelPainter.paintAt(x, y);
-      // todo 考虑小程序getImageData兼容
       // const prevImageData = pixelPainter.getImageData(x, y);
       const imageData = pixelPainter.getImageData(0, 0, 1, 1);
       if (imageData) {
@@ -192,15 +188,10 @@ export default class EventHandle {
     this._PixelPainter.dispose();
   }
 
-  // public dispatchEvent(event: string, detail: EventDetail) {
-  //   // todo 用户自定义事件
-  // }
-
   private _syntheticMouseEvent = (nativeEvent: MouseEvent, isNative: boolean = true) => {
     if (this.render.simulateClickEvent && nativeEvent.type === 'click') {
       return;
     }
-    // todo统一mousewheel事件
     const { x, y } = isNative ? this._getMousePosition(nativeEvent) : nativeEvent;
     const target = this.pickTarget(x, y);
     const prevMouseTarget = this._prevMouseTarget;
@@ -230,7 +221,6 @@ export default class EventHandle {
     this._dispatchSyntheticEvent(event, target);
 
     if (event.type === 'mousedown' || event.type === 'mousemove') {
-      // todo 父元素也可以拖动
       if (event.type === 'mousedown' && nativeEvent.button !== 2) {
         const parentNodes = target.getAncestorNodes(true);
         for (let i = 0; i < parentNodes.length; i++) {
@@ -331,7 +321,6 @@ export default class EventHandle {
 
     const event = new SyntheticTouchEvent(nativeEvent.type, touchEventParam);
 
-    // todo 根节点只被冒泡触发一次
     touchEventParam.changedTouches.forEach(touch =>
       this._dispatchSyntheticEvent(event, touch.target),
     );
@@ -355,7 +344,6 @@ export default class EventHandle {
         this._touchStartInfo = event;
         this._cancelClick = false;
       }
-      // 暂只支持单个目标拖动
       let dragStartTarget: Element;
       synthetichChangedTouches.forEach(touch => {
         const { x, y, target } = touch;
@@ -443,7 +431,7 @@ export default class EventHandle {
       }
     }
 
-    // 合成mouseover mouseout
+    // synthetic mouseover mouseout
     if (changedTouches.length) {
       const target = synthetichChangedTouches[0].target;
       if (target !== prevMouseTarget) {
@@ -510,7 +498,7 @@ export default class EventHandle {
       bubbles: true,
     });
     this._dispatchSyntheticEvent(mouseoverEvent, target);
-    // 触发当前对象的mouseover, mouseenter事件
+    // trigger mouseover, mouseenter event
     const parentNodes = target.getAncestorNodes(true);
     parentNodes.forEach(node => {
       const mouseEnterEvent = new SyntheticMouseEvent('mouseenter', {
@@ -543,7 +531,7 @@ export default class EventHandle {
   };
 
   private _getMousePosition(event: MouseEvent | Touch): { x: number; y: number } {
-    // firefox svg下offsetX指向了svg元素的偏移
+    // firefox svg offsetX is relative to svgElement target
     if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg') {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
@@ -650,7 +638,6 @@ export default class EventHandle {
       }
 
       target.dragMoveBy(dx, dy);
-      // todo 如果脏数据超过了脏限制,不要实时刷新
       if (
         this.render.renderer === 'canvas' &&
         !this._eventOnly &&
@@ -666,7 +653,6 @@ export default class EventHandle {
       count++;
       this._dispatchSyntheticEvent(event, (target.parentNode as any) as Element, count);
     }
-    // todo 拖动行为
   }
 
   private _getDragParam(

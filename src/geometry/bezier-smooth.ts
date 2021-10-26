@@ -31,7 +31,6 @@ export default (
 
 function getRate(P0: Point, P1: Point, P2: Point, first: boolean = false): number {
   return 0.25;
-//   // TODO 这部分需要改成动态计算
 //   const l1: number = Math.sqrt(Math.pow(P1.x - P0.x, 2) + Math.pow(P1.y - P0.y, 2));
 //   const l2: number = Math.sqrt(Math.pow(P2.x - P1.x, 2) + Math.pow(P2.y - P1.y, 2));
 

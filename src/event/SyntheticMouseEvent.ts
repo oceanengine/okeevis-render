@@ -1,10 +1,6 @@
 import SyntheticEvent, { SyntheticEventParams } from './SyntheticEvent';
 import Element from '../shapes/Element';
 
-/**
- * 含滚动事件
- */
-
 export interface SyntheticMouseEventParams extends SyntheticEventParams {
   x: number;
   y: number;
