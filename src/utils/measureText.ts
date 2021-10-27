@@ -1,4 +1,4 @@
-import LRUMap from './LRU';
+import LRUMap from './lru';
 import ES6Set from './set';
 import { TextConf } from '../shapes/Text';
 
