@@ -152,11 +152,11 @@ export default class EventHandle {
         const b0 = pickValue[2];
 
         for (let i = 0; i < pickNodes.length; i++) {
-          const node = pickNodes[i];
-          if (!node.pickByGPU()) {
+          const currentNode = pickNodes[i];
+          if (!currentNode.pickByGPU()) {
             continue;
           }
-          const [r, g, b] = node.pickRGB;
+          const [r, g, b] = currentNode.pickRGB;
           const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
           if (gap < 3) {
             gpuPickIndex = i;
@@ -164,7 +164,7 @@ export default class EventHandle {
           }
         }
       }
-      gpuPickNodes.forEach(node => node.resetPickRGB());
+      gpuPickNodes.forEach(gpuNode => gpuNode.resetPickRGB());
     }
 
     if (geometryPickIndex >= 0 || gpuPickIndex >= 0) {
@@ -575,13 +575,16 @@ export default class EventHandle {
     let passiveSupported = false;
     try {
       const options = Object.defineProperty({}, 'passive', {
+        /* eslint-disable getter-return */
         get() {
           passiveSupported = true;
         },
       });
 
       window.addEventListener('test', null, options);
-    } catch (err) {}
+    } catch (err) {
+        /* eslint-disable no-empty */
+      }
     dom.addEventListener(
       'wheel',
       this._syntheticMouseEvent,

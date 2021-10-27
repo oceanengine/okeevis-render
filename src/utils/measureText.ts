@@ -1,6 +1,6 @@
+import LRUMap from './LRU';
 import ES6Set from './set';
 import { TextConf } from '../shapes/Text';
-import LRUMap from './LRU';
 
 import * as styleHelper from '../canvas/style';
 

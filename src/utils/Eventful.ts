@@ -34,6 +34,7 @@ export default class EventFul {
     this._eventListeners = {};
   }
 
+  // eslint-disable-next-line no-unused-vars
   protected onEvent(type: string, ...params: any[]) {
     // nothing
   }

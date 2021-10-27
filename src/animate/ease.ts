@@ -1,4 +1,6 @@
-/* eslint-disable */
+/* eslint-disable no-cond-assign  */
+/* eslint-disable no-return-assign  */
+
 export type EasingName = keyof typeof easing;
 export type EasingFunction = (k: number) => number;
 const easing = {

@@ -248,6 +248,7 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
       endY = y;
     }
     if (action === 'quadraticCurveTo') {
+      // todo
     }
 
     if (action === 'closePath') {

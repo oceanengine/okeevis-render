@@ -1,4 +1,3 @@
-import parserLibary = require('htmlparser2/lib/Parser');
 import Rich from './rich-obj';
 import VNode, { VNodeProps, NodeAttributeParser, attributeList } from './vnode';
 import VBox from './nodes/vbox';
@@ -9,6 +8,8 @@ import Text from './nodes/text';
 import HorizontalLine from './nodes/hr';
 import Spacer from './nodes/spacer';
 import * as lodash from '../utils/lodash';
+// eslint-disable-next-line import/order
+import parserLibary = require('htmlparser2/lib/Parser');
 
 // old version modulex.exports = Parser
 const Parser = typeof parserLibary === 'function' ? parserLibary : parserLibary.Parser;
