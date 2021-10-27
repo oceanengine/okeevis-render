@@ -40,14 +40,10 @@ function getControl(
   P3: Point,
   smoothMonotone?: 'x' | 'y',
 ): Point[] {
-  const rateAX: number =
-    smoothMonotone === 'y' && isMonotonicity(P0, P1, P2, 'y') ? 0 : 0.25;
-  const rateAY: number =
-    smoothMonotone === 'x' && isMonotonicity(P0, P1, P2, 'x') ? 0 : 0.25;
-  const rateBX: number =
-    smoothMonotone === 'y' && isMonotonicity(P1, P2, P3, 'y') ? 0 : 0.25;
-  const rateBY: number =
-    smoothMonotone === 'x' && isMonotonicity(P1, P2, P3, 'x') ? 0 : 0.25;
+  const rateAX: number = smoothMonotone === 'y' && isMonotonicity(P0, P1, P2, 'y') ? 0 : 0.25;
+  const rateAY: number = smoothMonotone === 'x' && isMonotonicity(P0, P1, P2, 'x') ? 0 : 0.25;
+  const rateBX: number = smoothMonotone === 'y' && isMonotonicity(P1, P2, P3, 'y') ? 0 : 0.25;
+  const rateBY: number = smoothMonotone === 'x' && isMonotonicity(P1, P2, P3, 'x') ? 0 : 0.25;
 
   return [
     P1,

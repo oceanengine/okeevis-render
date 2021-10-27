@@ -583,8 +583,8 @@ export default class EventHandle {
 
       window.addEventListener('test', null, options);
     } catch (err) {
-        /* eslint-disable no-empty */
-      }
+      /* eslint-disable no-empty */
+    }
     dom.addEventListener(
       'wheel',
       this._syntheticMouseEvent,

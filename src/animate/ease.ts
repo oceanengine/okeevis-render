@@ -176,13 +176,14 @@ const easing = {
   BounceOut: (k: number): number => {
     if (k < 1 / 2.75) {
       return 7.5625 * k * k;
-    } if (k < 2 / 2.75) {
+    }
+    if (k < 2 / 2.75) {
       return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
-    } if (k < 2.5 / 2.75) {
+    }
+    if (k < 2.5 / 2.75) {
       return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
-    } 
-      return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
-    
+    }
+    return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
   },
   BounceInOut: (k: number): number => {
     if (k < 0.5) {
