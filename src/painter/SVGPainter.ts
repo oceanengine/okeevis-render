@@ -1,15 +1,15 @@
-import Es6Set from '../utils/set';
 import { diff } from '@egjs/list-differ';
+import Es6Set from '../utils/set';
 import Painter from '../abstract/Painter';
 import { registerPainter } from './index';
-import Text, {TextSpan, } from '../shapes/Text';
+import Text, { TextSpan } from '../shapes/Text';
 import Render from '../render';
 import Group from '../shapes/Group';
 import Element from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
 import { fpsRect, fpsText } from './fps';
 import SVGNode from '../abstract/Node';
-import { getSVGRootAttributes, SVGAttributeMap, SVGElementStyle, getClipId, } from '../svg/style';
+import { getSVGRootAttributes, SVGAttributeMap, getClipId } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Marker from '../shapes/Marker';
 
@@ -21,7 +21,6 @@ function setToArray<T>(set: Es6Set<T>, out: T[] = []): T[] {
   });
   return out;
 }
-// todo 支持渐变, 剪切, 阴影
 
 export default class SVGPainter implements Painter {
   public render: Render;
@@ -85,7 +84,7 @@ export default class SVGPainter implements Painter {
             } else {
               this._removeNode(dirtyNode);
             }
-          } else  {
+          } else {
             const parentNode = dirtyNode.parentNode;
             this._mountNode(this._loadedSVGElements[parentNode.id], dirtyNode);
           }
@@ -119,7 +118,10 @@ export default class SVGPainter implements Painter {
   }
 
   public getBase64(): string {
-    return  'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent((this._svgRoot.parentNode as HTMLElement).innerHTML)));
+    return (
+      'data:image/svg+xml;base64,' +
+      window.btoa(unescape(encodeURIComponent((this._svgRoot.parentNode as HTMLElement).innerHTML)))
+    );
   }
 
   public dispose() {
@@ -207,11 +209,11 @@ export default class SVGPainter implements Painter {
       delete this._loadedDefsElements[defsObject.id];
     });
 
-    diffResult.maintained.forEach(([from, to]) => {
-      const obj = prevShadows[from]
-      const dom = this._loadedDefsElements[obj.id].firstChild as any as SVGElement;
+    diffResult.maintained.forEach(([from]) => {
+      const obj = prevShadows[from];
+      const dom = (this._loadedDefsElements[obj.id].firstChild as any) as SVGElement;
       this._setElementAttr(dom, obj.getSVGNode().childNodes[0].svgAttr);
-    })
+    });
   }
 
   private _mountNode(parent: SVGElement, node: Element, type: number = 0) {
@@ -230,7 +232,7 @@ export default class SVGPainter implements Painter {
       this._mountTextNode(svgDom, spanList);
     }
     if (isClip) {
-      const clip = this._createSVGElement('clipPath', { id: getClipId(node)});
+      const clip = this._createSVGElement('clipPath', { id: getClipId(node) });
       clip.appendChild(svgDom);
       appendNode = clip;
     }
@@ -262,11 +264,11 @@ export default class SVGPainter implements Painter {
       svgText.appendChild(textNode);
     } else {
       spanList.forEach(span => {
-        const tspan = this._createSVGElement('tspan', {x: span.x, y: span.y});
+        const tspan = this._createSVGElement('tspan', { x: span.x, y: span.y });
         const textNode = document.createTextNode(span.text);
         tspan.appendChild(textNode);
         svgText.appendChild(tspan);
-      })
+      });
     }
   }
 
@@ -388,7 +390,7 @@ export default class SVGPainter implements Painter {
 
   private _getAllShadows(group: Group) {
     group.eachChild(child => {
-      const { shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY } = child.attr;
+      const { shadowColor, shadowBlur } = child.attr;
       if (shadowColor && shadowBlur >= 0) {
         const shadow = child.getShadowObj();
         this._dfsShadows.add(shadow);

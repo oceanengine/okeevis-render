@@ -1,4 +1,5 @@
 declare module 'normalize-wheel' {
-  const fn =  (event: WheelEvent) => NormalLizeWheel;
+  // eslint-disable-next-line no-unused-vars
+  const fn = (event: WheelEvent) => NormalLizeWheel;
   export = fn;
 }

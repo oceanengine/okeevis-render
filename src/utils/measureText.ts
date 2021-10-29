@@ -1,6 +1,6 @@
-import ES6Set from '../utils/set';
-import { TextConf } from '../shapes/Text';
 import LRUMap from './LRU';
+import ES6Set from './set';
+import { TextConf } from '../shapes/Text';
 
 import * as styleHelper from '../canvas/style';
 
@@ -10,8 +10,6 @@ export interface TextSize {
 }
 
 const textSizeLRUMap = new LRUMap<TextSize>(3000);
-
-
 
 let defaultContext: CanvasRenderingContext2D;
 
@@ -37,40 +35,54 @@ export function removeContext(ctx: CanvasRenderingContext2D) {
   canvasContextPool.delete(ctx);
 }
 
-export  function measureTextList(textList: string[], textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getContext()): TextSize[] {
+export function measureTextList(
+  textList: string[],
+  textStyle: TextConf = {},
+  ctx: CanvasRenderingContext2D = getContext(),
+): TextSize[] {
   ctx.save();
   initTextContext(ctx, textStyle);
-  const sizeList = textList.map(text => measureText(text, textStyle, ctx, false))
+  const sizeList = textList.map(text => measureText(text, textStyle, ctx, false));
   ctx.restore();
   return sizeList;
 }
 
-export  function measureText(text: string, textStyle: TextConf = {}, ctx: CanvasRenderingContext2D = getContext(), setContext = true): TextSize {
+export function measureText(
+  text: string,
+  textStyle: TextConf = {},
+  ctx: CanvasRenderingContext2D = getContext(),
+  setContext = true,
+): TextSize {
   const cacheKey = getCacheKey(text, textStyle);
   const cacheSize = textSizeLRUMap.get(cacheKey);
   if (cacheSize) {
-    return cacheSize 
+    return cacheSize;
   }
   setContext && ctx.save();
   setContext && initTextContext(ctx, textStyle);
   const width = ctx.measureText(text).width;
   const height = textStyle.fontSize;
-  const size = {width, height};
+  const size = { width, height };
   textSizeLRUMap.set(cacheKey, size);
   setContext && ctx.restore();
   return size;
 }
 
 function initTextContext(ctx: CanvasRenderingContext2D, textStyle: TextConf = {}) {
-  const { fontFamily = 'sans-serif', fontSize = 12, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;
-  styleHelper.setFontStyle(ctx, 
-    fontSize,
-    fontFamily,
-    fontWeight,
-    fontStyle,
-  )
+  const {
+    fontFamily = 'sans-serif',
+    fontSize = 12,
+    fontWeight = 'normal',
+    fontStyle = 'normal',
+  } = textStyle;
+  styleHelper.setFontStyle(ctx, fontSize, fontFamily, fontWeight, fontStyle);
 }
 function getCacheKey(text: string, textStyle: TextConf): string {
-  const { fontFamily = 'sans-serif', fontSize = 10, fontWeight = 'normal', fontStyle = 'normal' } = textStyle;
+  const {
+    fontFamily = 'sans-serif',
+    fontSize = 10,
+    fontWeight = 'normal',
+    fontStyle = 'normal',
+  } = textStyle;
   return [text, fontSize, fontFamily, fontWeight, fontStyle].join('__$$__');
 }

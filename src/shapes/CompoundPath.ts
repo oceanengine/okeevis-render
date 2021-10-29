@@ -1,6 +1,6 @@
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { BBox, unionBBox } from '../utils/bbox';
+import { BBox } from '../utils/bbox';
 import Path2D from '../geometry/Path2D';
 
 export interface CompoundPathConf extends CommonAttr {

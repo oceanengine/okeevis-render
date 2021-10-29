@@ -10,11 +10,11 @@ export interface BBox {
 }
 
 export function createZeroBBox(): BBox {
-  return {x: 0, y: 0, width: 0, height: 0};
+  return { x: 0, y: 0, width: 0, height: 0 };
 }
 
 export function ceilBBox(box: BBox): BBox {
-  const {x, y, width, height} = box;
+  const { x, y, width, height } = box;
   const x1 = Math.floor(x - 0.5);
   const y1 = Math.floor(y - 0.5);
   const x2 = Math.ceil(x + width + 0.5);
@@ -24,18 +24,18 @@ export function ceilBBox(box: BBox): BBox {
     y: y1,
     width: x2 - x1,
     height: y2 - y1,
-  }
+  };
 }
 
-export function inBBox( bbox: BBox, x: number, y: number, lineWidth = 1): boolean {
-  return x >= bbox.x - lineWidth / 2 && x <= bbox.x + bbox.width + lineWidth / 2 && y >= bbox.y  - lineWidth / 2 && y <= bbox.y + bbox.height + lineWidth / 2;
+export function inBBox(bbox: BBox, x: number, y: number, lineWidth = 1): boolean {
+  return (
+    x >= bbox.x - lineWidth / 2 &&
+    x <= bbox.x + bbox.width + lineWidth / 2 &&
+    y >= bbox.y - lineWidth / 2 &&
+    y <= bbox.y + bbox.height + lineWidth / 2
+  );
 }
 
-/**
- * 用来判断两个矩形是否相交
- * @param a 相交矩形a
- * @param b 相交矩形b
- */
 export function bboxIntersect(a: BBox, b: BBox): boolean {
   return (
     Math.abs(a.x + a.width / 2 - (b.x + b.width / 2)) * 2 < a.width + b.width &&
@@ -73,7 +73,7 @@ export function unionBBox(bboxList: BBox[], filterZero = true): BBox {
     maxX = Math.max(box.x + box.width, maxX);
     maxY = Math.max(box.y + box.height, maxY);
   }
- 
+
   return {
     x: minX,
     y: minY,
@@ -119,7 +119,6 @@ export function arcBBox(cx: number, cy: number, r: number, start: number, end: n
       height: 0,
     };
   }
-  // 找圆弧中心点切线平移形成包围盒
   const delta = Math.abs(end - start);
   const xRange = [cx - r, cx + r];
   const yRange = [cy - r, cy + r];
@@ -170,7 +169,7 @@ export function sectorBBox(
 
 export function polygonBBox(points: Array<{ x: number; y: number }>): BBox {
   if (points.length === 0) {
-    return {x: 0, y: 0, width: 0, height: 0};
+    return { x: 0, y: 0, width: 0, height: 0 };
   }
   let minX = Number.POSITIVE_INFINITY;
   let minY = Number.POSITIVE_INFINITY;
@@ -199,7 +198,7 @@ export function alignBox(
   height: number,
   align: BoxAlign,
   verticalAlign: BoxVerticalAlign,
-): {x: number, y: number} {
+): { x: number; y: number } {
   const { x: boxX, y: boxY, width: boxWidth, height: boxHeight } = outBox;
   let x: number = boxX;
   let y: number = boxY;

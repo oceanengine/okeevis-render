@@ -89,9 +89,6 @@ export function getSVGColor(color: ColorValue): string {
   }
 }
 
-// 4时颜色空间约26w
-// 8时颜色空间32768
-
 const MAX_SIZE = 32 * 32 * 32;
 
 export function valueToRgb(index: number): [number, number, number] {

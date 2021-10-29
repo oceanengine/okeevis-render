@@ -29,15 +29,6 @@ export default (
   return getBezierList(path, isLoop, smoothConstraint, smoothMonotone);
 };
 
-function getRate(P0: Point, P1: Point, P2: Point, first: boolean = false): number {
-  return 0.25;
-//   // TODO 这部分需要改成动态计算
-//   const l1: number = Math.sqrt(Math.pow(P1.x - P0.x, 2) + Math.pow(P1.y - P0.y, 2));
-//   const l2: number = Math.sqrt(Math.pow(P2.x - P1.x, 2) + Math.pow(P2.y - P1.y, 2));
-
-//   return first ? l1 / (l1 + l2) : l2 / (l1 + l2);
-}
-
 function isMonotonicity(P0: Point, P1: Point, P2: Point, key: 'x' | 'y'): boolean {
   return (P0[key] <= P1[key] && P1[key] <= P2[key]) || (P0[key] >= P1[key] && P1[key] >= P2[key]);
 }
@@ -49,14 +40,10 @@ function getControl(
   P3: Point,
   smoothMonotone?: 'x' | 'y',
 ): Point[] {
-  const rateAX: number =
-    smoothMonotone === 'y' && isMonotonicity(P0, P1, P2, 'y') ? 0 : getRate(P0, P1, P2);
-  const rateAY: number =
-    smoothMonotone === 'x' && isMonotonicity(P0, P1, P2, 'x') ? 0 : getRate(P0, P1, P2);
-  const rateBX: number =
-    smoothMonotone === 'y' && isMonotonicity(P1, P2, P3, 'y') ? 0 : getRate(P1, P2, P3);
-  const rateBY: number =
-    smoothMonotone === 'x' && isMonotonicity(P1, P2, P3, 'x') ? 0 : getRate(P1, P2, P3);
+  const rateAX: number = smoothMonotone === 'y' && isMonotonicity(P0, P1, P2, 'y') ? 0 : 0.25;
+  const rateAY: number = smoothMonotone === 'x' && isMonotonicity(P0, P1, P2, 'x') ? 0 : 0.25;
+  const rateBX: number = smoothMonotone === 'y' && isMonotonicity(P1, P2, P3, 'y') ? 0 : 0.25;
+  const rateBY: number = smoothMonotone === 'x' && isMonotonicity(P1, P2, P3, 'x') ? 0 : 0.25;
 
   return [
     P1,

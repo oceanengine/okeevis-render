@@ -1,10 +1,10 @@
 /**
  *  https://www.cnblogs.com/shn11160/archive/2012/08/27/2658057.html
- * 椭圆polyfill
+ * ellipsis polyfill
  */
 import Shape from './Shape';
 import { CommonAttr } from './Element';
-import { BBox, circleBBox } from '../utils/bbox';
+import { BBox } from '../utils/bbox';
 import { pointInEllipseFill, pointInEllipseStroke } from '../geometry/contain/ellipse';
 
 export interface EllipseConf extends CommonAttr {
@@ -39,13 +39,12 @@ export default class Circle extends Shape<EllipseConf> {
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
     //  polyfill
     //  ctx.save();
-    //  选择a、b中的较大者作为arc方法的半径参数
+    //  choose Max(a, b) as the arc radius
     //  const r = (rx > ry) ? rx : ry;
-    //  const ratioX = rx / r; // 横轴缩放比率
-    //  const ratioY = ry / r; // 纵轴缩放比率v
-    //  ctx.scale(ratioX, ratioY); // 进行缩放（均匀压缩）
+    //  const ratioX = rx / r;
+    //  const ratioY = ry / r;
+    //  ctx.scale(ratioX, ratioY);
     //  ctx.beginPath();
-    //  // 从椭圆的左端点开始逆时针绘制
     //  ctx.moveTo((cx + rx) / ratioX, cy / ratioY);
     //  ctx.arc(cx / ratioX, cy / ratioY, r, 0, 2 * Math.PI);
     //  ctx.closePath();

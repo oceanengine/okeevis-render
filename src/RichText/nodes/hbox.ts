@@ -19,7 +19,6 @@ export default class HBox extends Box {
   public layout(): void {
     const contentBox = this.getContentBox();
 
-    // 基础宽度分配 非弹性元素
     this.children.forEach(child => {
       const propsWidth = child.props.width as number;
       const minWidth = child.minSize[0];
@@ -39,7 +38,6 @@ export default class HBox extends Box {
     const contentWidth = lodash.sum(this.children.map(child => child.bbox.width));
     const leftWidth = contentBox.width - contentWidth;
 
-    // 剩余宽度分配 flex
     const flexItems = this.children.filter(child => child.props.flex > 0);
     const flexValues = flexItems.map(item => item.props.flex);
     const totalFlex = lodash.sum(flexValues);
@@ -48,7 +46,6 @@ export default class HBox extends Box {
       item.bbox.width += flexGrow[index];
     });
 
-    // 处理对齐分配坐标 或者高度
     flexLayout(
       contentBox,
       this.children.map(child => child.bbox),
@@ -57,7 +54,6 @@ export default class HBox extends Box {
       this.props.pack,
     );
 
-    // 递归处理
     this.children.forEach(child => child.layout());
   }
 }

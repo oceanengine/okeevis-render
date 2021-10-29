@@ -1,12 +1,12 @@
 import Painter from '../abstract/Painter';
 import { registerPainter } from './index';
 import Render from '../render';
-import Element, { defaultCanvasContext, } from '../shapes/Element';
+import Element, { defaultCanvasContext } from '../shapes/Element';
 import Shape, { ShapeConf } from '../shapes/Shape';
 import Group, { GroupConf } from '../shapes/Group';
-import { BBox, bboxIntersect, } from '../utils/bbox';
+import { BBox, bboxIntersect } from '../utils/bbox';
 import mergeDirtyRegions from './dirtyRect';
-import { getCtxColor, isGradient, isTransparent, ColorValue} from '../color';
+import { getCtxColor, isGradient, isTransparent, ColorValue } from '../color';
 import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
@@ -35,7 +35,6 @@ const contextKeys: Array<keyof ShapeConf> = [
   'clip',
 ];
 
-
 export default class CanvasPainter implements Painter {
   public render: Render;
 
@@ -49,7 +48,6 @@ export default class CanvasPainter implements Painter {
 
   private _isPixelPainter: boolean = false;
 
-  // 首帧强制走全屏刷新逻辑
   private _isFirstFrame: boolean = true;
 
   private _paintPosition: [number, number];
@@ -66,7 +64,7 @@ export default class CanvasPainter implements Painter {
     this.dpr = isPixelPainter ? 1 : render.dpr;
     isPixelPainter ? this._initPixelCanvas() : this._initCanvas();
     if (this.render.isBrowser() && !isPixelPainter) {
-      // 浏览器窗口切换时, 脏矩形有点问题
+      // tab switch must redraw
       document.addEventListener('visibilitychange', this._handleDocumentVisibilityChange);
     }
   }
@@ -106,7 +104,7 @@ export default class CanvasPainter implements Painter {
       ) {
         this.paintInDirtyRegion();
       } else {
-        // 全屏刷新
+        // full screen paint
         this.paint();
       }
       // console.log('dirty-size: ', dirytCount)
@@ -168,7 +166,12 @@ export default class CanvasPainter implements Painter {
       const el = dirtyElements[i];
       el.getDirtyRects().forEach(rect => dirtyRegions.push(rect));
     }
-    const renderBbox = {x: 0, y: 0, width: this.render.getWidth(), height: this.render.getHeight()};
+    const renderBbox = {
+      x: 0,
+      y: 0,
+      width: this.render.getWidth(),
+      height: this.render.getHeight(),
+    };
     dirtyRegions = dirtyRegions.filter(region => bboxIntersect(region, renderBbox));
     if (dirtyRegions.length === 0) {
       return;
@@ -206,7 +209,15 @@ export default class CanvasPainter implements Painter {
       const lineWidth = current.getExtendAttr('lineWidth');
       const stroke = current.getExtendAttr('stroke');
       const fill = current.getExtendAttr('fill');
-      this._setElementCanvasContext(ctx, current, fill, stroke, fillOpacity, strokeOpacity, lineWidth);
+      this._setElementCanvasContext(
+        ctx,
+        current,
+        fill,
+        stroke,
+        fillOpacity,
+        strokeOpacity,
+        lineWidth,
+      );
     });
     chunk.forEach(item => this.drawElement(ctx, item));
     ctx.restore();
@@ -219,17 +230,20 @@ export default class CanvasPainter implements Painter {
     if (!dirtyRegion) {
       ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
     } else {
-      ctx.clearRect(dirtyRegion.x * dpr, dirtyRegion.y * dpr, dirtyRegion.width * dpr, dirtyRegion.height * dpr);
+      ctx.clearRect(
+        dirtyRegion.x * dpr,
+        dirtyRegion.y * dpr,
+        dirtyRegion.width * dpr,
+        dirtyRegion.height * dpr,
+      );
     }
     ctx.save();
     if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
       ctx.scale(dpr, dpr);
     }
-    // 改变默认的canvas上下文
     styleHelper.setFontStyle(ctx, defaultCanvasContext.fontSize, defaultCanvasContext.fontFamily);
     styleHelper.setTextBaseline(ctx, defaultCanvasContext.textBaseline);
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
-    // todo 初始化LineWidth = 0;
 
     if (dirtyRegion) {
       ctx.beginPath();
@@ -289,7 +303,9 @@ export default class CanvasPainter implements Painter {
     if (opacity === 0 && !this._isPixelPainter) {
       return;
     }
-    const hasSelfContext = this._isPixelPainter ? true : this._hasSelfContext(item, fill, fillOpacity, stroke, strokeOpacity);
+    const hasSelfContext = this._isPixelPainter
+      ? true
+      : this._hasSelfContext(item, fill, fillOpacity, stroke, strokeOpacity);
 
     if (hasSelfContext) {
       ctx.save();
@@ -337,7 +353,6 @@ export default class CanvasPainter implements Painter {
           item.attr.markerEnd.renderMarker(this, item as Shape, 'end');
         }
       }
-      
     } else {
       // const batchBrush = current.attr._batchBrush;
       // if (batchBrush) {
@@ -356,7 +371,13 @@ export default class CanvasPainter implements Painter {
       // }
     }
 
-    if (!this._isPixelPainter && (this.render.showBBox || this.render.showBoundingRect || item.attr.showBBox || item.attr.showBoundingRect)) {
+    if (
+      !this._isPixelPainter &&
+      (this.render.showBBox ||
+        this.render.showBoundingRect ||
+        item.attr.showBBox ||
+        item.attr.showBoundingRect)
+    ) {
       this._drawBBox(item);
     }
 
@@ -416,7 +437,6 @@ export default class CanvasPainter implements Painter {
   private _initPixelCanvas() {
     if (this.render.isBrowser()) {
       const canvas = document.createElement('canvas');
-      // todo 考虑dpr < 1 (缩放的场景)
       const w = 1;
       const h = 1;
       canvas.width = Math.max(w * this.render.dpr, 1);
@@ -430,7 +450,6 @@ export default class CanvasPainter implements Painter {
       try {
         const canvasCreator = getCanvasCreator();
         this._canvas = canvasCreator(this.render.dpr, this.render.dpr);
-        // taro模拟了document.createElement环境, 但无法创建真正的canvas
         if (!this._canvas.getContext) {
           throw new Error('not a canvas');
         }
@@ -476,12 +495,41 @@ export default class CanvasPainter implements Painter {
     }
   }
 
-  private _setElementCanvasContext(ctx: CanvasRenderingContext2D, item: Element<GroupConf>, computedFill: ColorValue, computedStroke: ColorValue, fillOpacity: number, strokeOpacity: number, lineWidth: number) {
+  private _setElementCanvasContext(
+    ctx: CanvasRenderingContext2D,
+    item: Element<GroupConf>,
+    computedFill: ColorValue,
+    computedStroke: ColorValue,
+    fillOpacity: number,
+    strokeOpacity: number,
+    lineWidth: number,
+  ) {
     this._ctxCount++;
-    const {clip, lineCap, lineJoin, miterLimit, stroke, fill,  fontSize, fontFamily, fontWeight, fontStyle, fontVariant, textBaseline, textAlign, blendMode, lineDashOffset, shadowBlur, shadowOffsetX, shadowOffsetY, shadowColor, lineDash, } = item.attr;
+    const {
+      clip,
+      lineCap,
+      lineJoin,
+      miterLimit,
+      stroke,
+      fill,
+      fontSize,
+      fontFamily,
+      fontWeight,
+      fontStyle,
+      fontVariant,
+      textBaseline,
+      textAlign,
+      blendMode,
+      lineDashOffset,
+      shadowBlur,
+      shadowOffsetX,
+      shadowOffsetY,
+      shadowColor,
+      lineDash,
+    } = item.attr;
 
     this._applyTransform(ctx, item);
-    
+
     if (clip) {
       ctx.beginPath();
       item.getClipElement().brush(ctx);
@@ -489,7 +537,7 @@ export default class CanvasPainter implements Painter {
     }
 
     if (item.attr.lineWidth > 0) {
-      const offset = this._isPixelPainter ? (item.attr.pickingBuffer || 0) : 0;
+      const offset = this._isPixelPainter ? item.attr.pickingBuffer || 0 : 0;
       styleHelper.setLineWidth(ctx, lineWidth + offset);
     }
 
@@ -505,7 +553,6 @@ export default class CanvasPainter implements Painter {
       styleHelper.setMiterLimit(ctx, miterLimit);
     }
 
-    // 文本和图像自己检测, 不走gpu,不故考虑fontSize
     if (this._isPixelPainter && !item.isGroup) {
       const rgb = item.pickRGB;
       const pickColor = `rgb(${rgb.join(',')})`;
@@ -514,48 +561,30 @@ export default class CanvasPainter implements Painter {
       return;
     }
 
-    // group只支持color string, pattern,不支持渐变
-    // todo 考虑小程序api setXXXX
     if (stroke && stroke !== 'none' && !(item.isGroup && isGradient(stroke))) {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, stroke, item));
     }
 
-    if (
-      !stroke &&
-      isGradient(computedStroke) &&
-      !item.isGroup
-    ) {
+    if (!stroke && isGradient(computedStroke) && !item.isGroup) {
       styleHelper.setStrokeStyle(ctx, getCtxColor(ctx, computedStroke, item));
     }
 
-    /** 渐变样式无法继承 */
-    if (
-      fill &&
-      fill !== 'none' &&
-      !(item.isGroup && isGradient(fill))
-    ) {
+    // gradient color can't be extended
+    if (fill && fill !== 'none' && !(item.isGroup && isGradient(fill))) {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, fill, item));
     }
 
-    /** 渐变样式无法继承 */
     if (!fill && isGradient(computedFill) && !item.isGroup) {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, computedFill, item));
     }
 
-    // todo 兼容小程序
-    if (
-      fontSize  ||
-      fontFamily ||
-      fontWeight ||
-      fontVariant ||
-      fontStyle
-    ) {
+    if (fontSize || fontFamily || fontWeight || fontVariant || fontStyle) {
       const _fontSize = item.getExtendAttr('fontSize');
       const _fontFamily = item.getExtendAttr('fontFamily');
       const _fontWeight = item.getExtendAttr('fontWeight');
       const _fontStyle = item.getExtendAttr('fontStyle');
       // tood gc optimize
-      styleHelper.setFontStyle(ctx, _fontSize,_fontFamily,_fontWeight, _fontStyle);
+      styleHelper.setFontStyle(ctx, _fontSize, _fontFamily, _fontWeight, _fontStyle);
     }
 
     if (textBaseline) {
@@ -566,7 +595,6 @@ export default class CanvasPainter implements Painter {
       styleHelper.setTextAlign(ctx, textAlign);
     }
 
-    // 透明度相同时不用复用alpha
     if (fillOpacity === strokeOpacity && fillOpacity !== 1) {
       styleHelper.setGlobalAlpha(ctx, fillOpacity);
     }
@@ -584,19 +612,17 @@ export default class CanvasPainter implements Painter {
     }
 
     if (shadowBlur > 0 && !isTransparent(shadowColor)) {
-      styleHelper.setShadow(
-        ctx,
-        shadowOffsetX,
-        shadowOffsetY,
-        shadowBlur,
-        shadowColor,
-      );
+      styleHelper.setShadow(ctx, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor);
     }
-
-   
   }
 
-  protected _hasSelfContext(item: Element<ShapeConf>, fill: ColorValue, fillOpacity: number, stroke: ColorValue, strokeOpacity: number): boolean {
+  protected _hasSelfContext(
+    item: Element<ShapeConf>,
+    fill: ColorValue,
+    fillOpacity: number,
+    stroke: ColorValue,
+    strokeOpacity: number,
+  ): boolean {
     if (contextKeys.some(key => item.attr[key] !== undefined)) {
       return true;
     }
@@ -607,7 +633,7 @@ export default class CanvasPainter implements Painter {
     if (fillOpacity !== 1 || strokeOpacity !== 1) {
       return true;
     }
-    
+
     const dragOffset = item.getDragOffset();
     const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
     if (hasDrag || item.getTransform() !== IDENTRY_MATRIX) {
@@ -652,7 +678,6 @@ export default class CanvasPainter implements Painter {
 
   private _handleDocumentVisibilityChange = () => {
     if (document.visibilityState === 'visible') {
-      // 在下一帧强制走全屏刷新逻辑
       this._isFirstFrame = true;
     }
   };

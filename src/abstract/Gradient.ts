@@ -1,7 +1,7 @@
 import { BBox } from '../utils/bbox';
 import SVGNode from './Node';
 
-// todo 支持全局坐标系的gradient, 此时不用切换上下文
+// todo global coord gradient support
 
 export interface ColorStop {
   offset: number;
@@ -10,7 +10,6 @@ export interface ColorStop {
 export interface GradientOption {
   stops: ColorStop[];
 }
-
 
 let id: number = 1;
 
@@ -33,5 +32,4 @@ export default abstract class Gradient<T extends GradientOption = any> {
   public abstract getCanvasContextStyle(ctx: CanvasRenderingContext2D, bbox: BBox): CanvasGradient;
 
   public abstract getSVGNode(): SVGNode;
-
 }

@@ -7,12 +7,7 @@ import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 import SVGPainter from '../painter/SVGPainter';
 
-export interface GroupConf extends TextConf {
-  /**
-   * 废弃属性, 合并绘制路径,并没有什么用, 但是保留作为测试用.
-   */
-  _batchBrush?: boolean;
-}
+export interface GroupConf extends TextConf {}
 
 export interface ChunkItem {
   parent: Group;
@@ -41,10 +36,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   public getDefaultAttr(): GroupConf {
     return {
       ...super.getDefaultAttr(),
-      _batchBrush: false,
     };
   }
-  
+
   protected onAttrChange(key: any, value: any, oldValue: any) {
     super.onAttrChange(key, value, oldValue);
     if (shapeKeys.indexOf(key) !== -1) {
@@ -165,6 +159,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
   public addChunk(items: T[] = []): this {
     if (items.length === 0) {
+      return this;
     }
     this._chunks.push(items);
     this.onChunkChange();
@@ -272,14 +267,14 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       return max;
     }
     const nodes = this.childNodes;
-    let count = 0 ;
+    let count = 0;
     while (nodes.length) {
       const node = nodes.pop() as Group;
       count++;
       if (count >= max) {
         break;
       }
-      if(node.isGroup) {
+      if (node.isGroup) {
         if (node.size > max) {
           return max;
         }
@@ -287,7 +282,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
           if (nodes.length < max) {
             nodes.push(child);
           }
-        })
+        });
       }
     }
     return count;
@@ -306,13 +301,13 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
     const result = diff(prevList, list, (item, index) => {
       const attr = item.attr;
-      const key = (attr.key !== undefined) ? item.type +  attr.key : `auto-key-${item.type}-${index}`;
+      const key = attr.key !== undefined ? item.type + attr.key : `auto-key-${item.type}-${index}`;
       return key;
     });
 
     result.removed.forEach(index => {
       nextList.splice(index, 1);
-      const node = prevList[index]
+      const node = prevList[index];
       const parentNode = node.parentNode;
       node.parentNode = this;
       this.remove(node);
@@ -325,16 +320,16 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       nextList.splice(from, 1);
       nextList.splice(to, 0, prevList[result.pureChanged[i][0]]);
     });
-    
+
     result.maintained.forEach(([from, to]) => {
       const prevElement = prevList[from];
       const nextElement = list[to];
-      
+
       if (prevElement === nextElement) {
         prevElement.ownerRender = nextElement.ownerRender = this.ownerRender;
         return;
       }
-     
+
       if (nextElement.attr.ref) {
         nextElement.attr.ref.current = prevElement;
       }
@@ -346,7 +341,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       // todo clone matrix
       const dragOffset = nextElement.getDragOffset();
       prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
-     this._diffUpdateElement(prevElement, nextElement);
+      this._diffUpdateElement(prevElement, nextElement);
     });
 
     result.added.forEach(index => {
@@ -356,7 +351,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
 
     this.firstChild = nextList[0];
     this.lastChild = nextList[nextList.length - 1];
-    for (let i= 0 ; i < nextList.length; i++) {
+    for (let i = 0; i < nextList.length; i++) {
       nextList[i].prevSibling = nextList[i - 1];
       nextList[i].nextSibling = nextList[i + 1];
     }
@@ -414,9 +409,9 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
         child.dirtyBBox();
       }
       if (child.isGroup) {
-        (child as any as Group).dirtyTextChildBBox()
+        ((child as any) as Group).dirtyTextChildBBox();
       }
-    })
+    });
   }
 
   private _mountNode(item: T, dirty: boolean = true) {
@@ -441,7 +436,6 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
       this.lastChild = last.nextSibling = item;
       item.nextSibling = null;
     } else {
-      // 中间节点
       item.prevSibling.nextSibling = item.nextSibling;
       if (item.nextSibling) {
         item.nextSibling.prevSibling = item.prevSibling;
@@ -465,26 +459,33 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
   private _diffUpdateElement(prevElement: Element, nextElement: Element) {
     const prevAttr = prevElement.attr;
     const nextAttr = nextElement.attr;
-    const {transitionDuration = defaultSetting.during, transitionEase = defaultSetting.ease, transitionProperty = 'all', transitionDelay = 0 } = nextElement.attr;
+    const {
+      transitionDuration = defaultSetting.during,
+      transitionEase = defaultSetting.ease,
+      transitionProperty = 'all',
+      transitionDelay = 0,
+    } = nextElement.attr;
     prevElement.startAttrTransaction();
-    for (let key in prevAttr) {
+    for (const key in prevAttr) {
       if (!(key in nextAttr)) {
-        prevElement.removeAttr(key as any)
+        prevElement.removeAttr(key as any);
       }
     }
-    
+
     if (transitionProperty === 'none' || transitionProperty.length === 0) {
-       prevElement.setAttr(nextAttr)
+      prevElement.setAttr(nextAttr);
     } else {
-      // todo 指定transitionProperty数组时, 非过渡属性无法更新
-      const nextAttr = transitionProperty === 'all' ? nextElement.attr : lodash.pick(nextElement.attr, transitionProperty as any);
-      prevElement.stopAllAnimation().animateTo(nextAttr, transitionDuration, transitionEase, null, transitionDelay);
+      // todo transition property array support
+      const transitionAttr =
+        transitionProperty === 'all' ? nextAttr : lodash.pick(nextAttr, transitionProperty as any);
+      prevElement
+        .stopAllAnimation()
+        .animateTo(transitionAttr, transitionDuration, transitionEase, null, transitionDelay);
     }
     if ((prevElement as TypeCustomElement).$$CustomType) {
       (prevElement as TypeCustomElement).skipUpdate();
     }
     prevElement.endAttrTransaction();
-    // todo 如果是自定义渲染的话, 当前的key变化不影响不触发重新渲染
   }
 
   private _findSVGDomNode(item: Element) {

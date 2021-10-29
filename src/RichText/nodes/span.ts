@@ -11,7 +11,6 @@ export default class Span extends VNode {
   public type: 'span';
 
   public defaultProps: VNodeProps = {
-    fontSize: 12,
     padding: 0,
     borderWidth: 0,
   };
@@ -27,7 +26,7 @@ export default class Span extends VNode {
     });
     this.children.forEach(child => {
       group.add(child.render());
-    })
+    });
     return group;
   }
 

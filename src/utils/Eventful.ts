@@ -1,4 +1,3 @@
-
 export default class EventFul {
   private _eventListeners: Record<string, Function[]> = {};
 
@@ -25,7 +24,7 @@ export default class EventFul {
     }
   }
 
-  public dispatch(type: string, ...args:any[]): void {
+  public dispatch(type: string, ...args: any[]): void {
     const listenerList = this._eventListeners[type] || [];
     listenerList.forEach(listener => listener.apply(null, args));
     this.onEvent.apply(this, [type, ...args]);
@@ -35,6 +34,7 @@ export default class EventFul {
     this._eventListeners = {};
   }
 
+  // eslint-disable-next-line no-unused-vars
   protected onEvent(type: string, ...params: any[]) {
     // nothing
   }

@@ -1,8 +1,8 @@
-import Element, { defaultCanvasContext, ElementAttr, } from '../shapes/Element';
+import Element, { defaultCanvasContext, ElementAttr } from '../shapes/Element';
 import Group from '../shapes/Group';
 import * as mat3 from '../../js/mat3';
 import { SVG_NAMESPACE, XLINK_NAMESPACE, IDENTRY_MATRIX } from '../constant';
-import Shadow from '../svg/Shadow';
+import Shadow from './Shadow';
 
 import {
   getSVGColor,
@@ -44,9 +44,9 @@ export interface SVGElementStyle {
   'stroke-opacity': string;
   filter: string;
   cursor: string;
-  "marker-start": string;
-  "marker-mid": string;
-  "marker-end": string;
+  'marker-start': string;
+  'marker-mid': string;
+  'marker-end': string;
 }
 
 export const SVGAttributeMap: Record<keyof SVGElementStyle, keyof ElementAttr> = {
@@ -109,7 +109,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     shadowBlur,
     markerStart,
     markerMid,
-    markerEnd
+    markerEnd,
   } = node.attr;
   const ret: Partial<SVGElementStyle> = {};
   const clip = node.getClipElement();
@@ -124,16 +124,15 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
 
   if (hasDrag || selfMatrix !== IDENTRY_MATRIX) {
     if (!hasDrag) {
-      ret.transform = getSvgMatrix(selfMatrix)
+      ret.transform = getSvgMatrix(selfMatrix);
     } else {
       const globalTransform = node.getGlobalTransform();
       const parentTransform = node.parentNode.getGlobalTransform();
       const out = mat3.create();
       mat3.multiply(out, mat3.invert(out, parentTransform), globalTransform);
-      ret.transform = getSvgMatrix(out)
+      ret.transform = getSvgMatrix(out);
     }
   }
-
 
   if (fill) {
     ret.fill = getSVGColor(fill);
@@ -143,7 +142,8 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     ret.stroke = getSVGColor(stroke);
   }
   if (lineWidth !== undefined && lineWidth >= 0) {
-    ret['stroke-width'] = (node.attr.strokeNoScale ? node.getExtendAttr('lineWidth') : lineWidth) + '';
+    ret['stroke-width'] =
+      (node.attr.strokeNoScale ? node.getExtendAttr('lineWidth') : lineWidth) + '';
   }
   if (opacity !== undefined) {
     ret.opacity = opacity + '';
@@ -185,7 +185,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   }
 
   if (lineDashOffset !== undefined) {
-    ret['stroke-dashoffset'] = lineDashOffset +'';
+    ret['stroke-dashoffset'] = lineDashOffset + '';
   }
 
   if (lineCap) {
@@ -201,17 +201,17 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   }
 
   if (shadowColor && shadowBlur >= 0) {
-    ret['filter'] = `url(#${node.getShadowObj().id})`
+    ret.filter = `url(#${node.getShadowObj().id})`;
   }
-  
+
   if (markerStart) {
-    ret["marker-start"] = `url(#${markerStart.getMarkerId()})`;
+    ret['marker-start'] = `url(#${markerStart.getMarkerId()})`;
   }
   if (markerMid) {
-    ret["marker-mid"] = `url(#${markerMid.getMarkerId()})`;
+    ret['marker-mid'] = `url(#${markerMid.getMarkerId()})`;
   }
   if (markerEnd) {
-    ret["marker-end"] = `url(#${markerEnd.getMarkerId()})`;
+    ret['marker-end'] = `url(#${markerEnd.getMarkerId()})`;
   }
 
   return ret;

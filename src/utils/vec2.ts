@@ -1,5 +1,4 @@
-import {BBox, } from './bbox';
-
+import { BBox } from './bbox';
 
 export type Vec2 = [number, number];
 
@@ -33,7 +32,7 @@ export function dot(a: Vec2, b: Vec2): number {
 }
 
 export function cross(a: Vec2, b: Vec2): number {
- return a[0] * b[1] - a[1] * b[0];
+  return a[0] * b[1] - a[1] * b[0];
 }
 
 export function exactEquals(a: Vec2, b: Vec2): boolean {

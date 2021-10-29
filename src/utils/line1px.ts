@@ -1,6 +1,6 @@
-import { LineConf, } from '../shapes/Line';
+import { LineConf } from '../shapes/Line';
 import { RectConf } from '../shapes/Rect';
-import * as lodash from '../utils/lodash';
+import * as lodash from './lodash';
 
 let enable1px = false;
 

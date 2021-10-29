@@ -9,7 +9,7 @@ interface Point {
 function isEdgePoind(points: Point[], x: number, y: number): boolean {
   let flag: boolean = false;
 
-  for (let j: number = 0; j < points.length; j = j + 1) {
+  for (let j: number = 0; j < points.length; j += 1) {
     const current = points[j];
     if (equalWithTolerance(current.x, x) && equalWithTolerance(current.y, y)) {
       flag = true;
@@ -22,21 +22,17 @@ function isEdgePoind(points: Point[], x: number, y: number): boolean {
 
 export function pointInPolygonFill(pointList: Point[], x: number, y: number): boolean {
   let countNum: number = 0;
-  for (let i: number = 0; i < pointList.length; i = i + 1) {
+  for (let i: number = 0; i < pointList.length; i += 1) {
     const p1: Point = pointList[i];
     const p2: Point = pointList[(i + 1) % pointList.length];
 
-    // 平行线
     if (p1.y === p2.y) {
       continue;
     }
-
-    // 最高点都不到该点的
     if (Math.max(p1.y, p2.y) < y) {
       continue;
     }
 
-    // 最低点都不到该点的
     if (Math.min(p1.y, p2.y) > y) {
       continue;
     }
@@ -46,11 +42,10 @@ export function pointInPolygonFill(pointList: Point[], x: number, y: number): bo
       continue;
     }
     if (vertex > x) {
-      countNum = countNum + 1;
+      countNum += 1;
     }
   }
 
-  // 奇数在内部 偶数在外部
   return countNum % 2 === 1;
 }
 

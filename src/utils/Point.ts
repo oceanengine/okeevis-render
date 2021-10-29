@@ -33,14 +33,11 @@ export default class Point {
 
   /**
    *
-   * @param angle 弧度制
-   * @param distance  距离
+   * @param angle rad
+   * @param distance  number
    */
   public angleMoveTo(angle: number, distance: number): this {
-    return this.moveBy(
-      distance * Math.cos(angle),
-      distance * Math.sin(angle),
-    );
+    return this.moveBy(distance * Math.cos(angle), distance * Math.sin(angle));
   }
 
   public distanceTo(x: number, y: number): number {
@@ -52,12 +49,12 @@ export default class Point {
   }
 
   public getAngleTo(x: number, y: number): number {
-    return Math.atan2(y - this.y, x - this.x,);
+    return Math.atan2(y - this.y, x - this.x);
   }
 
   /**
    *
-   * @param angle 弧度制
+   * @param angle rad
    * @param cx
    * @param cy
    */
@@ -77,5 +74,4 @@ export default class Point {
     this.y = cy + scale * distance * Math.sin(angle);
     return this;
   }
-  
 }

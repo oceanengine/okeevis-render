@@ -38,7 +38,6 @@ function getArcPath(pathAction: PathAction, i: number): string {
     endAngle = params[6];
   }
   const startPoint = getPointOnPolar(cx, cy, r, startAngle);
-  // todo 注意2PI的情况
   const delta = endAngle - startAngle;
   let endPointAngle: number = endAngle;
   if (endAngle - startAngle >= PI2 || equalWithTolerance(delta, PI2)) {
@@ -49,7 +48,7 @@ function getArcPath(pathAction: PathAction, i: number): string {
   const endPoint = getPointOnPolar(cx, cy, r, endPointAngle);
   const isLargeArc = Math.abs(startAngle - endAngle) > Math.PI;
   const isClockWise = endAngle > startAngle;
- return`${i > 0 ? 'L' : 'M'}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${
+  return `${i > 0 ? 'L' : 'M'}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${
     isLargeArc ? 1 : 0
   } ${isClockWise ? 1 : 0} ${endPoint.x} ${endPoint.y}`;
 }

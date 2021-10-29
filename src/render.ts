@@ -124,7 +124,6 @@ export default class Render extends EventFul {
   public dirty(el?: Element<any>) {
     this.nextTick();
     this._needUpdate = true;
-    // todo svg下不能限制dirtyElements数量
     if (el && this._renderer === 'svg') {
       this._dirtyElements.add(el);
       return;
@@ -179,7 +178,6 @@ export default class Render extends EventFul {
   public addEventElement(element: Element) {
     this._eventGroop.add(element);
   }
-  
 
   public removeEventElement(element: Element) {
     this._eventGroop.remove(element);
@@ -301,7 +299,7 @@ export default class Render extends EventFul {
     }
   }
 
-  public getOneChunk(): {parent: Group, items: Element[]} {
+  public getOneChunk(): { parent: Group; items: Element[] } {
     let parent: Group;
     let items: Element[];
     if (!this.chunksElement.size) {
@@ -315,7 +313,7 @@ export default class Render extends EventFul {
     });
     return {
       parent,
-      items
-    }
+      items,
+    };
   }
 }

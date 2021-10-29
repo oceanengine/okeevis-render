@@ -1,7 +1,6 @@
 /* eslint-disable lines-between-class-members */
 import SyntheticDragEvent from '../event/SyntheticDragEvent';
 
-
 export interface DragAndDropConf {
   draggable?: boolean;
   onDrag?: (event: SyntheticDragEvent) => void;
@@ -10,5 +9,5 @@ export interface DragAndDropConf {
   onDragenter?: (event: SyntheticDragEvent) => void;
   onDragleave?: (event: SyntheticDragEvent) => void;
   onDrop?: (event: SyntheticDragEvent) => void;
-  getDragOffset?: (event: SyntheticDragEvent) => {x: number, y: number};
+  getDragOffset?: (event: SyntheticDragEvent) => { x: number; y: number };
 }

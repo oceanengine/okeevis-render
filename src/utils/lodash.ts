@@ -2,6 +2,7 @@
  * @desc lodash import
  */
 /* tslint:disable:no-require-imports */
+import { throttle as _throttle, debounce as _debounce } from 'throttle-debounce';
 import isNull = require('lodash/isNull');
 import isUndefined = require('lodash/isUndefined');
 import isBoolean = require('lodash/isBoolean');
@@ -11,7 +12,7 @@ import isFunction = require('lodash/isFunction');
 import isObject = require('lodash/isObject');
 import min = require('lodash/min');
 import max = require('lodash/max');
-import sum=require('lodash/sum');
+import sum = require('lodash/sum');
 import isArray = require('lodash/isArray');
 import findIndex = require('lodash/findIndex');
 import find = require('lodash/find');
@@ -26,13 +27,12 @@ import toNumber = require('lodash/toNumber');
 import flatten = require('lodash/flatten');
 import cloneDeep = require('lodash/cloneDeep');
 import set = require('lodash/set');
-import { throttle as _throttle, debounce as _debounce } from 'throttle-debounce'
 
 export function throttle(callback: (...args: any[]) => any, delay: number) {
   return _throttle(delay, false, callback);
 }
 
-export function debounce(callback:  (...args: any[]) => any, delay: number) {
+export function debounce(callback: (...args: any[]) => any, delay: number) {
   return _debounce(delay, false, callback);
 }
 

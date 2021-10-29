@@ -2,7 +2,7 @@
 {
 direction: "ltr",
 fillStyle: "#000000",
-filter: "none", // 只兼容火狐
+filter: "none",
 font: "10px sans-serif",
 globalAlpha: 1,
 globalCompositeOperation: "source-over",

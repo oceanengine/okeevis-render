@@ -69,7 +69,6 @@ export default class Sector extends Shape<SectorConf> {
     if (round || !cornerRadius || cornerRadius === 0) {
       let roundStart: number;
       let roundEnd: number;
-      // 内弧
       ctx.arc(cx, cy, radiusI, end, start, !anticlockwise);
       if (round) {
         const { x, y } = getPointOnPolar(cx, cy, (radius + radiusI) / 2, start);
@@ -77,7 +76,6 @@ export default class Sector extends Shape<SectorConf> {
         roundEnd = start;
         ctx.arc(x, y, Math.abs(radius - radiusI) / 2, roundStart, roundEnd, anticlockwise);
       }
-      // 外弧
       ctx.arc(cx, cy, radius, start, end, anticlockwise);
       if (round) {
         const { x, y } = getPointOnPolar(cx, cy, (radius + radiusI) / 2, end);
@@ -97,13 +95,11 @@ export default class Sector extends Shape<SectorConf> {
         [r1, r2, r3, r4] = cornerRadius;
       }
       const cta: number = end - start;
-      // l1 内边 l2 右侧边 l3 外边 l4 左侧边
       const l1: number = cta * this.attr.radiusI;
       const l2: number = this.attr.radius - this.attr.radiusI;
       const l3: number = cta * this.attr.radius;
       const l4: number = this.attr.radius - this.attr.radiusI;
 
-      // r1 右上角 r2 右下 r3 左下 r4 左上
       r1 = Math.min(l1 / Math.PI, l2 / Math.PI, r1);
       r2 = Math.min(l2 / Math.PI, l3 / Math.PI, r2);
       r3 = Math.min(l3 / Math.PI, l4 / Math.PI, r3);
@@ -203,7 +199,9 @@ export default class Sector extends Shape<SectorConf> {
   }
 
   protected computeBBox(): BBox {
-    let { cx, cy, radius, radiusI, start, end, round } = this.attr;
+    const { cx, cy, radius, radiusI, start: ostart, end: oend, round } = this.attr;
+    let start = ostart;
+    let end = oend;
     if (round) {
       const delta = Math.asin((radius - radiusI) / radius) * (end > start ? 1 : -1);
       start -= delta;
