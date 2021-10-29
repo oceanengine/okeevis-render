@@ -34,7 +34,7 @@ function interpolatedPosition(P0: Point, P1: Point, P2: Point, P3: Point, u: num
   return { x, y };
 }
 
-let nodesLeft: number = 0;
+// const nodesLeft: number = 0;
 
 // main function to calculate the Path
 function savePathCatmullRom(path: Point[], isLoop: boolean, frame: number): Point[] {
@@ -74,7 +74,7 @@ function savePathCatmullRom(path: Point[], isLoop: boolean, frame: number): Poin
       }
 
       outPath.push(vec); // store each value
-      nodesLeft += 1; // increment node counter
+      // nodesLeft += 1; // increment node counter
       // ui++;
     }
   }

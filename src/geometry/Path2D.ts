@@ -250,6 +250,7 @@ export default class Path2D {
         });
       } else if (action === 'ellipse') {
         // todo ellipsis bbox
+        // eslint-disable-next-line no-unused-vars
         const [cx, cy, rx, ry, ration, startAngle, endAngle] = params;
         this._pushBBoxPoints(points, arcBBox(cx, cy, rx, startAngle, endAngle));
       }

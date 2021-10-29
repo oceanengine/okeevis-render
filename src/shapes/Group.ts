@@ -477,9 +477,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     } else {
       // todo transition property array support
       const transitionAttr =
-        transitionProperty === 'all'
-          ? nextAttr
-          : lodash.pick(nextAttr, transitionProperty as any);
+        transitionProperty === 'all' ? nextAttr : lodash.pick(nextAttr, transitionProperty as any);
       prevElement
         .stopAllAnimation()
         .animateTo(transitionAttr, transitionDuration, transitionEase, null, transitionDelay);
