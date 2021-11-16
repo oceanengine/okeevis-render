@@ -1,17 +1,17 @@
 # OKee Render
 
-A fast lightweight 2D graphic library
+一个轻量级的高性能 2d 图形库
 
-## Features
+## 特性
 
-* Both svg and canvas renderer support with same API
-* Good performance with large amount of data
-* Inheritable style attributes
+* svg /canvas双引擎, 使用相同的api
+* 优秀的性能, 支持数十万图元渲染交互
+* 可继承式样式属性
 
-## Install
+## 安装
 > npm install @okee-uikit/render
 
-### Usage
+### 使用
 ```html
 <div id="container" style="width: 600px;height: 480px"></div>
 ```
