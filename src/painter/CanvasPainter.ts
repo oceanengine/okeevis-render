@@ -346,9 +346,6 @@ export default class CanvasPainter implements Painter {
         if (item.attr.markerStart) {
           item.attr.markerStart.renderMarker(this, item as Shape, 'start');
         }
-        if (item.attr.markerMid) {
-          item.attr.markerMid.renderMarker(this, item as Shape, 'middle');
-        }
         if (item.attr.markerEnd) {
           item.attr.markerEnd.renderMarker(this, item as Shape, 'end');
         }

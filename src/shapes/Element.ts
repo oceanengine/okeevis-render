@@ -39,7 +39,6 @@ export interface BaseAttr extends TransformConf, EventConf {
   data?: any;
   display?: boolean;
   markerStart?: Marker;
-  markerMid?: Marker;
   markerEnd?: Marker;
 
   zIndex?: number; // deprecated
@@ -540,11 +539,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.attr.display === false) {
       return createZeroBBox();
     }
-    const { markerStart, markerMid, markerEnd } = this.attr;
+    const { markerStart, markerEnd } = this.attr;
     const boundingRect = this.getBoundingClientRect();
     const { x, y, width, height } = boundingRect;
     const shadowBlur = this.getExtendAttr('shadowBlur');
-    const hasSubBox = shadowBlur > 0 || markerStart || markerMid || markerEnd;
+    const hasSubBox = shadowBlur > 0 || markerStart || markerEnd;
     if (!hasSubBox) {
       return ceilBBox(boundingRect);
     }
@@ -559,12 +558,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
         height: height + shadowBlur * 2 + shadowOffsetY,
       });
     }
-    if (markerStart || markerMid || markerEnd) {
+    if (markerStart || markerEnd) {
       if (markerStart) {
         boxList.push(markerStart.getMarkerDirtyRect((this as unknown) as Shape, 'start'));
-      }
-      if (markerMid) {
-        boxList.push(markerMid.getMarkerDirtyRect((this as unknown) as Shape, 'middle'));
       }
       if (markerEnd) {
         boxList.push(markerEnd.getMarkerDirtyRect((this as unknown) as Shape, 'end'));

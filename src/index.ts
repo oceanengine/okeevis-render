@@ -1,5 +1,6 @@
 export { default as Render } from './render';
 export { default as Element, ElementAttr } from './shapes/Element';
+export { default as Shape, ShapeConf } from './shapes/Shape';
 export { default as Group, GroupConf } from './shapes/Group';
 export { default as Arc, ArcConf } from './shapes/Arc';
 export { default as Circle, CircleConf } from './shapes/Circle';
@@ -12,8 +13,8 @@ export { default as Polyline, PolylineConf } from './shapes/Polyline';
 export { default as Rect, RectConf } from './shapes/Rect';
 export { default as Sector, SectorConf } from './shapes/Sector';
 export { default as Text, TextConf } from './shapes/Text';
+export { default as Marker } from './shapes/Marker';
 export { default as RichText } from './RichText';
-export { default as Shape, ShapeConf } from './shapes/Shape';
 export { default as CompoundPath, CompoundPathConf } from './shapes/CompoundPath';
 export { default as LinearGradient } from './color/LinearGradient';
 export { default as RadialGradient } from './color/RadialGradient';
