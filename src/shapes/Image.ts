@@ -3,7 +3,7 @@ import { CommonAttr } from './Element';
 import { getImage } from '../utils/imageLoader';
 import { BBox, rectBBox, inBBox, alignBox, BoxAlign, BoxVerticalAlign } from '../utils/bbox';
 
-export interface ImageConf extends CommonAttr {
+export interface ImageAttr extends CommonAttr {
   x?: number;
   y?: number;
   // ie support, must append to body first
@@ -27,7 +27,7 @@ export interface ImageConf extends CommonAttr {
 }
 
 const boxAlign: Record<
-  Exclude<ImageConf['preserveAspectRatio'], 'none'>,
+  Exclude<ImageAttr['preserveAspectRatio'], 'none'>,
   [BoxAlign, BoxVerticalAlign]
 > = {
   xMinYMin: ['left', 'top'],
@@ -41,9 +41,9 @@ const boxAlign: Record<
   xMaxYMax: ['right', 'bottom'],
 };
 
-const shapeKeys: Array<keyof ImageConf> = ['x', 'y', 'width', 'height', 'src'];
+const shapeKeys: Array<keyof ImageAttr> = ['x', 'y', 'width', 'height', 'src'];
 
-export default class Image extends Shape<ImageConf> {
+export default class Image extends Shape<ImageAttr> {
   public type = 'image';
 
   public svgTagName = 'image';
@@ -54,11 +54,11 @@ export default class Image extends Shape<ImageConf> {
 
   public shapeKeys = shapeKeys;
 
-  public getAnimationKeys(): Array<keyof ImageConf> {
+  public getAnimationKeys(): Array<keyof ImageAttr> {
     return [...super.getAnimationKeys(), 'x', 'y', 'width', 'height'];
   }
 
-  public getDefaultAttr(): ImageConf {
+  public getDefaultAttr(): ImageAttr {
     return {
       ...super.getDefaultAttr(),
       x: 0,

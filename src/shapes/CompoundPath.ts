@@ -3,20 +3,20 @@ import { CommonAttr } from './Element';
 import { BBox } from '../utils/bbox';
 import Path2D from '../geometry/Path2D';
 
-export interface CompoundPathConf extends CommonAttr {
+export interface CompoundPathAttr extends CommonAttr {
   shapes?: Shape[];
   pathData?: Path2D;
   closePath?: boolean;
 }
 
-const shapeKeys: Array<keyof CompoundPathConf> = ['shapes', 'pathData'];
+const shapeKeys: Array<keyof CompoundPathAttr> = ['shapes', 'pathData'];
 
-export default class CompoundPath extends Shape<CompoundPathConf> {
+export default class CompoundPath extends Shape<CompoundPathAttr> {
   public type = 'compoundPath';
 
   public shapeKeys = shapeKeys;
 
-  public getDefaultAttr(): CompoundPathConf {
+  public getDefaultAttr(): CompoundPathAttr {
     return {
       ...super.getDefaultAttr(),
       shapes: [],
@@ -24,11 +24,11 @@ export default class CompoundPath extends Shape<CompoundPathConf> {
     };
   }
 
-  public getAnimationKeys(): Array<keyof CompoundPathConf> {
+  public getAnimationKeys(): Array<keyof CompoundPathAttr> {
     return [...super.getAnimationKeys(), 'pathData'];
   }
 
-  public prevProcessAttr(attr: CompoundPathConf) {
+  public prevProcessAttr(attr: CompoundPathAttr) {
     super.prevProcessAttr(attr);
     if (attr.shapes && attr.shapes.length > 0) {
       const path = new Path2D();

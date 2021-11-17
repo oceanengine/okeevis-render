@@ -4,7 +4,7 @@
 import * as lodash from '../utils/lodash';
 import Element from '../shapes/Element';
 import { BBox } from '../utils/bbox';
-import { TextConf } from '../shapes/Text';
+import { TextAttr } from '../shapes/Text';
 import { PaddingOption } from './flexlayout';
 import Rich from './rich-obj';
 import { EventConf } from '../event';
@@ -173,7 +173,7 @@ export default class VNode<T extends VNodeProps = VNodeProps> {
     }
   }
 
-  public getExtendAttr(attr: keyof (TextConf | VNodeProps)) {
+  public getExtendAttr(attr: keyof (TextAttr | VNodeProps)) {
     const value = this.getClosestNodeProps(attr);
     if (value === undefined) {
       return this.ownerDocument.conf[attr];

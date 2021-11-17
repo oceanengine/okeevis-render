@@ -6,17 +6,17 @@ import * as lodash from '../utils/lodash';
 import VNode from './vnode';
 import TextNode from './nodes/text';
 import parseVNode, { TagsMap } from './parser';
-import { TextConf } from '../shapes/Text';
+import { TextAttr } from '../shapes/Text';
 import { VNodeObject } from './index';
 
-export interface RichTextConf extends Omit<TextConf, 'text'> {
+export interface RichTextAttr extends Omit<TextAttr, 'text'> {
   text?: string | VNodeObject;
 }
 /**
  * rich text
  */
 export default class RichText {
-  public conf: RichTextConf;
+  public conf: RichTextAttr;
 
   public node: VNode;
 
@@ -24,7 +24,7 @@ export default class RichText {
 
   private _relayouted: boolean;
 
-  public constructor(conf: RichTextConf) {
+  public constructor(conf: RichTextAttr) {
     this.conf = conf;
     this.init();
   }

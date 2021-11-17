@@ -2,7 +2,7 @@
  * vbox
  */
 import Group from '../../shapes/Group';
-import Rect, { RectConf } from '../../shapes/Rect';
+import Rect, { RectAttr } from '../../shapes/Rect';
 import { createRef } from '../../utils/ref';
 import { BBox } from '../../utils/bbox';
 import { getPadding } from '../flexlayout';
@@ -46,7 +46,7 @@ export default class Box extends VNode {
       group.setAttr('clip', clipRef);
       group.add(rect);
     }
-    const attr: RectConf = {
+    const attr: RectAttr = {
       ...this.bbox,
       ...this.getStyle(),
       ...this.props.boxShadow,

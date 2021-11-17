@@ -1,5 +1,5 @@
-import { LineConf } from '../shapes/Line';
-import { RectConf } from '../shapes/Rect';
+import { LineAttr } from '../shapes/Line';
+import { RectAttr } from '../shapes/Rect';
 import * as lodash from './lodash';
 
 let enable1px = false;
@@ -12,7 +12,7 @@ export function pixelOptimize(v: number) {
   return Math.floor(v) + 0.5;
 }
 
-export default function line1px(option: LineConf): LineConf {
+export default function line1px(option: LineAttr): LineAttr {
   if (!enable1px) {
     return;
   }
@@ -26,7 +26,7 @@ export default function line1px(option: LineConf): LineConf {
   return option;
 }
 
-export function rect1px(option?: RectConf): RectConf {
+export function rect1px(option?: RectAttr): RectAttr {
   if (option) {
     if (lodash.isNumber(option.x) && lodash.isNumber(option.y)) {
       const { x, y, width, height } = option;

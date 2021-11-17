@@ -5,19 +5,19 @@ import { pointInCircle, pointInCircleStroke } from '../geometry/contain/circle';
 
 const PI2 = Math.PI * 2;
 
-export interface CircleConf extends CommonAttr {
+export interface CircleAttr extends CommonAttr {
   cx?: number;
   cy?: number;
   radius?: number;
 }
-const shapeKeys: Array<keyof CircleConf> = ['cx', 'cy', 'radius'];
+const shapeKeys: Array<keyof CircleAttr> = ['cx', 'cy', 'radius'];
 
-export default class Circle extends Shape<CircleConf> {
+export default class Circle extends Shape<CircleAttr> {
   public type = 'circle';
 
   public shapeKeys = shapeKeys;
 
-  public getDefaultAttr(): CircleConf {
+  public getDefaultAttr(): CircleAttr {
     return {
       ...super.getDefaultAttr(),
       cx: 0,
@@ -26,7 +26,7 @@ export default class Circle extends Shape<CircleConf> {
     };
   }
 
-  public getAnimationKeys(): Array<keyof CircleConf> {
+  public getAnimationKeys(): Array<keyof CircleAttr> {
     return [...super.getAnimationKeys(), 'cx', 'cy', 'radius'];
   }
 

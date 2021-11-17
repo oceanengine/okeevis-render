@@ -2,7 +2,7 @@ import Eventful from '../utils/Eventful';
 import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import SVGPainter from '../painter/SVGPainter';
-import Group, { GroupConf } from './Group';
+import Group, { GroupAttr } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
@@ -12,7 +12,7 @@ import interpolatePath from '../interpolate/interpolatePath';
 import interpolateColor from '../interpolate/interpolateColor';
 import { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
-import Shape, { ShapeConf } from './Shape';
+import Shape, { ShapeAttr } from './Shape';
 import Marker from './Marker';
 import * as mat3 from '../../js/mat3';
 import { Vec2, transformMat3, vec2BBox, createVec2 } from '../utils/vec2';
@@ -24,7 +24,7 @@ import { getSVGStyleAttributes } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
 
-export type ElementAttr = GroupConf & ShapeConf & { [key: string]: any };
+export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
 export const defaultSetting: { during: number; ease: EasingName } = {
   during: 300,
@@ -90,7 +90,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionDelay?: number;
 }
 
-export const defaultCanvasContext: ShapeConf = {
+export const defaultCanvasContext: ShapeAttr = {
   fill: 'none',
   stroke: 'none',
   lineWidth: 1,
@@ -129,7 +129,7 @@ const transformKeys: Array<keyof CommonAttr> = [
   'matrix',
 ];
 
-const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
+const animationKeysMap: Record<string, Array<keyof ShapeAttr>> = {};
 
 const defaultTRansformConf: CommonAttr = {
   originX: 0,
@@ -814,7 +814,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let animationKeys = animationKeysMap[this.type] as Array<keyof T>;
     if (!animationKeys) {
       animationKeys = this.getAnimationKeys();
-      animationKeysMap[this.type] = animationKeys as Array<keyof ShapeConf>;
+      animationKeysMap[this.type] = animationKeys as Array<keyof ShapeAttr>;
     }
     animationKeys = animationKeys.filter(key => {
       const toValue = toAttr[key];

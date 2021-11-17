@@ -4,7 +4,7 @@ import { getPointOnPolar } from '../utils/math';
 import { arcBBox, BBox } from '../utils/bbox';
 import { pointInArcStroke, pointInArcFill } from '../geometry/contain/arc';
 
-export interface ArcConf extends CommonAttr {
+export interface ArcAttr extends CommonAttr {
   cx?: number;
   cy?: number;
   radius?: number;
@@ -13,14 +13,14 @@ export interface ArcConf extends CommonAttr {
   closePath?: boolean;
 }
 
-const shapeKeys: Array<keyof ArcConf> = ['cx', 'cy', 'radius', 'start', 'end'];
+const shapeKeys: Array<keyof ArcAttr> = ['cx', 'cy', 'radius', 'start', 'end'];
 
-export default class Arc extends Shape<ArcConf> {
+export default class Arc extends Shape<ArcAttr> {
   public type = 'arc';
 
   public readonly shapeKeys = shapeKeys;
 
-  public getDefaultAttr(): ArcConf {
+  public getDefaultAttr(): ArcAttr {
     return {
       ...super.getDefaultAttr(),
       cx: 0,
@@ -32,7 +32,7 @@ export default class Arc extends Shape<ArcConf> {
     };
   }
 
-  public getAnimationKeys(): Array<keyof ArcConf> {
+  public getAnimationKeys(): Array<keyof ArcAttr> {
     return [...super.getAnimationKeys(), 'cx', 'cy', 'radius', 'start', 'end'];
   }
 
