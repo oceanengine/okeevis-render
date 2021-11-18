@@ -1,7 +1,7 @@
 {
   "name": "@okee-uikit/render",
   "version": "0.1.0",
-  "description": "",
+  "description": "a fast lightweight 2d graphic library",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
@@ -62,7 +62,7 @@
   },
   "author": "liwensheng",
   "license": "ISC",
-  "homepage": "",
+  "homepage": "https://github.com/oceanengine/okeevis-render",
   "dependencies": {
     "@egjs/list-differ": "1.0.0",
     "color": "3.1.3",
