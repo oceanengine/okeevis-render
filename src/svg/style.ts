@@ -260,5 +260,5 @@ export function getAllShadows(group: Group, out: Array<Shadow> = []): Shadow[] {
 }
 
 export function getClipId(node: Element) {
-  return `lightcharts-clip-${node.id}`;
+  return `okee-render-clip-${node.id}`;
 }

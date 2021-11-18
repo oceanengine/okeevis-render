@@ -21,7 +21,7 @@ export default class Pattern {
 
   public constructor(conf: PatternOption) {
     this.option = conf;
-    this.id = 'lightcharts-pattern-' + id++;
+    this.id = 'okee-render-pattern-' + id++;
   }
 
   public getCanvasContextStyle(

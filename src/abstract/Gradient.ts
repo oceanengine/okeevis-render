@@ -22,7 +22,7 @@ export default abstract class Gradient<T extends GradientOption = any> {
 
   public constructor(option: T) {
     this.option = option;
-    this.id = 'lightcharts-gradient-' + id++;
+    this.id = 'okee-render-gradient-' + id++;
   }
 
   public abstract clone(): Gradient<T>;

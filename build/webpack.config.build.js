@@ -19,9 +19,9 @@ var prodWebpackConfig = {
     entry: root + '/src/index.ts',
     output: {
         path: assetsRoot,
-        library: 'lightcharts',
+        library: 'OkeeRender',
         libraryTarget: 'umd',
-        filename: 'lightcharts.min.js',
+        filename: 'okee-render.min.js',
     },
     plugins: [
         new webpack.DefinePlugin({
@@ -29,15 +29,15 @@ var prodWebpackConfig = {
                 NODE_ENV: '"production"',
             },
         }),
-        // new UglifyJsPlugin({
-        //     uglifyOptions: {
-        //         compress: {
-        //             warnings: false,
-        //         },
-        //     },
-        //     sourceMap: false,
-        //     parallel: true,
-        // }),
+        new UglifyJsPlugin({
+            uglifyOptions: {
+                compress: {
+                    warnings: false,
+                },
+            },
+            sourceMap: false,
+            parallel: true,
+        }),
     ],
 };
 
