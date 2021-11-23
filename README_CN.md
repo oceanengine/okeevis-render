@@ -1,12 +1,23 @@
 # OKee Render
 
-一个轻量级的高性能 2d 图形库
+<p align="center">一个高性能的轻量级2d图形库</p>
+<p align="center">
+    <img src="https://img.shields.io/npm/v/@okee-uikit/render" alt="npm version" />
+    <img src="https://img.shields.io/badge/language-typescript-red.svg" />
+    <img src="https://img.shields.io/bundlephobia/min/@okee-uikit/render" alt="min size" />
+</p>
+
+[English](./README.md)　| 简体中文
 
 ## 特性
 
 * svg /canvas双引擎, 使用相同的api
 * 优秀的性能, 支持数十万图元渲染交互
-* 可继承式样式属性
+* 支持web、node、小程序环境
+* 支持插值动画和路径动画
+* 支持虚拟dom更新及产生过渡效果
+* 支持富文本组件
+
 
 ## 安装
 > npm install @okee-uikit/render
@@ -25,7 +36,8 @@ or.add(new Rect({
   x: 0,
   y: 0,
   width: 100,
-  height: 100
+  height: 100，
+  fill: 'red'
 }))
 ```
 
