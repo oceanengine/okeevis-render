@@ -418,7 +418,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     item.parentNode = this;
     item.mounted();
     if (dirty) {
-      this.dirty(item);
+      item.dirty();
     }
     this.dirtyBBox();
   }
