@@ -434,7 +434,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._dirty;
   }
 
-  public dirty(dirtyElement: Element = null) {
+  public dirty() {
     let leafNodeSize = 1;
     if (
       this.ownerRender &&
@@ -452,7 +452,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this._dirty = true;
     if (this.ownerRender) {
-      this.ownerRender.dirty(dirtyElement || this);
+      this.ownerRender.dirty(this);
       if (this.isGroup && this.ownerRender.renderer === 'canvas') {
         if (leafNodeSize > this.ownerRender.maxDirtyRects) {
           (this.ownerRender.getPainter() as CanvasPainter).noDirtyRectNextFrame();
