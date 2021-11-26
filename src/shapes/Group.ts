@@ -2,19 +2,19 @@ import { diff } from '@egjs/list-differ';
 import Element, { defaultSetting } from './Element';
 import { TypeCustomElement } from './CustomElement';
 import Shape from './Shape';
-import { TextConf, shapeKeys } from './Text';
+import { TextAttr, shapeKeys } from './Text';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 import SVGPainter from '../painter/SVGPainter';
 
-export interface GroupConf extends TextConf {}
+export interface GroupAttr extends TextAttr {}
 
 export interface ChunkItem {
   parent: Group;
   chunks: Element[][];
 }
 
-export default class Group<T extends Element = Element> extends Element<GroupConf> {
+export default class Group<T extends Element = Element> extends Element<GroupAttr> {
   public type = 'group';
 
   public svgTagName = 'g';
@@ -33,7 +33,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     return this._length;
   }
 
-  public getDefaultAttr(): GroupConf {
+  public getDefaultAttr(): GroupAttr {
     return {
       ...super.getDefaultAttr(),
     };
@@ -46,7 +46,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     }
   }
 
-  public getAnimationKeys(): Array<keyof GroupConf> {
+  public getAnimationKeys(): Array<keyof GroupAttr> {
     return [...super.getAnimationKeys(), 'fontSize'];
   }
 
@@ -418,7 +418,7 @@ export default class Group<T extends Element = Element> extends Element<GroupCon
     item.parentNode = this;
     item.mounted();
     if (dirty) {
-      this.dirty(item);
+      item.dirty();
     }
     this.dirtyBBox();
   }

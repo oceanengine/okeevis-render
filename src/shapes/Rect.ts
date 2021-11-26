@@ -8,21 +8,21 @@ interface Point {
   y: number;
 }
 
-export interface RectConf extends CommonAttr {
+export interface RectAttr extends CommonAttr {
   x?: number;
   y?: number;
   width?: number;
   height?: number;
   r?: number | number[];
 }
-const shapeKeys: Array<keyof RectConf> = ['x', 'y', 'width', 'height'];
+const shapeKeys: Array<keyof RectAttr> = ['x', 'y', 'width', 'height'];
 
-export default class Rect extends Shape<RectConf> {
+export default class Rect extends Shape<RectAttr> {
   public type = 'rect';
 
   public shapeKeys = shapeKeys;
 
-  public getDefaultAttr(): RectConf {
+  public getDefaultAttr(): RectAttr {
     return {
       ...super.getDefaultAttr(),
       x: 0,
@@ -33,7 +33,7 @@ export default class Rect extends Shape<RectConf> {
     };
   }
 
-  public getAnimationKeys(): Array<keyof RectConf> {
+  public getAnimationKeys(): Array<keyof RectAttr> {
     return [...super.getAnimationKeys(), 'x', 'y', 'width', 'height', 'r'];
   }
 

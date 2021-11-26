@@ -2,7 +2,7 @@ import Eventful from '../utils/Eventful';
 import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import SVGPainter from '../painter/SVGPainter';
-import Group, { GroupConf } from './Group';
+import Group, { GroupAttr } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
@@ -12,7 +12,7 @@ import interpolatePath from '../interpolate/interpolatePath';
 import interpolateColor from '../interpolate/interpolateColor';
 import { TransformConf } from '../abstract/TransformAble';
 import { EventConf } from '../event';
-import Shape, { ShapeConf } from './Shape';
+import Shape, { ShapeAttr } from './Shape';
 import Marker from './Marker';
 import * as mat3 from '../../js/mat3';
 import { Vec2, transformMat3, vec2BBox, createVec2 } from '../utils/vec2';
@@ -24,7 +24,7 @@ import { getSVGStyleAttributes } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
 
-export type ElementAttr = GroupConf & ShapeConf & { [key: string]: any };
+export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
 export const defaultSetting: { during: number; ease: EasingName } = {
   during: 300,
@@ -39,7 +39,6 @@ export interface BaseAttr extends TransformConf, EventConf {
   data?: any;
   display?: boolean;
   markerStart?: Marker;
-  markerMid?: Marker;
   markerEnd?: Marker;
 
   zIndex?: number; // deprecated
@@ -91,7 +90,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionDelay?: number;
 }
 
-export const defaultCanvasContext: ShapeConf = {
+export const defaultCanvasContext: ShapeAttr = {
   fill: 'none',
   stroke: 'none',
   lineWidth: 1,
@@ -130,7 +129,7 @@ const transformKeys: Array<keyof CommonAttr> = [
   'matrix',
 ];
 
-const animationKeysMap: Record<string, Array<keyof ShapeConf>> = {};
+const animationKeysMap: Record<string, Array<keyof ShapeAttr>> = {};
 
 const defaultTRansformConf: CommonAttr = {
   originX: 0,
@@ -435,7 +434,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._dirty;
   }
 
-  public dirty(dirtyElement: Element = null) {
+  public dirty() {
     let leafNodeSize = 1;
     if (
       this.ownerRender &&
@@ -453,7 +452,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this._dirty = true;
     if (this.ownerRender) {
-      this.ownerRender.dirty(dirtyElement || this);
+      this.ownerRender.dirty(this);
       if (this.isGroup && this.ownerRender.renderer === 'canvas') {
         if (leafNodeSize > this.ownerRender.maxDirtyRects) {
           (this.ownerRender.getPainter() as CanvasPainter).noDirtyRectNextFrame();
@@ -540,11 +539,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.attr.display === false) {
       return createZeroBBox();
     }
-    const { markerStart, markerMid, markerEnd } = this.attr;
+    const { markerStart, markerEnd } = this.attr;
     const boundingRect = this.getBoundingClientRect();
     const { x, y, width, height } = boundingRect;
     const shadowBlur = this.getExtendAttr('shadowBlur');
-    const hasSubBox = shadowBlur > 0 || markerStart || markerMid || markerEnd;
+    const hasSubBox = shadowBlur > 0 || markerStart || markerEnd;
     if (!hasSubBox) {
       return ceilBBox(boundingRect);
     }
@@ -559,12 +558,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
         height: height + shadowBlur * 2 + shadowOffsetY,
       });
     }
-    if (markerStart || markerMid || markerEnd) {
+    if (markerStart || markerEnd) {
       if (markerStart) {
         boxList.push(markerStart.getMarkerDirtyRect((this as unknown) as Shape, 'start'));
-      }
-      if (markerMid) {
-        boxList.push(markerMid.getMarkerDirtyRect((this as unknown) as Shape, 'middle'));
       }
       if (markerEnd) {
         boxList.push(markerEnd.getMarkerDirtyRect((this as unknown) as Shape, 'end'));
@@ -818,7 +814,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let animationKeys = animationKeysMap[this.type] as Array<keyof T>;
     if (!animationKeys) {
       animationKeys = this.getAnimationKeys();
-      animationKeysMap[this.type] = animationKeys as Array<keyof ShapeConf>;
+      animationKeysMap[this.type] = animationKeys as Array<keyof ShapeAttr>;
     }
     animationKeys = animationKeys.filter(key => {
       const toValue = toAttr[key];

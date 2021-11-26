@@ -27,24 +27,8 @@ module.exports = {
     module: {
         loaders: [
             {
-                test: /\.(jpg|gif|png|svg)$/,
-                loader: 'url-loader',
-                options: {
-                    limit: 8192,
-                },
-            },
-            {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
-            },
-            {
-                test: /\.pug$/,
-                loader: 'pug-loader',
-            },
-            {
-                test: /\.styl$/,
-                // loader: 'stylus-loader',
-                loader: 'style-loader!css-loader!stylus-loader',
             },
             {
                 test: /\.json$/,
@@ -55,11 +39,7 @@ module.exports = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 include: root,
-            },
-            {
-                test: /\.css$/,
-                loader: 'style-loader!css-loader',
-            },
+            }
         ],
     },
     plugins: [

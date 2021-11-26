@@ -1,4 +1,4 @@
-import Group, { GroupConf } from './Group';
+import Group, { GroupAttr } from './Group';
 import Element from './Element';
 
 class CustomElement extends Group {
@@ -53,7 +53,7 @@ class CustomElement extends Group {
   }
 }
 
-declare class MyClass<T> extends Element<T & GroupConf> {
+declare class MyClass<T> extends Element<T & GroupAttr> {
   public $$CustomType: boolean;
 
   public skipUpdate(): void;
@@ -67,4 +67,4 @@ declare class MyClass<T> extends Element<T & GroupConf> {
 
 export type TypeCustomElement<T = {}> = MyClass<T>;
 
-export default (CustomElement as any) as new <T>(attr?: T & Omit<GroupConf, 'text'>) => MyClass<T>;
+export default (CustomElement as any) as new <T>(attr?: T & Omit<GroupAttr, 'text'>) => MyClass<T>;

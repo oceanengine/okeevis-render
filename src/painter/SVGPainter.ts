@@ -359,12 +359,9 @@ export default class SVGPainter implements Painter {
 
   private _getAllMarkers(group: Group) {
     group.eachChild(child => {
-      const { markerStart, markerMid, markerEnd } = child.attr;
+      const { markerStart, markerEnd } = child.attr;
       if (markerStart) {
         this._dfsMarkers.add(markerStart);
-      }
-      if (markerMid) {
-        this._dfsMarkers.add(markerMid);
       }
       if (markerEnd) {
         this._dfsMarkers.add(markerEnd);

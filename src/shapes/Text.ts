@@ -4,7 +4,7 @@ import * as lodash from '../utils/lodash';
 import { BBox, inBBox } from '../utils/bbox';
 import { measureText } from '../utils/measureText';
 
-export interface TextConf extends CommonAttr {
+export interface TextAttr extends CommonAttr {
   x?: number;
   y?: number;
   maxWidth?: number;
@@ -24,7 +24,7 @@ export interface TextConf extends CommonAttr {
     ellipsis?: string;
   };
 }
-export const shapeKeys: Array<keyof TextConf> = [
+export const shapeKeys: Array<keyof TextAttr> = [
   'x',
   'y',
   'text',
@@ -42,7 +42,7 @@ export interface TextSpan {
   text: string;
 }
 
-export default class Text extends Shape<TextConf> {
+export default class Text extends Shape<TextAttr> {
   public type = 'text';
 
   public svgTagName = 'text';
@@ -64,7 +64,7 @@ export default class Text extends Shape<TextConf> {
     return !!((text + '').indexOf('\n') !== -1 || truncate);
   }
 
-  public getDefaultAttr(): TextConf {
+  public getDefaultAttr(): TextAttr {
     return {
       ...super.getDefaultAttr(),
       text: '',
@@ -77,7 +77,7 @@ export default class Text extends Shape<TextConf> {
     return this._isOverflow;
   }
 
-  public getAnimationKeys(): Array<keyof TextConf> {
+  public getAnimationKeys(): Array<keyof TextAttr> {
     return [...super.getAnimationKeys(), 'x', 'y', 'fontSize'];
   }
 
@@ -159,7 +159,7 @@ export default class Text extends Shape<TextConf> {
     return measureText(text, textStyle);
   }
 
-  public getTextStyle(): TextConf {
+  public getTextStyle(): TextAttr {
     const fontSize = this.getExtendAttr('fontSize');
     return {
       fontSize,

@@ -9,7 +9,7 @@ interface Point {
   y: number;
 }
 
-export interface SectorConf extends CommonAttr {
+export interface SectorAttr extends CommonAttr {
   cx?: number;
   cy?: number;
   radius?: number;
@@ -20,7 +20,7 @@ export interface SectorConf extends CommonAttr {
   cornerRadius?: number | number[];
 }
 
-const shapeKeys: Array<keyof SectorConf> = [
+const shapeKeys: Array<keyof SectorAttr> = [
   'cx',
   'cy',
   'radius',
@@ -30,12 +30,12 @@ const shapeKeys: Array<keyof SectorConf> = [
   'round',
 ];
 
-export default class Sector extends Shape<SectorConf> {
+export default class Sector extends Shape<SectorAttr> {
   public type = 'sector';
 
   public shapeKeys = shapeKeys;
 
-  public getDefaultAttr(): SectorConf {
+  public getDefaultAttr(): SectorAttr {
     return {
       ...super.getDefaultAttr(),
       cx: 0,
@@ -49,7 +49,7 @@ export default class Sector extends Shape<SectorConf> {
     };
   }
 
-  public getAnimationKeys(): Array<keyof SectorConf> {
+  public getAnimationKeys(): Array<keyof SectorAttr> {
     return [...super.getAnimationKeys(), 'cx', 'cy', 'start', 'end', 'radius', 'radiusI'];
   }
 

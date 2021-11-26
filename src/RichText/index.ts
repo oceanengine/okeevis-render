@@ -15,7 +15,7 @@ export type VNodeObject = VNodeProps & {
 
 export interface RichTextConf {
   rich?: boolean;
-  text: string | VNodeObject;
+  text?: string | VNodeObject;
 }
 
 export default class RichText extends CustomElement<RichTextConf> {

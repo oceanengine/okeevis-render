@@ -1,6 +1,6 @@
 import LRUMap from './LRU';
 import ES6Set from './set';
-import { TextConf } from '../shapes/Text';
+import { TextAttr } from '../shapes/Text';
 
 import * as styleHelper from '../canvas/style';
 
@@ -37,7 +37,7 @@ export function removeContext(ctx: CanvasRenderingContext2D) {
 
 export function measureTextList(
   textList: string[],
-  textStyle: TextConf = {},
+  textStyle: TextAttr = {},
   ctx: CanvasRenderingContext2D = getContext(),
 ): TextSize[] {
   ctx.save();
@@ -49,7 +49,7 @@ export function measureTextList(
 
 export function measureText(
   text: string,
-  textStyle: TextConf = {},
+  textStyle: TextAttr = {},
   ctx: CanvasRenderingContext2D = getContext(),
   setContext = true,
 ): TextSize {
@@ -68,7 +68,7 @@ export function measureText(
   return size;
 }
 
-function initTextContext(ctx: CanvasRenderingContext2D, textStyle: TextConf = {}) {
+function initTextContext(ctx: CanvasRenderingContext2D, textStyle: TextAttr = {}) {
   const {
     fontFamily = 'sans-serif',
     fontSize = 12,
@@ -77,7 +77,7 @@ function initTextContext(ctx: CanvasRenderingContext2D, textStyle: TextConf = {}
   } = textStyle;
   styleHelper.setFontStyle(ctx, fontSize, fontFamily, fontWeight, fontStyle);
 }
-function getCacheKey(text: string, textStyle: TextConf): string {
+function getCacheKey(text: string, textStyle: TextAttr): string {
   const {
     fontFamily = 'sans-serif',
     fontSize = 10,

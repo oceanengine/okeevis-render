@@ -1,7 +1,7 @@
-import Polyline, { PolylineConf } from './Polyline';
+import Polyline, { PolylineAttr } from './Polyline';
 import { pointInPolygonStroke } from '../geometry/contain/polygon';
 
-export type PolygonConf = PolylineConf;
+export type PolygonAttr = PolylineAttr;
 
 export default class Polygon extends Polyline {
   public type = 'polygon';

@@ -9,14 +9,14 @@ interface Point {
   x: number;
   y: number;
 }
-export interface PolylineConf extends CommonAttr {
+export interface PolylineAttr extends CommonAttr {
   pointList?: Point[];
   smooth?: boolean;
   smoothType?: 'bezier' | 'spline';
   smoothConstraint?: [Point, Point];
   smoothMonotone?: 'x' | 'y';
 }
-const shapeKeys: Array<keyof PolylineConf> = [
+const shapeKeys: Array<keyof PolylineAttr> = [
   'pointList',
   'smooth',
   'smoothConstraint',
@@ -24,12 +24,12 @@ const shapeKeys: Array<keyof PolylineConf> = [
   'smoothType',
 ];
 
-export default class Polyline extends Shape<PolylineConf> {
+export default class Polyline extends Shape<PolylineAttr> {
   public type = 'polyline';
 
   public shapeKeys = shapeKeys;
 
-  public getDefaultAttr(): PolylineConf {
+  public getDefaultAttr(): PolylineAttr {
     return {
       ...super.getDefaultAttr(),
       pointList: [],
@@ -38,7 +38,7 @@ export default class Polyline extends Shape<PolylineConf> {
     };
   }
 
-  public getAnimationKeys(): Array<keyof PolylineConf> {
+  public getAnimationKeys(): Array<keyof PolylineAttr> {
     return [...super.getAnimationKeys(), 'pointList'];
   }
 

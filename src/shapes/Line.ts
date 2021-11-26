@@ -4,23 +4,23 @@ import { BBox, lineBBox } from '../utils/bbox';
 import { pointInLineStroke } from '../geometry/contain/line';
 import line1px from '../utils/line1px';
 
-export interface LineConf extends CommonAttr {
+export interface LineAttr extends CommonAttr {
   x1?: number;
   y1?: number;
   x2?: number;
   y2?: number;
 }
 
-const shapeKeys: Array<keyof LineConf> = ['x1', 'y1', 'x2', 'y2'];
+const shapeKeys: Array<keyof LineAttr> = ['x1', 'y1', 'x2', 'y2'];
 
-export default class Line extends Shape<LineConf> {
+export default class Line extends Shape<LineAttr> {
   public type = 'line';
 
   public fillAble = false;
 
   public shapeKeys = shapeKeys;
 
-  public getDefaultAttr(): LineConf {
+  public getDefaultAttr(): LineAttr {
     return {
       ...super.getDefaultAttr(),
       x1: 0,
@@ -35,7 +35,7 @@ export default class Line extends Shape<LineConf> {
     line1px(this.attr);
   }
 
-  public getAnimationKeys(): Array<keyof LineConf> {
+  public getAnimationKeys(): Array<keyof LineAttr> {
     return [...super.getAnimationKeys(), 'x1', 'y1', 'x2', 'y2'];
   }
 

@@ -1,33 +1,33 @@
 import Element, { CommonAttr } from './Element';
 
-import { ArcConf } from './Arc';
-import { CircleConf } from './Circle';
-import { ImageConf } from './Image';
-import { LineConf } from './Line';
-import { PathConf } from './Path';
-import { PolygonConf } from './Polygon';
-import { PolylineConf } from './Polyline';
-import { RectConf } from './Rect';
-import { SectorConf } from './Sector';
-import { TextConf } from './Text';
-import { EllipseConf } from './Ellipse';
-import { CompoundPathConf } from './CompoundPath';
+import { ArcAttr } from './Arc';
+import { CircleAttr } from './Circle';
+import { ImageAttr } from './Image';
+import { LineAttr } from './Line';
+import { PathAttr } from './Path';
+import { PolygonAttr } from './Polygon';
+import { PolylineAttr } from './Polyline';
+import { RectAttr } from './Rect';
+import { SectorAttr } from './Sector';
+import { TextAttr } from './Text';
+import { EllipseAttr } from './Ellipse';
+import { CompoundPathAttr } from './CompoundPath';
 import Path2D, { PointOnPath } from '../geometry/Path2D';
 
-export type ShapeConf = ArcConf &
-  CircleConf &
-  ImageConf &
-  LineConf &
-  PathConf &
-  PolylineConf &
-  PolygonConf &
-  RectConf &
-  SectorConf &
-  TextConf &
-  CompoundPathConf &
-  EllipseConf;
+export type ShapeAttr = ArcAttr &
+  CircleAttr &
+  ImageAttr &
+  LineAttr &
+  PathAttr &
+  PolylineAttr &
+  PolygonAttr &
+  RectAttr &
+  SectorAttr &
+  TextAttr &
+  CompoundPathAttr &
+  EllipseAttr;
 
-export default class Shape<T extends CommonAttr = ShapeConf> extends Element<T> {
+export default class Shape<T extends CommonAttr = ShapeAttr> extends Element<T> {
   public svgTagName = 'path';
 
   public brush(ctx: CanvasRenderingContext2D) {

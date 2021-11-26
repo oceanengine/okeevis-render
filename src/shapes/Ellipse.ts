@@ -7,20 +7,20 @@ import { CommonAttr } from './Element';
 import { BBox } from '../utils/bbox';
 import { pointInEllipseFill, pointInEllipseStroke } from '../geometry/contain/ellipse';
 
-export interface EllipseConf extends CommonAttr {
+export interface EllipseAttr extends CommonAttr {
   cx?: number;
   cy?: number;
   rx?: number;
   ry?: number;
 }
-const shapeKeys: Array<keyof EllipseConf> = ['cx', 'cy', 'rx', 'ry'];
+const shapeKeys: Array<keyof EllipseAttr> = ['cx', 'cy', 'rx', 'ry'];
 
-export default class Circle extends Shape<EllipseConf> {
+export default class Circle extends Shape<EllipseAttr> {
   public type = 'ellipse';
 
   public shapeKeys = shapeKeys;
 
-  public getDefaultAttr(): EllipseConf {
+  public getDefaultAttr(): EllipseAttr {
     return {
       ...super.getDefaultAttr(),
       cx: 0,
@@ -30,7 +30,7 @@ export default class Circle extends Shape<EllipseConf> {
     };
   }
 
-  public getAnimationKeys(): Array<keyof EllipseConf> {
+  public getAnimationKeys(): Array<keyof EllipseAttr> {
     return [...super.getAnimationKeys(), 'cx', 'cy', 'rx', 'ry'];
   }
 

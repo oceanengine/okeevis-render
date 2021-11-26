@@ -1,5 +1,6 @@
 import Element, { defaultCanvasContext, ElementAttr } from '../shapes/Element';
 import Group from '../shapes/Group';
+import Marker from '../shapes/Marker';
 import * as mat3 from '../../js/mat3';
 import { SVG_NAMESPACE, XLINK_NAMESPACE, IDENTRY_MATRIX } from '../constant';
 import Shadow from './Shadow';
@@ -108,7 +109,6 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     shadowColor,
     shadowBlur,
     markerStart,
-    markerMid,
     markerEnd,
   } = node.attr;
   const ret: Partial<SVGElementStyle> = {};
@@ -207,9 +207,6 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   if (markerStart) {
     ret['marker-start'] = `url(#${markerStart.getMarkerId()})`;
   }
-  if (markerMid) {
-    ret['marker-mid'] = `url(#${markerMid.getMarkerId()})`;
-  }
   if (markerEnd) {
     ret['marker-end'] = `url(#${markerEnd.getMarkerId()})`;
   }
@@ -249,6 +246,22 @@ export function getAllDefsGradientAndPattern(
   return out;
 }
 
+export function getAllMarkers(group: Group, out: Array<Marker> = []): Marker[] {
+  group.eachChild(child => {
+    const { markerStart, markerEnd } = child.attr;
+    if (markerStart) {
+      out.indexOf(markerStart) === -1 && out.push(markerStart);
+    }
+    if (markerEnd) {
+      out.indexOf(markerEnd) === -1 && out.push(markerEnd);
+    }
+    if (child.isGroup) {
+      getAllMarkers(child as Group, out);
+    }
+  });
+  return out;
+}
+
 export function getAllShadows(group: Group, out: Array<Shadow> = []): Shadow[] {
   group.eachChild(child => {
     const { shadowColor, shadowBlur } = child.attr;
@@ -264,5 +277,5 @@ export function getAllShadows(group: Group, out: Array<Shadow> = []): Shadow[] {
 }
 
 export function getClipId(node: Element) {
-  return `lightcharts-clip-${node.id}`;
+  return `okee-render-clip-${node.id}`;
 }

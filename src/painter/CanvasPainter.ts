@@ -2,8 +2,8 @@ import Painter from '../abstract/Painter';
 import { registerPainter } from './index';
 import Render from '../render';
 import Element, { defaultCanvasContext } from '../shapes/Element';
-import Shape, { ShapeConf } from '../shapes/Shape';
-import Group, { GroupConf } from '../shapes/Group';
+import Shape, { ShapeAttr } from '../shapes/Shape';
+import Group, { GroupAttr } from '../shapes/Group';
 import { BBox, bboxIntersect } from '../utils/bbox';
 import mergeDirtyRegions from './dirtyRect';
 import { getCtxColor, isGradient, isTransparent, ColorValue } from '../color';
@@ -12,7 +12,7 @@ import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
 import { fpsRect, fpsText } from './fps';
 
-const contextKeys: Array<keyof ShapeConf> = [
+const contextKeys: Array<keyof ShapeAttr> = [
   'fill',
   'fontSize',
   'blendMode',
@@ -346,9 +346,6 @@ export default class CanvasPainter implements Painter {
         if (item.attr.markerStart) {
           item.attr.markerStart.renderMarker(this, item as Shape, 'start');
         }
-        if (item.attr.markerMid) {
-          item.attr.markerMid.renderMarker(this, item as Shape, 'middle');
-        }
         if (item.attr.markerEnd) {
           item.attr.markerEnd.renderMarker(this, item as Shape, 'end');
         }
@@ -497,7 +494,7 @@ export default class CanvasPainter implements Painter {
 
   private _setElementCanvasContext(
     ctx: CanvasRenderingContext2D,
-    item: Element<GroupConf>,
+    item: Element<GroupAttr>,
     computedFill: ColorValue,
     computedStroke: ColorValue,
     fillOpacity: number,
@@ -617,7 +614,7 @@ export default class CanvasPainter implements Painter {
   }
 
   protected _hasSelfContext(
-    item: Element<ShapeConf>,
+    item: Element<ShapeAttr>,
     fill: ColorValue,
     fillOpacity: number,
     stroke: ColorValue,
