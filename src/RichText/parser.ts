@@ -8,11 +8,9 @@ import Text from './nodes/text';
 import HorizontalLine from './nodes/hr';
 import Spacer from './nodes/spacer';
 import * as lodash from '../utils/lodash';
-// eslint-disable-next-line import/order
-import parserLibary = require('htmlparser2/lib/Parser');
+import {  parseXML as parse } from '../utils/xmlparser';
 
 // old version modulex.exports = Parser
-const Parser = typeof parserLibary === 'function' ? parserLibary : parserLibary.Parser;
 
 export const TagsMap = {
   vbox: VBox,
@@ -41,7 +39,8 @@ export default function parseXML(template: string, document: Rich): VNode[] {
   if (!template) {
     return [];
   }
-  const parser = new Parser(
+ parse(
+   template,
     {
       onopentag(name: keyof typeof TagsMap, attribs: any) {
         const NodeConstroctor = TagsMap[name];
@@ -63,22 +62,11 @@ export default function parseXML(template: string, document: Rich): VNode[] {
           currentNode.appendChild(new Text({ value: trimText }));
         }
       },
-      onclosetag(name: keyof typeof TagsMap) {
-        const NodeConstroctor = TagsMap[name];
-        if (NodeConstroctor) {
-          nodesStack.pop();
-          currentNode = nodesStack[nodesStack.length - 1];
-        }
+      onclosetag() {
+        nodesStack.pop();
+        currentNode = nodesStack[nodesStack.length - 1];
       },
-    },
-    {
-      decodeEntities: true,
-      lowerCaseTags: true,
-      lowerCaseAttributeNames: false,
-      recognizeSelfClosing: true,
-    },
+    }
   );
-  parser.write(template);
-  parser.end();
   return root;
 }
