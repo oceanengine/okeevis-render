@@ -9,7 +9,7 @@ export interface SyntheticDragEventParams extends SyntheticMouseEventParams {
   dy: number;
 }
 
-export default class SyntheticDragEvent extends SyntheticMouseEvent {
+export default class SyntheticDragEvent extends SyntheticMouseEvent<DragEvent> {
   public syntheticType = 'dnd';
 
   public startX: number;

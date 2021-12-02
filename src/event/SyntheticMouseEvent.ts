@@ -6,7 +6,7 @@ export interface SyntheticMouseEventParams extends SyntheticEventParams {
   y: number;
 }
 
-export default class SyntheticMouseEvent extends SyntheticEvent<MouseEvent> {
+export default class SyntheticMouseEvent<T extends MouseEvent = MouseEvent> extends SyntheticEvent<T> {
   public syntheticType = 'mouse';
 
   public x: number;
