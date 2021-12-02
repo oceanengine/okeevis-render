@@ -52,6 +52,8 @@ export default class EventHandle {
 
   private _dragStartTouchId: number;
 
+  private _nativeDragoverTarget: Element;
+
   private _eventOnly: boolean;
 
   private _PixelPainter: CanvasPainter;
@@ -510,6 +512,39 @@ export default class EventHandle {
     this._prevMouseTarget = target;
   };
 
+  private _handleNativeDnDEvent = (nativeEvent: DragEvent) => {
+    // dragover drop
+    nativeEvent.preventDefault();
+    const { x, y } = this._getMousePosition(nativeEvent);
+    const target = this.pickTarget(x, y);
+    const eventParam = {
+      x,
+      y,
+      bubbles: nativeEvent.bubbles,
+      original: nativeEvent,
+      timeStamp: nativeEvent.timeStamp,
+    };
+    if (nativeEvent.type === 'drop') {
+      const dropEvent = new SyntheticMouseEvent(nativeEvent.type, {
+        ...eventParam,
+      });
+      this._dispatchSyntheticEvent(dropEvent, target);
+    }
+    if (nativeEvent.type === 'dragover') {
+      const prevDragOverTarget = this._nativeDragoverTarget;
+      const dragOverEvent = new SyntheticMouseEvent('dragover', eventParam);
+      this._dispatchSyntheticEvent(dragOverEvent, target);
+      this._nativeDragoverTarget = target;
+      if (prevDragOverTarget !== target) {
+        const dragEnterEvent = new SyntheticMouseEvent('dragenter', eventParam);
+        const dragLeaveEvent = new SyntheticMouseEvent('dragleave', eventParam);
+        this._dispatchSyntheticEvent(dragEnterEvent, target);
+        this._dispatchSyntheticEvent(dragLeaveEvent, prevDragOverTarget);
+      }
+    }
+   
+  }
+
   private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
     const { x, y } = this._getMousePosition(nativeEvent);
     const mouseEventParam: SyntheticMouseEventParams = {
@@ -563,6 +598,8 @@ export default class EventHandle {
     dom.removeEventListener('touchcancel', this._syntheticTouchEvent);
     dom.removeEventListener('mouseleave', this._handleMouseLeave);
     dom.removeEventListener('mouseenter', this._handleMouseEnter);
+    dom.removeEventListener('drop', this._handleNativeDnDEvent);
+    dom.removeEventListener('dragover', this._handleNativeDnDEvent);
     document.removeEventListener('mouseup', this._handleDocumentMouseUp);
   }
 
@@ -610,6 +647,8 @@ export default class EventHandle {
     dom.addEventListener('touchcancel', this._syntheticTouchEvent);
     dom.addEventListener('mouseleave', this._handleMouseLeave);
     dom.addEventListener('mouseenter', this._handleMouseEnter);
+    dom.addEventListener('drop', this._handleNativeDnDEvent);
+    dom.addEventListener('dragover', this._handleNativeDnDEvent);
     document.addEventListener('mouseup', this._handleDocumentMouseUp);
   }
 

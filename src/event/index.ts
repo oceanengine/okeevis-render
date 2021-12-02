@@ -30,6 +30,7 @@ export interface EventConf {
   onDragStart?: (event: SyntheticDragEvent) => void;
   onDrag?: (event: SyntheticDragEvent) => void;
   onDragEnd?: (event: SyntheticDragEvent) => void;
+  onDragEnter?: (event: SyntheticDragEvent) => void;
   onDragOver?: (event: SyntheticDragEvent) => void;
   onDragLeave?: (event: SyntheticDragEvent) => void;
   onDrop?: (event: SyntheticDragEvent) => void;
