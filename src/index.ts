@@ -1,5 +1,6 @@
 export { default as Render } from './render';
 export { default as Element, ElementAttr } from './shapes/Element';
+export { default as CustomElement } from './shapes/CustomElement';
 export { default as Shape, ShapeAttr } from './shapes/Shape';
 export { default as Group, GroupAttr } from './shapes/Group';
 export { default as Arc, ArcAttr } from './shapes/Arc';
