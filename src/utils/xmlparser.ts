@@ -30,7 +30,7 @@ const enum State {
 const allowTags = ['hbox', 'vbox', 'span', 'image', 'hr', 'spacer'];
 
 export function parseXML(input: string, option: ParseOption) {
-  const xml = input.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  const xml = input.replace(/<!--.*?-->/gi, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
   let state = State.Text;
   let text = '';
   let tagName = '';
