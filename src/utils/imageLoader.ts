@@ -1,6 +1,11 @@
 export type ImageLoader = (src: string, callback: Function) => void;
 
-const loadedImage: Record<string, HTMLImageElement> = {};
+interface ImageSource {
+  image?: HTMLImageElement;
+  loaded: boolean;
+}
+
+const loadedImage: Record<string, ImageSource> = {};
 
 const browserImageLoader: ImageLoader = (src: string, callback: Function) => {
   const image = new Image();
@@ -26,15 +31,18 @@ export function getImage(
   callback?: (image: HTMLImageElement) => void,
 ): HTMLImageElement {
   if (loadedImage[src]) {
-    return loadedImage[src];
+    return loadedImage[src].image;
   }
+  loadedImage[src] = {loaded: false, image: undefined};
   try {
     imageLoader(src, (image: HTMLImageElement) => {
-      loadedImage[src] = image;
+      loadedImage[src].loaded = true;
+      loadedImage[src].image = image;
       callback && callback(image);
     });
   } catch (err) {
-    loadedImage[src] = src as any;
+    loadedImage[src].image = src as any;
+    loadedImage[src].loaded = true;
   }
-  return loadedImage[src];
+  return loadedImage[src].image;
 }
