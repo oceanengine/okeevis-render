@@ -54,4 +54,5 @@ function onImageLoad(image: ImageSource, res: HTMLImageElement) {
     const cb = image.listeners[id];
     cb && cb(image);
   }
+  delete image.listeners;
 }
