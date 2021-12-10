@@ -114,12 +114,15 @@ export function parseXML(input: string, option: ParseOption) {
   function stateInTagName(c: string) { // < div
     if (c === '>') {
       afterOpenTag();
+    } else if (c === '/') {
+      state = State.InSelfClosingTag;
     } else if (/\s/.test(c)) {
       state = State.BeforeAttributeName;
     } else {
       tagName += c;
     }
   }
+
   function stateInSelfClosingTag(c: string) { // </ after </
     if (c === '>') {
       afterOpenTag();
@@ -200,7 +203,10 @@ export function parseXML(input: string, option: ParseOption) {
     }
   }
   function stateInAttributeValueNq(c: string) { // div a=b
-    if (isWhiteSpace(c)) {
+    if (c === '>') {
+      saveAttrValue();
+      afterOpenTag();
+    } else if (isWhiteSpace(c)) {
       saveAttrValue();
     } else {
       attrValue += c;

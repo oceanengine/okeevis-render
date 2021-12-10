@@ -63,6 +63,7 @@ export default function parseXML(template: string, document: Rich): VNode[] {
         }
       },
       onclosetag() {
+        console.log('closetag')
         nodesStack.pop();
         currentNode = nodesStack[nodesStack.length - 1];
       },
