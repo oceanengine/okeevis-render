@@ -31,7 +31,7 @@ export default class Pattern {
     const { image, repeat } = this.option;
     if (!this._pattern) {
       if (typeof image === 'string') {
-        const result = getImage(image, ret => {
+        const result = getImage(image, this.id, ret => {
           this._pattern = ctx.createPattern(ret, repeat);
           onPatternReady();
         });
