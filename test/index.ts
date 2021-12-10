@@ -1,1 +1,1 @@
-import './animateMotion'
+import './image'
