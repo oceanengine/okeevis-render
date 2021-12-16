@@ -169,10 +169,10 @@ export default class Render extends EventFul {
     this._rootGroup.clear();
   }
 
-  public updateAll(elements: Element<any>[]) {
+  public updateAll(elements: Element<any>[], transition: boolean = true) {
     this.chunksElement.clear();
     this._frameAbleElement.clear();
-    this._rootGroup.updateAll(elements);
+    this._rootGroup.updateAll(elements, transition);
   }
 
   public addEventElement(element: Element) {
