@@ -1,6 +1,11 @@
 export type ImageLoader = (src: string, callback: Function) => void;
 
-const loadedImage: Record<string, HTMLImageElement> = {};
+interface ImageSource {
+  image?: HTMLImageElement;
+  listeners: Record<string, Function>;
+}
+
+const loadedImage: Record<string, ImageSource> = {};
 
 const browserImageLoader: ImageLoader = (src: string, callback: Function) => {
   const image = new Image();
@@ -23,18 +28,31 @@ export function getImageLoader(): ImageLoader {
 
 export function getImage(
   src: string,
+  listernId: string | number,
   callback?: (image: HTMLImageElement) => void,
 ): HTMLImageElement {
   if (loadedImage[src]) {
-    return loadedImage[src];
+    if (callback && !loadedImage[src].image) {
+      loadedImage[src].listeners[listernId] = callback;
+    }
+    return loadedImage[src].image;
   }
+  loadedImage[src] = {image: undefined, listeners: {[listernId]: callback}};
   try {
     imageLoader(src, (image: HTMLImageElement) => {
-      loadedImage[src] = image;
-      callback && callback(image);
+     onImageLoad(loadedImage[src], image);
     });
   } catch (err) {
-    loadedImage[src] = src as any;
+    onImageLoad(loadedImage[src], src as unknown as HTMLImageElement);
   }
-  return loadedImage[src];
+  return loadedImage[src].image;
+}
+
+function onImageLoad(image: ImageSource, res: HTMLImageElement) {
+  image.image = res;
+  for (const id in image.listeners) {
+    const cb = image.listeners[id];
+    cb && cb(image);
+  }
+  delete image.listeners;
 }

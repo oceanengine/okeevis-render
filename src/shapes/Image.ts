@@ -73,7 +73,7 @@ export default class Image extends Shape<ImageAttr> {
     if (!src) {
       return;
     }
-    const image = getImage(src, () => {
+    const image = getImage(src, this.id, () => {
       this.dirty();
     });
     if (image) {
@@ -116,11 +116,8 @@ export default class Image extends Shape<ImageAttr> {
   }
 
   protected computeBBox(): BBox {
-    const { src, x, y, width, height } = this.attr;
-    const image = getImage(src);
-    const sw = width > 0 ? width : image?.width || 0;
-    const sh = height > 0 ? height : image?.height || 0;
-    return rectBBox(x, y, sw, sh);
+    const { x, y, width, height } = this.attr;
+    return rectBBox(x, y, width, height);
   }
 
   private _getImagePosition(image: HTMLImageElement): BBox {

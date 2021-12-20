@@ -288,7 +288,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     return count;
   }
 
-  public updateAll(list: T[]) {
+  public updateAll(list: T[], transition: boolean = true) {
     if (this._chunks.length) {
       this.replaceChunks([]);
     }
@@ -334,14 +334,14 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
         nextElement.attr.ref.current = prevElement;
       }
       if (prevElement.isGroup) {
-        ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children());
+        ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children(), transition);
         const chunks = ((nextElement as any) as Group).getChunks();
         ((prevElement as unknown) as Group).replaceChunks(chunks);
       }
       // todo clone matrix
       const dragOffset = nextElement.getDragOffset();
       prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
-      this._diffUpdateElement(prevElement, nextElement);
+      this._diffUpdateElement(prevElement, nextElement, transition);
     });
 
     result.added.forEach(index => {
@@ -456,7 +456,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     }
   }
 
-  private _diffUpdateElement(prevElement: Element, nextElement: Element) {
+  private _diffUpdateElement(prevElement: Element, nextElement: Element, transition: boolean) {
     const prevAttr = prevElement.attr;
     const nextAttr = nextElement.attr;
     const {
@@ -472,7 +472,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       }
     }
 
-    if (transitionProperty === 'none' || transitionProperty.length === 0) {
+    if (!transition || transitionProperty === 'none' || transitionProperty.length === 0) {
       prevElement.setAttr(nextAttr);
     } else {
       // todo transition property array support
