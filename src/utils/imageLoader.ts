@@ -1,8 +1,8 @@
 export type ImageLoader = (src: string, callback: Function) => void;
-
+export type LoadCallback = (image: HTMLImageElement) => void;
 interface ImageSource {
   image?: HTMLImageElement;
-  listeners: Record<string, Function>;
+  listeners: Record<string, LoadCallback>;
 }
 
 const loadedImage: Record<string, ImageSource> = {};
@@ -52,7 +52,7 @@ function onImageLoad(image: ImageSource, res: HTMLImageElement) {
   image.image = res;
   for (const id in image.listeners) {
     const cb = image.listeners[id];
-    cb && cb(image);
+    cb && cb(image.image);
   }
   delete image.listeners;
 }
