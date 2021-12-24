@@ -39,7 +39,7 @@ export default class Marker extends Element<MarkerAttr> {
     const ctx = painter.getContext();
     ctx.save();
     ctx.transform(matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]);
-    painter.drawElement(ctx, this.attr.shape);
+    painter.drawElement(this.attr.shape);
     ctx.restore();
   }
 

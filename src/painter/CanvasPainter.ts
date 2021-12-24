@@ -54,9 +54,7 @@ export default class CanvasPainter implements Painter {
 
   private _frameTimes: number[] = [];
 
-  private _ctxCount = 0;
-
-  private _repaintCount = 0;
+  private _dirtyRegion: BBox;
 
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
@@ -80,8 +78,6 @@ export default class CanvasPainter implements Painter {
   }
 
   public onFrame(now?: number) {
-    this._ctxCount = 0;
-    this._repaintCount = 0;
     const showFPS = this.render.showFPS;
     const needUpdate = this.render.needUpdate();
     if (showFPS && now) {
@@ -150,7 +146,7 @@ export default class CanvasPainter implements Painter {
     ctx.translate(-x, -y);
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
 
-    this.render.getRoot().eachChild(item => this.drawElement(ctx, item));
+    this.render.getRoot().eachChild(item => this.drawElement(item));
     ctx.restore();
     if (ctx.draw) {
       ctx.draw(true);
@@ -176,7 +172,9 @@ export default class CanvasPainter implements Painter {
     if (dirtyRegions.length === 0) {
       return;
     }
-    this.paint(mergeDirtyRegions(dirtyRegions));
+    this._dirtyRegion = mergeDirtyRegions(dirtyRegions);
+    this.paint();
+    this._dirtyRegion = null;
     // console.timeEnd('compute dirty rects');
   }
 
@@ -219,12 +217,13 @@ export default class CanvasPainter implements Painter {
         lineWidth,
       );
     });
-    chunk.forEach(item => this.drawElement(ctx, item));
+    chunk.forEach(item => this.drawElement(item));
     ctx.restore();
   }
 
-  public paint(dirtyRegion?: BBox) {
+  public paint() {
     // console.time('paint');
+    const dirtyRegion = this._dirtyRegion;
     const ctx = this._canvas.getContext('2d');
     const dpr = this.dpr;
     if (!dirtyRegion) {
@@ -250,12 +249,14 @@ export default class CanvasPainter implements Painter {
       this._brushRect(ctx, dirtyRegion);
       ctx.clip();
     }
-    this.render.getRoot().eachChild(item => this.drawElement(ctx, item, dirtyRegion));
+    this.render.getRoot().eachChild(item => this.drawElement(item));
     ctx.restore();
     // console.timeEnd('paint');
   }
 
-  public drawElement(ctx: CanvasRenderingContext2D, item: Element, dirtyRegion?: BBox) {
+  public drawElement = (item: Element) => {
+    const dirtyRegion = this._dirtyRegion;
+    const ctx = this._ctx;
     item.clearDirty();
 
     if (!item.attr.display) {
@@ -273,8 +274,6 @@ export default class CanvasPainter implements Painter {
         return;
       }
     }
-
-    this._repaintCount++;
 
     const opacity = item.getComputedOpacity();
     const fillOpacity = item.getExtendAttr('fillOpacity') * opacity;
@@ -356,7 +355,7 @@ export default class CanvasPainter implements Painter {
       //   ctx.beginPath();
       // }
 
-      (item as Group).eachChild(child => this.drawElement(ctx, child, dirtyRegion));
+      (item as Group).eachChild(this.drawElement);
 
       // if (batchBrush) {
       //   if (fill && fill !== 'none') {
@@ -501,7 +500,6 @@ export default class CanvasPainter implements Painter {
     strokeOpacity: number,
     lineWidth: number,
   ) {
-    this._ctxCount++;
     const {
       clip,
       lineCap,
@@ -692,8 +690,8 @@ export default class CanvasPainter implements Painter {
     fpsText.setAttr({
       text: fps + ' fps',
     });
-    this.drawElement(this._ctx, fpsRect);
-    this.drawElement(this._ctx, fpsText);
+    this.drawElement(fpsRect);
+    this.drawElement(fpsText);
   }
 }
 registerPainter('canvas', CanvasPainter);
