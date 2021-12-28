@@ -8,6 +8,7 @@ import {
   getClipId,
 } from './style';
 import Element from '../shapes/Element';
+import Text from '../shapes/Text';
 import SVGNode from '../abstract/Node';
 import { LinearGradient, RadialGradient, Pattern } from '../color';
 import Shadow from './Shadow';
@@ -47,15 +48,19 @@ function getGradientAndPatternString(
   getCustomerNodeString(item.getSVGNode(), stringBuffer);
 }
 
-function getCustomerNodeString(node: SVGNode, stringBuffer: string[]) {
-  const { svgTagName, svgAttr, childNodes } = node;
-  stringBuffer.push(`<${svgTagName}`);
-  for (const key in svgAttr) {
-    stringBuffer.push(` ${key}="${svgAttr[key]}"`);
+function getCustomerNodeString(node: SVGNode | string, stringBuffer: string[]) {
+  if (typeof node === 'object') {
+    const { svgTagName, svgAttr, childNodes } = node;
+    stringBuffer.push(`<${svgTagName}`);
+    for (const key in svgAttr) {
+      stringBuffer.push(` ${key}="${svgAttr[key]}"`);
+    }
+    stringBuffer.push('>');
+    childNodes && childNodes.forEach(child => getCustomerNodeString(child, stringBuffer));
+    stringBuffer.push(`</${svgTagName}>`);
+  } else {
+    stringBuffer.push(node);
   }
-  stringBuffer.push('>');
-  childNodes && childNodes.forEach(child => getCustomerNodeString(child, stringBuffer));
-  stringBuffer.push(`</${svgTagName}>`);
 }
 
 function getNodeString(node: Element, stringBuffer: string[], isRoot = false) {
@@ -80,7 +85,23 @@ function getNodeString(node: Element, stringBuffer: string[], isRoot = false) {
   }
 
   if (node.type === 'text') {
-    stringBuffer.push(node.attr.text + '');
+    const spanList = (node as Text).getSpanList();
+    if (spanList.length === 1) {
+      stringBuffer.push(spanList[0].text);
+    } else {
+      spanList.forEach(span => {
+        const tspan: SVGNode = {
+          svgTagName: 'tspan',
+          svgAttr: {
+            x: span.x,
+            y: span.y
+          },
+          childNodes: [span.text as any],
+        };
+        getCustomerNodeString(tspan, stringBuffer);
+      })
+
+    }
   }
   if (tagName === 'marker') {
     getNodeString((node as Marker).attr.shape, stringBuffer);
