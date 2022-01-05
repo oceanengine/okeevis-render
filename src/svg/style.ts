@@ -1,4 +1,4 @@
-import Element, { defaultCanvasContext, ElementAttr } from '../shapes/Element';
+import Element, { transformKeys, defaultCanvasContext, ElementAttr } from '../shapes/Element';
 import Group from '../shapes/Group';
 import Marker from '../shapes/Marker';
 import * as mat3 from '../../js/mat3';
@@ -122,7 +122,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     ret['clip-path'] = `url(#${getClipId(clip)})`;
   }
 
-  if (hasDrag || selfMatrix !== IDENTRY_MATRIX) {
+  if (hasDrag  || selfMatrix !== IDENTRY_MATRIX || transformKeys.some(key => key in node.attr)) {
     if (!hasDrag) {
       ret.transform = getSvgMatrix(selfMatrix);
     } else {

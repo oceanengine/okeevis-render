@@ -118,7 +118,7 @@ export const defaultCanvasContext: ShapeAttr = {
 };
 const extendAbleKeys = Object.keys(defaultCanvasContext);
 
-const transformKeys: Array<keyof CommonAttr> = [
+export const transformKeys: Array<keyof CommonAttr> = [
   'rotation',
   'scaleX',
   'scaleY',
