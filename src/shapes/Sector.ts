@@ -55,7 +55,7 @@ export default class Sector extends Shape<SectorAttr> {
 
   public brush(ctx: CanvasRenderingContext2D) {
     const { cx, cy, radius, radiusI, start, end, round, cornerRadius } = this.attr;
-    if (equalWithTolerance(start, end)) {
+    if (equalWithTolerance(start, end) && !this.isClip) {
       return;
     }
     const delta = Math.abs(start - end);

@@ -20,8 +20,10 @@ let renderingClips: Element[];
 let renderingMarkers: Marker[] = [];
 let renderingGradientAndPatterns: Array<LinearGradient | RadialGradient | Pattern>;
 let renderingShadows: Shadow[];
+let isFigma: boolean = false;
 
-export function renderToSVGString(rootGroup: Group, width: number, height: number): string {
+export function renderToSVGString(rootGroup: Group, width: number, height: number, figma: boolean): string {
+  isFigma = figma;
   renderingWidth = width;
   renderingHeight = height;
   renderingClips = getAllDefsClips(rootGroup);
@@ -66,7 +68,7 @@ function getCustomerNodeString(node: SVGNode | string, stringBuffer: string[]) {
 function getNodeString(node: Element, stringBuffer: string[], isRoot = false) {
   const tagName = !isRoot ? node.svgTagName : 'svg';
   const attr = !isRoot
-    ? node.getSvgAttributes()
+    ? (node as any).getSvgAttributes(isFigma)
     : getSVGRootAttributes(renderingWidth, renderingHeight);
   const children = node.isGroup ? node.children() : null;
   stringBuffer.push(`<${tagName}`);

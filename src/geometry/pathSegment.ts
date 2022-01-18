@@ -26,6 +26,11 @@ function arcLength(r: number, startAngle: number, endAngle: number): number {
   return theta * r;
 }
 
+/**
+ * learned from Snap.svg
+ * Apache-2.0 License
+ * https://github.com/adobe-webplatform/Snap.svg/blob/master/src/path.js
+ */
 function bezierLength(
   x1: number,
   y1: number,
