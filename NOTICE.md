@@ -13,10 +13,6 @@ gl-matrix
 Copyright (c) 2015-2021, Brandon Jones, Colin MacKenzie IV.
 gl-matrix is licensed under the MIT License. 
 ======
-htmlparser2
-Copyright 2010, 2011, Chris Winberry <chris@winberry.net>. All rights reserved.
-htmlparser2 is licensed under the MIT License. 
-======
 lodash
 Copyright JS Foundation and other contributors <https://js.foundation/>
 Based on Underscore.js, copyright Jeremy Ashkenas,

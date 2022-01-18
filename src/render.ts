@@ -4,15 +4,15 @@ import EventHandle from './event/EventHandle';
 import EventFul from './utils/Eventful';
 import Group from './shapes/Group';
 import Element from './shapes/Element';
-import { getDomContentSize } from './utils/dom';
 import { getRequestAnimationFrame, getCancelAnimationFrame } from './utils/rAF';
 import { addContext, removeContext } from './utils/measureText';
-import { getPainter } from './painter';
+import { getPainter, registerPainter } from './painter';
+import CanvasPainter from './painter/CanvasPainter';
 import { renderToSVGString } from './svg/renderToSVGString';
 import { downloadBase64 } from './utils/download';
+import { getDomContentSize } from './utils/dom';
 
-import './painter/CanvasPainter';
-import './painter/SVGPainter';
+registerPainter('canvas', CanvasPainter);
 
 export interface RenderOptions {
   dpr?: number;
@@ -93,7 +93,10 @@ export default class Render extends EventFul {
         this._width = width;
         this._height = height;
       }
-      const UsedPainter = getPainter(this._renderer);
+      const UsedPainter = getPainter(this._renderer) || CanvasPainter;
+      if (UsedPainter === CanvasPainter) {
+        this._renderer = 'canvas';
+      }
       this._painter = new UsedPainter(this);
       addContext(this._painter.getContext());
     } else {
@@ -235,8 +238,8 @@ export default class Render extends EventFul {
     return this._painter;
   }
 
-  public renderToSVGString(): string {
-    return renderToSVGString(this.getRoot(), this._width, this._height);
+  public renderToSVGString(option: {figma?: boolean} = {}): string {
+    return renderToSVGString(this.getRoot(), this._width, this._height, option.figma);
   }
 
   public syntheticEvent(type: string, param: any) {

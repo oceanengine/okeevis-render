@@ -165,6 +165,8 @@ export function parseXML(input: string, option: ParseOption) {
       attrValue = '';
     } else if (isWhiteSpace(c)) {
       state = State.AfterAttributeName;
+    } else if (c === '>') {
+      afterOpenTag();
     } else {
       attrName += c;
     }

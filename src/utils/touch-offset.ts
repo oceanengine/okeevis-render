@@ -1,3 +1,11 @@
+/**
+ * inspired by zrender https://github.com/ecomfe/zrender/blob/master/src/core/dom.ts
+ * The algoritm is learnt from
+ * https://franklinta.com/2014/09/08/computing-css-matrix3d-transforms/
+ * And we made some optimization for matrix inversion.
+ * Other similar approaches:
+ * "cv::getPerspectiveTransform", "Direct Linear Transformation".
+ */
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from './vec2';
 

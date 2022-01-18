@@ -1,7 +1,6 @@
 import { diff } from '@egjs/list-differ';
 import Es6Set from '../utils/set';
 import Painter from '../abstract/Painter';
-import { registerPainter } from './index';
 import Text, { TextSpan } from '../shapes/Text';
 import Render from '../render';
 import Group from '../shapes/Group';
@@ -417,4 +416,3 @@ export default class SVGPainter implements Painter {
     this._updateNode(fpsText);
   }
 }
-registerPainter('svg', SVGPainter);

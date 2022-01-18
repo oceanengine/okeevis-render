@@ -1,5 +1,4 @@
 import Painter from '../abstract/Painter';
-import { registerPainter } from './index';
 import Render from '../render';
 import Element, { defaultCanvasContext } from '../shapes/Element';
 import Shape, { ShapeAttr } from '../shapes/Shape';
@@ -694,4 +693,3 @@ export default class CanvasPainter implements Painter {
     this.drawElement(fpsText);
   }
 }
-registerPainter('canvas', CanvasPainter);

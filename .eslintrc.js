@@ -4,7 +4,6 @@ module.exports = {
     'prettier',
     // 'plugin:jest/recommended',
     'plugin:import/typescript',
-    'prettier/react',
   ],
   env: {
     browser: true,
@@ -27,6 +26,7 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-unused-vars': [2, { args: 'none' }],
         'no-unused-expressions': 'off',
+        "react/static-property-placement": 0,
         // '@typescript-eslint/no-unused-expressions': 2,
       },
     },
@@ -44,12 +44,7 @@ module.exports = {
         'eol-last': 0,
         'no-script-url': 0,
         'prefer-rest-params': 0,
-        'react/no-access-state-in-setstate': 0,
-        'react/destructuring-assignment': 0,
-        'react/no-multi-comp': 0,
-        'jsx-a11y/href-no-hash': 0,
         'import/no-extraneous-dependencies': 0,
-        'jsx-a11y/control-has-associated-label': 0,
       },
     },
   ],
