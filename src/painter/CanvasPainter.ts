@@ -5,7 +5,7 @@ import Shape, { ShapeAttr } from '../shapes/Shape';
 import Group, { GroupAttr } from '../shapes/Group';
 import { BBox, bboxIntersect } from '../utils/bbox';
 import mergeDirtyRegions from './dirtyRect';
-import { getCtxColor, isGradient, isTransparent, ColorValue } from '../color';
+import { getCtxColor, isGradient, isPattern, Pattern, isTransparent, ColorValue } from '../color';
 import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
@@ -322,7 +322,8 @@ export default class CanvasPainter implements Painter {
       if (
         item.fillAble &&
         (needFill || (this._isPixelPainter && hasFill)) &&
-        item.type !== 'text'
+        item.type !== 'text' && 
+        !(isPattern(fill) && !(fill as Pattern).isReady())
       ) {
         ctx.fill();
       }

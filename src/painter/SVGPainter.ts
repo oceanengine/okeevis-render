@@ -1,8 +1,9 @@
 import { diff } from '@egjs/list-differ';
 import Es6Set from '../utils/set';
 import Painter from '../abstract/Painter';
-import Text, { TextSpan } from '../shapes/Text';
 import Render from '../render';
+import { Gradient, LinearGradient, RadialGradient, Pattern, isGradient, isPattern } from '../color';
+import Text, { TextSpan } from '../shapes/Text';
 import Group from '../shapes/Group';
 import Element from '../shapes/Element';
 import { SVG_NAMESPACE, XLINK_NAMESPACE } from '../constant';
@@ -11,8 +12,6 @@ import SVGNode from '../abstract/Node';
 import { getSVGRootAttributes, SVGAttributeMap, getClipId } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Marker from '../shapes/Marker';
-
-import { Gradient, LinearGradient, RadialGradient, Pattern, isGradient, isPattern } from '../color';
 
 function setToArray<T>(set: Es6Set<T>, out: T[] = []): T[] {
   set.forEach(value => {
