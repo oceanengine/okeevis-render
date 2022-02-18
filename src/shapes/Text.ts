@@ -243,7 +243,7 @@ export default class Text extends Shape<TextAttr> {
     } else if (textStyle.textBaseline === 'top') {
       dy = textStyle.fontSize / 2 + textStyle.fontSize / 10;
     } else if (textStyle.textBaseline === 'middle') {
-      dy = +textStyle.fontSize / 10 + (figma ? textStyle.fontSize / 5 : 0);
+      dy = +textStyle.fontSize / 10 + (figma ? textStyle.fontSize / 5 + 1 : 0);
     }
 
     if (textStyle.textAlign === 'start' || textStyle.textAlign === 'left') {
