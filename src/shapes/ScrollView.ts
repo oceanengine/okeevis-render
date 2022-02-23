@@ -18,23 +18,30 @@ interface ScrollViewAttr extends GroupAttr {
 }
 
 export default class ScrollView extends Group {
+  public type = 'scrollView';
+
   public attr: ScrollViewAttr;
 
   private _scrollContentGroup: Group;
 
   private _bgRect: Rect;
 
+  private _scrollLeft: number;
+
+  private _scrollTop: number;
 
   // eslint-disable-next-line no-useless-constructor
   public constructor(attr: ScrollViewAttr) {
     super(attr);
+    this._scrollLeft = this.attr.scrollLeft;
+    this._scrollTop = this.attr.scrollTop;
   }
 
   protected update(): void {
-    const { x, y, width, height, scrollLeft, scrollTop } = this.attr;
+    const { x, y, width, height, } = this.attr;
     (this.attr.clip as Rect)?.setAttr({ x, y, width, height });
     this._bgRect?.setAttr({ x, y, width, height });
-    this._scrollContentGroup?.setAttr({ translateX: scrollLeft, translateY: scrollTop });
+    this.scrollTo(this._scrollLeft, this._scrollTop)
   }
 
   public addContent(element: Element) {
@@ -58,30 +65,29 @@ export default class ScrollView extends Group {
   }
 
   public get scrollLeft(): number {
-    return this.attr.scrollLeft;
+    return this._scrollLeft;
   }
 
   public set scrollLeft(x: number) {
     const { width, scrollWidth } = this.attr;
     const scrollLeft = lodash.clamp(x, 0, scrollWidth - width);
-    this.attr.scrollLeft = scrollLeft;
-    this._scrollContentGroup.setAttr('translateX', -scrollLeft);
+    this._scrollLeft = scrollLeft;
+    this._scrollContentGroup?.setAttr('translateX', -scrollLeft);
   }
 
   public get scrollTop(): number {
-    return this.attr.scrollTop;
+    return this._scrollTop;
   }
 
   public set scrollTop(y: number) {
     const { height, scrollHeight } = this.attr;
     const scrollTop = lodash.clamp(y, 0, scrollHeight - height);
-    this.attr.scrollTop = scrollTop;
-    this._scrollContentGroup.setAttr('translateY', -scrollTop);
+    this._scrollTop = scrollTop;
+    this._scrollContentGroup?.setAttr('translateY', -scrollTop);
   }
 
   public scrollBy(dx: number, dy: number) {
-    const { scrollLeft, scrollTop } = this.attr;
-    this.scrollTo(scrollLeft + dx, scrollTop + dy);
+    this.scrollTo(this._scrollLeft + dx, this._scrollTop + dy);
   }
 
   public scrollTo(x: number, y: number) {
@@ -117,6 +123,7 @@ export default class ScrollView extends Group {
       key: 'scroll-content',
       translateX: scrollLeft,
       translateY: scrollTop,
+      transitionProperty: 'none',
     });
     this._scrollContentGroup = group;
     this.add(group);
