@@ -39,6 +39,10 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     };
   }
 
+  public get isGroup() {
+    return true;
+  }
+
   protected onAttrChange(key: any, value: any, oldValue: any) {
     super.onAttrChange(key, value, oldValue);
     if (shapeKeys.indexOf(key) !== -1) {
