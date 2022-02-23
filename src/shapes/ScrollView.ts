@@ -12,8 +12,6 @@ interface ScrollViewAttr extends GroupAttr {
   scrollHeight?: number;
   scrollX?: boolean;
   scrollY?: boolean;
-  scrollLeft?: number;
-  scrollTop?: number;
   onScroll?: Function;
 }
 
@@ -26,15 +24,13 @@ export default class ScrollView extends Group {
 
   private _bgRect: Rect;
 
-  private _scrollLeft: number;
+  private _scrollLeft: number = 0;
 
-  private _scrollTop: number;
+  private _scrollTop: number = 0;
 
   // eslint-disable-next-line no-useless-constructor
   public constructor(attr: ScrollViewAttr) {
     super(attr);
-    this._scrollLeft = this.attr.scrollLeft;
-    this._scrollTop = this.attr.scrollTop;
   }
 
   protected update(): void {
@@ -59,8 +55,6 @@ export default class ScrollView extends Group {
       scrollHeight: 0,
       scrollX: false,
       scrollY: false,
-      scrollLeft: 0,
-      scrollTop: 0,
     }
   }
 
@@ -96,7 +90,7 @@ export default class ScrollView extends Group {
   }
 
   protected created() {
-    const { x, y, width, height, scrollLeft, scrollTop } = this.attr;
+    const { x, y, width, height } = this.attr;
     const clipRect = new Rect({ x, y, width, height });
     this._bgRect = new Rect({
       key: 'event-rect',
@@ -121,8 +115,8 @@ export default class ScrollView extends Group {
     })
     const group = new Group({
       key: 'scroll-content',
-      translateX: scrollLeft,
-      translateY: scrollTop,
+      translateX: this._scrollLeft,
+      translateY: this._scrollTop,
       transitionProperty: 'none',
     });
     this._scrollContentGroup = group;
