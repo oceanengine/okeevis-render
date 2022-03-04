@@ -17,6 +17,8 @@ let patternCanvas: HTMLCanvasElement;
 export default class Pattern {
   public type = 'pattern';
 
+  public isPattern = true;
+
   public option: PatternOption;
 
   public id: string;

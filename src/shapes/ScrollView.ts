@@ -37,7 +37,9 @@ export default class ScrollView extends Group {
     const { x, y, width, height, } = this.attr;
     (this.attr.clip as Rect)?.setAttr({ x, y, width, height });
     this._bgRect?.setAttr({ x, y, width, height });
-    this.scrollTo(this._scrollLeft, this._scrollTop)
+    if (lodash.isNumber(this._scrollLeft && lodash.isNumber(this._scrollTop))) {
+      this.scrollTo(this._scrollLeft, this._scrollTop)
+    }
   }
 
   public addContent(element: Element) {

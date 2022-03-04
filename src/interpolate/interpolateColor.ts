@@ -1,7 +1,9 @@
 import * as Color from 'color';
 import { InterpolateFunction } from './index';
 import interpolate from './interpolate';
-import { ColorValue, LinearGradient, RadialGradient } from '../color';
+import { ColorValue, Gradient, isGradient } from '../color';
+import LinearGradient from '../color/LinearGradient';
+import RadialGradient from '../color/RadialGradient';
 
 const interpolateMap: Record<string, InterpolateFunction> = {
   color: interpolateColor,
@@ -28,16 +30,11 @@ export default function interpolateColor(from: ColorValue, to: ColorValue, k: nu
     out.alpha = parseFloat(out.alpha.toFixed(3));
     return Color(out).toString();
   }
-
-  if (from instanceof LinearGradient && to instanceof LinearGradient) {
-    const option = interpolate(from.option, to.option, k, interpolateMap);
-    return new LinearGradient(option);
+  if (isGradient(from) && isGradient(to) && (from as Gradient).type === (to as Gradient).type) {
+    const option = interpolate((from as Gradient).option, (to as Gradient).option, k, interpolateMap);
+    const GradientConstructor = (from as LinearGradient).type === 'linearGradient' ? LinearGradient : RadialGradient;
+    return new GradientConstructor(option);
   }
-
-  if (from instanceof RadialGradient && to instanceof LinearGradient) {
-    const option = interpolate(from.option, to.option, k, interpolateMap);
-    return new RadialGradient(option);
-  }
-
+  
   return to;
 }
