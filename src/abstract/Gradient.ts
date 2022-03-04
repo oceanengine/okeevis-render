@@ -16,6 +16,8 @@ let id: number = 1;
 export default abstract class Gradient<T extends GradientOption = any> {
   public abstract type: string;
 
+  public isGradient: boolean = true;
+
   public id: string;
 
   public option: T;

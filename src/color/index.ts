@@ -1,9 +1,9 @@
 import * as Color from 'color';
-import Gradient from '../abstract/Gradient';
-import LinearGradient from './LinearGradient';
-import RadialGradient from './RadialGradient';
-import Pattern from './Pattern';
-import Element from '../shapes/Element';
+import type Gradient from '../abstract/Gradient';
+import type LinearGradient from './LinearGradient';
+import type RadialGradient from './RadialGradient';
+import type Pattern from './Pattern';
+import type Element from '../shapes/Element';
 import * as lodash from '../utils/lodash';
 import { NAME_TRANSPARENT, RGBA_TRANSPARENT } from '../constant';
 
@@ -32,8 +32,8 @@ export function brighten(color: ColorValue, ration: number = 0): ColorValue {
     return brightenStringColor(color, ration);
   }
 
-  if (color instanceof LinearGradient || color instanceof RadialGradient) {
-    const nextColor = color.clone();
+  if ((color as Gradient).isGradient) {
+    const nextColor = (color as Gradient).clone() as LinearGradient;
     nextColor.option.stops.forEach(stop => {
       stop.color = brightenStringColor(stop.color, ration);
     });
@@ -43,12 +43,12 @@ export function brighten(color: ColorValue, ration: number = 0): ColorValue {
   return color;
 }
 
-export function isGradient(color: ColorValue) {
-  return color instanceof LinearGradient || color instanceof RadialGradient;
+export function isGradient(color: ColorValue): boolean {
+  return color && (color as Gradient).isGradient;
 }
 
 export function isPattern(color: ColorValue): boolean {
-  return color instanceof Pattern;
+  return (color as Pattern).isPattern;
 }
 
 export function isTransparent(color: ColorValue) {
@@ -63,14 +63,11 @@ export function getCtxColor(
   if (lodash.isString(color)) {
     return color;
   }
-  if (color instanceof LinearGradient) {
-    return color.getCanvasContextStyle(ctx, item.getBBox());
+  if ((color as Gradient).isGradient) {
+    return (color as Gradient).getCanvasContextStyle(ctx, item.getBBox());
   }
-  if (color instanceof RadialGradient) {
-    return color.getCanvasContextStyle(ctx, item.getBBox());
-  }
-  if (color instanceof Pattern) {
-    return color.getCanvasContextStyle(ctx, () => {
+  if ((color as Pattern).isPattern) {
+    return (color as Pattern).getCanvasContextStyle(ctx, () => {
       item.dirty();
     });
   }
@@ -81,9 +78,7 @@ export function getSVGColor(color: ColorValue): string {
     return color;
   }
   if (
-    color instanceof LinearGradient ||
-    color instanceof RadialGradient ||
-    color instanceof Pattern
+    isGradient(color) || isPattern(color)
   ) {
     return `url(#${color.id})`;
   }

@@ -18,6 +18,7 @@ const defaultOption: LinearGradientOption = {
 };
 
 export default class LinearGradient extends Gradient<LinearGradientOption> {
+
   public type = 'linearGradient';
 
   public option: LinearGradientOption;

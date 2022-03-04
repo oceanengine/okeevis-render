@@ -8,11 +8,13 @@ import { getRequestAnimationFrame, getCancelAnimationFrame } from './utils/rAF';
 import { addContext, removeContext } from './utils/measureText';
 import { getPainter, registerPainter } from './painter';
 import CanvasPainter from './painter/CanvasPainter';
+import SVGPainter from './painter/SVGPainter';
 import { renderToSVGString } from './svg/renderToSVGString';
 import { downloadBase64 } from './utils/download';
 import { getDomContentSize } from './utils/dom';
 
 registerPainter('canvas', CanvasPainter);
+registerPainter('svg', SVGPainter);
 
 export interface RenderOptions {
   dpr?: number;
