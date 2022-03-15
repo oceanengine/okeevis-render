@@ -48,7 +48,7 @@ export function isGradient(color: ColorValue): boolean {
 }
 
 export function isPattern(color: ColorValue): boolean {
-  return (color as Pattern).isPattern;
+  return color && (color as Pattern).isPattern;
 }
 
 export function isTransparent(color: ColorValue) {
