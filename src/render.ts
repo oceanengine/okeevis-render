@@ -45,7 +45,7 @@ export default class Render extends EventFul {
 
   public chunksElement: ES6Set<Group> = new ES6Set();
 
-  private _dom: HTMLDivElement | HTMLCanvasElement;
+  private _dom: HTMLElement;
 
   private _width: number;
 
@@ -77,7 +77,7 @@ export default class Render extends EventFul {
 
   private _isOnframe: boolean = false;
 
-  public constructor(dom?: HTMLDivElement | HTMLCanvasElement, option: RenderOptions = {}) {
+  public constructor(dom?: HTMLElement, option: RenderOptions = {}) {
     super();
 
     this._rootGroup = new Group();
@@ -188,7 +188,7 @@ export default class Render extends EventFul {
     this._eventGroop.remove(element);
   }
 
-  public getDom(): HTMLDivElement | HTMLCanvasElement {
+  public getDom(): HTMLElement {
     return this._dom;
   }
 

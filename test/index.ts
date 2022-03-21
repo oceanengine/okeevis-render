@@ -1,2 +1,2 @@
-import './pattern.test'
+import './color'
 
