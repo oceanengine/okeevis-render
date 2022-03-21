@@ -37,7 +37,7 @@ export default class ConicGradient extends Gradient<ConicGradientOption> {
       return 'rgba(0, 0, 0, 0)' as any;
     }
     const gradient = ctx.createConicGradient(this.option.startAngle, cx, cy);
-    option.stops.map(stop => {
+    option.stops.forEach(stop => {
       gradient.addColorStop(stop.offset, stop.color);
     });
     return gradient;

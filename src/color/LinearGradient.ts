@@ -38,7 +38,7 @@ export default class LinearGradient extends Gradient<LinearGradientOption> {
     const x2: number = option.x2 * rect.width + rect.x;
     const y2: number = option.y2 * rect.height + rect.y;
     const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
-    option.stops.map(stop => {
+    option.stops.forEach(stop => {
       gradient.addColorStop(stop.offset, stop.color);
     });
     return gradient;
