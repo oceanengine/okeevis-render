@@ -19,6 +19,7 @@ export { default as RichText } from './RichText';
 export { default as CompoundPath, CompoundPathAttr } from './shapes/CompoundPath';
 export { default as LinearGradient } from './color/LinearGradient';
 export { default as RadialGradient } from './color/RadialGradient';
+export { default as ConicGradient } from './color/ConicGradient';
 export { default as Pattern } from './color/Pattern';
 export { default as PathShape } from './geometry/Path2D';
 export { RefObject, createRef } from './utils/ref';

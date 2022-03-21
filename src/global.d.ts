@@ -27,6 +27,7 @@ declare global {
     setTextAlign(textAlign: string): void;
     setTextBaseline(textBaseline: string): void;
     createCircularGradient(cx: number, cy: number, r: number): CanvasGradient;
+    createConicGradient(startAngle: number, x: number, y: number): CanvasGradient;
     draw(reverse?: boolean, callback?: Function): void;
   }
 }
