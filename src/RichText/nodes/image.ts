@@ -2,6 +2,7 @@
  * hbox
  */
 import Image from '../../shapes/Image';
+import Rect from '../../shapes/Rect';
 import VNode, { VNodeProps } from '../vnode';
 
 export default class VImage extends VNode {
@@ -18,7 +19,12 @@ export default class VImage extends VNode {
   }
 
   public render(): Image {
+    const clip = this.props.borderRadius > 0 ? new Rect({
+      ...this.bbox,
+      r: this.props.borderRadius
+    }): null;
     return new Image({
+      clip,
       ...this.bbox,
       ...this.getEvents(),
       src: this.props.src,
