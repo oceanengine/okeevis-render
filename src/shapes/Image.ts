@@ -65,6 +65,8 @@ export default class Image extends Shape<ImageAttr> {
       y: 0,
       width: 0,
       height: 0,
+      fillOpacity: 1,
+      strokeOpacity: 1,
     };
   }
 
