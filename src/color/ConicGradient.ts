@@ -1,4 +1,4 @@
-import Gradient, { GradientOption } from '../abstract/Gradient';
+import Gradient, { GradientOption, GradientType } from '../abstract/Gradient';
 import * as lodash from '../utils/lodash';
 import { BBox } from '../utils/bbox';
 import SVGNode from '../abstract/Node';
@@ -16,7 +16,7 @@ const defaultOption: ConicGradientOption = {
 };
 
 export default class ConicGradient extends Gradient<ConicGradientOption> {
-  public type = 'conic-gradient';
+  public type: GradientType= 'conicGradient';
 
   public option: ConicGradientOption;
 
@@ -29,7 +29,6 @@ export default class ConicGradient extends Gradient<ConicGradientOption> {
   }
 
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {
-    ctx.createCircularGradient
     const option = this.option;
     const cx = rect.x + rect.width * this.option.cx;
     const cy = rect.y + rect.height * this.option.cy;
