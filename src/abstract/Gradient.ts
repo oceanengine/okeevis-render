@@ -11,10 +11,12 @@ export interface GradientOption {
   stops: ColorStop[];
 }
 
+export type GradientType = 'linearGradient' | 'radialGradient' | 'conicGradient';
+
 let id: number = 1;
 
 export default abstract class Gradient<T extends GradientOption = any> {
-  public abstract type: string;
+  public abstract type: GradientType;
 
   public isGradient: boolean = true;
 

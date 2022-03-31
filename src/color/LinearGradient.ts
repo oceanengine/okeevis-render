@@ -1,4 +1,4 @@
-import Gradient, { GradientOption } from '../abstract/Gradient';
+import Gradient, { GradientOption,  GradientType } from '../abstract/Gradient';
 import * as lodash from '../utils/lodash';
 import { BBox } from '../utils/bbox';
 import SVGNode from '../abstract/Node';
@@ -19,7 +19,7 @@ const defaultOption: LinearGradientOption = {
 
 export default class LinearGradient extends Gradient<LinearGradientOption> {
 
-  public type = 'linearGradient';
+  public type: GradientType = 'linearGradient';
 
   public option: LinearGradientOption;
 
