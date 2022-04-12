@@ -26,7 +26,7 @@ export default class VImage extends VNode {
     return new Image({
       clip,
       ...this.bbox,
-      ...this.getEvents(),
+      ...this.getEventsAndCursor(),
       src: this.props.src,
     });
   }

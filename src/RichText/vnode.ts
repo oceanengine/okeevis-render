@@ -41,6 +41,7 @@ export interface VNodeProps {
   value?: string;
   color?: string;
   ellipsis?: string;
+  cursor?: string;
   boxShadow?: ShadowStyle;
 }
 
@@ -108,6 +109,7 @@ export const NodeAttributeParser: Record<
   color: parseString,
   ellipsis: parseString,
   boxShadow: parseBoxShadow,
+  cursor: parseString,
 };
 
 export const attributeList = Object.keys(NodeAttributeParser) as Array<keyof VNodeProps>;
@@ -199,15 +201,16 @@ export default class VNode<T extends VNodeProps = VNodeProps> {
     };
   }
 
-  protected getEvents(): EventConf {
-    const events: Record<string, Function> = {};
+  protected getEventsAndCursor(): EventConf & {cursor: string} {
+    const events: Record<string, Function | string> = {};
     for (const key in this.props) {
       const value = this.props[key as keyof EventConf];
       if (typeof value === 'function') {
         events[key] = value;
       }
     }
-    return events;
+    events.cursor = this.props.cursor;
+    return events as any;
   }
 
   protected getClampSize(size: number, sizeType: 'width' | 'height'): number {
