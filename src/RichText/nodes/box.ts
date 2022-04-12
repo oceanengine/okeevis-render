@@ -31,7 +31,7 @@ export default class Box extends VNode {
 
   public render(): Group {
     const group = new Group({
-      ...this.getEvents(),
+      ...this.getEventsAndCursor(),
     });
     const isRoot = !this.parentNode;
     if (this.props.borderRadius && isRoot) {

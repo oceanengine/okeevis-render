@@ -227,7 +227,7 @@ export default class SVGPainter implements Painter {
     let appendNode = svgDom;
     if (tagName === 'text') {
       const spanList = (node as Text).getSpanList();
-      this._mountTextNode(svgDom, spanList);
+      this._mountTextNode(svgDom, spanList, attributes);
     }
     if (isClip) {
       const clip = this._createSVGElement('clipPath', { id: getClipId(node) });
@@ -256,13 +256,13 @@ export default class SVGPainter implements Painter {
     return svgDom;
   }
 
-  private _mountTextNode(svgText: SVGElement, spanList: TextSpan[]) {
+  private _mountTextNode(svgText: SVGElement, spanList: TextSpan[], attributes: {dy: number}) {
     if (spanList.length === 1) {
       const textNode = document.createTextNode(spanList[0].text);
       svgText.appendChild(textNode);
     } else {
       spanList.forEach(span => {
-        const tspan = this._createSVGElement('tspan', { x: span.x, y: span.y });
+        const tspan = this._createSVGElement('tspan', { x: span.x, y: span.y, dy: attributes.dy });
         const textNode = document.createTextNode(span.text);
         tspan.appendChild(textNode);
         svgText.appendChild(tspan);
@@ -272,10 +272,11 @@ export default class SVGPainter implements Painter {
 
   private _updateNode(node: Element) {
     const svgDom = this._loadedSVGElements[node.id];
-    this._setElementAttr(svgDom, node.getSvgAttributes());
+    const attributes = node.getSvgAttributes();
+    this._setElementAttr(svgDom, attributes);
     if (node.type === 'text') {
       svgDom.textContent = '';
-      this._mountTextNode(svgDom, (node as Text).getSpanList());
+      this._mountTextNode(svgDom, (node as Text).getSpanList(), attributes);
     }
     if (node.attr.display && svgDom.getAttribute('display') === 'none') {
       svgDom.setAttribute('display', '');

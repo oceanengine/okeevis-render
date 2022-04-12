@@ -359,6 +359,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       nextList[i].prevSibling = nextList[i - 1];
       nextList[i].nextSibling = nextList[i + 1];
     }
+    this.afterUpdateAll();
   }
 
   public eachChild(callback: (child: T) => void) {
@@ -416,6 +417,10 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
         ((child as any) as Group).dirtyTextChildBBox();
       }
     });
+  }
+
+  protected afterUpdateAll() {
+    // nothing
   }
 
   private _mountNode(item: T, dirty: boolean = true) {

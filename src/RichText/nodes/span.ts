@@ -22,7 +22,7 @@ export default class Span extends VNode {
 
   public render(): Group {
     const group = new Group({
-      ...this.getEvents(),
+      ...this.getEventsAndCursor(),
     });
     this.children.forEach(child => {
       group.add(child.render());
