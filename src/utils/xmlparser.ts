@@ -30,6 +30,7 @@ const enum State {
 const allowTags = ['hbox', 'vbox', 'span', 'image', 'hr', 'spacer'];
 
 export function parseXML(input: string, option: ParseOption) {
+  // todo quickjs旧版本不支持这个正则
   const xml = input.replace(/<!--.*?-->/gi, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
   let state = State.Text;
   let text = '';
