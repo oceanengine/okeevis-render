@@ -75,6 +75,7 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
     const textBaseline = this.getExtendAttr('textBaseline');
     container.style.cssText = `line-height: 100%;position: absolute;font-size:${fontSize};font-family:${fontFamily};color:${fill};font-weight: ${fontWeight};pointer-events:${pointerEvents};cusor:${cursor}`;
     container.style.display = this.attr.display === false ? 'none' : 'block';
+    container.style.textAlign = textAlign;
     this._setTransform();
     if (textAlign === 'left') {
       container.style.left = this.attr.x + 'px';
@@ -103,6 +104,7 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
         }
       })
     }
+
     this.clearContent();
     this.renderContent();
   }
