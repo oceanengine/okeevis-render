@@ -2,9 +2,9 @@
 
 <p align="center">一个高性能的轻量级2d图形库</p>
 <p align="center">
-    <img src="https://img.shields.io/npm/v/@okee-uikit/render" alt="npm version" />
+    <img src="https://img.shields.io/npm/v/@okeev/render" alt="npm version" />
     <img src="https://img.shields.io/badge/language-typescript-red.svg" />
-    <img src="https://img.shields.io/bundlephobia/min/@okee-uikit/render" alt="min size" />
+    <img src="https://img.shields.io/bundlephobia/min/@okeev/render" alt="min size" />
 </p>
 
 [English](./README.md)　| 简体中文
@@ -20,7 +20,7 @@
 
 
 ## 安装
-> npm install @okee-uikit/render
+> npm install @okeev/render
 
 ### 使用
 ```html
@@ -28,7 +28,7 @@
 ```
 
 ```js
-import { Render, Rect } from '@okee-uikit/render'
+import { Render, Rect } from '@okeev/render'
 
 const or = new Render(document.getElementById('container'))
 

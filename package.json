@@ -1,5 +1,5 @@
 {
-  "name": "@okee-uikit/render",
+  "name": "@okeev/render",
   "version": "0.1.0",
   "description": "a fast lightweight 2d graphic library",
   "main": "lib/index.js",
