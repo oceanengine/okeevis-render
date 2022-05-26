@@ -567,9 +567,6 @@ export default class EventHandle {
 
   private _isEventFromDomNode(event: MouseEvent | Touch) {
     const target = event.target as HTMLElement;
-    if (!target) {
-      return false;
-    }
     let node = target
     while (node) {
       if (node.className === DOM_LAYER_CLASS) {
