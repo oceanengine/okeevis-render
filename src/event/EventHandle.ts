@@ -3,6 +3,7 @@ import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
 import { valueToRgb } from '../color';
+import { DOM_LAYER_CLASS } from '../constant';
 
 import {
   SyntheticEvent,
@@ -564,9 +565,27 @@ export default class EventHandle {
     this._draggingTarget = null;
   };
 
+  private _isEventFromDomNode(event: MouseEvent | Touch) {
+    const target = event.target as HTMLElement;
+    if (!target) {
+      return false;
+    }
+    let node = target
+    while (node) {
+      if (node.className === DOM_LAYER_CLASS) {
+        return true;
+      }
+      if (node === this.render.getDom()) {
+        return false;
+      }
+      node = node.parentNode as HTMLElement;
+    }
+    return false;
+  }
+
   private _getMousePosition(event: MouseEvent | Touch): { x: number; y: number } {
     // firefox svg offsetX is relative to svgElement target
-    if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg') {
+    if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg' && !this._isEventFromDomNode(event)) {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
     return getTouchOffsetPosition(

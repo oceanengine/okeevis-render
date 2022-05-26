@@ -2,6 +2,7 @@
  * @author liwensheng
  */
 
+import { DOM_LAYER_CLASS } from '../constant';
 import Shape from './Shape';
 import { TextAttr } from './Text';
 import { inBBox, createZeroBBox, BBox } from '../utils/bbox';
@@ -52,7 +53,7 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
     super.mounted();
     if (!this._container) {
       this._container = document.createElement('div') as HTMLDivElement;
-      this._container.className = "canvas-dom-layer"
+      this._container.className = DOM_LAYER_CLASS;
     }
     if (this.ownerRender) {
       this.ownerRender.getDom().appendChild(this._container);
@@ -129,7 +130,7 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
     const renderer = getDOMRenderer(this.attr.renderer);
     this._effectClear = renderer(this._container, this.attr.text);
   }
-  
+
   protected clearContent() {
     this._effectClear && this._effectClear();
   }

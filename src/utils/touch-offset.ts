@@ -9,7 +9,7 @@
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from './vec2';
 
-function isDomHasTransform(dom: HTMLDivElement) {
+function isDomHasTransform(dom: HTMLElement) {
   let node = dom;
   while (node) {
     const { transform } = getComputedStyle(node);
@@ -24,7 +24,7 @@ function isDomHasTransform(dom: HTMLDivElement) {
 const DOM_PROPERTY = '__lightrendermarkers';
 
 export function getTouchOffsetPosition(
-  dom: HTMLDivElement,
+  dom: HTMLElement,
   clientX: number,
   clientY: number,
 ): { x: number; y: number } {
@@ -56,7 +56,7 @@ export function getTouchOffsetPosition(
   return { x: result[0], y: result[1] };
 }
 
-function appendRects(dom: HTMLDivElement, info: any) {
+function appendRects(dom: HTMLElement, info: any) {
   const rects = [
     ['0px', '0px'],
     ['100%', '0px'],
