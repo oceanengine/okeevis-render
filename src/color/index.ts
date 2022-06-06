@@ -43,6 +43,14 @@ export function brighten(color: ColorValue, ration: number = 0): ColorValue {
   return color;
 }
 
+export function alpha(color: string, alpha: number): string {
+  const out = Color(color).alpha(alpha);
+  const red = Math.round(out.red());
+  const green = Math.round(out.green());
+  const blue = Math.round(out.blue());
+  return `rgba(${[red, green, blue, alpha].join(',')})`;
+}
+
 export function isGradient(color: ColorValue): boolean {
   return color && (color as Gradient).isGradient;
 }

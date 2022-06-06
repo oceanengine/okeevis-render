@@ -261,8 +261,8 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     if (this._chunks.length) {
       this.clearChunks();
     }
-    super.destroy();
     this.clear();
+    super.destroy();
     this._chunks = [];
   }
 
