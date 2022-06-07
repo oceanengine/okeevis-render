@@ -5,6 +5,9 @@ const interpolateNumber: InterpolateFunction<number> = (
   to: number,
   k: number,
 ): number => {
+  if (isNaN(from)) {
+    return to;
+  }
   return from + (to - from) * k;
 };
 
