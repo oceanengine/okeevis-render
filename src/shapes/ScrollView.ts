@@ -33,6 +33,8 @@ export default class ScrollView extends Group {
 
   private _bgRect: Rect;
 
+  private _clipGroup: Group;
+
   private _horizontalScrollBar: Rect;
 
   private _verticalScrollBar: Rect;
@@ -54,7 +56,7 @@ export default class ScrollView extends Group {
 
   protected update(): void {
     const { x, y, width, height, } = this.attr;
-    (this.attr.clip as Rect)?.setAttr({ x, y, width, height });
+    (this._clipGroup?.attr.clip as Rect)?.setAttr({ x, y, width, height });
     this._bgRect?.setAttr({ x, y, width, height });
     if (lodash.isNumber(this._scrollLeft && lodash.isNumber(this._scrollTop))) {
       this.scrollTo(this._scrollLeft, this._scrollTop)
@@ -137,7 +139,7 @@ export default class ScrollView extends Group {
   protected created() {
     const { x, y, width, height } = this.attr;
     const clipRect = new Rect({ x, y, width, height });
-    const clipGroup = new Group({
+    const clipGroup = this._clipGroup = new Group({
       key: 'clip-group',
       clip: clipRect,
       draggable: true,
