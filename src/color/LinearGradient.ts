@@ -1,4 +1,4 @@
-import Gradient, { GradientOption,  GradientType } from '../abstract/Gradient';
+import Gradient, { GradientOption, GradientType } from '../abstract/Gradient';
 import * as lodash from '../utils/lodash';
 import { BBox } from '../utils/bbox';
 import SVGNode from '../abstract/Node';
@@ -33,10 +33,10 @@ export default class LinearGradient extends Gradient<LinearGradientOption> {
 
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {
     const option = this.option;
-    const x1: number = option.x1 * rect.width + rect.x;
-    const y1: number = option.y1 * rect.height + rect.y;
-    const x2: number = option.x2 * rect.width + rect.x;
-    const y2: number = option.y2 * rect.height + rect.y;
+    const x1: number = option.global ? option.x1 : option.x1 * rect.width + rect.x;
+    const y1: number = option.global ? option.y1 : option.y1 * rect.height + rect.y;
+    const x2: number = option.global ? option.x2 : option.x2 * rect.width + rect.x;
+    const y2: number = option.global ? option.y2 : option.y2 * rect.height + rect.y;
     const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
     option.stops.forEach(stop => {
       gradient.addColorStop(stop.offset, stop.color);
@@ -45,15 +45,16 @@ export default class LinearGradient extends Gradient<LinearGradientOption> {
   }
 
   public getSVGNode(): SVGNode {
-    const { x1, y1, x2, y2, stops } = this.option;
+    const { x1, y1, x2, y2, stops, global } = this.option;
     return {
       svgTagName: 'linearGradient',
       svgAttr: {
+        gradientUnits: global ? 'userSpaceOnUse' : 'objectBoundingBox',
         id: this.id,
-        x1: x1 * 100 + '%',
-        y1: y1 * 100 + '%',
-        x2: x2 * 100 + '%',
-        y2: y2 * 100 + '%',
+        x1,
+        y1,
+        x2,
+        y2,
       },
       childNodes: stops.map(stop => {
         return {

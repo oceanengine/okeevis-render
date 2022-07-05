@@ -6,9 +6,12 @@ import SVGNode from './Node';
 export interface ColorStop {
   offset: number;
   color: string;
+  
 }
 export interface GradientOption {
   stops: ColorStop[];
+  /** use global coordinate */
+  global?: boolean;
 }
 
 export type GradientType = 'linearGradient' | 'radialGradient' | 'conicGradient';

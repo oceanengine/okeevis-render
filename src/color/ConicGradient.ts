@@ -30,8 +30,8 @@ export default class ConicGradient extends Gradient<ConicGradientOption> {
 
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {
     const option = this.option;
-    const cx = rect.x + rect.width * this.option.cx;
-    const cy = rect.y + rect.height * this.option.cy;
+    const cx = option.global ? option.cx : (rect.x + rect.width * this.option.cx);
+    const cy = option.global ? option.cy : (rect.y + rect.height * this.option.cy);
     if (!ctx.createConicGradient) {
       return 'rgba(0, 0, 0, 0)' as any;
     }

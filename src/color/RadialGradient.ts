@@ -32,9 +32,9 @@ export default class RadialGradient extends Gradient<RadialGradientOption> {
   public getCanvasContextStyle(ctx: CanvasRenderingContext2D, rect: BBox): CanvasGradient {
     const option = this.option;
     const min: number = Math.min(rect.width, rect.height);
-    const x1: number = option.cx * rect.width + rect.x;
-    const y1: number = option.cy * rect.height + rect.y;
-    const r1: number = min * option.r;
+    const x1: number = option.global ? option.cx : option.cx * rect.width + rect.x;
+    const y1: number = option.global ? option.cy : option.cy * rect.height + rect.y;
+    const r1: number = option.global ? option.r : min * option.r;
     const x2: number = x1;
     const y2: number = y1;
     const gradient: CanvasGradient = ctx.createRadialGradient
@@ -47,10 +47,11 @@ export default class RadialGradient extends Gradient<RadialGradientOption> {
   }
 
   public getSVGNode(): SVGNode {
-    const { cx, cy, r, stops } = this.option;
+    const { cx, cy, r, stops, global } = this.option;
     return {
       svgTagName: 'radialGradient',
       svgAttr: {
+        gradientUnits: global ? 'userSpaceOnUse' : 'objectBoundingBox',
         id: this.id,
         cx,
         cy,
