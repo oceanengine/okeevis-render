@@ -2,7 +2,7 @@ import Render from '../src/render'
 import Polyline from '../src/shapes/Polyline'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom)
+const render = new Render(dom, {renderer: 'svg'})
 
 const polyline = new Polyline({
   draggable: true,
@@ -10,9 +10,14 @@ const polyline = new Polyline({
     {x: 0, y: 0,},
     {x: 100, y: 0,},
     {x: 100, y: 100,},
+    {x: 259, y: 100,},
+    {x:150, y: 200,},
   ],
-  lineWidth: 2,
-  fill: 'red',
+  translateX: 50,
+  translateY: 50,
+  lineWidth: 1,
+  borderRadius: 20,
+  fill: 'transparent',
   stroke: 'blue'
 })
 const polyline2 = new Polyline({
@@ -31,4 +36,4 @@ const polyline2 = new Polyline({
 })
 
 render.add(polyline)
-render.add(polyline2)
+// render.add()

@@ -31,6 +31,12 @@ export function dot(a: Vec2, b: Vec2): number {
   return a[0] * b[0] + a[1] * b[1];
 }
 
+export function subtract(out: Vec2, a: Vec2, b: Vec2) {
+  out[0] = a[0] - b[0];
+  out[1] = a[1] - b[1];
+  return out;
+}
+
 export function cross(a: Vec2, b: Vec2): number {
   return a[0] * b[1] - a[1] * b[0];
 }
