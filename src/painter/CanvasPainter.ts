@@ -53,6 +53,8 @@ export default class CanvasPainter implements Painter {
 
   private _frameTimes: number[] = [];
 
+  private _viewPort: BBox;
+
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
     this._isPixelPainter = isPixelPainter;
@@ -62,6 +64,7 @@ export default class CanvasPainter implements Painter {
       // tab switch must redraw
       document.addEventListener('visibilitychange', this._handleDocumentVisibilityChange);
     }
+    this._viewPort = {x: 0, y: 0, width: render.getWidth(), height: render.getHeight()};
   }
 
   public resize(width: number, height: number) {
@@ -71,6 +74,8 @@ export default class CanvasPainter implements Painter {
       this._canvas.style.width = width + 'px';
       this._canvas.style.height = height + 'px';
     }
+    this._viewPort.width = width;
+    this._viewPort.height = height;
     this.render.dirty();
   }
 
@@ -264,6 +269,14 @@ export default class CanvasPainter implements Painter {
       const bbox = item.getCurrentDirtyRect();
       const isDirty = bboxIntersect(dirtyRegion, bbox);
       if (!isDirty) {
+        return;
+      }
+    }
+    
+    if (this.render.enableViewportCulling) {
+      const bbox = item.getCurrentDirtyRect();
+      const isInViewport = bboxIntersect(this._viewPort, bbox);
+      if (!isInViewport) {
         return;
       }
     }

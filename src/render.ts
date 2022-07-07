@@ -41,6 +41,8 @@ export default class Render extends EventFul {
 
   public scaleByDprBeforePaint: boolean = true;
 
+  public enableViewportCulling: boolean = false;
+
   public eventListener: Function;
 
   public chunksElement: ES6Set<Group> = new ES6Set();
