@@ -13,6 +13,7 @@ export interface RectAttr extends CommonAttr {
   y?: number;
   width?: number;
   height?: number;
+  borderRadius?: number | number[];
   r?: number | number[];
 }
 const shapeKeys: Array<keyof RectAttr> = ['x', 'y', 'width', 'height'];
@@ -38,7 +39,7 @@ export default class Rect extends Shape<RectAttr> {
   }
 
   public brush(ctx: CanvasRenderingContext2D): void {
-    const { x, y, width, height, r } = this.attr;
+    const { x, y, width, height, borderRadius, r = borderRadius } = this.attr;
     if ((width === 0 || height === 0) && !this.isClip) {
       return;
     }
@@ -67,7 +68,7 @@ export default class Rect extends Shape<RectAttr> {
           [r1, r2, r3, r4] = r;
         }
       } else {
-        r1 = r2 = r3 = r4 = this.attr.r as number;
+        r1 = r2 = r3 = r4 = r as number;
       }
       const absWidth: number = Math.abs(width / 2);
       const absHeight: number = Math.abs(height / 2);

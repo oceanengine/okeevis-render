@@ -17,7 +17,7 @@ export interface SectorAttr extends CommonAttr {
   start?: number;
   end?: number;
   round?: boolean;
-  cornerRadius?: number | number[];
+  borderRadius?: number | number[];
 }
 
 const shapeKeys: Array<keyof SectorAttr> = [
@@ -45,7 +45,7 @@ export default class Sector extends Shape<SectorAttr> {
       start: 0,
       end: 0,
       round: false,
-      cornerRadius: 0,
+      borderRadius: 0,
     };
   }
 
@@ -54,7 +54,7 @@ export default class Sector extends Shape<SectorAttr> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { cx, cy, radius, radiusI, start, end, round, cornerRadius } = this.attr;
+    const { cx, cy, radius, radiusI, start, end, round, borderRadius } = this.attr;
     if (equalWithTolerance(start, end) && !this.isClip) {
       return;
     }
@@ -66,7 +66,7 @@ export default class Sector extends Shape<SectorAttr> {
       return;
     }
     const anticlockwise = end < start;
-    if (round || !cornerRadius || cornerRadius === 0) {
+    if (round || !borderRadius || borderRadius === 0) {
       let roundStart: number;
       let roundEnd: number;
       ctx.arc(cx, cy, radiusI, end, start, !anticlockwise);
@@ -89,10 +89,10 @@ export default class Sector extends Shape<SectorAttr> {
       let r2: number;
       let r3: number;
       let r4: number;
-      if (typeof cornerRadius === 'number') {
-        r1 = r2 = r3 = r4 = cornerRadius;
+      if (typeof borderRadius === 'number') {
+        r1 = r2 = r3 = r4 = borderRadius;
       } else {
-        [r1, r2, r3, r4] = cornerRadius;
+        [r1, r2, r3, r4] = borderRadius;
       }
       const cta: number = end - start;
       const l1: number = cta * this.attr.radiusI;

@@ -11,7 +11,7 @@ interface Point {
 }
 export interface PolylineAttr extends CommonAttr {
   pointList?: Point[];
-  borderRadius?: number;
+  borderRadius?: number | number[];
   smooth?: boolean;
   smoothType?: 'bezier' | 'spline';
   smoothConstraint?: [Point, Point];
@@ -83,7 +83,7 @@ export default class Polyline extends Shape<PolylineAttr> {
           if (!p3 && isPolygon) {
             p3 = pointList[0];
           }
-          this.lineToWithBorderRadius(ctx, p1, p2, p3, borderRadius, isFirstPolygonPoint);
+          this.lineToWithBorderRadius(ctx, p1, p2, p3, borderRadius as number, isFirstPolygonPoint);
         }
       }
     }

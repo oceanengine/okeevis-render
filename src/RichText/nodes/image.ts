@@ -21,7 +21,7 @@ export default class VImage extends VNode {
   public render(): Image {
     const clip = this.props.borderRadius > 0 ? new Rect({
       ...this.bbox,
-      r: this.props.borderRadius
+      borderRadius: this.props.borderRadius
     }): null;
     return new Image({
       clip,
