@@ -1,6 +1,6 @@
 import Group, { GroupAttr } from './Group';
-import Element, { ElementAttr } from './Element';
-import Rect from './Rect';
+import Element from './Element';
+import Rect, { RectAttr } from './Rect';
 import * as lodash from '../utils/lodash';
 
 interface ScrollViewAttr extends GroupAttr {
@@ -12,17 +12,17 @@ interface ScrollViewAttr extends GroupAttr {
   scrollHeight?: number;
   scrollX?: boolean;
   scrollY?: boolean;
-  showScrollBar?: boolean;
   onScroll?: Function;
   maxScrollLeft?: number;
   maxScrollTop?: number;
+  showScrollBar?: boolean | 'hover' | 'scrolling';
+  scrollBarSize?: number;
+  scrollThumbColor?: string;
+  scrollThumbHoverColor?: string;
+  scrollTrackColor?: string;
 }
 
-const scrollTrackSize = 11;
-const scorllBarSize = 6;
 const trackBorderColor = '#ebebeb';
-const barColor = '#e0e0e0';
-const barActiveColor = '#c1c1c1';
 
 export default class ScrollView extends Group {
   public type = 'scrollView';
@@ -49,9 +49,12 @@ export default class ScrollView extends Group {
 
   private _isMouseEnter: boolean = false;
 
+  private _isOverBar: boolean = false;
+
   // eslint-disable-next-line no-useless-constructor
   public constructor(attr: ScrollViewAttr) {
     super(attr);
+    this._debouncedFadeScrollBar = lodash.debounce(this._debouncedFadeScrollBar, 500).bind(this);
   }
 
   protected update(): void {
@@ -88,17 +91,21 @@ export default class ScrollView extends Group {
       scrollX: false,
       scrollY: false,
       showScrollBar: false,
+      scrollBarSize: 11,
+      scrollThumbColor: '#e0e0e0',
+      scrollThumbHoverColor: '#c1c1c1',
+      scrollTrackColor: '#fafafa',
     }
   }
 
   public get clientWidth() {
-    const { showScrollBar, scrollY, height, scrollHeight, width } = this.attr;
-    return showScrollBar && (scrollY && height < scrollHeight) ? width - scrollTrackSize : width;
+    const { showScrollBar, scrollY, height, scrollHeight, width, scrollBarSize } = this.attr;
+    return showScrollBar && (scrollY && height < scrollHeight) ? width - scrollBarSize : width;
   }
 
   public get clientHeight() {
-    const { showScrollBar, scrollX, height, scrollWidth, width } = this.attr;
-    return showScrollBar && (scrollX && width < scrollWidth) ? height - scrollTrackSize : height;
+    const { showScrollBar, scrollX, height, scrollWidth, width, scrollBarSize } = this.attr;
+    return showScrollBar && (scrollX && width < scrollWidth) ? height - scrollBarSize : height;
   }
 
   public get scrollLeft(): number {
@@ -189,21 +196,28 @@ export default class ScrollView extends Group {
   }
 
   private _eventScrollBy(target: ScrollView, dx: number, dy: number) {
-    const { scrollX, scrollY, onScroll } = target.attr;
+    const { scrollX, scrollY, onScroll, showScrollBar } = target.attr;
+    if (showScrollBar === 'scrolling') {
+      const elements = [this._horizontalScrollBar, this._horizontalScrollTrack, this._verticalScrollBar, this._verticalScrollTrack];
+      elements.forEach(item => item.stopAllAnimation());
+      target._debouncedFadeScrollBar();
+    }
     target.scrollBy(scrollX ? dx : 0, scrollY ? dy : 0);
     onScroll && onScroll();
+    
   }
 
   private _attachScrollBar() {
-    const commonBarAttr: ElementAttr = {
+    const { scrollThumbColor, scrollThumbHoverColor } = this.attr;
+    const commonBarAttr: RectAttr = {
       draggable: true,
       stroke: 'rgba(0,0,0,0)',
       lineWidth: 8,
       r: 5,
-      fill: barColor,
+      fill: scrollThumbColor,
       transitionProperty: 'none',
-      onMouseEnter: e => e.target.setAttr({ fill: barActiveColor }),
-      onMouseLeave: e => e.target.setAttr({ fill: barColor }),
+      onMouseEnter: e => e.target.setAttr({ fill: scrollThumbHoverColor }),
+      onMouseLeave: e => e.target.setAttr({ fill: scrollThumbColor }),
       getDragOffset: () => {
         return { x: 0, y: 0 }
       },
@@ -247,53 +261,65 @@ export default class ScrollView extends Group {
   }
 
   private _updateHorizontalBar() {
-    const { x, y, width, height, scrollWidth } = this.attr;
+    const { x, y, width, height, scrollWidth, showScrollBar, scrollBarSize, scrollTrackColor } = this.attr;
+    const scrollThumbWidth = scrollBarSize - 5;
     const clientWidth = this.clientWidth;
     const scaleX = clientWidth / scrollWidth;
     const dx = this.scrollLeft * scaleX;
-    const yposition = y + height - scrollTrackSize / 2 - 0.5;
-    const show = scaleX < 1 && this.attr.showScrollBar && this._isMouseEnter;
+    const yposition = y + height - scrollBarSize / 2 - 0.5;
+    let show = !!(scaleX < 1 && showScrollBar);
+    if (showScrollBar === 'hover') {
+      show = show && this._isMouseEnter;
+    }
     this._horizontalScrollTrack.setAttr({
       display: show,
+      opacity: 1,
       x,
-      y: yposition - scrollTrackSize / 2,
+      y: yposition - scrollBarSize / 2,
       width,
-      height: scrollTrackSize,
-      fill: '#fafafa',
+      height: scrollBarSize,
+      fill: scrollTrackColor,
       stroke: trackBorderColor,
       lineWidth: 1,
     });
     this._horizontalScrollBar.setAttr({
       display: show,
+      opacity: 1,
       x: x + dx,
-      y: yposition - scorllBarSize / 2,
+      y: yposition - scrollThumbWidth / 2,
       width: clientWidth * scaleX,
-      height: scorllBarSize,
+      height: scrollThumbWidth,
     });
   }
 
   private _updateVerticalBar() {
-    const { x, y, width, height, scrollHeight } = this.attr;
+    const { x, y, width, height, scrollHeight, showScrollBar, scrollBarSize, scrollTrackColor } = this.attr;
+    const scrollThumbWidth = scrollBarSize - 5;
     const clientHeight = this.clientHeight;
     const scaleY = clientHeight / scrollHeight;
     const dy = this.scrollTop * scaleY;
-    const xposition = x + width - scrollTrackSize / 2 - 0.5;
-    const show = scaleY < 1 && this.attr.showScrollBar && this._isMouseEnter;
+    const xposition = x + width - scrollBarSize / 2 - 0.5;
+    let show = !!(scaleY < 1 && showScrollBar);
+    if (showScrollBar === 'hover') {
+      show = show && this._isMouseEnter;
+    }
     this._verticalScrollTrack.setAttr({
       display: show,
-      x: xposition - scrollTrackSize / 2,
+      opacity: 1,
+      x: xposition - scrollBarSize / 2,
       y,
-      width: scrollTrackSize,
+      width: scrollBarSize,
       height,
-      fill: '#fafafa',
+      fill: scrollTrackColor,
       stroke: trackBorderColor,
       lineWidth: 1,
     });
     this._verticalScrollBar.setAttr({
       display: show,
-      x: xposition - scorllBarSize / 2,
+      opacity: 1,
+      x: xposition - scrollThumbWidth / 2,
       y: y + dy,
-      width: scorllBarSize,
+      width: scrollThumbWidth,
       height: clientHeight * scaleY,
     });
   }
@@ -318,5 +344,10 @@ export default class ScrollView extends Group {
       const flag = position < minY ? -1 : 1;
       this._eventScrollBy(this, 0, flag * clientHeight);
     }
+  }
+
+  private _debouncedFadeScrollBar() {
+    const elements = [this._horizontalScrollBar, this._horizontalScrollTrack, this._verticalScrollBar, this._verticalScrollTrack];
+    elements.forEach(item => item.animateTo({ opacity: 0 }, 500));
   }
 }

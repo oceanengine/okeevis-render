@@ -17,6 +17,10 @@ const scrollView = new ScrollView({
   scrollWidth: 410,
   scrollHeight: 800,
   showScrollBar: true,
+  scrollBarSize: 20,
+  scrollThumbColor: 'red',
+  scrollThumbHoverColor: 'blue',
+  scrollTrackColor: '#000',
 });
 
 scrollView.addContent(new Text({
