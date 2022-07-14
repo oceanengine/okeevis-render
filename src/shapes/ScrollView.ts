@@ -20,9 +20,8 @@ interface ScrollViewAttr extends GroupAttr {
   scrollThumbColor?: string;
   scrollThumbHoverColor?: string;
   scrollTrackColor?: string;
+  scrollTrackBorderColor?: string;
 }
-
-const trackBorderColor = '#ebebeb';
 
 export default class ScrollView extends Group {
   public type = 'scrollView';
@@ -95,6 +94,7 @@ export default class ScrollView extends Group {
       scrollThumbColor: '#e0e0e0',
       scrollThumbHoverColor: '#c1c1c1',
       scrollTrackColor: '#fafafa',
+      scrollTrackBorderColor: '#ebebeb',
     }
   }
 
@@ -261,7 +261,7 @@ export default class ScrollView extends Group {
   }
 
   private _updateHorizontalBar() {
-    const { x, y, width, height, scrollWidth, showScrollBar, scrollBarSize, scrollTrackColor } = this.attr;
+    const { x, y, width, height, scrollWidth, showScrollBar, scrollBarSize, scrollTrackColor, scrollTrackBorderColor } = this.attr;
     const scrollThumbWidth = scrollBarSize - 5;
     const clientWidth = this.clientWidth;
     const scaleX = clientWidth / scrollWidth;
@@ -279,7 +279,7 @@ export default class ScrollView extends Group {
       width,
       height: scrollBarSize,
       fill: scrollTrackColor,
-      stroke: trackBorderColor,
+      stroke: scrollTrackBorderColor,
       lineWidth: 1,
     });
     this._horizontalScrollBar.setAttr({
@@ -293,7 +293,7 @@ export default class ScrollView extends Group {
   }
 
   private _updateVerticalBar() {
-    const { x, y, width, height, scrollHeight, showScrollBar, scrollBarSize, scrollTrackColor } = this.attr;
+    const { x, y, width, height, scrollHeight, showScrollBar, scrollBarSize, scrollTrackColor, scrollTrackBorderColor } = this.attr;
     const scrollThumbWidth = scrollBarSize - 5;
     const clientHeight = this.clientHeight;
     const scaleY = clientHeight / scrollHeight;
@@ -311,7 +311,7 @@ export default class ScrollView extends Group {
       width: scrollBarSize,
       height,
       fill: scrollTrackColor,
-      stroke: trackBorderColor,
+      stroke: scrollTrackBorderColor,
       lineWidth: 1,
     });
     this._verticalScrollBar.setAttr({
