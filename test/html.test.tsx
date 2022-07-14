@@ -28,7 +28,7 @@ const scrollView = new ScrollView({
 const textconfig: TextAttr = {
   x: 100,
   y: 100,
-  text: `<p><button>test</button><input type="checkbox" />`,
+  text: `<p>dfdsfsdsdf<button>test</button><input type="checkbox" />`,
   fill: '#333',
   originX: 100,
   originY: 100,

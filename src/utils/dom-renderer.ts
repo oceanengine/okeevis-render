@@ -2,20 +2,16 @@
 
 const rendererStorage: Record<string, DOMRenderer> = {};
 
-export type DOMRenderer = (container: HTMLDivElement, content: unknown) => () => void;
 
-rendererStorage.html = (dom: HTMLDivElement, content: unknown) => {
-  dom.innerHTML = content + '';
-  return () => {
-    dom.innerHTML = '';
-  }
-};
 
-rendererStorage.vue = (dom: HTMLDivElement, content: any) => {
-  const vue = content.$mount(dom);
-  return () => {
-    vue.unmount();
-  }
+export type DOMRenderer = {
+  update: (dom: HTMLDivElement, content: unknown) => void;
+  destroy: (dom: HTMLDivElement) => void;
+}
+
+rendererStorage.html = {
+  update: (dom, content) => dom.innerHTML = content + '',
+  destroy: dom => dom.innerHTML = '',
 }
 
 export function getDOMRenderer(type: string) {
@@ -27,10 +23,8 @@ export function registerDOMRenderer(type: string, renderer: DOMRenderer) {
 }
 
 export function createReactRenderer(ReactDOM: { render: Function, unmountComponentAtNode: Function }): DOMRenderer {
-  return (dom: HTMLDivElement, content: unknown) => {
-    ReactDOM.render(content, dom);
-    return () => {
-      ReactDOM.unmountComponentAtNode(dom);
-    }
+  return {
+    update: (dom, content) => ReactDOM.render(content, dom),
+    destroy: dom => ReactDOM.unmountComponentAtNode(dom),
   }
 }

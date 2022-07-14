@@ -6,7 +6,7 @@ import { DOM_LAYER_CLASS } from '../constant';
 import Shape from './Shape';
 import { TextAttr } from './Text';
 import { inBBox, createZeroBBox, BBox } from '../utils/bbox';
-import { getDOMRenderer } from '../utils/dom-renderer';
+import { getDOMRenderer, DOMRenderer } from '../utils/dom-renderer';
 
 const shapeKeys: Array<keyof TextAttr> = [
   'x',
@@ -35,8 +35,10 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
   public shapeKeys = shapeKeys;
 
   protected _container: HTMLDivElement;
+  
+  private _renderer: DOMRenderer;
 
-  protected _effectClear: Function;
+  private _contentDirty: boolean = true;
 
   public getDefaultAttr(): Partial<DOMNodeAttr> {
     return {
@@ -66,6 +68,7 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
     if (!container) {
       return;
     }
+    this._renderer = getDOMRenderer(this.attr.renderer);
     const fontSize = this.getExtendAttr('fontSize') + 'px';
     const fontFamily = this.getExtendAttr('fontFamily');
     const fill = this.getExtendAttr('fill');
@@ -105,16 +108,16 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
         }
       })
     }
-
-    this.clearContent();
-    this.renderContent();
+    if (this._contentDirty) {
+      this._renderer.update(container, this.attr.text);
+    }
+    this._contentDirty = false;
   }
 
   public destroy() {
     super.destroy();
-    this.clearContent();
+    this._renderer.destroy(this._container);
     this._container.parentNode.removeChild(this._container);
-    this._effectClear = null;
   }
 
   public dirtyGlobalTransform() {
@@ -126,13 +129,11 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
     return this._container;
   }
 
-  protected renderContent() {
-    const renderer = getDOMRenderer(this.attr.renderer);
-    this._effectClear = renderer(this._container, this.attr.text);
-  }
-
-  protected clearContent() {
-    this._effectClear && this._effectClear();
+  protected onAttrChange(attr: any, value: unknown, oldValue: unknown) {
+    super.onAttrChange(attr, value, oldValue);
+    if (attr === 'text') {
+      this._contentDirty = true;
+    }
   }
 
   protected isPointOnPath(x: number, y: number): boolean {
