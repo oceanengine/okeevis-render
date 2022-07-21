@@ -11,7 +11,7 @@ import { interpolate } from '../interpolate';
 import interpolatePath from '../interpolate/interpolatePath';
 import interpolateColor from '../interpolate/interpolateColor';
 import { TransformConf } from '../abstract/TransformAble';
-import { EventConf } from '../event';
+import { EventConf, RenderEventHandleParam } from '../event';
 import Shape, { ShapeAttr } from './Shape';
 import Marker from './Marker';
 import * as mat3 from '../../js/mat3';
@@ -145,7 +145,7 @@ const defaultTRansformConf: CommonAttr = {
 
 let nodeId = 1;
 export default class Element<T extends CommonAttr = ElementAttr>
-  extends Eventful
+  extends Eventful<RenderEventHandleParam>
   implements AnimateAble<T> {
   public id: number;
 

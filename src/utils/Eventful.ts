@@ -30,7 +30,7 @@ export default class EventFul<T extends DefaultEventHandle = DefaultEventHandle>
     }
   }
 
-  public dispatch<U extends keyof T>(type: string, ...args: T[U]): void {
+  public dispatch<U extends keyof T>(type: U, ...args: T[U]): void {
     const listenerList = this._eventListeners[type] || [];
     listenerList.forEach(listener => listener.apply(null, args));
     this.onEvent.apply(this, [type, ...args]);

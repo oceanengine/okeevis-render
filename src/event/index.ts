@@ -61,4 +61,6 @@ export type RenderEventHandleParam = {
   'touchmove': [SyntheticTouchEvent];
   'touchstart': [SyntheticTouchEvent];
   'touchend': [SyntheticTouchEvent];
+  'touchcancel': [SyntheticTouchEvent];
+  [key: string]: any[];
 }

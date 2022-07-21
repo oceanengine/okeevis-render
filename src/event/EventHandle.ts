@@ -707,7 +707,7 @@ export default class EventHandle {
       }
     }
 
-    target.dispatch(event.type, event);
+    target.dispatch(event.type, event as any);
 
     if (bubbles && !isPropagationStopped && target.parentNode) {
       count++;
