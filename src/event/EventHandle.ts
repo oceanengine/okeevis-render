@@ -682,7 +682,7 @@ export default class EventHandle {
     }
 
     if (isRoot) {
-      this.render.dispatch(event.type, event);
+      this.render.dispatch(event.type, event as SyntheticMouseEvent | SyntheticDragEvent);
     }
 
     const { bubbles, isPropagationStopped } = event;

@@ -2,6 +2,7 @@ import ES6Set from './utils/set';
 import Painter from './abstract/Painter';
 import EventHandle from './event/EventHandle';
 import EventFul from './utils/Eventful';
+import type { RenderEventHandleParam } from './event/index';
 import Group from './shapes/Group';
 import Element from './shapes/Element';
 import { getRequestAnimationFrame, getCancelAnimationFrame } from './utils/rAF';
@@ -23,7 +24,7 @@ export interface RenderOptions {
   height?: number;
 }
 
-export default class Render extends EventFul {
+export default class Render extends EventFul<RenderEventHandleParam> {
   public dpr: number = 1;
 
   public enableDirtyRect: boolean = true;

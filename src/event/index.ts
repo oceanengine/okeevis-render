@@ -39,3 +39,26 @@ export interface EventConf {
   onTouchStart?: (event: SyntheticTouchEvent) => void;
   onTouchEnd?: (event: SyntheticTouchEvent) => void;
 }
+
+export type RenderEventHandleParam = {
+  'contextmenu': [];
+  'mousemove': [SyntheticMouseEvent];
+  'mousedown': [SyntheticMouseEvent];
+  'mouseup': [SyntheticMouseEvent];
+  'mouseout': [SyntheticMouseEvent];
+  'mouseover': [SyntheticMouseEvent];
+  'click': [SyntheticMouseEvent];
+  'dblclick': [SyntheticMouseEvent];
+  'mouseleave': [SyntheticMouseEvent];
+  'wheel': [SyntheticWheelEvent];
+  'dragstart': [SyntheticDragEvent];
+  'drag': [SyntheticDragEvent];
+  'dragend': [SyntheticDragEvent];
+  'dragenter': [SyntheticDragEvent];
+  'dragover': [SyntheticDragEvent];
+  'dragleave': [SyntheticDragEvent];
+  'drop': [SyntheticDragEvent];
+  'touchmove': [SyntheticTouchEvent];
+  'touchstart': [SyntheticTouchEvent];
+  'touchend': [SyntheticTouchEvent];
+}

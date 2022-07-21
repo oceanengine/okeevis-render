@@ -1,7 +1,13 @@
-export default class EventFul {
-  private _eventListeners: Record<string, Function[]> = {};
+interface DefaultEventHandle {
+  [key: string]: any[];
+}
 
-  public on(eventName: string, listener: Function): void {
+export type Callback<T extends any[]> = (...args: T) => void;
+
+export default class EventFul<T extends DefaultEventHandle = DefaultEventHandle> {
+  private _eventListeners: { [P in keyof T]?: Callback<T[P]>[] } = {};
+
+  public on<U extends keyof T>(eventName: U, listener: Callback<T[U]>): void {
     const listenerList = this._eventListeners[eventName] || [];
     const exsitListener: boolean =
       listenerList.length > 0 && listenerList.some(item => item === listener);
@@ -11,7 +17,7 @@ export default class EventFul {
     }
   }
 
-  public off(eventName: string, listener?: Function): void {
+  public off<U extends keyof T>(eventName: U, listener?: Callback<T[U]>): void {
     const listenerList = this._eventListeners[eventName] || [];
     if (typeof listener === 'undefined') {
       delete this._eventListeners[eventName];
@@ -24,7 +30,7 @@ export default class EventFul {
     }
   }
 
-  public dispatch(type: string, ...args: any[]): void {
+  public dispatch<U extends keyof T>(type: string, ...args: T[U]): void {
     const listenerList = this._eventListeners[type] || [];
     listenerList.forEach(listener => listener.apply(null, args));
     this.onEvent.apply(this, [type, ...args]);
