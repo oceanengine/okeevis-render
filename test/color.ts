@@ -48,6 +48,7 @@ const conicGradient = new ConicGradient({
   cx: 130,
   cy: 360,
   global: true,
+  startAngle: -Math.PI / 2,
   stops:  [
     {
       offset: 0,

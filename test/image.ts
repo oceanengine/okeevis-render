@@ -10,7 +10,7 @@ const img = new Image({
   width: 200,
   height: 358,
   showBBox: true,
-  src: 'https://lf1-hscdn-tos.pstatp.com/obj/developer-baas/baas/ttkw6x/140eef26a890065b_1601003200893.png',
+  src: './test.png',
   preserveAspectRatio: 'xMidYMin',
 })
 const img2 = new Image({
@@ -19,7 +19,7 @@ const img2 = new Image({
   width: 100,
   height: 100,
   showBBox: true,
-  src: 'https://lf1-hscdn-tos.pstatp.com/obj/developer-baas/baas/ttkw6x/140eef26a890065b_1601003200893.png',
+  src: './test.png',
   preserveAspectRatio: 'xMidYMin',
 })
 

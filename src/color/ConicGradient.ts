@@ -2,6 +2,7 @@ import Gradient, { GradientOption, GradientType } from '../abstract/Gradient';
 import * as lodash from '../utils/lodash';
 import { BBox } from '../utils/bbox';
 import SVGNode from '../abstract/Node';
+import { isMobile } from '../utils/env';
 
 export interface ConicGradientOption extends GradientOption {
   cx?: number;
@@ -35,7 +36,7 @@ export default class ConicGradient extends Gradient<ConicGradientOption> {
     if (!ctx.createConicGradient) {
       return 'rgba(0, 0, 0, 0)' as any;
     }
-    const gradient = ctx.createConicGradient(this.option.startAngle, cx, cy);
+    const gradient = ctx.createConicGradient(this.option.startAngle + (isMobile ? Math.PI / 2 : 0), cx, cy);
     option.stops.forEach(stop => {
       gradient.addColorStop(stop.offset, stop.color);
     });

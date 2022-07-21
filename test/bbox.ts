@@ -65,7 +65,7 @@ const circle = new Circle({
 
 const image = new Image({
   draggable: true,
-  src: 'https://lf1-hscdn-tos.pstatp.com/obj/developer-baas/baas/ttkw6x/1ddf8408cdd9f7e0_1600424925672.png',
+  src: './test.png',
   x: 250,
   y: 200,
   width: 100,
@@ -210,7 +210,7 @@ group.add(path)
 const patternImage = new window.Image();
 patternImage.width = 50;
 patternImage.height = 50;
-patternImage.src = 'https://lf1-hscdn-tos.pstatp.com/obj/developer-baas/baas/ttkw6x/1ddf8408cdd9f7e0_1600424925672.png'
+patternImage.src = './test.png'
 group.prepend(new Rect({
   x: 0,
   y: 0,
