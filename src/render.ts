@@ -90,14 +90,19 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._renderer = option.renderer || 'canvas';
     this._dom = dom;
     if (dom) {
+      let domWidth: number;
+      let domHeight: number;
       if (typeof (dom as HTMLCanvasElement).getContext === 'function' && !this._isBrowser) {
-        this._width = (dom as HTMLCanvasElement).width;
-        this._height = (dom as HTMLCanvasElement).height;
+        domWidth = (dom as HTMLCanvasElement).width;
+        domHeight = (dom as HTMLCanvasElement).height;
       } else {
-        const [width, height] = getDomContentSize(dom);
-        this._width = width;
-        this._height = height;
+        const [divWidth, divHeight] = getDomContentSize(dom as HTMLDivElement);
+        domWidth = divWidth;
+        domHeight = divHeight;
       }
+      const { width = domWidth, height = domHeight } = option;
+      this._width = width;
+      this._height = height;
       const UsedPainter = getPainter(this._renderer) || CanvasPainter;
       if (UsedPainter === CanvasPainter) {
         this._renderer = 'canvas';
@@ -243,7 +248,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     return this._painter;
   }
 
-  public renderToSVGString(option: {figma?: boolean} = {}): string {
+  public renderToSVGString(option: { figma?: boolean } = {}): string {
     return renderToSVGString(this.getRoot(), this._width, this._height, option.figma);
   }
 

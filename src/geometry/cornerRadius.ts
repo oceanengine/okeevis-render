@@ -10,6 +10,8 @@ function vectorLength(p1: Vec2, p2: Vec2): number {
 interface CornderPoints {
   startPoint: Vec2;
   endPoint: Vec2;
+  startAngle: number;
+  endAngle: number;
   center: Vec2;
   clocWise: boolean;
 }
@@ -36,6 +38,8 @@ export function getPolylineCornerRadiusPoints(p1: Vec2, p2: Vec2, p3: Vec2, r: n
   return {
     startPoint: [startX, startY],
     endPoint: [endX, endY],
+    startAngle: startPointRotate,
+    endAngle: endPointRotate,
     center: [cx, cy],
     clocWise,
   }

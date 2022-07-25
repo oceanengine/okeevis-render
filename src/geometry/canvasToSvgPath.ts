@@ -1,6 +1,5 @@
 import { PathAction } from './Path2D';
 import { getPointOnPolar, PI2, equalWithTolerance } from '../utils/math';
-import { Vec2, cross } from '../utils/vec2';
 
 export default function canvasToSvgPath(pathList: PathAction[]): string {
   let out = '';
@@ -30,7 +29,7 @@ export default function canvasToSvgPath(pathList: PathAction[]): string {
 
 function getArcPath(pathAction: PathAction, i: number): string {
   const { action, params } = pathAction;
-  let [cx, cy, r, startAngle, endAngle, antiClocWise] = params;
+  let [cx, cy, r, startAngle, endAngle, antiClocWise ] = params;
   if (action === 'ellipse') {
     cx = params[0];
     cy = params[1];
@@ -47,9 +46,7 @@ function getArcPath(pathAction: PathAction, i: number): string {
     endPointAngle = startAngle - PI2 + 1e-4;
   }
   const endPoint = getPointOnPolar(cx, cy, r, endPointAngle);
-  const vec1: Vec2 = [startPoint.x - cx, startPoint.y - cy];
-  const vec2: Vec2 = [endPoint.x - cx, endPoint.y - cy];
-  const isLargeArc = cross(vec1, vec2) * (antiClocWise ? -1 : 1) < 0;
+  const isLargeArc = Math.abs(startAngle - endAngle) >= Math.PI;
   return `${i > 0 ? 'L' : 'M'}${startPoint.x},${startPoint.y}A ${r} ${r} ${0} ${
     isLargeArc ? 1 : 0
   } ${!antiClocWise ? 1 : 0} ${endPoint.x} ${endPoint.y}`;

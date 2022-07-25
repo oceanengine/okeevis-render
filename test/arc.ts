@@ -2,7 +2,7 @@ import Render from '../src/render'
 import Arc from '../src/shapes/Arc'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom)
+const render = new Render(dom, {renderer: 'svg'})
 const shape = new Arc({
   cx: 220,
   cy: 250,

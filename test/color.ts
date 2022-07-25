@@ -7,7 +7,7 @@ import LinearGradient from '../src/color/LinearGradient';
 import RadialGradient from '../src/color/RadialGradient';
 
 const dom = document.getElementById('root') as HTMLElement;
-const render = new Render(dom, {renderer: 'canvas'});
+const render = new Render(dom, {renderer: 'svg'});
 
 const leftRightGraidnet = new LinearGradient({
   x1: 300,
@@ -66,7 +66,7 @@ const shape = new Circle({
   cx: 150,
   cy: 150,
   radius: 50,
-  fill: radialGradient,
+  fill: 'blue',
   stroke: 'red',
   cursor: 'pointer',
 })
@@ -90,5 +90,5 @@ const sector = new Sector({
 })
 
 render.add(shape);
-render.add(shape2)
-render.add(sector)
+// render.add(shape2)
+// render.add(sector)

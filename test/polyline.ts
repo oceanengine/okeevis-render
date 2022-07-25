@@ -2,7 +2,7 @@ import Render from '../src/render'
 import Polyline from '../src/shapes/Polyline'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {renderer: 'svg'})
+const render = new Render(dom, {renderer: 'canvas'})
 
 const polyline = new Polyline({
   draggable: true,

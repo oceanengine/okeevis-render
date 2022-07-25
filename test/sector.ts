@@ -2,7 +2,7 @@ import Render from '../src/render'
 import Sector from '../src/shapes/Sector'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, { renderer: 'canvas' })
+const render = new Render(dom, { renderer: 'svg' })
 
 const shape = new Sector({
   cx: 200,

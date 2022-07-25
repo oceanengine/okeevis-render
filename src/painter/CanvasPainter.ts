@@ -174,7 +174,7 @@ export default class CanvasPainter implements Painter {
     if (dirtyRegions.length === 0) {
       return;
     }
-    this.paint(mergeDirtyRegions(dirtyRegions));
+    this.paint(mergeDirtyRegions(dirtyRegions, this.render.dpr));
     // console.timeEnd('compute dirty rects');
   }
 
