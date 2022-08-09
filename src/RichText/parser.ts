@@ -58,7 +58,13 @@ export default function parseRichNode(template: string, document: Rich): VNode[]
       ontext(text: string) {
         const trimText = text.trim();
         if (trimText) {
-          currentNode.appendChild(new Text({ value: trimText }));
+          const textNode = new Text({ value: trimText });
+          textNode.ownerDocument = document;
+          if (currentNode) {
+            currentNode.appendChild(textNode);
+          } else {
+            root.push(textNode);
+          }
         }
       },
       onclosetag() {

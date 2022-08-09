@@ -6,7 +6,7 @@ import Rect from '../../shapes/Rect';
 import VNode, { VNodeProps } from '../vnode';
 
 export default class VImage extends VNode {
-  public type: 'image';
+  public type = 'image';
 
   public defaultProps: VNodeProps = {
     borderWidth: 1,

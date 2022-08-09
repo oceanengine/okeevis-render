@@ -4,6 +4,7 @@
  */
 import CustomElement from '../shapes/CustomElement';
 import Element from '../shapes/Element';
+import Text from '../shapes/Text';
 import { VNodeProps } from './vnode';
 import RichObj from './rich-obj';
 import { EventConf } from '../event';
@@ -46,6 +47,11 @@ export default class RichText extends CustomElement<RichTextConf> {
       return;
     }
     const rootNode = this._richObj.node;
+    if (rootNode.type === 'text') {
+      return new Text({
+        ...this.attr
+      });
+    }
     this._richObj.layout();
     return rootNode.render();
   }

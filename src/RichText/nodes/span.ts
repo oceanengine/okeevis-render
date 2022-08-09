@@ -8,7 +8,7 @@ import VNode, { VNodeProps } from '../vnode';
 import * as lodash from '../../utils/lodash';
 
 export default class Span extends VNode {
-  public type: 'span';
+  public type = 'span';
 
   public defaultProps: VNodeProps = {
     padding: 0,

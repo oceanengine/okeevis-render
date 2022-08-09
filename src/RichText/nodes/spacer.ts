@@ -7,7 +7,7 @@ import * as lodash from '../../utils/lodash';
 export default class Spacer extends VNode {
   public static selfClosing: boolean = true;
 
-  public type: 'spacer';
+  public type = 'spacer';
 
   public defaultProps: VNodeProps = {
     flex: 0,

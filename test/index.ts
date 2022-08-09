@@ -1,2 +1,2 @@
-import './sector'
+import './rich-text'
 

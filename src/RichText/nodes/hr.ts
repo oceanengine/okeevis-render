@@ -8,7 +8,7 @@ import * as lodash from '../../utils/lodash';
 export default class HorizontalLine extends VNode {
   public static selfClosing: boolean = true;
 
-  public type: 'hr';
+  public type = 'hr';
 
   public defaultProps: VNodeProps = {
     width: '100%',

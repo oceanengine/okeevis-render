@@ -7,7 +7,7 @@ import Box from './box';
 import { measureText } from '../../utils/measureText';
 
 export default class VText extends VNode {
-  public type: 'text';
+  public type = 'text';
 
   private _relayouted: boolean = false;
 
