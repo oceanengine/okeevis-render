@@ -35,7 +35,6 @@ export default class Polyline extends Shape<PolylineAttr> {
       ...super.getDefaultAttr(),
       pointList: [],
       smooth: false,
-      borderRadius: 0,
       smoothType: 'spline',
     };
   }
@@ -45,7 +44,8 @@ export default class Polyline extends Shape<PolylineAttr> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { pointList, borderRadius } = this.attr;
+    const { pointList } = this.attr;
+    const borderRadius = this.getExtendAttr('borderRadius') || 0;
     const isPolygon = this.type === 'polygon';
     if (!pointList || pointList.length === 0) {
       return;
