@@ -69,10 +69,13 @@ export default class Polyline extends Shape<PolylineAttr> {
         ctx.lineTo(splinePoints[i].x, splinePoints[i].y);
       }
     } else {
+      let radiusIndex = -1;
       for (let i: number = isPolygon ? 0 : 1; i < pointList.length; i++) {
+        radiusIndex++;
         if (!borderRadius) {
           ctx.lineTo(pointList[i].x, pointList[i].y);
         } else {
+          const r = Array.isArray(borderRadius) ? (borderRadius[radiusIndex] || 0) : borderRadius;
           let p1 = pointList[i - 1];
           const p2 = pointList[i];
           let p3 = pointList[i + 1];
@@ -83,7 +86,7 @@ export default class Polyline extends Shape<PolylineAttr> {
           if (!p3 && isPolygon) {
             p3 = pointList[0];
           }
-          this.lineToWithBorderRadius(ctx, p1, p2, p3, borderRadius as number, isFirstPolygonPoint);
+          this.lineToWithBorderRadius(ctx, p1, p2, p3, r, isFirstPolygonPoint);
         }
       }
     }

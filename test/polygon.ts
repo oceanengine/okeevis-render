@@ -13,7 +13,7 @@ const shape = new Polygon({
   stroke: 'blue',
   draggable: true,
   fill: 'red',
-  borderRadius: 5,
+  borderRadius: [10, 10],
   lineWidth: 2,
 })
 render.add(shape);

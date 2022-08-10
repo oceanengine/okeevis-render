@@ -1,5 +1,5 @@
 import { LineAttr } from '../shapes/Line';
-import { RectAttr } from '../shapes/Rect';
+import { BBox } from './bbox';
 import * as lodash from './lodash';
 
 let enable1px = false;
@@ -26,7 +26,7 @@ export default function line1px(option: LineAttr): LineAttr {
   return option;
 }
 
-export function rect1px(option?: RectAttr): RectAttr {
+export function rect1px(option?: Partial<BBox>): Partial<BBox> {
   if (option) {
     if (lodash.isNumber(option.x) && lodash.isNumber(option.y)) {
       const { x, y, width, height } = option;

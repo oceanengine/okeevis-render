@@ -30,7 +30,6 @@ export default class Rect extends Shape<RectAttr> {
       y: 0,
       width: 0,
       height: 0,
-      r: 0,
     };
   }
 
@@ -39,7 +38,7 @@ export default class Rect extends Shape<RectAttr> {
   }
 
   public brush(ctx: CanvasRenderingContext2D): void {
-    const { x, y, width, height, borderRadius, r = borderRadius } = this.attr;
+    const { x, y, width, height, borderRadius = 0, r = borderRadius } = this.attr;
     if ((width === 0 || height === 0) && !this.isClip) {
       return;
     }

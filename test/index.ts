@@ -1,2 +1,2 @@
-import './rich-text'
+import './polygon'
 
