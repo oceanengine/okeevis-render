@@ -16,7 +16,7 @@ const polyline = new Polyline({
   translateX: 50,
   translateY: 50,
   lineWidth: 1,
-  borderRadius: [10, 20, 0],
+  borderRadius: 10,
   fill: 'transparent',
   stroke: 'blue'
 })

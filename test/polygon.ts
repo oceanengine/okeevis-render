@@ -6,14 +6,15 @@ const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom, {renderer: 'svg'})
 const shape = new Polygon({
   pointList: [
-    {x: 106, y: 70},
-    {x: 230, y: 135},
-    {x: 94, y: 209},
+    {x: 10, y: 10},
+    {x: 100, y: 10},
+    {x: 100, y: 200},
+    {x: 100, y: 200},
   ],
   stroke: 'blue',
   draggable: true,
   fill: 'red',
-  borderRadius: [10, 10],
+  borderRadius: 10,
   lineWidth: 2,
 })
 render.add(shape);

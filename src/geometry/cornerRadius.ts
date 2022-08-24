@@ -8,6 +8,7 @@ function vectorLength(p1: Vec2, p2: Vec2): number {
 }
 
 interface CornderPoints {
+  radius: number;
   startPoint: Vec2;
   endPoint: Vec2;
   startAngle: number;
@@ -17,7 +18,7 @@ interface CornderPoints {
 }
 
 export function getPolylineCornerRadiusPoints(p1: Vec2, p2: Vec2, p3: Vec2, r: number): CornderPoints {
-  const maxLen = Math.max(vectorLength(p1, p2), vectorLength(p2, p3));
+  const maxLen = Math.min(vectorLength(p1, p2), vectorLength(p2, p3));
   const clocWise = cross(subtract([0, 0], p3, p1), subtract([0, 0], p2, p1)) < 0;
   const p2Angle = angle(subtract([0, 0], p1, p2), subtract([0, 0], p3, p2));
   const rmax = Math.abs(maxLen * Math.tan(p2Angle / 2));
@@ -36,6 +37,7 @@ export function getPolylineCornerRadiusPoints(p1: Vec2, p2: Vec2, p3: Vec2, r: n
   const endX = cx + radius * Math.cos(endPointRotate);
   const endY = cy + radius * Math.sin(endPointRotate);
   return {
+    radius,
     startPoint: [startX, startY],
     endPoint: [endX, endY],
     startAngle: startPointRotate,

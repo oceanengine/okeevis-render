@@ -96,13 +96,13 @@ export default class Polyline extends Shape<PolylineAttr> {
     if (!p3 && this.type === 'polyline') {
       return ctx.lineTo(p2.x, p2.y);
     }
-    const { startPoint, startAngle, endAngle, center, clocWise } = getPolylineCornerRadiusPoints([p1.x, p1.y], [p2.x, p2.y], [p3.x, p3.y], borderRadius);
+    const { radius, startPoint, startAngle, endAngle, center, clocWise } = getPolylineCornerRadiusPoints([p1.x, p1.y], [p2.x, p2.y], [p3.x, p3.y], borderRadius);
     if (!noLineTo) {
       ctx.lineTo(startPoint[0], startPoint[1]);
     } else {
       ctx.moveTo(startPoint[0], startPoint[1]);
     }
-    ctx.arc(center[0], center[1], borderRadius, startAngle, endAngle, !clocWise);
+    ctx.arc(center[0], center[1], radius, startAngle, endAngle, !clocWise);
   }
 
   protected computeBBox(): BBox {
