@@ -147,25 +147,30 @@ export default class EventHandle {
     if (gpuPickNodes.length > 0 && pixelPainter.getContext().getImageData) {
       pixelPainter.paintAt(x, y);
       // const prevImageData = pixelPainter.getImageData(x, y);
-      const imageData = pixelPainter.getImageData(0, 0, 1, 1);
-      if (imageData) {
-        const pickValue = imageData.data;
-        const r0 = pickValue[0];
-        const g0 = pickValue[1];
-        const b0 = pickValue[2];
+      try {
+        // may thrown error when contains cross origin image
+        const imageData = pixelPainter.getImageData(0, 0, 1, 1);
+        if (imageData) {
+          const pickValue = imageData.data;
+          const r0 = pickValue[0];
+          const g0 = pickValue[1];
+          const b0 = pickValue[2];
 
-        for (let i = 0; i < pickNodes.length; i++) {
-          const currentNode = pickNodes[i];
-          if (!currentNode.pickByGPU()) {
-            continue;
-          }
-          const [r, g, b] = currentNode.pickRGB;
-          const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
-          if (gap < 3) {
-            gpuPickIndex = i;
-            break;
+          for (let i = 0; i < pickNodes.length; i++) {
+            const currentNode = pickNodes[i];
+            if (!currentNode.pickByGPU()) {
+              continue;
+            }
+            const [r, g, b] = currentNode.pickRGB;
+            const gap = Math.abs(r - r0) + Math.abs(g - g0) + Math.abs(b - b0);
+            if (gap < 3) {
+              gpuPickIndex = i;
+              break;
+            }
           }
         }
+      } catch (err) {
+
       }
       gpuPickNodes.forEach(gpuNode => gpuNode.resetPickRGB());
     }
@@ -543,8 +548,7 @@ export default class EventHandle {
         this._dispatchSyntheticEvent(dragLeaveEvent, prevDragOverTarget);
       }
     }
-   
-  }
+  };
 
   private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
     const { x, y } = this._getMousePosition(nativeEvent);
@@ -567,7 +571,7 @@ export default class EventHandle {
 
   private _isEventFromDomNode(event: MouseEvent | Touch) {
     const target = event.target as HTMLElement;
-    let node = target
+    let node = target;
     while (node) {
       if (node.className === DOM_LAYER_CLASS) {
         return true;
@@ -582,7 +586,11 @@ export default class EventHandle {
 
   private _getMousePosition(event: MouseEvent | Touch): { x: number; y: number } {
     // firefox svg offsetX is relative to svgElement target
-    if ((event as MouseEvent).offsetX && this.render.renderer !== 'svg' && !this._isEventFromDomNode(event)) {
+    if (
+      (event as MouseEvent).offsetX &&
+      this.render.renderer !== 'svg' &&
+      !this._isEventFromDomNode(event)
+    ) {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
     return getTouchOffsetPosition(
@@ -711,7 +719,7 @@ export default class EventHandle {
 
     if (bubbles && !isPropagationStopped && target.parentNode) {
       count++;
-      this._dispatchSyntheticEvent(event, (target.parentNode as any) as Element, count);
+      this._dispatchSyntheticEvent(event, target.parentNode as any as Element, count);
     }
   }
 
