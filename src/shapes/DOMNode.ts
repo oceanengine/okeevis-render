@@ -77,7 +77,19 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
     const cursor = this.getExtendAttr('cursor');
     const textAlign = this.getExtendAttr('textAlign');
     const textBaseline = this.getExtendAttr('textBaseline');
-    container.style.cssText = `line-height: 100%;position: absolute;font-size:${fontSize};font-family:${fontFamily};color:${fill};font-weight: ${fontWeight};pointer-events:${pointerEvents};cusor:${cursor}`;
+    const cssStyle: Partial<CSSStyleDeclaration> = {
+      lineHeight: '100%',
+      position: 'absolute',
+      fontSize,
+      fontFamily,
+      color: fill as string,
+      fontWeight: fontWeight + '',
+      pointerEvents,
+      cursor
+    };
+    for (let key in cssStyle) {
+      container.style[key] = cssStyle[key];
+    }
     container.style.display = this.attr.display === false ? 'none' : 'block';
     container.style.textAlign = textAlign;
     this._setTransform();
