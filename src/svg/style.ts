@@ -29,7 +29,7 @@ export interface SVGElementStyle {
   stroke: string;
   'stroke-width': string;
   'stroke-linecap': string;
-  'stroke-linjoin': string;
+  'stroke-linejoin': string;
   'stroke-miterlimit': string;
   'stroke-dasharray': string;
   'stroke-dashoffset': string;
@@ -193,7 +193,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   }
 
   if (lineJoin) {
-    ret['stroke-linjoin'] = lineJoin;
+    ret['stroke-linejoin'] = lineJoin;
   }
 
   if (miterLimit) {
