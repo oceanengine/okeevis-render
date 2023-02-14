@@ -30,6 +30,8 @@ export default class SyntheticWheelEvent extends SyntheticMouseEvent {
 
   public normalizeWheel: NormalLizeWheel;
 
+  public isFromTouchPad: boolean;
+
   public constructor(type: string, params: SyntheticWheelEventParams) {
     super(type, params);
     this.deltaMode = params.deltaMode;
@@ -37,5 +39,6 @@ export default class SyntheticWheelEvent extends SyntheticMouseEvent {
     this.deltaY = params.deltaY;
     this.deltaZ = params.deltaZ;
     this.normalizeWheel = params.normalizeWheel;
+    this.isFromTouchPad = (params.original as any).wheelDelta % 40 !== 0;
   }
 }

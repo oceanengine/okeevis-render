@@ -1,8 +1,6 @@
 import { BBox } from '../utils/bbox';
 import SVGNode from './Node';
 
-// todo global coord gradient support
-
 export interface ColorStop {
   offset: number;
   color: string;
@@ -30,6 +28,10 @@ export default abstract class Gradient<T extends GradientOption = any> {
   public constructor(option: T) {
     this.option = option;
     this.id = 'okee-render-gradient-' + id++;
+  }
+
+  public addColorStop(offset: number, color: string) {
+    this.option.stops.push({offset, color});
   }
 
   public abstract clone(): Gradient<T>;

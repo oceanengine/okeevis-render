@@ -7,7 +7,7 @@ export interface PatternOption {
   image?: CanvasImageSource | string;
   width?: number;
   height?: number;
-  element: Element | Element[];
+  element?: Element | Element[];
   repeat?: 'repeat' | 'repeat-x' | 'repeat-y' | 'no-repeat';
 }
 
@@ -51,7 +51,11 @@ export default class Pattern {
         }
       } else if (image instanceof HTMLImageElement) {
         if (image.complete) {
-          this._pattern = ctx.createPattern(image, repeat);
+          try {
+            this._pattern = ctx.createPattern(image, repeat);
+          } catch(err) {
+            console.log(err)
+          }
         } else {
           image.onload = () => {
             try {
@@ -75,7 +79,7 @@ export default class Pattern {
         }
         render.refreshImmediately();
         render.dispose();
-        const patterImage = new Image(width, height);
+        const patterImage = new Image();
         const dataURL = canvas.toDataURL();
         patterImage.onload = () => {
           this._pattern = ctx.createPattern(patterImage, 'repeat');

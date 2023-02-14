@@ -6,7 +6,7 @@ import Arc from '../src/shapes/Arc'
 import Path from '../src/shapes/Path'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {renderer: 'canvas'})
+const render = new Render(dom, {renderer: 'canvas', workerEnabled: true})
 render.enableDirtyRect = true;
 
 const arrow = Path.fromSvgPath("M 0 0 L 5 2 L 0 4 z").setAttr({

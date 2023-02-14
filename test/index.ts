@@ -1,2 +1,2 @@
-import './polygon'
+import './animateMotion'
 

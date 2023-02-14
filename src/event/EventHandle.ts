@@ -65,6 +65,8 @@ export default class EventHandle {
 
   private _cancelClick: boolean = true;
 
+  private _frameCallback: Function[] = [];
+
   public constructor(render: Render, eventOnly: boolean = false) {
     this.render = render;
     this._PixelPainter = new CanvasPainter(render, true);
@@ -74,6 +76,8 @@ export default class EventHandle {
   }
 
   public onFrame() {
+    this._frameCallback.forEach(fn => fn());
+    this._frameCallback.length = 0;
     if (
       this.render.needUpdate() &&
       this._prevMousePosition &&
@@ -169,9 +173,7 @@ export default class EventHandle {
             }
           }
         }
-      } catch (err) {
-
-      }
+      } catch (err) {}
       gpuPickNodes.forEach(gpuNode => gpuNode.resetPickRGB());
     }
 
@@ -193,6 +195,7 @@ export default class EventHandle {
       this._detachEvents();
     }
     this._PixelPainter.dispose();
+    this._frameCallback.length = 0;
   }
 
   private _syntheticMouseEvent = (nativeEvent: MouseEvent, isNative: boolean = true) => {
@@ -458,7 +461,6 @@ export default class EventHandle {
   };
 
   private _handleMouseLeave = (nativeEvent: WheelEvent) => {
-    // todo
     const { x, y } = this._getMousePosition(nativeEvent);
     const target = this._prevMouseTarget || this._getHandleGroup();
     const eventParam = {
@@ -486,7 +488,6 @@ export default class EventHandle {
   };
 
   private _handleMouseEnter = (nativeEvent: WheelEvent) => {
-    // todo
     const { x, y } = this._getMousePosition(nativeEvent);
     const target = this.pickTarget(x, y);
     if (this.render.isBrowser() && !this._eventOnly) {
@@ -705,13 +706,15 @@ export default class EventHandle {
         dy = offset.y;
       }
 
-      target.dragMoveBy(dx, dy);
-      if (
-        this.render.renderer === 'canvas' &&
-        !this._eventOnly &&
-        !(this.render.getPainter() as CanvasPainter).isFullPaintNextFrame()
-      ) {
-        this.render.getPainter().onFrame();
+      // 当使用脏矩形时，如果修改的步调和tick的不一致，会导致脏矩形错误,需要同步刷新
+      // 事件的触发频率和tick不同步，如果不同步重绘，会导致残影
+      if (!this._eventOnly && this.render.enableDirtyRect) {
+        this._frameCallback.push(() => {
+          target.dragMoveBy(dx, dy);
+        });
+        this.render.nextTick();
+      } else {
+        target.dragMoveBy(dx, dy);
       }
     }
 

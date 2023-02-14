@@ -55,6 +55,8 @@ export default class CanvasPainter implements Painter {
 
   private _viewPort: BBox;
 
+  private _clearArea: BBox | boolean;
+
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
     this._isPixelPainter = isPixelPainter;
@@ -64,7 +66,7 @@ export default class CanvasPainter implements Painter {
       // tab switch must redraw
       document.addEventListener('visibilitychange', this._handleDocumentVisibilityChange);
     }
-    this._viewPort = {x: 0, y: 0, width: render.getWidth(), height: render.getHeight()};
+    this._viewPort = { x: 0, y: 0, width: render.getWidth(), height: render.getHeight() };
   }
 
   public resize(width: number, height: number) {
@@ -80,6 +82,9 @@ export default class CanvasPainter implements Painter {
   }
 
   public onFrame(now?: number) {
+    if (!this._ctx) {
+      return;
+    }
     const showFPS = this.render.showFPS;
     const needUpdate = this.render.needUpdate();
     if (showFPS && now) {
@@ -93,6 +98,7 @@ export default class CanvasPainter implements Painter {
     const dirtyElements = this.render.getDirtyElements();
     const dirytCount = dirtyElements.size;
     const chunk = this.render.getOneChunk();
+    this._clearArea = false;
     if (needUpdate) {
       if (
         !this._isFirstFrame &&
@@ -119,17 +125,38 @@ export default class CanvasPainter implements Painter {
     }
   }
 
+  // worker mode
+  public getClearArea(): BBox | boolean {
+    return this._clearArea;
+  }
+
   public getImageData(x: number, y: number, width: number, height: number): ImageData {
-    return this._canvas.getContext('2d').getImageData(x, y, width, height);
+    return this._ctx.getImageData(x, y, width, height);
+  }
+
+  public getCanvas() {
+    return this._canvas;
+  }
+
+  public getCanvasContext() {
+    return this._canvas?.getContext('2d');
   }
 
   public getContext(): CanvasRenderingContext2D {
     return this._ctx;
   }
 
+  public clearCanvas() {
+    this._canvas.getContext('2d').clearRect(0, 0, this._canvas.width, this._canvas.height);
+  }
+
+  public setContext(ctx: CanvasRenderingContext2D) {
+    this._ctx = ctx;
+  }
+
   public paintAt(x: number, y: number) {
     this._paintPosition = [x, y];
-    const ctx = this._canvas.getContext('2d');
+    const ctx = this._ctx;
     if (this._canvas === this.render.getDom()) {
       ctx.clearRect(0, 0, 1, 1);
     } else {
@@ -223,17 +250,20 @@ export default class CanvasPainter implements Painter {
 
   public paint(dirtyRegion?: BBox) {
     // console.time('paint');
-    const ctx = this._canvas.getContext('2d');
+    const ctx = this._ctx;
     const dpr = this.dpr;
     if (!dirtyRegion) {
       ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+      this._clearArea = true;
     } else {
-      ctx.clearRect(
-        dirtyRegion.x * dpr,
-        dirtyRegion.y * dpr,
-        dirtyRegion.width * dpr,
-        dirtyRegion.height * dpr,
-      );
+      const { x, y, width, height } = dirtyRegion;
+      ctx.clearRect(x * dpr, y * dpr, width * dpr, height * dpr);
+      this._clearArea = {
+        x: x * dpr,
+        y: y * dpr,
+        width: width * dpr,
+        height: height * dpr,
+      };
     }
     ctx.save();
     if (dpr !== 1 && this.render.scaleByDprBeforePaint) {
@@ -272,7 +302,7 @@ export default class CanvasPainter implements Painter {
         return;
       }
     }
-    
+
     if (this.render.enableViewportCulling) {
       const bbox = item.getCurrentDirtyRect();
       const isInViewport = bboxIntersect(this._viewPort, bbox);
@@ -329,7 +359,7 @@ export default class CanvasPainter implements Painter {
       if (
         item.fillAble &&
         (needFill || (this._isPixelPainter && hasFill)) &&
-        item.type !== 'text' && 
+        item.type !== 'text' &&
         !(isPattern(fill) && !(fill as Pattern).isReady())
       ) {
         ctx.fill();
@@ -387,7 +417,7 @@ export default class CanvasPainter implements Painter {
     if (hasSelfContext) {
       ctx.restore();
     }
-  }
+  };
 
   public isFullPaintNextFrame(): boolean {
     return !this.render.enableDirtyRect || this._isFirstFrame;

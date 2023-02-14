@@ -13,6 +13,8 @@ import SVGPainter from './painter/SVGPainter';
 import { renderToSVGString } from './svg/renderToSVGString';
 import { downloadBase64 } from './utils/download';
 import { getDomContentSize } from './utils/dom';
+import { getScheduler } from './multi-thread/scheduler';
+import { CommandBufferEncoder } from './multi-thread/command-buffer';
 
 registerPainter('canvas', CanvasPainter);
 registerPainter('svg', SVGPainter);
@@ -22,6 +24,7 @@ export interface RenderOptions {
   renderer?: 'canvas' | 'svg';
   width?: number;
   height?: number;
+  workerEnabled?: boolean;
 }
 
 export default class Render extends EventFul<RenderEventHandleParam> {
@@ -80,6 +83,16 @@ export default class Render extends EventFul<RenderEventHandleParam> {
 
   private _isOnframe: boolean = false;
 
+  private _raf: Function;
+
+  private _caf: Function;
+
+  private _unregisterWorker: Function;
+
+  private _workerEnabled: boolean;
+
+  private _commandBuffer: CommandBufferEncoder;
+
   public constructor(dom?: HTMLElement, option: RenderOptions = {}) {
     super();
 
@@ -88,6 +101,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._isBrowser = /html.*?element/gi.test(Object.prototype.toString.call(dom));
     this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio || 1 : 1);
     this._renderer = option.renderer || 'canvas';
+    this._workerEnabled = option.workerEnabled;
     this._dom = dom;
     if (dom) {
       let domWidth: number;
@@ -115,6 +129,31 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     }
     this._eventHandle = new EventHandle(this);
     this._eventElementHandle = new EventHandle(this, true);
+    if (
+      this._workerEnabled &&
+      this.renderer === 'canvas' &&
+      this._isBrowser &&
+      window.OffscreenCanvas
+    ) {
+      const {
+        requestAnimationFrame: raf,
+        cancelAnimationFrame: caf,
+        unRegisterTask,
+        commandBuffer,
+      } = getScheduler().getRaf({
+        onPainted: this._onThreadPaited,
+        oneFrameBehind: !this.enableDirtyRect,
+      });
+      this._raf = raf;
+      this._caf = caf;
+      this._unregisterWorker = unRegisterTask;
+      this._commandBuffer = commandBuffer;
+      (this._painter as CanvasPainter).setContext(commandBuffer as any);
+    } else {
+      this._workerEnabled = false;
+      this._raf = getRequestAnimationFrame();
+      this._caf = getCancelAnimationFrame();
+    }
     this.nextTick();
   }
 
@@ -122,6 +161,10 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._width = width;
     this._height = height;
     this._painter?.resize(width, height);
+  }
+
+  public isWorkerEnabled(): boolean {
+    return this._workerEnabled;
   }
 
   public refresh() {
@@ -223,7 +266,10 @@ export default class Render extends EventFul<RenderEventHandleParam> {
 
   public dispose() {
     // todo polyfill
-    getCancelAnimationFrame()(this._requestAnimationFrameId);
+    this._caf(this._requestAnimationFrameId);
+    if (this._workerEnabled) {
+      this._unregisterWorker();
+    }
     if (this._painter) {
       removeContext(this._painter.getContext());
       this._painter.dispose();
@@ -232,7 +278,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._eventHandle.dispose();
     this._eventElementHandle.dispose();
     this._frameAbleElement.clear();
-    this.chunksElement.clear();
+    this.clear();
     this._rootGroup.clear();
     this._eventGroop.clear();
     this._rootGroup = null;
@@ -283,9 +329,17 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._requestAnimationFrameId = null;
     this._isOnframe = true;
     this._frameAbleElement.forEach(item => item.onFrame(now));
-    this._painter?.onFrame(now);
     this._eventHandle.onFrame();
     this._eventElementHandle.onFrame();
+    if (this._workerEnabled) {
+      const canvas = (this._painter as CanvasPainter).getCanvas();
+      this._commandBuffer.start(canvas.width, canvas.height);
+    }
+    this._painter?.onFrame(now);
+    if (this._workerEnabled) {
+      this._commandBuffer.commit();
+    }
+
     this._needUpdate = false;
     this._dirtyElements.clear();
     const chunkSize = this.chunksElement.size;
@@ -308,7 +362,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
 
   public nextTick() {
     if (!this._requestAnimationFrameId) {
-      this._requestAnimationFrameId = getRequestAnimationFrame()(this._onFrame);
+      this._requestAnimationFrameId = this._raf(this._onFrame);
     }
   }
 
@@ -329,4 +383,22 @@ export default class Render extends EventFul<RenderEventHandleParam> {
       items,
     };
   }
+
+  private _onThreadPaited = (data: ImageBitmap) => {
+    const painter = this._painter as CanvasPainter;
+    const ctx = painter.getCanvasContext();
+    const area = painter.getClearArea();
+    if (!ctx) {
+      return;
+    }
+    if (area) {
+      if (area === true) {
+        painter.clearCanvas();
+      } else {
+        const { x, y, width, height } = area;
+        ctx.clearRect(x, y, width, height);
+      }
+    }
+    ctx.drawImage(data, 0, 0, data.width, data.height);
+  };
 }

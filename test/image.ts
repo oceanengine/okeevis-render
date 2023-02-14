@@ -2,7 +2,7 @@ import Render from '../src/render'
 import Image from '../src/shapes/Image'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {renderer: 'canvas'})
+const render = new Render(dom, {renderer: 'canvas', workerEnabled: true})
 
 const img = new Image({
   x: 0,
@@ -11,6 +11,7 @@ const img = new Image({
   height: 358,
   showBBox: true,
   src: './test.png',
+  draggable: true,
   preserveAspectRatio: 'xMidYMin',
 })
 const img2 = new Image({
@@ -19,7 +20,7 @@ const img2 = new Image({
   width: 100,
   height: 100,
   showBBox: true,
-  src: './test.png',
+  src: '/test.png',
   preserveAspectRatio: 'xMidYMin',
 })
 

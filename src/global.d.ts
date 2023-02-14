@@ -29,4 +29,10 @@ declare global {
     createConicGradient(startAngle: number, x: number, y: number): CanvasGradient;
     draw(reverse?: boolean, callback?: Function): void;
   }
+  export class OffscreenCanvas extends HTMLCanvasElement {
+    constructor(width: number, height: number);
+    transferToImageBitmap(): ImageBitmap;
+    convertToBlob(): Blob;
+    getContext(contextId: '2d', options?: CanvasRenderingContext2DSettings): CanvasRenderingContext2D;
+  }
 }

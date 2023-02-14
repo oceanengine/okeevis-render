@@ -5,18 +5,21 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "start": "node build/dev-server.js",
-    "build": "node build/build.js  & ./node_modules/.bin/tsc -d",
-    "build:esm": "rollup -c build/rollup.config.js && rm -rf .rpt2_cache",
+    "start": "npm-run-all -s build:worker dev",
+    "build:worker": "webpack --config ./build/webpack.config.worker.js && node build/build-worker.js",
+    "build": "npm-run-all -s build:worker tsc uglify",
     "dev": "node build/dev-server.js",
+    "tsc": "node build/build.js  && ./node_modules/.bin/tsc -d",
     "test": "cross-env NODE_ENV=test mocha --compilers js:babel-core/register test/test.js",
     "tslint": "tslint -c tslint.json -r src/ -p ./tsconfig.json",
     "lint": "eslint --fix src/",
-    "prettier": "prettier --write src/"
+    "prettier": "prettier --write src/",
+    "uglify": "node ./build/uglify.js"
   },
   "devDependencies": {
     "@types/color": "^3.0.1",
     "@types/lodash": "^4.14.166",
+    "@types/throttle-debounce": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
     "babel-core": "^6.24.0",
@@ -38,19 +41,20 @@
     "eslint-tinker": "^0.5.0",
     "html-webpack-plugin": "^2.30.1",
     "mocha": "^5.2.0",
+    "npm-run-all": "^4.1.5",
     "opn": "^5.1.0",
     "ora": "^2.1.0",
     "prettier": "^2.2.1",
     "ts-loader": "^3.2.0",
     "typescript": "3.8.3",
+    "uglify-js": "^3.17.4",
     "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^3.8.0",
     "webpack-dev-middleware": "^1.12.2",
     "webpack-dev-server": "^3.1.11",
     "webpack-hot-middleware": "2.13.2",
-    "webpack-merge": "^4.1.0",
-    "@types/throttle-debounce": "^2.1.0"
+    "webpack-merge": "^4.1.0"
   },
   "repository": {
     "type": "git",

@@ -3,7 +3,7 @@ import RichText from '../src/RichText'
 import Group from '../src/shapes/Group';
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom)
+const render = new Render(dom, {workerEnabled: true})
 
 const rich = new RichText({
   rich: true,

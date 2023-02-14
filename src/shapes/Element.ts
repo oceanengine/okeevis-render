@@ -794,9 +794,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (dx === 0 && dy === 0) {
       return;
     }
+    this.dirty();
     this._dragOffset[0] += dx;
     this._dragOffset[1] += dy;
-    this.dirty();
     this.dirtyGlobalTransform();
   }
 

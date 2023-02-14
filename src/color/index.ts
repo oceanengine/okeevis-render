@@ -2,6 +2,7 @@ import * as Color from 'color';
 import type Gradient from '../abstract/Gradient';
 import type LinearGradient from './LinearGradient';
 import type RadialGradient from './RadialGradient';
+import type ConicGradient from './ConicGradient';
 import type Pattern from './Pattern';
 import type Element from '../shapes/Element';
 import * as lodash from '../utils/lodash';
@@ -9,7 +10,7 @@ import { NAME_TRANSPARENT, RGBA_TRANSPARENT } from '../constant';
 
 export { Color };
 export type ColorValue = 'none' | string | LinearGradient | RadialGradient | Pattern | null;
-export { Gradient, LinearGradient, RadialGradient, Pattern };
+export { Gradient, LinearGradient, RadialGradient, Pattern, ConicGradient };
 
 function brightenStringColor(color: string, ration: number): string {
   const out = Color(color).lighten(ration);
@@ -51,15 +52,15 @@ export function alpha(color: string, alpha: number): string {
   return `rgba(${[red, green, blue, alpha].join(',')})`;
 }
 
-export function isGradient(color: ColorValue): boolean {
+export function isGradient(color: ColorValue): color is Gradient {
   return color && (color as Gradient).isGradient;
 }
 
-export function isPattern(color: ColorValue): boolean {
+export function isPattern(color: ColorValue): color is Pattern {
   return color && (color as Pattern).isPattern;
 }
 
-export function isTransparent(color: ColorValue) {
+export function isTransparent(color: ColorValue): boolean {
   return color === RGBA_TRANSPARENT || color === NAME_TRANSPARENT;
 }
 
