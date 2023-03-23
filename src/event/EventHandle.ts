@@ -712,7 +712,9 @@ export default class EventHandle {
         this._frameCallback.push(() => {
           target.dragMoveBy(dx, dy);
         });
+        
         this.render.nextTick();
+
       } else {
         target.dragMoveBy(dx, dy);
       }

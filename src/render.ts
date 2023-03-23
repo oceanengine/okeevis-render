@@ -14,7 +14,8 @@ import { renderToSVGString } from './svg/renderToSVGString';
 import { downloadBase64 } from './utils/download';
 import { getDomContentSize } from './utils/dom';
 import { getScheduler } from './multi-thread/scheduler';
-import { CommandBufferEncoder } from './multi-thread/command-buffer';
+import type { CommandBufferEncoder } from './multi-thread/command-buffer';
+import { BBox } from './utils/bbox';
 
 registerPainter('canvas', CanvasPainter);
 registerPainter('svg', SVGPainter);
@@ -25,6 +26,7 @@ export interface RenderOptions {
   width?: number;
   height?: number;
   workerEnabled?: boolean;
+  oneFrameBehind?: boolean;
 }
 
 export default class Render extends EventFul<RenderEventHandleParam> {
@@ -142,7 +144,6 @@ export default class Render extends EventFul<RenderEventHandleParam> {
         commandBuffer,
       } = getScheduler().getRaf({
         onPainted: this._onThreadPaited,
-        oneFrameBehind: !this.enableDirtyRect,
       });
       this._raf = raf;
       this._caf = caf;
@@ -161,6 +162,10 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._width = width;
     this._height = height;
     this._painter?.resize(width, height);
+  }
+
+  public getRaf(): typeof requestAnimationFrame {
+    return this._raf as typeof requestAnimationFrame;
   }
 
   public isWorkerEnabled(): boolean {
@@ -331,6 +336,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._frameAbleElement.forEach(item => item.onFrame(now));
     this._eventHandle.onFrame();
     this._eventElementHandle.onFrame();
+
     if (this._workerEnabled) {
       const canvas = (this._painter as CanvasPainter).getCanvas();
       this._commandBuffer.start(canvas.width, canvas.height);
@@ -384,21 +390,10 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     };
   }
 
-  private _onThreadPaited = (data: ImageBitmap) => {
+  private _onThreadPaited = (data: ImageBitmap, clearRects: BBox[]) => {
     const painter = this._painter as CanvasPainter;
     const ctx = painter.getCanvasContext();
-    const area = painter.getClearArea();
-    if (!ctx) {
-      return;
-    }
-    if (area) {
-      if (area === true) {
-        painter.clearCanvas();
-      } else {
-        const { x, y, width, height } = area;
-        ctx.clearRect(x, y, width, height);
-      }
-    }
+    clearRects.forEach(rect => ctx.clearRect(rect.x, rect.y, rect.width, rect.height));
     ctx.drawImage(data, 0, 0, data.width, data.height);
   };
 }

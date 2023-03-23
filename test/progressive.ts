@@ -5,7 +5,7 @@ import Rect from '../src/shapes/Rect';
 import Line from '../src/shapes/Line';
 
 const dom = document.getElementById('root') as HTMLDivElement;
-const render = new Render(dom, {renderer: 'canvas'});
+const render = new Render(dom, {renderer: 'canvas', workerEnabled: true});
 render.showFPS = true;
 render.showBBox = false;
 render.maxDirtyRects = 1000;

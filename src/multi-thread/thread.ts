@@ -37,9 +37,11 @@ export class Thread {
     this._callback = onEnd;
     const postImages: ImageBitmap[] = [];
     const imageIds: number[] = [];
-    images.forEach((canvas, id) => {
+    images.forEach((image, id) => {
       if (!this._loadedImage.has(id)) {
         this._loadedImage.add(id);
+        const canvas = new OffscreenCanvas(image.width, image.height);
+        canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
         postImages.push(canvas.transferToImageBitmap());
         imageIds.push(id);
       }

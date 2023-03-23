@@ -9,6 +9,7 @@ import RadialGradient from '../src/color/RadialGradient';
 const dom = document.getElementById('root') as HTMLElement;
 const render = new Render(dom, {renderer: 'canvas', workerEnabled: true});
 render.enableDirtyRect = true;
+render.showFPS = true;
 
 const leftRightGraidnet = new LinearGradient({
   x1: 300,

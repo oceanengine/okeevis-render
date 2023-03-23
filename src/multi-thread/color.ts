@@ -1,22 +1,13 @@
-let imageId: number = 1;
 
-const imageStorage: Map<HTMLImageElement, { id: number; canvas: OffscreenCanvas }> = new Map();
+const images: HTMLImageElement[] = [];
 
-export function loadImage(image: HTMLImageElement): { id: number; canvas: OffscreenCanvas } {
-  if (imageStorage.has(image)) {
-    return imageStorage.get(image);
+export function loadImage(image: HTMLImageElement): number {
+  const index = images.indexOf(image);
+  if (index !== -1) {
+    return index;
   }
-  const id = imageId++;
-  const canvas = new OffscreenCanvas(image.width, image.height);
-  canvas.getContext('2d').drawImage(
-    image,
-    0,
-    0,
-    image.width,
-    image.height,
-  );
-  imageStorage.set(image, { id, canvas });
-  return imageStorage.get(image);
+  images.push(image);
+  return images.length - 1;
 }
 
 export function isGradient(value: unknown): value is Gradient {
@@ -115,13 +106,13 @@ export class Pattern {
 
   public repeat:  PatternRepeat;
 
-  public canvas: OffscreenCanvas;
+  public image: HTMLImageElement;;
 
   constructor(image: HTMLImageElement, repeat: PatternRepeat = 'repeat') {
-    const { id, canvas } = loadImage(image);
+    const id = loadImage(image);
     this.repeat = repeat;
     this.id = id;
-    this.canvas = canvas;
+    this.image = image;
   }
 
   public setTransform(transform?: DOMMatrix): void {

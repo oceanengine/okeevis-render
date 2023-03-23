@@ -2,7 +2,8 @@ import Render from '../src/render'
 import Rect from '../src/shapes/Rect'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {workerEnabled: false})
+const render = new Render(dom, {workerEnabled: true})
+render.enableDirtyRect = true;
 
 const rect = new Rect({
   x: 100,

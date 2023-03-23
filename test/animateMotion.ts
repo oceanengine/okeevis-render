@@ -8,6 +8,7 @@ import Path from '../src/shapes/Path'
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom, {renderer: 'canvas', workerEnabled: true})
 render.enableDirtyRect = true;
+render.showFPS = true
 
 const arrow = Path.fromSvgPath("M 0 0 L 5 2 L 0 4 z").setAttr({
   fill: 'red',
@@ -75,3 +76,5 @@ render.add(shapeRect)
 render.add(shapeCircle)
 render.add(shapeArc)
 render.add(shpaeLine)
+;
+(window as any).render = render;

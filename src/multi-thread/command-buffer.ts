@@ -13,13 +13,17 @@ import {
   loadImage,
 } from './color';
 import { ACTION, lineJoinMap, textAlignMap, LineCapMap, textBaselineMap, ColorType, PatternRepeat } from './types';
+import type { BBox } from '../utils/bbox';
 
 const MAX_SIZE = 32768; // pow(2, 15)
 const MAX_OFFSET = MAX_SIZE - 100;
 
 export interface FrameData {
   buffers: ArrayBuffer[];
-  images: Map<number, OffscreenCanvas>;
+  images: Map<number, HTMLImageElement>;
+  clearRects: BBox[];
+  taskId?: number;
+  rafId?: number;
 }
 
 export class CommandBufferEncoder {
@@ -30,11 +34,12 @@ export class CommandBufferEncoder {
   private _dataview: DataView;
   private _byteOffset: number = 0;
   private _actionCount: number = 0;
+  private _clearRects:BBox[] = [];
   private _onCommit: (frameData: FrameData) => void = undefined;
   private _onStart: () => void;
-  private _images: Map<number, OffscreenCanvas> = new Map();
+  private _images: Map<number, HTMLImageElement> = new Map();
 
-  public constructor(config: { onCommit?: (frameData: FrameData) => void; onStart: () => void }) {
+  public constructor(config: { onCommit?: (frameData: FrameData) => void; onStart?: () => void }) {
     this._onCommit = config.onCommit;
     this._onStart = config.onStart;
   }
@@ -209,6 +214,8 @@ export class CommandBufferEncoder {
     this._writef32(y);
     this._writef32(w);
     this._writef32(h);
+    // todo只push没有绘制过图形的clearRect
+    this._clearRects.push({x, y, width: w, height: h});
   }
 
   public clip(): void {
@@ -244,11 +251,11 @@ export class CommandBufferEncoder {
     dh?: unknown,
   ): void {
     this.appendAction(ACTION.drawImage);
-    const { id, canvas } = loadImage(image as HTMLImageElement);
+    const id = loadImage(image as HTMLImageElement);
     const arglen = arguments.length;
     this._writeu32(id);
     this._writeu8(arglen);
-    this._images.set(id, canvas);
+    this._images.set(id, image as HTMLImageElement);
     for (let i = 1; i < arglen; i++) {
       this._writef32(arguments[i]);
     }
@@ -500,11 +507,11 @@ export class CommandBufferEncoder {
       this._writeColorStops(color.stops);
 
     } else if (isPattern(color)) {
-      const { id, canvas, repeat } = color;
+      const { id, image, repeat } = color;
       this._writeu8(ColorType.PATTERN);
       const patternTransform = color.getPatternTransform();
       this._writeu32(id);
-      this._images.set(id, canvas);
+      this._images.set(id, image);
       this._writeu8(PatternRepeat[repeat]);
       this._writeBoolean(!!patternTransform);
       if (patternTransform) {
@@ -543,12 +550,14 @@ export class CommandBufferEncoder {
       this._onCommit?.({
         buffers: this._commandBufferList,
         images: this._images,
+        clearRects: this._clearRects,
       });
       this._commandBufferList = [];
       this._commandBuffer = undefined;
       this._dataview = undefined;
       this._byteOffset = 0;
       this._actionCount = 0;
+      this._clearRects = [];
     }
   }
 }

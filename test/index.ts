@@ -1,2 +1,2 @@
-import './animateMotion'
+import './diff'
 

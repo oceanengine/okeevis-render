@@ -55,8 +55,6 @@ export default class CanvasPainter implements Painter {
 
   private _viewPort: BBox;
 
-  private _clearArea: BBox | boolean;
-
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
     this._isPixelPainter = isPixelPainter;
@@ -98,7 +96,6 @@ export default class CanvasPainter implements Painter {
     const dirtyElements = this.render.getDirtyElements();
     const dirytCount = dirtyElements.size;
     const chunk = this.render.getOneChunk();
-    this._clearArea = false;
     if (needUpdate) {
       if (
         !this._isFirstFrame &&
@@ -123,11 +120,6 @@ export default class CanvasPainter implements Painter {
     if (this._ctx.draw) {
       this._ctx.draw(true);
     }
-  }
-
-  // worker mode
-  public getClearArea(): BBox | boolean {
-    return this._clearArea;
   }
 
   public getImageData(x: number, y: number, width: number, height: number): ImageData {
@@ -254,16 +246,9 @@ export default class CanvasPainter implements Painter {
     const dpr = this.dpr;
     if (!dirtyRegion) {
       ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
-      this._clearArea = true;
     } else {
       const { x, y, width, height } = dirtyRegion;
       ctx.clearRect(x * dpr, y * dpr, width * dpr, height * dpr);
-      this._clearArea = {
-        x: x * dpr,
-        y: y * dpr,
-        width: width * dpr,
-        height: height * dpr,
-      };
     }
     ctx.save();
     if (dpr !== 1 && this.render.scaleByDprBeforePaint) {

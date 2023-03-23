@@ -1,9 +1,10 @@
 import { Thread } from './thread';
 import { CommandBufferEncoder, FrameData } from './command-buffer';
+import { BBox } from 'src/utils/bbox';
 
 export type RafCallback = (time: number) => void;
 export type RafCallbackWithCtx = (thread: Thread, time: number) => void;
-export type onDataReady = (data: CanvasImageSource) => void;
+export type onDataReady = (data: CanvasImageSource, clearRects: BBox[]) => void;
 
 let scheduler: WorkerScheduler;
 let rafUserId = 1;
@@ -11,6 +12,8 @@ export class WorkerScheduler {
   private _threads: Thread[] = [];
 
   private _rafId: number = 1;
+
+  private _windowRafId: number;
 
   private _pendingTasks: Map<number, number[]> = new Map();
 
@@ -25,8 +28,6 @@ export class WorkerScheduler {
       onPainted: onDataReady;
       locked: boolean;
       frameCount: number;
-      frameData: FrameData;
-      oneFrameBehind: boolean;
     }
   > = {};
 
@@ -34,7 +35,7 @@ export class WorkerScheduler {
     this._threads = [new Thread(), new Thread(), new Thread()];
   }
 
-  public getRaf(option: {onPainted: onDataReady; oneFrameBehind: boolean}): {
+  public getRaf(option: { onPainted: onDataReady }): {
     unRegisterTask: Function;
     requestAnimationFrame: Function;
     cancelAnimationFrame: RafCallback;
@@ -46,8 +47,6 @@ export class WorkerScheduler {
       locked: false,
       lastTime: 0,
       frameCount: 0,
-      frameData: null,
-      oneFrameBehind: option.oneFrameBehind,
     };
     let unregisted = false;
     const raf = (rafCb: RafCallback) => {
@@ -60,9 +59,8 @@ export class WorkerScheduler {
       this._rafIdCbMap.set(id, rafCb);
       idList.push(id);
       this._pendingTasks.set(taskId, idList);
-      const idleThread = this._getIdleThread();
-      if (idleThread) {
-        requestAnimationFrame(this._queryFrame);
+      if (!this._windowRafId) {
+        this._windowRafId = requestAnimationFrame(this._queryFrame);
       }
       return id;
     };
@@ -84,86 +82,62 @@ export class WorkerScheduler {
       unRegisterTask,
       commandBuffer: new CommandBufferEncoder({
         onCommit: data => this._commitFrameData(taskId, data),
-        onStart: () => this._swapCommandBufer(taskId),
       }),
     };
   }
 
   private _commitFrameData(taskId: number, data: FrameData) {
-    const task = this._taskConfig[taskId];
-    task.frameData = data;
-    if (!this._pendingTasks.has(taskId) || !task.oneFrameBehind) {
-      // todo 脏矩形模式下，由于清除的区域和实际不一致，有帧延迟
-      this._swapCommandBufer(taskId);
-    }
+    data.taskId = taskId;
+    data.rafId = this._windowRafId;
+    this._frameDataQueue.unshift(data);
+    this._queryThread();
   }
 
-  private _swapCommandBufer(taskId: number) {
+  private _requestTaskFrame(now: number, taskId: number, taskCbList: number[]) {
+    const pendingTask = this._pendingTasks;
     const task = this._taskConfig[taskId];
-    if (task.frameData) {
-      this._frameDataQueue.unshift(task.frameData);
-      this._queryThread()
+    if (task.locked) {
+      return;
     }
-    task.frameData = null
-  }
-
-  private _getUnlockTask(now: number, timeLimit: boolean): number {
-    // todo 限流，和上一帧间隔不能太快
-    const keys = this._pendingTasks.keys();
-    let iter = keys.next();
-    while (!iter.done) {
-      const taskId = iter.value;
-      const taskGlobalCb = this._taskConfig[taskId];
-      if (taskGlobalCb && !taskGlobalCb.locked) {
-        const lastTime = taskGlobalCb.lastTime;
-        if (timeLimit &&  now - lastTime >= 15) {
-          return taskId;
-        }
-        if (!timeLimit && now - lastTime < 15) {
-          return taskId;
-        }
-      }
-      iter = keys.next();
-    }
+    task.locked = true;
+    task.lastTime = now;
+    task.frameCount++;
+    pendingTask.delete(taskId);
+    taskCbList.forEach(id => {
+      this._rafIdCbMap.get(id)(now);
+      this._rafIdCbMap.delete(id);
+    });
   }
 
   private _queryFrame = () => {
     const pendingTask = this._pendingTasks;
     const now = performance.now();
-    const taskId = this._getUnlockTask(now, true);
-    if (taskId) {
-      const taskGlobalCb = this._taskConfig[taskId];
-      taskGlobalCb.locked = true;
-      taskGlobalCb.lastTime = now;
-      taskGlobalCb.frameCount++;
-      const taskCbList = pendingTask.get(taskId);
-      pendingTask.delete(taskId);
-      taskCbList.forEach(id => {
-        this._rafIdCbMap.get(id)(now);
-        this._rafIdCbMap.delete(id);
-      });
-      if (taskGlobalCb.frameCount === 1 && pendingTask.has(taskId) && taskGlobalCb.oneFrameBehind) {
-        taskGlobalCb.locked = false;
-        requestAnimationFrame(this._queryFrame);
-      }
-    } else if (this._getUnlockTask(now, false)) {
-      requestAnimationFrame(this._queryFrame);
+    this._pendingTasks.forEach((taskCbList, taskId) => {
+      this._requestTaskFrame(now, taskId, taskCbList);
+    });
+    this._windowRafId = null;
+    if (pendingTask.size) {
+      this._windowRafId = requestAnimationFrame(this._queryFrame);
     }
   };
 
   private _queryThread() {
     const idleThread = this._getIdleThread();
-    const frameData = this._frameDataQueue.pop();
-    const task = this._taskConfig[1];
-    if (idleThread && frameData) {
+    if (idleThread && this._frameDataQueue.length) {
+      const frameData = this._frameDataQueue.pop();
       idleThread.run(frameData, data => {
+        const taskId = frameData.taskId;
+        const task = this._taskConfig[taskId];
         task.locked = false;
-        task.onPainted(data);
-        this._queryFrame();
-        if (this._frameDataQueue.length) {
-          this._queryThread();
-        }
+        task.onPainted(data, frameData.clearRects);
+        // if (this._windowRafId > frameData.rafId) {
+        //   this._requestTaskFrame(performance.now(), taskId, this._pendingTasks.get(taskId));
+        // }
+        this._queryThread();
       });
+      if (this._frameDataQueue.length) {
+        this._queryThread();
+      }
     }
   }
 
