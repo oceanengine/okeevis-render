@@ -126,10 +126,14 @@ export class WorkerScheduler {
     if (idleThread && this._frameDataQueue.length) {
       const frameData = this._frameDataQueue.pop();
       idleThread.run(frameData, data => {
-        const taskId = frameData.taskId;
+        const taskId = frameData.taskId;        
         const task = this._taskConfig[taskId];
-        task.locked = false;
-        task.onPainted(data, frameData.clearRects);
+
+        // task may has been unregistered;
+        if (task) {
+          task.locked = false;
+          task.onPainted(data, frameData.clearRects);
+        }
         // if (this._windowRafId > frameData.rafId) {
         //   this._requestTaskFrame(performance.now(), taskId, this._pendingTasks.get(taskId));
         // }
