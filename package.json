@@ -3,22 +3,24 @@
   "version": "0.1.0",
   "description": "a fast lightweight 2d graphic library",
   "main": "lib/index.js",
+  "module": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
     "start": "npm-run-all -s build:worker dev",
     "build:worker": "webpack --config ./build/webpack.config.worker.js && node build/build-worker.js",
-    "build": "npm-run-all -s build:worker tsc uglify",
+    "build": "npm-run-all -s build:worker build:es uglify",
     "dev": "node build/dev-server.js",
-    "tsc": "node build/build.js  && ./node_modules/.bin/tsc -d",
+    "build:es": "./node_modules/.bin/tsc -d",
+    "build:umd": "node build/build.js",
     "test": "cross-env NODE_ENV=test mocha --compilers js:babel-core/register test/test.js",
     "tslint": "tslint -c tslint.json -r src/ -p ./tsconfig.json",
     "lint": "eslint --fix src/",
     "prettier": "prettier --write src/",
     "uglify": "node ./build/uglify.js"
   },
+  "sideEffects": ["lib/render.js"],
   "devDependencies": {
     "@types/color": "^3.0.1",
-    "@types/lodash": "^4.14.166",
     "@types/throttle-debounce": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
@@ -54,7 +56,8 @@
     "webpack-dev-middleware": "^1.12.2",
     "webpack-dev-server": "^3.1.11",
     "webpack-hot-middleware": "2.13.2",
-    "webpack-merge": "^4.1.0"
+    "webpack-merge": "^4.1.0",
+    "@types/lodash-es": "^4.17.7"
   },
   "repository": {
     "type": "git",
@@ -67,7 +70,7 @@
     "@egjs/list-differ": "1.0.0",
     "color": "3.1.3",
     "gl-matrix": "3.3.0",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "normalize-wheel": "1.0.1",
     "throttle-debounce": "^3.0.1"
   }

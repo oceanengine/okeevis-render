@@ -5,7 +5,7 @@ import Shape from './Shape';
 import { TextAttr, shapeKeys } from './Text';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
-import SVGPainter from '../painter/SVGPainter';
+import type SVGPainter from '../painter/SVGPainter';
 
 export interface GroupAttr extends TextAttr {}
 

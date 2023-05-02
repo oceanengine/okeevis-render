@@ -34,3 +34,4 @@ export {
   getRequestAnimationFrame,
   getCancelAnimationFrame,
 } from './utils/rAF';
+export { registerFeature } from './utils/featureManager';

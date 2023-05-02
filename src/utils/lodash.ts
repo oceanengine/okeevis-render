@@ -1,32 +1,28 @@
-/**
- * @desc lodash import
- */
-/* tslint:disable:no-require-imports */
 import { throttle as _throttle, debounce as _debounce } from 'throttle-debounce';
-import isNull = require('lodash/isNull');
-import isUndefined = require('lodash/isUndefined');
-import isBoolean = require('lodash/isBoolean');
-import isNumber = require('lodash/isNumber');
-import isString = require('lodash/isString');
-import isFunction = require('lodash/isFunction');
-import isObject = require('lodash/isObject');
-import min = require('lodash/min');
-import max = require('lodash/max');
-import sum = require('lodash/sum');
-import isArray = require('lodash/isArray');
-import findIndex = require('lodash/findIndex');
-import find = require('lodash/find');
-import last = require('lodash/last');
-import first = require('lodash/first');
-import includes = require('lodash/includes');
-import uniq = require('lodash/uniq');
-import clamp = require('lodash/clamp');
-import pick = require('lodash/pick');
-import omit = require('lodash/omit');
-import toNumber = require('lodash/toNumber');
-import flatten = require('lodash/flatten');
-import cloneDeep = require('lodash/cloneDeep');
-import set = require('lodash/set');
+import isNull from 'lodash-es/isNull';
+import isUndefined from 'lodash-es/isUndefined';
+import isBoolean from 'lodash-es/isBoolean';
+import isNumber from 'lodash-es/isNumber';
+import isString from 'lodash-es/isString';
+import isFunction from 'lodash-es/isFunction';
+import isObject from 'lodash-es/isObject';
+import min from 'lodash-es/min';
+import max from 'lodash-es/max';
+import sum from 'lodash-es/sum';
+import isArray from 'lodash-es/isArray';
+import findIndex from 'lodash-es/findIndex';
+import find from 'lodash-es/find';
+import last from 'lodash-es/last';
+import first from 'lodash-es/first';
+import includes from 'lodash-es/includes';
+import uniq from 'lodash-es/uniq';
+import clamp from 'lodash-es/clamp';
+import pick from 'lodash-es/pick';
+import omit from 'lodash-es/omit';
+import toNumber from 'lodash-es/toNumber';
+import flatten from 'lodash-es/flatten';
+import cloneDeep from 'lodash-es/cloneDeep';
+import set from 'lodash-es/set';
 
 export function throttle(callback: (...args: any[]) => any, delay: number) {
   return _throttle(delay, false, callback);

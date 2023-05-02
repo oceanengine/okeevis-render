@@ -1,7 +1,7 @@
 import Eventful from '../utils/Eventful';
-import Render from '../render';
-import CanvasPainter from '../painter/CanvasPainter';
-import SVGPainter from '../painter/SVGPainter';
+import type Render from '../render';
+import type CanvasPainter from '../painter/CanvasPainter';
+import type SVGPainter from '../painter/SVGPainter';
 import Group, { GroupAttr } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue } from '../color';

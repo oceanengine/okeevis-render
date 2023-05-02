@@ -13,9 +13,9 @@ import SVGPainter from './painter/SVGPainter';
 import { renderToSVGString } from './svg/renderToSVGString';
 import { downloadBase64 } from './utils/download';
 import { getDomContentSize } from './utils/dom';
-import { getScheduler } from './multi-thread/scheduler';
 import type { CommandBufferEncoder } from './multi-thread/command-buffer';
 import { BBox } from './utils/bbox';
+import { getFeature } from './utils/featureManager';
 
 registerPainter('canvas', CanvasPainter);
 registerPainter('svg', SVGPainter);
@@ -26,7 +26,6 @@ export interface RenderOptions {
   width?: number;
   height?: number;
   workerEnabled?: boolean;
-  oneFrameBehind?: boolean;
 }
 
 export default class Render extends EventFul<RenderEventHandleParam> {
@@ -135,14 +134,15 @@ export default class Render extends EventFul<RenderEventHandleParam> {
       this._workerEnabled &&
       this.renderer === 'canvas' &&
       this._isBrowser &&
-      window.OffscreenCanvas
+      window.OffscreenCanvas &&
+      getFeature('worker')
     ) {
       const {
         requestAnimationFrame: raf,
         cancelAnimationFrame: caf,
         unRegisterTask,
         commandBuffer,
-      } = getScheduler().getRaf({
+      } = getFeature('worker')().getRaf({
         onPainted: this._onThreadPaited,
       });
       this._raf = raf;
@@ -283,7 +283,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._eventHandle.dispose();
     this._eventElementHandle.dispose();
     this._frameAbleElement.clear();
-    this.clear();
+    this.chunksElement.clear();
     this._rootGroup.clear();
     this._eventGroop.clear();
     this._rootGroup = null;
