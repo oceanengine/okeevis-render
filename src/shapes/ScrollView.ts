@@ -74,6 +74,10 @@ export default class ScrollView extends Group {
     });
   }
 
+  public getContentGroup(): Group {
+    return this._scrollContentGroup;
+  }
+
   public addContent(element: Element) {
     this._scrollContentGroup.add(element);
   }
