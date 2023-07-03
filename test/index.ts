@@ -1,2 +1,2 @@
-import './diff'
+import './rich-text'
 

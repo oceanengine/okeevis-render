@@ -33,8 +33,9 @@ export default class Box extends VNode {
     const group = new Group({
       ...this.getEventsAndCursor(),
     });
+    const { borderRadius, borderWidth,  } = this.props;
     const isRoot = !this.parentNode;
-    if (this.props.borderRadius && isRoot) {
+    if (borderRadius && !borderWidth && isRoot) {
       const clipRef = createRef();
       const rect = new Rect({
         ref: clipRef,
