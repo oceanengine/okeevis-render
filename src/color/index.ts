@@ -1,4 +1,4 @@
-import * as Color from 'color';
+import Color from 'color';
 import type Gradient from '../abstract/Gradient';
 import type LinearGradient from './LinearGradient';
 import type RadialGradient from './RadialGradient';
