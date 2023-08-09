@@ -1,4 +1,4 @@
-import * as normalizeWheel from 'normalize-wheel';
+import normalizeWheel from 'normalize-wheel';
 import Render from '../render';
 import CanvasPainter from '../painter/CanvasPainter';
 import Element from '../shapes/Element';
