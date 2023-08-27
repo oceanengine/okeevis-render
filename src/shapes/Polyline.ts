@@ -2,9 +2,8 @@ import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { BBox, polygonBBox } from '../utils/bbox';
 import { pointInPolygonFill, pointInPolygonStroke } from '../geometry/contain/polygon';
-import bezierSmooth from '../geometry/bezier-smooth';
-import catmullRom from '../geometry/catmull-rom';
 import { getPolylineCornerRadiusPoints } from '../geometry/cornerRadius';
+import { Curve, MonotoneX, MonotoneY, CatmullRomClosed, Natural} from '../geometry/curve';
 interface Point {
   x: number;
   y: number;
@@ -13,16 +12,12 @@ export interface PolylineAttr extends CommonAttr {
   pointList?: Point[];
   borderRadius?: number | number[];
   smooth?: boolean;
-  smoothType?: 'bezier' | 'spline';
-  smoothConstraint?: [Point, Point];
   smoothMonotone?: 'x' | 'y';
 }
 const shapeKeys: Array<keyof PolylineAttr> = [
   'pointList',
   'smooth',
-  'smoothConstraint',
   'smoothMonotone',
-  'smoothType',
 ];
 
 export default class Polyline extends Shape<PolylineAttr> {
@@ -35,7 +30,6 @@ export default class Polyline extends Shape<PolylineAttr> {
       ...super.getDefaultAttr(),
       pointList: [],
       smooth: false,
-      smoothType: 'spline',
     };
   }
 
@@ -44,30 +38,30 @@ export default class Polyline extends Shape<PolylineAttr> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { pointList } = this.attr;
+    const { pointList, smoothMonotone } = this.attr;
     const borderRadius = this.getExtendAttr('borderRadius') || 0;
     const isPolygon = this.type === 'polygon';
     if (!pointList || pointList.length === 0) {
       return;
     }
     ctx.moveTo(pointList[0].x, pointList[0].y);
-    if (this.attr.smooth && this.attr.smoothType === 'bezier') {
-      const smoothList = bezierSmooth(
-        pointList,
-        this.type === 'polygon',
-        this.attr.smoothConstraint,
-        this.attr.smoothMonotone,
-      );
-      const pL: Point[][] = smoothList;
-      for (let j: number = 0; j < pL.length; j++) {
-        const i: Point[] = pL[j];
-        ctx.bezierCurveTo(i[1].x, i[1].y, i[2].x, i[2].y, i[3].x, i[3].y);
-      }
-    } else if (this.attr.smooth && this.attr.smoothType === 'spline') {
-      const splinePoints = catmullRom(pointList, false, 100);
-      for (let i: number = 1; i < splinePoints.length; i++) {
-        ctx.lineTo(splinePoints[i].x, splinePoints[i].y);
-      }
+    if (this.attr.smooth) {
+        let CurveUse: new(ctx: CanvasRenderingContext2D) => Curve;
+        if (this.type === 'polygon') {
+          CurveUse = CatmullRomClosed;
+        } else {
+          if (smoothMonotone === 'x') {
+            CurveUse = MonotoneX;
+          } else if (smoothMonotone === 'y') {
+            CurveUse = MonotoneY;
+          } else {
+            CurveUse = Natural;
+          }
+        }
+        let curve = new CurveUse(ctx);
+        curve.lineStart();
+        pointList.forEach(point => curve.point(point.x, point.y));
+        curve.lineEnd();
     } else {
       let radiusIndex = -1;
       for (let i: number = isPolygon ? 0 : 1; i < pointList.length; i++) {

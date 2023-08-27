@@ -46,7 +46,6 @@ const PathKeyPoints: Partial<Record<PathAction['action'], [number, number][]>> =
     [2, 3],
   ],
 };
-
 export default class Path2D {
   private _pathList: PathAction[] = [];
 
@@ -62,6 +61,11 @@ export default class Path2D {
 
   public getPathList(): PathAction[] {
     return this._pathList;
+  }
+
+  // swapXY
+  public reflect() {
+    // todo
   }
 
   public connectPath(path: Path2D) {
