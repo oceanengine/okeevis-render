@@ -37,14 +37,13 @@ export default class Polyline extends Shape<PolylineAttr> {
     return [...super.getAnimationKeys(), 'pointList'];
   }
 
-  public brush(ctx: CanvasRenderingContext2D) {
+  public brush(ctx:CanvasRenderingContext2D) {
     const { pointList, smoothMonotone } = this.attr;
     const borderRadius = this.getExtendAttr('borderRadius') || 0;
     const isPolygon = this.type === 'polygon';
     if (!pointList || pointList.length === 0) {
       return;
     }
-    ctx.moveTo(pointList[0].x, pointList[0].y);
     if (this.attr.smooth) {
         let CurveUse: new(ctx: CanvasRenderingContext2D) => Curve;
         if (this.type === 'polygon') {
@@ -63,6 +62,7 @@ export default class Polyline extends Shape<PolylineAttr> {
         pointList.forEach(point => curve.point(point.x, point.y));
         curve.lineEnd();
     } else {
+      ctx.moveTo(pointList[0].x, pointList[0].y);
       let radiusIndex = -1;
       for (let i: number = isPolygon ? 0 : 1; i < pointList.length; i++) {
         radiusIndex++;
