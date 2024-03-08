@@ -14,6 +14,7 @@ export { default as Polyline, PolylineAttr } from './shapes/Polyline';
 export { default as Rect, RectAttr } from './shapes/Rect';
 export { default as Sector, SectorAttr } from './shapes/Sector';
 export { default as Text, TextAttr } from './shapes/Text';
+export { default as TextPath, TextPathAttr } from './shapes/TextPath';
 export { default as Marker } from './shapes/Marker';
 export { default as RichText } from './RichText';
 export { default as DOMNode } from './shapes/DOMNode';
