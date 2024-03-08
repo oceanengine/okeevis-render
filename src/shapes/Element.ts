@@ -219,6 +219,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _inFrameAble: boolean;
 
+  protected _refElements: Set<Element> | undefined;
+
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
@@ -434,6 +436,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._dirty;
   }
 
+  protected onChildDirty(): void {
+    // nothing;
+  }
+
   public dirty() {
     let leafNodeSize = 1;
     if (
@@ -441,6 +447,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this.ownerRender.renderer === 'canvas' &&
       this.ownerRender.enableDirtyRect
     ) {
+      this._refElements?.forEach(item => item.dirty());
+      this.parentNode?.onChildDirty()
       if (this.isGroup) {
         leafNodeSize = ((this as any) as Group).getLeafNodesSize(
           this.ownerRender.maxDirtyRects + 1,
@@ -533,6 +541,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._currentPaintAreaDirty = false;
     }
     return this._currentPaintArea;
+  }
+
+  public addRef(el: Element) {
+    if (!this._refElements) {
+      this._refElements = new Set();
+    }
+    this._refElements.add(el);
+  }
+
+  public removeRef(el: Element) {
+    this._refElements?.delete(el);
   }
 
   protected computeCurrentDirtyRect(): BBox {
@@ -768,6 +787,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._absTransformDirty = true;
     this._clientBoundingRectDirty = true;
     this._bboxDirty = true;
+    this._refElements?.clear();
     const clip = this.getClipElement();
     if (clip && !clip.parentNode) {
       clip.destroy();

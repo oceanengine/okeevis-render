@@ -419,6 +419,10 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     });
   }
 
+  public onChildDirty(): void {
+    this._refElements?.forEach(ref => ref.dirty());
+  }
+
   protected afterUpdateAll() {
     // nothing
   }
