@@ -1,2 +1,2 @@
-import './curve'
+import './textpath.test'
 
