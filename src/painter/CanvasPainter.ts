@@ -55,6 +55,8 @@ export default class CanvasPainter implements Painter {
 
   private _viewPort: BBox;
 
+  private _inUse: boolean = false;
+
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
     this._isPixelPainter = isPixelPainter;
@@ -266,6 +268,12 @@ export default class CanvasPainter implements Painter {
     this.render.getRoot().eachChild(item => this.drawElement(item, dirtyRegion));
     ctx.restore();
     // console.timeEnd('paint');
+  }
+
+  public drawElementInUse(el: Element) {
+    this._inUse = true;
+    this.drawElement(el);
+    this._inUse = false;
   }
 
   public drawElement = (item: Element, dirtyRegion?: BBox) => {
@@ -483,7 +491,10 @@ export default class CanvasPainter implements Painter {
     const dragOffset = item.getDragOffset();
     const hasDrag = dragOffset[0] !== 0 || dragOffset[1] !== 0;
     if (hasDrag || selfMatrix !== IDENTRY_MATRIX) {
-      if (!hasDrag) {
+      if (!hasDrag || this._inUse) {
+        if (hasDrag && this._inUse) {
+          ctx.translate(dragOffset[0], dragOffset[1]);
+        }
         ctx.transform(
           selfMatrix[0],
           selfMatrix[1],

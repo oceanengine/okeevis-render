@@ -13,6 +13,8 @@ const rect = new Rect({
 });
 
 const render = new Render(dom);
+render.enableDirtyRect = true;
+
 const shape = new Use({
   shape: rect,
   draggable: true,
@@ -48,10 +50,10 @@ const groupUse = new Use({
   shape: group,
   translateX: 120,
   draggable: true,
+  showBBox: true,
 });
 setTimeout(() => {
-  group.childAt(0).setAttr({ fill: 'blue', lineWidth: 2, stroke: 'red' });
+  group.childAt(0).animateTo({height: 200})
 }, 1000);
-render.addAll([rect, shape, shape2]);
 render.add(group);
 render.add(groupUse);

@@ -16,7 +16,7 @@ export default class Use extends Shape<UseAttr> {
   public shapeKeys = shapeKeys;
 
   public brush(): void {
-    (this.ownerRender.getPainter() as CanvasPainter).drawElement(this.attr.shape);
+    (this.ownerRender.getPainter() as CanvasPainter).drawElementInUse(this.attr.shape);
   }
 
   public mounted() {

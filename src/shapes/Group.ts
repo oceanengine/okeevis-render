@@ -420,7 +420,11 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
   }
 
   public onChildDirty(): void {
-    this._refElements?.forEach(ref => ref.dirty());
+    this._refElements?.forEach(ref => {
+      ref.dirty();
+      ref.dirtyTransform();
+      ref.dirtyBBox();
+    });
   }
 
   protected afterUpdateAll() {
