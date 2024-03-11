@@ -52,8 +52,15 @@ const groupUse = new Use({
   draggable: true,
   showBBox: true,
 });
+const nestUse = new Use({
+  shape: groupUse,
+  translateX: 120,
+  draggable: true,
+  showBBox: true,
+})
+render.add(group);
+render.add(groupUse);
+render.add(nestUse)
 setTimeout(() => {
   group.childAt(0).animateTo({height: 200})
 }, 1000);
-render.add(group);
-render.add(groupUse);
