@@ -2,7 +2,8 @@ import { getImage } from '../utils/imageLoader';
 import SVGNode from '../abstract/Node';
 import Element from '../shapes/Element';
 import Render from '../render';
-
+import { isBrowser } from '../utils/env'
+import { getCanvasCreator } from '../canvas/createCanvas';
 export interface PatternOption {
   image?: CanvasImageSource | string;
   width?: number;
@@ -49,7 +50,7 @@ export default class Pattern {
           this._pattern = ctx.createPattern(result, repeat);
           onPatternReady();
         }
-      } else if (image instanceof HTMLImageElement) {
+      } else if (isBrowser && image instanceof HTMLImageElement) {
         if (image.complete) {
           try {
             this._pattern = ctx.createPattern(image, repeat);
@@ -68,10 +69,10 @@ export default class Pattern {
           };
         }
       } else if (element) {
-        const canvas = patternCanvas ?? document.createElement('canvas');
+        const canvas = (isBrowser && patternCanvas) ? patternCanvas : getCanvasCreator()(width, height);
         const render = new Render(canvas);
-        const dpr = render.dpr;
-        render.resize(width, height);
+        const dpr = isBrowser ? render.dpr : 1;
+        isBrowser && render.resize(width, height);
         if (Array.isArray(element)) {
           render.addAll(element);
         } else {
@@ -79,17 +80,22 @@ export default class Pattern {
         }
         render.refreshImmediately();
         render.dispose();
-        const patterImage = new Image();
-        const dataURL = canvas.toDataURL();
-        patterImage.onload = () => {
-          this._pattern = ctx.createPattern(patterImage, 'repeat');
-          if (this._pattern.setTransform) {
-            const matrix = new DOMMatrix([1 / dpr, 0, 0, 1 / dpr, 0, 0]);
-            this._pattern.setTransform(matrix);
+        if (isBrowser) {
+          const patterImage = new Image();
+          const dataURL = canvas.toDataURL();
+          patterImage.onload = () => {
+            this._pattern = ctx.createPattern(patterImage, 'repeat');
+            if (this._pattern.setTransform) {
+              const matrix = new DOMMatrix([1 / dpr, 0, 0, 1 / dpr, 0, 0]);
+              this._pattern.setTransform(matrix);
+            }
+            onPatternReady();
           }
+          patterImage.src = dataURL;
+        } else {
+          this._pattern = ctx.createPattern(canvas, 'repeat');
           onPatternReady();
         }
-        patterImage.src = dataURL;
       }
     }
     return this._pattern;
