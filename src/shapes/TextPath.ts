@@ -86,7 +86,7 @@ export default class Text extends Shape<TextPathAttr> {
       let offset = startOffset || 0;
       str.forEach(char => {
         const measure = measureText(char, this.attr);
-        const out = mat3.create();
+        const out = mat3.createVec3();
         const point = path.getPointAtLength(offset);
         mat3.translate(out, out, [point.x, point.y]);
         mat3.rotate(out, out, point.alpha);
@@ -117,7 +117,7 @@ export default class Text extends Shape<TextPathAttr> {
 
   protected isPointOnPath(x: number, y: number): boolean {
     return this._letterList.some(item => {
-      const out = mat3.create();
+      const out = mat3.createVec3();
       const inverMatrix = mat3.invert(out, item.transform);
       const vec2: [number, number] = [0, 0];
       transformMat3(vec2, [x, y], inverMatrix);

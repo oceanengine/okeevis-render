@@ -78,7 +78,7 @@ export default class Marker extends Element<MarkerAttr> {
   }
 
   private _getMarkerMatrix(parent: Shape, position: MarkerPosition): mat3 {
-    const out = mat3.create();
+    const out = mat3.createVec3();
     const path = parent.getPathData();
     const { x, y, width, height, orient, shape, markerUnits } = this.attr;
     const bbox = shape.getBBox();

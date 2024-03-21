@@ -45,12 +45,12 @@ export function getTouchOffsetPosition(
     return { left: rect.offsetLeft, top: rect.offsetTop };
   });
   const matrixClient = mat3.fromValues(a1.left, a1.top, 1, a2.left, a2.top, 1, a3.left, a3.top, 1);
-  const invertedMatrixed = mat3.invert(mat3.create(), matrixClient);
+  const invertedMatrixed = mat3.invert(mat3.createVec3(), matrixClient);
   if (!invertedMatrixed) {
     return { x: clientX - left, y: clientY - top };
   }
   const matrixSource = mat3.fromValues(b1.left, b1.top, 1, b2.left, b2.top, 1, b3.left, b3.top, 1);
-  const matrix = mat3.multiply(mat3.create(), matrixSource, invertedMatrixed);
+  const matrix = mat3.multiply(mat3.createVec3(), matrixSource, invertedMatrixed);
   const result = [clientX, clientY] as any;
   transformMat3(result, result, matrix);
   return { x: result[0], y: result[1] };

@@ -757,7 +757,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public getInvertedPoint(x: number, y: number): [number, number] {
     const globalTransform = this.getGlobalTransform(true);
     if (globalTransform) {
-      const out = mat3.create();
+      const out = mat3.createVec3();
       const inverMatrix = mat3.invert(out, globalTransform);
       const vec2: [number, number] = [0, 0];
       transformMat3(vec2, [x, y], inverMatrix);
@@ -888,7 +888,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       callback,
       onFrame: (t: number) => {
         const point = path.getPointAtPercent(t);
-        const matrix = mat3.create();
+        const matrix = mat3.createVec3();
         let theta: number = rotate as number;
         if (rotate === 'auto') {
           theta = point.alpha + Math.PI / 2;
@@ -1037,7 +1037,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private _computeTransform(): mat3 {
-    const out = this._transform ? mat3.identity(this._transform) : mat3.create();
+    const out = this._transform ? mat3.identity(this._transform) : mat3.createVec3();
     const {
       rotation = 0,
       originX = 0,
@@ -1103,7 +1103,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (!parentTransform && !selfTransform && dx === 0 && dy === 0) {
       return null;
     }
-    const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.create();
+    const out = this._absTransform ? mat3.identity(this._absTransform) : mat3.createVec3();
     if (dx !== 0 || dy !== 0) {
       mat3.translate(out, out, this._dragOffset);
     }

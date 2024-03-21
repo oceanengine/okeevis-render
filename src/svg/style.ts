@@ -20,7 +20,7 @@ function getSvgMatrix(matrix: mat3): string {
   return `matrix(${transform.join(' ')})`;
 }
 
-// const identityMatrix = mat3.create();
+// const identityMatrix = mat3.createVec3();
 
 export interface SVGElementStyle {
   id: string;
@@ -128,7 +128,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     } else {
       const globalTransform = node.getGlobalTransform();
       const parentTransform = node.parentNode.getGlobalTransform();
-      const out = mat3.create();
+      const out = mat3.createVec3();
       mat3.multiply(out, mat3.invert(out, parentTransform), globalTransform);
       ret.transform = getSvgMatrix(out);
     }

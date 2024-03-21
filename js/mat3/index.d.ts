@@ -311,3 +311,4 @@ export type ReadonlyMat4 =
    * @returns {mat3} out
    */
   export function sub(out: mat3, a: ReadonlyMat3, b: ReadonlyMat3): mat3;
+  export function createVec3(): mat3;

@@ -1,8 +1,7 @@
 /* eslint-disable no-var */
-var mat3 = require('gl-matrix/mat3');
+export * from 'gl-matrix/mat3';
 // add try catch for vite
-try {
-  mat3.create = function create() {
+export function createVec3() {
     var out;
     try {
       if (typeof Float32Array !== 'undefined') {
@@ -24,5 +23,3 @@ try {
     out[8] = 1;
     return out;
   };
-} catch (err) {}
-module.exports = mat3;
