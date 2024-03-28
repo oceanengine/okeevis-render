@@ -36,4 +36,10 @@ export default class Use extends Shape<UseAttr> {
   protected computeBBox(): BBox {
     return { ...this.attr.shape.getBBox() };
   }
+
+  public getSvgAttributes(): any {
+    return {
+      ...super.getSvgAttributes(),
+    };
+  }
 }

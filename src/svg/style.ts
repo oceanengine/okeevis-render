@@ -27,6 +27,7 @@ export interface SVGElementStyle {
   'clip-path': string;
   fill: string;
   stroke: string;
+  color: string;
   'stroke-width': string;
   'stroke-linecap': string;
   'stroke-linejoin': string;
@@ -91,6 +92,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   const {
     fill,
     stroke,
+    color,
     lineWidth,
     lineDash,
     lineDashOffset,
@@ -141,6 +143,10 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   if (stroke) {
     ret.stroke = getSVGColor(stroke);
   }
+  if (color) {
+    ret.color = getSVGColor(color);
+  }
+
   if (lineWidth !== undefined && lineWidth >= 0) {
     ret['stroke-width'] =
       (node.attr.strokeNoScale ? node.getExtendAttr('lineWidth') : lineWidth) + '';
