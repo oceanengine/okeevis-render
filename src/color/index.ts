@@ -9,7 +9,7 @@ import * as lodash from '../utils/lodash';
 import { NAME_TRANSPARENT, RGBA_TRANSPARENT } from '../constant';
 
 export { Color };
-export type ColorValue = 'none' | string | LinearGradient | RadialGradient | Pattern | null;
+export type ColorValue = 'none' | 'currentColor' | string | LinearGradient | RadialGradient | Pattern | null;
 export { Gradient, LinearGradient, RadialGradient, Pattern, ConicGradient };
 
 function brightenStringColor(color: string, ration: number): string {
@@ -70,6 +70,9 @@ export function getCtxColor(
   item: Element,
 ): string | CanvasGradient | CanvasPattern {
   if (lodash.isString(color)) {
+    if (color === 'currentColor') {
+      return getCtxColor(ctx, item.getExtendAttr('color'), item);
+    }
     return color;
   }
   if ((color as Gradient).isGradient) {

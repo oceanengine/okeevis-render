@@ -45,6 +45,7 @@ export interface BaseAttr extends TransformConf, EventConf {
 
   fill?: ColorValue;
   stroke?: ColorValue;
+  color?: ColorValue;
   strokeNoScale?: boolean;
   lineWidth?: number;
   pickingBuffer?: number;
@@ -237,6 +238,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return [
       'fill',
       'stroke',
+      'color',
       'lineWidth',
       'lineDash',
       'lineDashOffset',
@@ -298,6 +300,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
       node = node.parentNode;
     }
+
+    if ((key === 'fill' || key === 'stroke') && value === 'currentColor' as any) {
+      return this.getExtendAttr('color') as T[U];
+    }
+
     if (key !== 'lineWidth' || !this.attr.strokeNoScale) {
       return value;
     }
@@ -846,7 +853,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const animateToAttr = lodash.pick(toAttr, animationKeys);
     const animateFromAttr = lodash.pick({ ...defaultTRansformConf, ...fromAttr }, animationKeys);
     animationKeys.forEach(key => {
-      if (animateFromAttr[key] === undefined) {
+      const value = animateFromAttr[key];
+      if (value === undefined || value === 'currentColor' as any) {
         animateFromAttr[key] = this.getExtendAttr(key);
       }
     });
