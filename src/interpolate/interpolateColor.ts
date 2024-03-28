@@ -23,7 +23,7 @@ export default function interpolateColor(from: ColorValue, to: ColorValue, k: nu
   }
 
   if (typeof from === 'string' && typeof to === 'string') {
-    if (from === 'none' || to === 'none') {
+    if (from === 'none' || to === 'none' || to === 'currentColor') {
       return to;
     }
     const fromColor = Color(from).object();

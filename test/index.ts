@@ -1,2 +1,2 @@
-import './use.test'
+import './currentColor.test'
 
