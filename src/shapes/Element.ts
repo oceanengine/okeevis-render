@@ -983,7 +983,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let fn: Function = interpolate;
     this.startAttrTransaction();
     for (const key in animate.to) {
-      if (key === 'fill' || key === 'stroke' || key === 'shadowColor') {
+      if (key === 'color' || key === 'fill' || key === 'stroke' || key === 'shadowColor') {
         fn = interpolateColor;
       } else if (key === 'pathData') {
         fn = interpolatePath;
