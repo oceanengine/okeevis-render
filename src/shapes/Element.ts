@@ -447,14 +447,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     // nothing;
   }
 
-  public dirty() {
+  public dirty(isRef = false) {
     let leafNodeSize = 1;
     if (
       this.ownerRender &&
       this.ownerRender.renderer === 'canvas' &&
       this.ownerRender.enableDirtyRect
     ) {
-      this._refElements?.forEach(item => item.dirty());
+      this._refElements?.forEach(item => item.dirty(true));
       this.parentNode?.onChildDirty()
       if (this.isGroup) {
         leafNodeSize = ((this as any) as Group).getLeafNodesSize(
@@ -551,6 +551,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public addRef(el: Element) {
+    if (!el) {
+      return;
+    }
     if (!this._refElements) {
       this._refElements = new Set();
     }

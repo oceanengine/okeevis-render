@@ -26,7 +26,7 @@ interface LetterItem {
 
 export const shapeKeys: Array<keyof TextPathAttr> = ['text', 'path', 'fontSize', 'startOffset'];
 
-export default class Text extends Shape<TextPathAttr> {
+export default class TextPath extends Shape<TextPathAttr> {
   public type = 'text';
 
   public svgTagName = 'textPath';
@@ -72,6 +72,15 @@ export default class Text extends Shape<TextPathAttr> {
     });
     ctx.restore();
   }
+
+  public mounted() {
+    this.attr.path.addRef(this as any as Shape);
+  }
+
+  public dirty(isRef: boolean) {
+    super.dirty(isRef);
+    this._letterListDirty = true;
+  } 
 
   protected getLetterList() {
     const { path, startOffset } = this.attr;
