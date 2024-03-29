@@ -1,4 +1,4 @@
-import Color from '../../js/color';
+import { Color } from '../../js/color';
 import { InterpolateFunction } from './index';
 import interpolate from './interpolate';
 import { ColorValue, Gradient, isGradient } from '../color';
@@ -10,7 +10,7 @@ import ConicGradient from '../color/ConicGradient';
 const GradientClassMap: Record<GradientType, new (...args: any[]) => Gradient> = {
   linearGradient: LinearGradient,
   radialGradient: RadialGradient,
-  conicGradient: ConicGradient
+  conicGradient: ConicGradient,
 };
 
 const interpolateMap: Record<string, InterpolateFunction> = {
@@ -39,10 +39,15 @@ export default function interpolateColor(from: ColorValue, to: ColorValue, k: nu
     return Color(out).toString();
   }
   if (isGradient(from) && isGradient(to) && (from as Gradient).type === (to as Gradient).type) {
-    const option = interpolate((from as Gradient).option, (to as Gradient).option, k, interpolateMap);
+    const option = interpolate(
+      (from as Gradient).option,
+      (to as Gradient).option,
+      k,
+      interpolateMap,
+    );
     const GradientConstructor = GradientClassMap[(from as Gradient).type];
     return new GradientConstructor(option);
   }
-  
+
   return to;
 }

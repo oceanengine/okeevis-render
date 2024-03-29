@@ -1,2 +1,2 @@
 var color = require('color');
-exports.default = color;
+exports.Color = color;

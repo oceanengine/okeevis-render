@@ -1,4 +1,4 @@
-import Color from '../../js/color';
+import { Color } from '../../js/color';
 import type Gradient from '../abstract/Gradient';
 import type LinearGradient from './LinearGradient';
 import type RadialGradient from './RadialGradient';
@@ -9,7 +9,14 @@ import * as lodash from '../utils/lodash';
 import { NAME_TRANSPARENT, RGBA_TRANSPARENT } from '../constant';
 
 export { Color };
-export type ColorValue = 'none' | 'currentColor' | string | LinearGradient | RadialGradient | Pattern | null;
+export type ColorValue =
+  | 'none'
+  | 'currentColor'
+  | string
+  | LinearGradient
+  | RadialGradient
+  | Pattern
+  | null;
 export { Gradient, LinearGradient, RadialGradient, Pattern, ConicGradient };
 
 function brightenStringColor(color: string, ration: number): string {
@@ -89,9 +96,7 @@ export function getSVGColor(color: ColorValue): string {
   if (lodash.isString(color)) {
     return color;
   }
-  if (
-    isGradient(color) || isPattern(color)
-  ) {
+  if (isGradient(color) || isPattern(color)) {
     return `url(#${color.id})`;
   }
 }
