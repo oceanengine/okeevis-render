@@ -1,4 +1,4 @@
-import Color from 'color';
+import Color from '../../js/color';
 import { InterpolateFunction } from './index';
 import interpolate from './interpolate';
 import { ColorValue, Gradient, isGradient } from '../color';
