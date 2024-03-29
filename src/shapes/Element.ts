@@ -1062,7 +1062,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let flagDirty = false;
     if (translateX !== 0 || translateY !== 0) {
       flagDirty = true;
-      mat3.translate(out, out, [translateX, translateY]);
+      out[6] = translateX;
+      out[7] = translateY;
     }
     if (rotation !== 0) {
       flagDirty = true;
