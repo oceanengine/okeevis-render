@@ -18,7 +18,7 @@ import * as mat3 from '../../js/mat3';
 import { Vec2, transformMat3, vec2BBox, createVec2 } from '../utils/vec2';
 import * as transformUtils from '../utils/transform';
 import { RGBA_TRANSPARENT, IDENTRY_MATRIX } from '../constant';
-import { BBox, unionBBox, ceilBBox, createZeroBBox } from '../utils/bbox';
+import { BBox, unionBBox, ceilBBox, createZeroBBox, inBBox } from '../utils/bbox';
 import { RefObject } from '../utils/ref';
 import { getSVGStyleAttributes } from '../svg/style';
 import Shadow from '../svg/Shadow';
@@ -79,7 +79,7 @@ export interface BaseAttr extends TransformConf, EventConf {
   shadowOffsetY?: number;
 
   cursor?: string;
-  pointerEvents?: 'none' | 'auto';
+  pointerEvents?: 'none' | 'auto' | 'bounding-box';
   showBBox?: boolean;
   showBoundingRect?: boolean;
 }
@@ -722,6 +722,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public isInShape(ox: number, oy: number): boolean {
     const [x, y] = this.getInvertedPoint(ox, oy);
+    if (this.attr.pointerEvents === 'bounding-box') {
+      return inBBox(this.getBBox(), x, y);
+    }
     return this.isPointOnPath(x, y);
   }
 
