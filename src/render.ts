@@ -162,6 +162,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._width = width;
     this._height = height;
     this._painter?.resize(width, height);
+    this.dispatch('resize');
   }
 
   public getRaf(): typeof requestAnimationFrame {
