@@ -1,8 +1,8 @@
 import Path2d, { PathAction } from './Path2D';
 import { getPointOnPolar } from '../utils/math';
 
-interface Segment {
-  type: 'line' | 'arc' | 'bezier';
+export interface Segment {
+  type: 'line' | 'arc' | 'bezier' | 'ellipse'; // todo ellipse/qurdatic
   params: number[];
 }
 
@@ -148,6 +148,14 @@ function pointAtBezier(
   };
 }
 
+function pointAtEllipse(t: number, cx: number, cy: number, rx: number, ry: number, start: number, end: number, antiClockwise: boolean) {
+  return {
+    x: 0,
+    y: 0,
+    alpha: 0
+  }
+}
+
 export function getSegmentLength(segment: Segment): number {
   if (segment.type === 'line') {
     return lineLength.apply(null, segment.params);
@@ -162,10 +170,12 @@ export function getSegmentLength(segment: Segment): number {
     return bezierLength.apply(null, segment.params);
   }
 }
+
 const segmentFn = {
   line: pointAtLine,
   arc: pointAtArc,
   bezier: pointAtBezier,
+  ellipse: pointAtEllipse,
 };
 export function getPointAtSegment(t: number, segment: Segment): SegmentPoint {
   return segmentFn[segment.type].apply(null, [t, ...segment.params]);
@@ -184,6 +194,7 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
     currentPath = pathList[i];
     action = currentPath.action;
     params = currentPath.params;
+
     if (action === 'moveTo') {
       startX = params[0];
       startY = params[1];
@@ -254,6 +265,16 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
     }
     if (action === 'quadraticCurveTo') {
       // todo
+    }
+
+    if (action === 'ellipse') {
+      const [cx, cy, rx, ry, rotation, start, end, clockWise] = params;
+      out.push({
+        type: 'ellipse',
+        params: [cx,cy, rx, ry, rotation, start, end, clockWise]
+      });
+      endX = cx + rx * Math.cos(end);
+      endY = cy + ry * Math.sin(end);
     }
 
     if (action === 'closePath') {

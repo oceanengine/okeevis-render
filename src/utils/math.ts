@@ -38,3 +38,18 @@ export function getPercentOrNumberValue(
     ? percentOrNumber
     : (fullValue * parseInt(percentOrNumber, 10)) / 100;
 }
+
+// 辗转相除法求最小公倍数
+export function getLeastCommonMultiple(a: number, b: number): number {
+  // 求最大公约数
+  function getGreatestCommonDivisor(a: number, b: number): number {
+    if (b === 0) {
+      return a;
+    } else {
+      return getGreatestCommonDivisor(b, a % b);
+    }
+  }
+  
+  // 求最小公倍数
+  return (a * b) / getGreatestCommonDivisor(a, b);
+}

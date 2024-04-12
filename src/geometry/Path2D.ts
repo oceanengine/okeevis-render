@@ -3,7 +3,9 @@ import parsePath from './parsePath';
 import { BBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
 import { equalWithTolerance, getPointOnPolar } from '../utils/math';
 import canvasToSvgPath from './canvasToSvgPath';
-import { getPathSegments, getSegmentLength, getPointAtSegment, SegmentPoint } from './pathSegment';
+import { getPathSegments, Segment, getSegmentLength, getPointAtSegment, SegmentPoint } from './pathSegment';
+import { pathToCurve } from './toCurve';
+import { bezierSubDivision } from './beziersubdivision';
 
 export type PointOnPath = SegmentPoint;
 
@@ -138,6 +140,10 @@ export default class Path2D {
     });
 
     return this;
+  }
+
+  public toCurve(): Path2D {
+    return pathToCurve(this);
   }
 
   public arc(
@@ -299,8 +305,45 @@ export default class Path2D {
     return lodash.sum(segments.map(item => getSegmentLength(item)));
   }
 
+  public getSegments(): Segment[] {
+    return getPathSegments(this, []);
+  }
+
+  public subdivision(count: number) {
+    // 曲线细分 ,count是大于等于1的整数
+    if (count % 1 !== 0) {
+      throw new Error('细分必须是整数')
+      return;
+    }
+    if (count <= 1) {
+      return;
+    }
+    const newPathList: PathAction[] = [];
+    let lastX: number;
+    let lastY: number;
+    this._pathList.forEach(path => {
+      if (path.action === 'bezierCurveTo') {
+        const subCurveList = bezierSubDivision([lastX, lastY, ...path.params], count);
+        subCurveList.forEach(subcurveParams => {
+          newPathList.push({
+            action: 'bezierCurveTo',
+            params: subcurveParams.slice(2),
+          });
+        })
+        lastX = path.params[4];
+        lastY = path.params[5];
+      } else {
+        // moveto;
+        lastX = path.params[0];
+        lastY = path.params[1];
+        newPathList.push(path);
+      }
+    });
+    this._pathList = newPathList;
+  }
+
   public getPointAtLength(len: number): PointOnPath {
-    const segments = getPathSegments(this, []);
+    const segments = this.getSegments();
     let sumLen = 0;
     for (let i = 0; i < segments.length; i++) {
       const segmentLength = getSegmentLength(segments[i]);
