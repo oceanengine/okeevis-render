@@ -362,6 +362,17 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     this.afterUpdateAll();
   }
 
+  public divideChild(element: T, count: number) {
+    if (element.parentNode !== this) {
+      console.warn('divide error, not child node');
+      return;
+    }
+    this.remove(element);
+    element.divide(count).forEach(el => {
+      this.add(el as T);
+    })
+  }
+
   public eachChild(callback: (child: T) => void) {
     let node = this.firstChild as T;
     while (node) {

@@ -136,6 +136,28 @@ export default class Rect extends Shape<RectAttr> {
     return inBBox(outterBBox, x, y) && !inBBox(innerBBox, x, y);
   }
 
+  /**
+   * @override
+   * @param count 分割的数量
+   */
+  public divide(count: number): Rect[] {
+    const n = Math.ceil(Math.sqrt(count));
+    const {x, y, width, height, fill } = this.attr;
+    const res: Rect[] = [];
+    for (let i = 0; i < n; i++ ) {
+      for (let j = 0; j < n; j++) {
+        res.push(new Rect({
+          x: x + width * i / (n - 1),
+          y: y + height * j / (n - 1),
+          width: width / n,
+          height: height / n,
+          fill,
+        }));
+      }
+    }
+    return res;
+  }
+
   protected computeBBox(): BBox {
     const { x, y, width, height } = this.attr;
     return rectBBox(x, y, width, height);

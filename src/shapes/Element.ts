@@ -919,6 +919,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     });
   }
 
+  public divide(count: number): Element[] {
+    return [];
+    // for morphing animate;
+  }
+
   // eslint-disable-next-line no-unused-vars
   protected prevProcessAttr(attr: T) {
     if (attr.position) {
