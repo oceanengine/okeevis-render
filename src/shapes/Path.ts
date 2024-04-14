@@ -1,5 +1,5 @@
 import Shape from './Shape';
-import { CommonAttr } from './Element';
+import Element, { CommonAttr } from './Element';
 import Path2D from '../geometry/Path2D';
 import { BBox } from '../utils/bbox';
 
@@ -54,3 +54,4 @@ export default class Path extends Shape<PathAttr> {
     return true;
   }
 }
+Element.createPath = () => new Path;

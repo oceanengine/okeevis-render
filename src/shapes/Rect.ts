@@ -147,8 +147,8 @@ export default class Rect extends Shape<RectAttr> {
     for (let i = 0; i < n; i++ ) {
       for (let j = 0; j < n; j++) {
         res.push(new Rect({
-          x: x + width * i / (n - 1),
-          y: y + height * j / (n - 1),
+          x: x + width * i / n,
+          y: y + height * j / n,
           width: width / n,
           height: height / n,
           fill,

@@ -6,7 +6,7 @@ import Line from '../src/shapes/Line';
 import Circle from '../src/shapes/Circle';
 
 const dom = document.getElementById('root') as HTMLDivElement;
-const render = new Render(dom, {renderer: 'svg'});
+const render = new Render(dom, {renderer: 'canvas'});
 render.enableDirtyRect = true
 const group = new Group();
 const a = new Rect({
@@ -16,6 +16,14 @@ const a = new Rect({
   width: 100,
   height: 100,
   fill: 'red'
+});
+const toReplace = new Rect({
+  x: 200,
+  y: 200,
+  width: 200,
+  height: 200,
+  fill: 'yellow',
+  draggable: true,
 });
 
 const b = new Rect({
@@ -59,4 +67,6 @@ render.add(group);
 group.addAll([a, b]);
 let i = 0;
 document.onclick = () => {
+  a.replaceWith(toReplace);
 }
+(window as any).render = render;

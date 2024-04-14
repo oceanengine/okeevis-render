@@ -23,6 +23,7 @@ import { RefObject } from '../utils/ref';
 import { getSVGStyleAttributes } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
+import type Path from '../shapes/Path';
 
 export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
@@ -148,6 +149,7 @@ let nodeId = 1;
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful<RenderEventHandleParam>
   implements AnimateAble<T> {
+  public static createPath: () => Path;
   public id: number;
 
   public attr: T & CommonAttr = {} as T;
@@ -256,7 +258,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       'shadowColor',
       'shadowBlur',
       'shadowOffsetX',
-      'shadowOffsetY',
+      'shadowOffsetY'
     ] as Array<keyof CommonAttr>;
   }
 
@@ -486,6 +488,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public get childNodes(): Element[] {
     return this.children();
+  }
+
+  public replaceWith(node: Element) {
+    const parent = this.parentNode;
+    if (parent) {
+      parent.replaceChild(this as any, node);
+    }
   }
 
   public children(): Element[] {
@@ -813,6 +822,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._dragOffset;
   }
 
+  public animateMorphing(path: Path2D, during: number = 300) {
+    const curPath = (this as any as Shape).getPathData();
+    const [from, to] = Path2D.morphing(curPath, path);
+    const newNode = Element.createPath().setAttr({
+      ...this.attr,
+      pathData: from,
+    });
+    this.replaceWith(newNode)
+    newNode.animateTo({
+      pathData: to,
+    }, during);
+    return newNode;
+  }
+
   public setDragOffset(x: number, y: number) {
     if (this._dragOffset[0] === x && this._dragOffset[1] === y) {
       return;
@@ -922,8 +945,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public divide(count: number): Element[] {
     return [];
     // for morphing animate;
-  }
-
+  }  
   // eslint-disable-next-line no-unused-vars
   protected prevProcessAttr(attr: T) {
     if (attr.position) {

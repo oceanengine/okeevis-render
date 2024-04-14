@@ -1,5 +1,5 @@
 import Path2d, { PathAction } from './Path2D';
-import { getPointOnPolar } from '../utils/math';
+import { getPointOnPolar, equalWithTolerance } from '../utils/math';
 
 export interface Segment {
   type: 'line' | 'arc' | 'bezier' | 'ellipse'; // todo ellipse/qurdatic
@@ -214,7 +214,12 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
       const [cx, cy, r, start, end] = params;
       const startPoint = getPointOnPolar(cx, cy, r, start);
       const endPoint = getPointOnPolar(cx, cy, r, end);
+      if (i === 0 && !equalWithTolerance(endX, startPoint.x) || !equalWithTolerance(endY, startPoint.y)) {
+        startX = startPoint.x;
+        startY = startPoint.y;
+      }
       if (i > 0) {
+      
         out.push({
           type: 'line',
           params: [endX, endY, startPoint.x, startPoint.y],

@@ -126,6 +126,32 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     this._mountNode(item);
   }
 
+  public replaceChild(child: T, target: T): void {
+    if (child.parentNode !== this) {
+      return;
+    }
+    child.dirty();
+    const prev = child.prevSibling;
+    const next = child.nextSibling;
+    target.prevSibling = prev;
+    target.nextSibling = next;
+    if (prev) {
+      prev.nextSibling = target;
+    }
+    if (next) {
+      next.prevSibling = target;
+    }
+    if (this.firstChild === child) {
+      this.firstChild = target;
+    }
+    if (this.lastChild === child) {
+      this.lastChild = target;
+    }
+
+    child.destroy();
+    this._mountNode(target);
+  }
+
   // https://developer.mozilla.org/zh-CN/docs/Web/API/Node/insertBefore
   // public insertBefore(newNode: T, refNode: T | null) {
   //   if (!refNode) {

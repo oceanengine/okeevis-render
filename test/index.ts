@@ -1,2 +1,1 @@
-import './path'
-
+import './divide.test'
