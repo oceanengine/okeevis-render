@@ -97,14 +97,14 @@ export default function parsePathString(inputPath: string): PathRecord[] {
       if (expectParamSize !== currentParams.length) {
         const count = currentParams.length / expectParamSize;
         for (let i = 0; i < count; i++) {
-          console.log(currentCommand)
           pathStack.push({
             action: currentCommand,
             params: currentParams.slice(i * expectParamSize, (i + 1) * expectParamSize)
           });
         }
+      } else {
+        pathStack.push(pathItem);
       }
-      pathStack.push(pathItem);
     }
   }
   for (let i: number = 0; i < strLen; i += 1) {
@@ -277,8 +277,8 @@ function getCanvasActions(recordList: PathRecord[]): PathRecord[] {
         canvasAPIParams = [Sx1, Sy1, params[0], params[1], params[2], params[3]];
         endX = canvasAPIParams[4];
         endY = canvasAPIParams[5];
-        prevBezierCurveX2 = params[0];
-        prevBezierCurveY2 = params[1];
+        prevBezierCurveX2 = canvasAPIParams[2];
+        prevBezierCurveY2 = canvasAPIParams[3];
         break;
       case svgPathCommand.s:
         canvasAPIName = canvasAPI.BEZIER_CURVE_TO;
@@ -293,8 +293,8 @@ function getCanvasActions(recordList: PathRecord[]): PathRecord[] {
         ];
         endX = canvasAPIParams[4];
         endY = canvasAPIParams[5];
-        prevBezierCurveX2 = params[0];
-        prevBezierCurveY2 = params[1];
+        prevBezierCurveX2 = canvasAPIParams[2];
+        prevBezierCurveY2 = canvasAPIParams[3];
         break;
       case svgPathCommand.Q:
         canvasAPIName = canvasAPI.QUADRATIC_CURVE_TO;

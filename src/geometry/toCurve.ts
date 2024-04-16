@@ -15,20 +15,20 @@ export function pathToCurve(path: Path2D): Path2D {
       curveList.push(lineToCurve(x1, y1, x2, y2));
     } else if (type === 'arc') {
       const [cx, cy, r, start, end, antiClockwise] = params;
-      curveList.push(arcToCurve(cx, cy, r, r, 0, start, end, !antiClockwise as any as boolean));
+      ellipseToCurve(cx, cy, r, r, 0, start, end, !antiClockwise as any as boolean, curveList);
     } else if (type === 'bezier') {
       curveList.push([...params]);
     } else if (type === 'ellipse') {
       const [cx, cy, rx, ry, rotation, start, end, clockWise] = params;
-      curveList.push(arcToCurve(cx, cy, rx, ry, rotation, start, end, clockWise as any as boolean));
+      ellipseToCurve(cx, cy, rx, ry, rotation, start, end, clockWise as any as boolean, curveList);
     }
   });
   let prevX: number;
   let prevY: number;
 
   for (let i = 0; i < curveList.length; i++) {
-    const [p1x, p1y ,p2x, p2y, p3x, p3y, p4x, p4y] = curveList[i];
-    if (!equalWithTolerance(p1x, prevX) || !equalWithTolerance(p1y, prevY)) {
+    const [p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y] = curveList[i];
+    if (!equalWithTolerance(p1x, prevX, 1e-4) || !equalWithTolerance(p1y, prevY, 1e-4)) {
       curvePath.moveTo(p1x, p1y);
     }
     curvePath.bezierCurveTo(p2x, p2y, p3x, p3y, p4x, p4y);
@@ -40,6 +40,24 @@ export function pathToCurve(path: Path2D): Path2D {
 
 function lineToCurve(x1: number, y1: number, x2: number, y2: number): number[] {
   return [x1, y1, x1, y1, x2, y2, x2, y2];
+}
+function ellipseToCurve(
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  xAxisRotation: number,
+  start: number,
+  end: number,
+  clockWise: boolean,
+  res: number[][],
+) {
+  const gap = end - start;
+  const delta = Math.min(Math.abs(end - start), Math.PI * 2);
+  const n = Math.ceil(delta / (Math.PI / 2));
+  for (let i = 1; i <= n; i++) {
+    res.push(arcToCurve(cx, cy, rx, ry, xAxisRotation, start + gap * (i - 1) / n, start + gap * i / n, clockWise));
+  }
 }
 
 function arcToCurve(
@@ -64,10 +82,5 @@ function arcToCurve(
   mat3.rotate(matrix, matrix, start + xAxisRotation);
   mat3.scale(matrix, matrix, [rx, ry]);
   [p1, p2, p3, p4].forEach((p: [number, number]) => transformMat3(p, p, matrix));
-  return [
-    ...p1,
-    ...p2,
-    ...p3,
-    ...p4
-  ];
+  return [...p1, ...p2, ...p3, ...p4];
 }
