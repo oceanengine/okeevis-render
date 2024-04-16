@@ -95,7 +95,14 @@ export default function parsePathString(inputPath: string): PathRecord[] {
       };
       expectParamSize = svgCommandParamSize[currentCommand.toLocaleLowerCase()];
       if (expectParamSize !== currentParams.length) {
-        throw new Error(`Error, Expect Number`);
+        const count = currentParams.length / expectParamSize;
+        for (let i = 0; i < count; i++) {
+          console.log(currentCommand)
+          pathStack.push({
+            action: currentCommand,
+            params: currentParams.slice(i * expectParamSize, (i + 1) * expectParamSize)
+          });
+        }
       }
       pathStack.push(pathItem);
     }
@@ -137,6 +144,10 @@ export default function parsePathString(inputPath: string): PathRecord[] {
     } else if (isNumber || isDot || isNegativeSymbol || isE) {
       if (currentExpect === expectType.COMMAND) {
         throw new Error('Error path, Expexct ');
+      }
+      if (isNumbering && isNegativeSymbol) {
+        pushParsedNumber();
+        bufferedNumberString = '';
       }
       isNumbering = true;
       bufferedNumberString += currentStr;
