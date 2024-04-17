@@ -1,1 +1,1 @@
-import './divide.test'
+import './morphin.test'
