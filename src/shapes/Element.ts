@@ -832,7 +832,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.replaceWith(newNode)
     newNode.animateTo({
       pathData: to,
-    }, during);
+    }, {
+      during,
+      callback: () => {
+        newNode.setAttr('pathData', path);
+      }
+    });
     return newNode;
   }
 
