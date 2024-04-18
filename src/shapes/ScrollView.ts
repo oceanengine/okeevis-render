@@ -59,11 +59,11 @@ export default class ScrollView extends Group {
   }
 
   protected update(): void {
-    const { x, y, width, height, } = this.attr;
+    const { x, y, width, height } = this.attr;
     (this._clipGroup?.attr.clip as Rect)?.setAttr({ x, y, width, height });
     this._bgRect?.setAttr({ x, y, width, height });
     if (lodash.isNumber(this._scrollLeft) && lodash.isNumber(this._scrollTop)) {
-      this.scrollTo(this._scrollLeft, this._scrollTop)
+      this.scrollTo(this._scrollLeft, this._scrollTop);
     }
   }
 
@@ -101,17 +101,17 @@ export default class ScrollView extends Group {
       scrollThumbHoverColor: '#c1c1c1',
       scrollTrackColor: '#fafafa',
       scrollTrackBorderColor: '#ebebeb',
-    }
+    };
   }
 
   public get clientWidth() {
     const { showScrollBar, scrollY, height, scrollHeight, width, scrollBarSize } = this.attr;
-    return showScrollBar && (scrollY && height < scrollHeight) ? width - scrollBarSize : width;
+    return showScrollBar && scrollY && height < scrollHeight ? width - scrollBarSize : width;
   }
 
   public get clientHeight() {
     const { showScrollBar, scrollX, height, scrollWidth, width, scrollBarSize } = this.attr;
-    return showScrollBar && (scrollX && width < scrollWidth) ? height - scrollBarSize : height;
+    return showScrollBar && scrollX && width < scrollWidth ? height - scrollBarSize : height;
   }
 
   public get scrollLeft(): number {
@@ -121,7 +121,7 @@ export default class ScrollView extends Group {
   public set scrollLeft(x: number) {
     const { scrollWidth, maxScrollLeft } = this.attr;
     const width = this.clientWidth;
-    const scrollLeft = lodash.clamp(x, 0, maxScrollLeft || (scrollWidth - width));
+    const scrollLeft = lodash.clamp(x, 0, maxScrollLeft || scrollWidth - width);
     this._scrollLeft = scrollLeft;
     this._scrollContentGroup?.setAttr('translateX', -scrollLeft);
     this._updateHorizontalBar();
@@ -135,7 +135,7 @@ export default class ScrollView extends Group {
   public set scrollTop(y: number) {
     const { scrollHeight, maxScrollTop } = this.attr;
     const height = this.clientHeight;
-    const scrollTop = lodash.clamp(y, 0, maxScrollTop || (scrollHeight - height));
+    const scrollTop = lodash.clamp(y, 0, maxScrollTop || scrollHeight - height);
     this._scrollTop = scrollTop;
     this._scrollContentGroup?.setAttr('translateY', -scrollTop);
     this._updateVerticalBar();
@@ -156,28 +156,18 @@ export default class ScrollView extends Group {
     this._updateDomNodeClip();
   }
 
-  public getCssClipPath(): string {
-    const path = new Rect({
-      x: this.scrollLeft,
-      y: this.scrollTop,
-      width: this.clientWidth,
-      height: this.clientHeight,
-    }).getPathData().getSVGPathString();
-    return `path('${path}')`;
-  }
-
   protected created() {
     const { x, y, width, height } = this.attr;
     const clipRect = new Rect({ x, y, width, height });
-    const clipGroup = this._clipGroup = new Group({
+    const clipGroup = (this._clipGroup = new Group({
       key: 'clip-group',
       clip: clipRect,
       draggable: isMobile,
       getDragOffset: () => {
-        return { x: 0, y: 0 }
+        return { x: 0, y: 0 };
       },
       onDrag: e => this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy),
-    });
+    }));
     this._bgRect = new Rect({
       key: 'event-rect',
       x,
@@ -203,9 +193,13 @@ export default class ScrollView extends Group {
       },
       onWheel: event => {
         event.preventDefault();
-        this._eventScrollBy(event.currentTarget as ScrollView, event.normalizeWheel.pixelX, event.normalizeWheel.pixelY)
+        this._eventScrollBy(
+          event.currentTarget as ScrollView,
+          event.normalizeWheel.pixelX,
+          event.normalizeWheel.pixelY,
+        );
       },
-    })
+    });
     const contentGroup = new Group({
       key: 'scroll-content',
       translateX: this._scrollLeft,
@@ -215,19 +209,22 @@ export default class ScrollView extends Group {
     clipGroup.add(contentGroup);
     this._scrollContentGroup = contentGroup;
     this._attachScrollBar();
-
   }
 
   private _eventScrollBy(target: ScrollView, dx: number, dy: number) {
     const { scrollX, scrollY, onScroll, showScrollBar } = target.attr;
     if (showScrollBar === 'scrolling') {
-      const elements = [this._horizontalScrollBar, this._horizontalScrollTrack, this._verticalScrollBar, this._verticalScrollTrack];
+      const elements = [
+        this._horizontalScrollBar,
+        this._horizontalScrollTrack,
+        this._verticalScrollBar,
+        this._verticalScrollTrack,
+      ];
       elements.forEach(item => item.stopAllAnimation());
       target._debouncedFadeScrollBar();
     }
     target.scrollBy(scrollX ? dx : 0, scrollY ? dy : 0);
     onScroll && onScroll();
-    
   }
 
   private _attachScrollBar() {
@@ -242,7 +239,7 @@ export default class ScrollView extends Group {
       onMouseEnter: e => e.target.setAttr({ fill: scrollThumbHoverColor }),
       onMouseLeave: e => e.target.setAttr({ fill: scrollThumbColor }),
       getDragOffset: () => {
-        return { x: 0, y: 0 }
+        return { x: 0, y: 0 };
       },
     };
     this._horizontalScrollBar = new Rect({
@@ -252,7 +249,7 @@ export default class ScrollView extends Group {
         const item = e.target.parentNode as ScrollView;
         const scaleX = item.clientWidth / item.attr.scrollWidth;
         (item as this)._eventScrollBy(item, e.dx / scaleX, 0);
-      }
+      },
     });
     this._verticalScrollBar = new Rect({
       key: 'scrollbar-y',
@@ -261,8 +258,8 @@ export default class ScrollView extends Group {
         const item = e.target.parentNode as ScrollView;
         const scaleY = item.clientHeight / item.attr.scrollHeight;
         (item as this)._eventScrollBy(item, 0, e.dy / scaleY);
-      }
-    });;
+      },
+    });
     this._horizontalScrollTrack = new Rect({
       key: 'scroll-track-x',
       onClick: e => (e.target.parentNode as ScrollView)._handleTrackClick('x', e.x),
@@ -274,7 +271,7 @@ export default class ScrollView extends Group {
     this._updateHorizontalBar();
     this._updateVerticalBar();
     if (this.attr.scrollX) {
-      this.add(this._horizontalScrollTrack)
+      this.add(this._horizontalScrollTrack);
       this.add(this._horizontalScrollBar);
     }
     if (this.attr.scrollY) {
@@ -284,7 +281,17 @@ export default class ScrollView extends Group {
   }
 
   private _updateHorizontalBar() {
-    const { x, y, width, height, scrollWidth, showScrollBar, scrollBarSize, scrollTrackColor, scrollTrackBorderColor } = this.attr;
+    const {
+      x,
+      y,
+      width,
+      height,
+      scrollWidth,
+      showScrollBar,
+      scrollBarSize,
+      scrollTrackColor,
+      scrollTrackBorderColor,
+    } = this.attr;
     const scrollThumbWidth = scrollBarSize - 5;
     const clientWidth = this.clientWidth;
     const scaleX = clientWidth / scrollWidth;
@@ -316,7 +323,17 @@ export default class ScrollView extends Group {
   }
 
   private _updateVerticalBar() {
-    const { x, y, width, height, scrollHeight, showScrollBar, scrollBarSize, scrollTrackColor, scrollTrackBorderColor } = this.attr;
+    const {
+      x,
+      y,
+      width,
+      height,
+      scrollHeight,
+      showScrollBar,
+      scrollBarSize,
+      scrollTrackColor,
+      scrollTrackBorderColor,
+    } = this.attr;
     const scrollThumbWidth = scrollBarSize - 5;
     const clientHeight = this.clientHeight;
     const scaleY = clientHeight / scrollHeight;
@@ -370,14 +387,39 @@ export default class ScrollView extends Group {
   }
 
   private _debouncedFadeScrollBar() {
-    const elements = [this._horizontalScrollBar, this._horizontalScrollTrack, this._verticalScrollBar, this._verticalScrollTrack];
+    const elements = [
+      this._horizontalScrollBar,
+      this._horizontalScrollTrack,
+      this._verticalScrollBar,
+      this._verticalScrollTrack,
+    ];
     elements.forEach(item => item.animateTo({ opacity: 0 }, 500));
   }
 
   private _updateDomNodeClip() {
-    const cssclip = this.getCssClipPath();
     this.tranverse(item => {
       if (item.type === 'dom') {
+        const {x, y ,textAlign, textBaseline} = (item as DOMNode).attr;
+        const {width, height} = (item as DOMNode).getBBox();
+        const widthOffset: any = {
+          left: 0,
+          center: width / 2,
+          right: width,
+        };
+        const topOffset: any = {
+          top: 0,
+          middle: height / 2,
+          bottom: height,
+        }
+        const path = new Rect({
+          x: this.scrollLeft - x + this.attr.x + widthOffset[textAlign],
+          y: this.scrollTop - y + this.attr.y + topOffset[textBaseline],
+          width: this.clientWidth,
+          height: this.clientHeight,
+        })
+          .getPathData()
+          .getSVGPathString();
+        const cssclip = `path('${path}')`;
         (item as DOMNode).getContainer().style.clipPath = cssclip;
       }
     });

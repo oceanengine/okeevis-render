@@ -40,6 +40,8 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
 
   private _contentDirty: boolean = true;
 
+  private _firstMount: boolean = true;
+
   public getDefaultAttr(): Partial<DOMNodeAttr> {
     return {
       ...super.getDefaultAttr(),
@@ -109,6 +111,9 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
       container.style.bottom = (this.ownerRender.getHeight() - this.attr.y) + 'px'
     }
     if (textAlign === 'center' || textBaseline === 'middle') {
+      if (this._firstMount) {
+        container.style.visibility = 'hidden';
+      }
       requestAnimationFrame(() => {
         const width = container.clientWidth;
         const height = container.clientHeight;
@@ -118,12 +123,15 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
         if (textBaseline === 'middle') {
           container.style.top = (this.attr.y - height / 2) + 'px';
         }
+        container.style.visibility = 'visible';
       })
     }
     if (this._contentDirty) {
       this._renderer.update(container, this.attr.text);
+      this.dirtyBBox();
     }
     this._contentDirty = false;
+    this._firstMount = false;
   }
 
   public destroy() {
