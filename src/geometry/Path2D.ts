@@ -3,6 +3,8 @@ import parsePath from './parsePath';
 import { BBox, rectBBox, arcBBox, polygonBBox } from '../utils/bbox';
 import { equalWithTolerance, getPointOnPolar, getLeastCommonMultiple } from '../utils/math';
 import canvasToSvgPath from './canvasToSvgPath';
+import * as mat3 from '../../js/mat3';
+import { transformMat3, Vec2 } from '../utils/vec2';
 import {
   getPathSegments,
   Segment,
@@ -42,6 +44,9 @@ const PathKeyPoints: Partial<Record<PathAction['action'], [number, number][]>> =
     [0, 1],
     [2, 3],
   ],
+  rect: [[0, 1]],
+  arc: [[0, 1]],
+  ellipse: [[0, 1]],
   moveTo: [[0, 1]],
   lineTo: [[0, 1]],
   bezierCurveTo: [
@@ -167,6 +172,35 @@ export default class Path2D {
 
   public reverse() {
     // todo;
+  }
+
+  public transform(a: number, b: number, c: number, d: number, e: number, f: number) {
+    const matrix = mat3.fromValues(a, b, 1, c, d, 1, e, f, 1);
+    this._pathList.forEach(path => {
+      const { action, params } = path;
+      if (PathKeyPoints[action]) {
+        PathKeyPoints[action].forEach((xyIndex => {
+          const [x, y] = xyIndex;
+          const xy = [params[x], params[y]] as any as  Vec2;
+          transformMat3(xy, xy, matrix);
+          params[x] = xy[0];
+          params[y] = xy[1];
+        }))
+      }
+    });
+  }
+
+  public translateToBBox() {
+    const bbox = this.getPathBBox();
+    this.translate(-bbox.x, -bbox.y);
+  }
+
+  public translate(dx: number, dy: number) {
+    this.transform(1, 0, 0, 1, dx, dy);
+  }
+
+  public scale(sx: number, sy: number) {
+    this.transform(sx, 0, 0, sy, 0, 0)
   }
 
   public arc(

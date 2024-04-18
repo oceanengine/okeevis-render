@@ -419,6 +419,15 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     return ret;
   }
 
+  public tranverse(callback: (node: Element) => void) {
+    this.eachChild(child => {
+      callback(child);
+      if (child.isGroup) {
+        (child as any as Group).tranverse(callback);
+      }
+    });
+  }
+
   public getAllLeafNodes(ret: Shape[], filter: Function): Shape[] {
     this.eachChild(item => {
       if (item.attr.display === false) {

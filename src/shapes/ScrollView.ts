@@ -2,6 +2,8 @@ import Group, { GroupAttr } from './Group';
 import Element from './Element';
 import Rect, { RectAttr } from './Rect';
 import * as lodash from '../utils/lodash';
+import type DOMNode from './DOMNode';
+import { isMobile } from '../utils/env';
 
 interface ScrollViewAttr extends GroupAttr {
   x: number;
@@ -123,6 +125,7 @@ export default class ScrollView extends Group {
     this._scrollLeft = scrollLeft;
     this._scrollContentGroup?.setAttr('translateX', -scrollLeft);
     this._updateHorizontalBar();
+    this._updateDomNodeClip();
   }
 
   public get scrollTop(): number {
@@ -136,6 +139,7 @@ export default class ScrollView extends Group {
     this._scrollTop = scrollTop;
     this._scrollContentGroup?.setAttr('translateY', -scrollTop);
     this._updateVerticalBar();
+    this._updateDomNodeClip();
   }
 
   public scrollBy(dx: number, dy: number) {
@@ -147,13 +151,28 @@ export default class ScrollView extends Group {
     this.scrollTop = y;
   }
 
+  public mounted() {
+    super.mounted();
+    this._updateDomNodeClip();
+  }
+
+  public getCssClipPath(): string {
+    const path = new Rect({
+      x: this.scrollLeft,
+      y: this.scrollTop,
+      width: this.clientWidth,
+      height: this.clientHeight,
+    }).getPathData().getSVGPathString();
+    return `path('${path}')`;
+  }
+
   protected created() {
     const { x, y, width, height } = this.attr;
     const clipRect = new Rect({ x, y, width, height });
     const clipGroup = this._clipGroup = new Group({
       key: 'clip-group',
       clip: clipRect,
-      draggable: true,
+      draggable: isMobile,
       getDragOffset: () => {
         return { x: 0, y: 0 }
       },
@@ -353,5 +372,14 @@ export default class ScrollView extends Group {
   private _debouncedFadeScrollBar() {
     const elements = [this._horizontalScrollBar, this._horizontalScrollTrack, this._verticalScrollBar, this._verticalScrollTrack];
     elements.forEach(item => item.animateTo({ opacity: 0 }, 500));
+  }
+
+  private _updateDomNodeClip() {
+    const cssclip = this.getCssClipPath();
+    this.tranverse(item => {
+      if (item.type === 'dom') {
+        (item as DOMNode).getContainer().style.clipPath = cssclip;
+      }
+    });
   }
 }
