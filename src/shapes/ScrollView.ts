@@ -192,11 +192,20 @@ export default class ScrollView extends Group {
         self._updateVerticalBar();
       },
       onWheel: event => {
-        event.preventDefault();
+        const _this = event.currentTarget as ScrollView;
+        const { scrollTop, scrollLeft, clientWidth, clientHeight, attr } =_this;
+        const isToBottom = scrollTop +  clientHeight - attr.scrollHeight === 0;
+        const isToRight =  scrollLeft + clientWidth -  attr.scrollWidth === 0;
+        const { pixelX, pixelY} = event.normalizeWheel;
+        const nopreventX = pixelX === 0 || !_this.attr.scrollX || (_this.scrollLeft === 0 && pixelX < 0) || (isToRight && pixelX > 0);
+        const nopreventY =  pixelY === 0 || !_this.attr.scrollY || (_this.scrollTop === 0 && pixelY < 0 || (isToBottom && pixelY > 0));
+        if (!(nopreventX && nopreventY)) {
+          event.preventDefault();
+        }
         this._eventScrollBy(
           event.currentTarget as ScrollView,
-          event.normalizeWheel.pixelX,
-          event.normalizeWheel.pixelY,
+          pixelX,
+          pixelY,
         );
       },
     });
