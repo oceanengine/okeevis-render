@@ -52,10 +52,13 @@ export default class ScrollView extends Group {
 
   private _isOverBar: boolean = false;
 
+  private _isScrolling: boolean = false;
+
   // eslint-disable-next-line no-useless-constructor
   public constructor(attr: ScrollViewAttr) {
     super(attr);
     this._debouncedFadeScrollBar = lodash.debounce(this._debouncedFadeScrollBar, 500).bind(this);
+    this._debounceStopScroll = lodash.debounce(this._debounceStopScroll, 80).bind(this);
   }
 
   protected update(): void {
@@ -200,8 +203,14 @@ export default class ScrollView extends Group {
         const nopreventX = pixelX === 0 || !_this.attr.scrollX || (_this.scrollLeft === 0 && pixelX < 0) || (isToRight && pixelX > 0);
         const nopreventY =  pixelY === 0 || !_this.attr.scrollY || (_this.scrollTop === 0 && pixelY < 0 || (isToBottom && pixelY > 0));
         if (!(nopreventX && nopreventY)) {
-          event.preventDefault();
+          this._isScrolling = true;
         }
+
+        if (this._isScrolling) {
+          event.preventDefault();
+          this._debounceStopScroll();
+        }
+
         this._eventScrollBy(
           event.currentTarget as ScrollView,
           pixelX,
@@ -403,6 +412,10 @@ export default class ScrollView extends Group {
       this._verticalScrollTrack,
     ];
     elements.forEach(item => item.animateTo({ opacity: 0 }, 500));
+  }
+
+  private _debounceStopScroll() {
+    this._isScrolling = false;
   }
 
   private _updateDomNodeClip() {
