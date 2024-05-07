@@ -474,8 +474,17 @@ export default class EventHandle {
       ...eventParam,
       bubbles: true,
     });
-    this._prevMousePosition = null;
-    this._prevMouseTarget = null;
+    if (!this._draggingTarget) {
+      this._prevMousePosition = null;
+    } else {
+      const onDragEvent = new SyntheticDragEvent('drag', {
+        ...eventParam,
+        ...this._getDragParam(eventParam),
+      });
+      this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
+      this._prevMousePosition = {x, y};
+    }
+    this._prevMouseTarget = this._draggingTarget ? this._draggingTarget : null
     this._dispatchSyntheticEvent(mouseoutEvent, target);
     const parentNodes = target.getAncestorNodes(true);
     parentNodes.forEach(node => {
@@ -515,6 +524,16 @@ export default class EventHandle {
       });
       this._dispatchSyntheticEvent(mouseEnterEvent, node);
     });
+    
+    if (this._draggingTarget) {
+      const onDragEvent = new SyntheticDragEvent('drag', {
+        ...eventParam,
+        ...this._getDragParam(eventParam),
+      });
+      this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
+      this._prevMousePosition = {x, y};
+    }
+
     this._prevMousePosition = { x, y };
     this._prevMouseTarget = target;
   };
@@ -570,6 +589,16 @@ export default class EventHandle {
     this._draggingTarget = null;
   };
 
+  private _handleDocumentMouseMove = (nativeEvent: MouseEvent) => {
+    // drag on mousemove outside canvas;
+    const target = nativeEvent.target;
+    if (!this._draggingTarget || this.render.getDom().contains(target as HTMLElement)) {
+      return;
+    };
+    (nativeEvent as any).__OUTSIDE_MOVE__ = true;
+    this._syntheticMouseEvent(nativeEvent);
+  }
+
   private _isEventFromDomNode(event: MouseEvent | Touch) {
     const target = event.target as HTMLElement;
     let node = target;
@@ -590,7 +619,8 @@ export default class EventHandle {
     if (
       (event as MouseEvent).offsetX &&
       this.render.renderer !== 'svg' &&
-      !this._isEventFromDomNode(event)
+      !this._isEventFromDomNode(event) &&
+      !(event as any).__OUTSIDE_MOVE__
     ) {
       return { x: (event as MouseEvent).offsetX, y: (event as MouseEvent).offsetY };
     }
@@ -626,6 +656,7 @@ export default class EventHandle {
     dom.removeEventListener('drop', this._handleNativeDnDEvent);
     dom.removeEventListener('dragover', this._handleNativeDnDEvent);
     document.removeEventListener('mouseup', this._handleDocumentMouseUp);
+    document.removeEventListener('mousemove', this._handleDocumentMouseMove);
   }
 
   private _initEvents() {
@@ -675,6 +706,7 @@ export default class EventHandle {
     dom.addEventListener('drop', this._handleNativeDnDEvent);
     dom.addEventListener('dragover', this._handleNativeDnDEvent);
     document.addEventListener('mouseup', this._handleDocumentMouseUp);
+    document.addEventListener('mousemove', this._handleDocumentMouseMove);
   }
 
   private _dispatchSyntheticEvent(event: SyntheticEvent, target: Element, count = 0) {
@@ -695,11 +727,11 @@ export default class EventHandle {
     }
 
     const { bubbles, isPropagationStopped } = event;
-
     if (event.type === 'drag' && count === 0) {
       const dragEvent = event as SyntheticDragEvent;
       let dx = dragEvent.dx;
       let dy = dragEvent.dy;
+      
       if (target.attr.getDragOffset) {
         const offset = target.attr.getDragOffset(dragEvent);
         dx = offset.x;
@@ -709,6 +741,7 @@ export default class EventHandle {
       // 当使用脏矩形时，如果修改的步调和tick的不一致，会导致脏矩形错误,需要同步刷新
       // 事件的触发频率和tick不同步，如果不同步重绘，会导致残影
       if (!this._eventOnly && this.render.enableDirtyRect) {
+      
         this._frameCallback.push(() => {
           target.dragMoveBy(dx, dy);
         });
@@ -738,6 +771,7 @@ export default class EventHandle {
     const offsetY = y - startY;
     const dx = x - prevX;
     const dy = y - prevY;
+  
     return {
       startX,
       startY,

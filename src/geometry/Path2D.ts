@@ -65,14 +65,38 @@ export default class Path2D {
   public static morphing(from: Path2D, to: Path2D): [Path2D, Path2D] {
     const fromCurve = from.toCurve();
     const toCurve = to.toCurve();
-    const fromCount = fromCurve
-      .getPathList()
-      .filter(path => path.action === 'bezierCurveTo').length;
-    const toCount = toCurve.getPathList().filter(path => path.action === 'bezierCurveTo').length;
-    const commonMultiple = getLeastCommonMultiple(fromCount, toCount);
-    fromCurve.subdivision(commonMultiple / fromCount);
-    toCurve.subdivision(commonMultiple / toCount);
-    return [fromCurve, toCurve];
+    const fromSubPathList = fromCurve.getSubpaths();
+    const toSubPathList = toCurve.getSubpaths();
+    const delta = fromSubPathList.length - toSubPathList.length;
+    const min = Math.min(fromSubPathList.length, toSubPathList.length);
+    const max = Math.max(fromSubPathList.length, toSubPathList.length);
+    for (let i = min; i < max; i++) {
+      const appendPath = (delta > 0 ? fromSubPathList[i] : toSubPathList[i]).clone();
+      const { x, y, width, height } = appendPath.getPathBBox();
+      appendPath.shrink(x + width / 2, y + height / 2);
+      if (delta > 0) {
+        toSubPathList.push(appendPath)
+      } else {
+        fromSubPathList.push(appendPath);
+      }
+    }
+    for (let i = 0; i < max; i++) {
+      const fromxx = fromSubPathList[i];
+      const toxx = toSubPathList[i]; 
+      const fromCount = fromxx
+        .getPathList()
+        .filter(path => path.action === 'bezierCurveTo').length;
+      const toCount = toxx.getPathList().filter(path => path.action === 'bezierCurveTo').length;
+      const commonMultiple = getLeastCommonMultiple(fromCount, toCount);
+      fromxx.subdivision(commonMultiple / fromCount);
+      toxx.subdivision(commonMultiple / toCount);
+    }
+
+    const resFrom = new Path2D();
+    const resTo = new Path2D();
+    fromSubPathList.forEach(path => resFrom.addPath(path));
+    toSubPathList.forEach(path => resTo.addPath(path));
+    return [resFrom, resTo];
   }
 
   public constructor(svgPath?: string) {
@@ -87,6 +111,25 @@ export default class Path2D {
 
   public getPathList(): PathAction[] {
     return this._pathList;
+  }
+
+  public getSubpaths(): Path2D[] {
+    const commandList: PathAction[] = this.getPathList();
+    const subPathList: Path2D[] = [];
+    let curActions: PathAction[];
+    let curPath: Path2D;
+    for (const pathAction of commandList) {
+      const { action } = pathAction;
+      if (subPathList.length === 0 || action === 'moveTo') {
+        curPath = new Path2D();
+        curActions = [pathAction];
+        curPath.setPathList(curActions);
+        subPathList.push(curPath);
+      } else {
+        curActions.push(pathAction);
+      }
+    }
+    return subPathList;
   }
 
   // swapXY
@@ -166,8 +209,9 @@ export default class Path2D {
     return this;
   }
 
-  public toCurve(): Path2D {
-    return pathToCurve(this);
+  public toCurve(): this {
+    this._pathList = pathToCurve(this);
+    return this;
   }
 
   public reverse() {
@@ -179,20 +223,21 @@ export default class Path2D {
     this._pathList.forEach(path => {
       const { action, params } = path;
       if (PathKeyPoints[action]) {
-        PathKeyPoints[action].forEach((xyIndex => {
+        PathKeyPoints[action].forEach(xyIndex => {
           const [x, y] = xyIndex;
-          const xy = [params[x], params[y]] as any as  Vec2;
+          const xy = [params[x], params[y]] as any as Vec2;
           transformMat3(xy, xy, matrix);
           params[x] = xy[0];
           params[y] = xy[1];
-        }))
+        });
       }
     });
   }
 
-  public translateToBBox() {
+  public reset(): this {
     const bbox = this.getPathBBox();
     this.translate(-bbox.x, -bbox.y);
+    return this;
   }
 
   public translate(dx: number, dy: number) {
@@ -200,7 +245,28 @@ export default class Path2D {
   }
 
   public scale(sx: number, sy: number) {
-    this.transform(sx, 0, 0, sy, 0, 0)
+    this.transform(sx, 0, 0, sy, 0, 0);
+  }
+
+  public addPath(path: Path2D) {
+    this._pathList = this._pathList.concat(path.getPathList());
+  }
+
+  public shrink(cx: number, cy: number) {
+    this._pathList.forEach(pathAction => {
+      const { action, params } = pathAction;
+      PathKeyPoints[action].forEach(item => {
+        const [xIndex, yIndex] = item;
+        params[xIndex] = cx;
+        params[yIndex] = cy;
+      });
+    });
+  }
+
+  public rotate(theta: number) {
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
+    this.transform(cos, sin, -sin, cos, 0, 1);
   }
 
   public arc(

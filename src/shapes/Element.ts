@@ -24,6 +24,7 @@ import { getSVGStyleAttributes } from '../svg/style';
 import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
 import type Path from '../shapes/Path';
+import { HookElement } from '../react/hooks';
 
 export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
@@ -83,6 +84,7 @@ export interface BaseAttr extends TransformConf, EventConf {
   pointerEvents?: 'none' | 'auto' | 'bounding-box';
   showBBox?: boolean;
   showBoundingRect?: boolean;
+  children?: any;
 }
 
 export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
@@ -150,6 +152,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful<RenderEventHandleParam>
   implements AnimateAble<T> {
   public static createPath: () => Path;
+
+  public static $$isElement: boolean = true;
+
+  public static isHookElement(obj:  unknown): obj is HookElement {
+    return (obj as Element).type === 'function-component';
+  }
+
+  public static isElementConstructor(obj: unknown): obj is Element {
+    return obj && (obj as Element).$$isElement;
+  }
+
+  public $$isElement: boolean = true;
+
   public id: number;
 
   public attr: T & CommonAttr = {} as T;

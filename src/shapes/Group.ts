@@ -6,6 +6,8 @@ import { TextAttr, shapeKeys } from './Text';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
 import type SVGPainter from '../painter/SVGPainter';
+import type { HookElement } from '../react/hooks';
+
 
 export interface GroupAttr extends TextAttr {}
 
@@ -30,7 +32,11 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
   protected _chunks: T[][] = [];
 
   public get size(): number {
-    return this._length;
+    return this._length; 
+  }
+
+  public static isGroup(obj: unknown): obj is Group {
+    return (obj as Group).isGroup;
   }
 
   public getDefaultAttr(): GroupAttr {
@@ -47,6 +53,9 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     super.onAttrChange(key, value, oldValue);
     if (shapeKeys.indexOf(key) !== -1) {
       this.dirtyTextChildBBox();
+    }
+    if (key === 'children') {
+      this.updateAll(Array.isArray(value) ? value : [value]);
     }
   }
 
@@ -319,7 +328,8 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
   }
 
   public updateAll(list: T[], transition: boolean = true) {
-    if (this._chunks.length) {
+
+    if (this._chunks?.length) {
       this.replaceChunks([]);
     }
     const prevList = this.children();
@@ -364,13 +374,17 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
         nextElement.attr.ref.current = prevElement;
       }
       if (prevElement.isGroup) {
-        ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children(), transition);
-        const chunks = ((nextElement as any) as Group).getChunks();
-        ((prevElement as unknown) as Group).replaceChunks(chunks);
+        if (Element.isHookElement(prevElement)) {
+          prevElement.updateProps((nextElement as unknown as HookElement).props);
+        } else {
+          ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children(), transition);
+          const chunks = ((nextElement as any) as Group).getChunks();
+          ((prevElement as unknown) as Group).replaceChunks(chunks);
+        }
       }
       // todo clone matrix
-      const dragOffset = nextElement.getDragOffset();
-      prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
+      // const dragOffset = nextElement.getDragOffset();
+      // prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
       this._diffUpdateElement(prevElement, nextElement, transition);
     });
 
@@ -520,8 +534,17 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
   }
 
   private _diffUpdateElement(prevElement: Element, nextElement: Element, transition: boolean) {
+   
     const prevAttr = prevElement.attr;
     const nextAttr = nextElement.attr;
+    if (Element.isHookElement(prevElement) && Element.isHookElement(nextElement)) {
+      if (prevElement.$$type === nextElement.$$type) {
+        (prevElement as HookElement).updateProps((nextElement as HookElement).props);
+      } else {
+        prevElement.replaceWith(nextElement);
+      }
+      return;
+    }
     const {
       transitionDuration = defaultSetting.during,
       transitionEase = defaultSetting.ease,
