@@ -4,6 +4,7 @@ import { Fragment } from './Fragment';
 import { createPortal } from './createPortal';
 import { useState, useEffect, useCallback, useMemo, useRef, useContext, useReducer } from './hooks';
 import { memo } from './memo';
+import { createRef } from '../utils/ref';
 
 export {
   createContext,
@@ -19,6 +20,7 @@ export {
   useContext,
   useReducer,
   memo,
+  createRef,
 };
 export * from './types';
 export default {
@@ -35,4 +37,5 @@ export default {
   useContext,
   useReducer,
   memo,
+  createRef,
 };
