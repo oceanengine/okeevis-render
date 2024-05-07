@@ -35,6 +35,10 @@ export default class Pattern {
     return !!this._pattern;
   }
 
+  public reload() {
+    this._pattern = undefined;
+  }
+
   public getCanvasContextStyle(
     ctx: CanvasRenderingContext2D,
     onPatternReady: Function,

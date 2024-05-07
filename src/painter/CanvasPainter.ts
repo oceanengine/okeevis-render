@@ -436,7 +436,7 @@ export default class CanvasPainter implements Painter {
     }
     if (this.render.isBrowser()) {
       document.removeEventListener('visibilitychange', this._handleDocumentVisibilityChange);
-      document.removeEventListener('resize', this._handleWindowResize);
+      window.removeEventListener('resize', this._handleWindowResize);
     }
     this._canvas = null;
     this.render = null;
@@ -722,7 +722,15 @@ export default class CanvasPainter implements Painter {
       return;
     }
     this._isFirstFrame = true;
-    this.resize(this.render.getWidth(), this.render.getHeight(), window.devicePixelRatio);
+    if (window.devicePixelRatio !== this.dpr) {
+      this.resize(this.render.getWidth(), this.render.getHeight(), window.devicePixelRatio);
+      this.render.getRoot().tranverse(node => {
+        const { fill } = node.attr;
+        if (isPattern(fill)) {
+          fill.reload();
+        }
+      })
+    }
   }
 
   private _drawFPS() {
