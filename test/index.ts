@@ -1,1 +1,1 @@
-import './scrollView.test'
+import './jsx'

@@ -33,6 +33,8 @@ export default class Render extends EventFul<RenderEventHandleParam> {
 
   public enableDirtyRect: boolean = true;
 
+  public autoDpr = true;
+
   public maxDirtyRects: number = 128;
 
   // public showDirtyRect: boolean = false;
@@ -94,6 +96,10 @@ export default class Render extends EventFul<RenderEventHandleParam> {
 
   private _commandBuffer: CommandBufferEncoder;
 
+  private _effectPending: boolean = false;
+
+  private _hookElementEffects: Function[] = [];
+
   public constructor(dom?: HTMLElement, option: RenderOptions = {}) {
     super();
 
@@ -101,6 +107,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._rootGroup.ownerRender = this;
     this._isBrowser = /html.*?element/gi.test(Object.prototype.toString.call(dom));
     this.dpr = option.dpr || (this._isBrowser ? window.devicePixelRatio || 1 : 1);
+    this.autoDpr = !option.dpr;
     this._renderer = option.renderer || 'canvas';
     this._workerEnabled = option.workerEnabled;
     this._dom = dom;
@@ -320,6 +327,18 @@ export default class Render extends EventFul<RenderEventHandleParam> {
 
   public __removeFrameableElement(element: Element<any>) {
     this._frameAbleElement.delete(element);
+  }
+
+  public __pushPendingEffect(effect: Function) {
+    this._hookElementEffects.unshift(effect);
+    if (!this._effectPending) {
+      this._effectPending = true;
+      this.getRaf()(() => {
+        this._hookElementEffects.forEach(effect => effect());
+        this._effectPending = false;
+        this._hookElementEffects.length = 0;
+      })
+    }
   }
 
   protected onEvent(type: string, ...params: any[]) {

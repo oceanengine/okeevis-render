@@ -1,10 +1,10 @@
-import Path2D from './Path2D';
+import Path2D, { PathAction } from './Path2D';
 import { getPathSegments } from './pathSegment';
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from '../utils/vec2';
 import { equalWithTolerance } from '../utils/math';
 
-export function pathToCurve(path: Path2D): Path2D {
+export function pathToCurve(path: Path2D): PathAction[] {
   const segments = getPathSegments(path, []);
   const curvePath = new Path2D();
   const curveList: number[][] = [];
@@ -35,7 +35,7 @@ export function pathToCurve(path: Path2D): Path2D {
     prevX = p4x;
     prevY = p4y;
   }
-  return curvePath;
+  return curvePath.getPathList();
 }
 
 function lineToCurve(x1: number, y1: number, x2: number, y2: number): number[] {

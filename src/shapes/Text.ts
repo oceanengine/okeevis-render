@@ -34,6 +34,7 @@ export const shapeKeys: Array<keyof TextAttr> = [
   'textAlign',
   'textBaseline',
   'fontWeight',
+  'children'
 ];
 export interface TextSpan {
   x: number;
@@ -62,6 +63,12 @@ export default class Text extends Shape<TextAttr> {
   private get isMutiLine(): boolean {
     const { text, truncate } = this.attr;
     return !!((text + '').indexOf('\n') !== -1 || truncate);
+  }
+
+  protected prevProcessAttr(attr: TextAttr) {
+    if (attr.children && !attr.text) {
+      attr.text = Array.isArray(attr.children) ? attr.children.join('') : attr.children;
+    }
   }
 
   public getDefaultAttr(): TextAttr {

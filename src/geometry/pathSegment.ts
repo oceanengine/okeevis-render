@@ -214,12 +214,11 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
       const [cx, cy, r, start, end] = params;
       const startPoint = getPointOnPolar(cx, cy, r, start);
       const endPoint = getPointOnPolar(cx, cy, r, end);
-      if (i === 0 && !equalWithTolerance(endX, startPoint.x) || !equalWithTolerance(endY, startPoint.y)) {
+      if (i === 0) {
         startX = startPoint.x;
         startY = startPoint.y;
       }
       if (i > 0) {
-      
         out.push({
           type: 'line',
           params: [endX, endY, startPoint.x, startPoint.y],

@@ -65,11 +65,13 @@ export default class CanvasPainter implements Painter {
     if (this.render.isBrowser() && !isPixelPainter) {
       // tab switch must redraw
       document.addEventListener('visibilitychange', this._handleDocumentVisibilityChange);
+      window.addEventListener('resize', this._handleWindowResize);
     }
     this._viewPort = { x: 0, y: 0, width: render.getWidth(), height: render.getHeight() };
   }
 
-  public resize(width: number, height: number) {
+  public resize(width: number, height: number, dpr?: number) {
+    this.dpr = dpr ?? this.dpr;
     this._canvas.width = width * this.dpr;
     this._canvas.height = height * this.dpr;
     if (this.render.isBrowser()) {
@@ -277,6 +279,10 @@ export default class CanvasPainter implements Painter {
   }
 
   public drawElement = (item: Element, dirtyRegion?: BBox) => {
+    if (Element.isHookElement(item)) {
+      item.eachChild(child => this.drawElement(child, dirtyRegion));
+      return;
+    }
     const ctx = this._ctx;
     item.clearDirty();
 
@@ -430,6 +436,7 @@ export default class CanvasPainter implements Painter {
     }
     if (this.render.isBrowser()) {
       document.removeEventListener('visibilitychange', this._handleDocumentVisibilityChange);
+      document.removeEventListener('resize', this._handleWindowResize);
     }
     this._canvas = null;
     this.render = null;
@@ -709,6 +716,14 @@ export default class CanvasPainter implements Painter {
       this._isFirstFrame = true;
     }
   };
+
+  private _handleWindowResize = () => {
+    if (!this.render.autoDpr) {
+      return;
+    }
+    this._isFirstFrame = true;
+    this.resize(this.render.getWidth(), this.render.getHeight(), window.devicePixelRatio);
+  }
 
   private _drawFPS() {
     fpsText.setAttr('display', this.render.showFPS);
