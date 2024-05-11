@@ -7,11 +7,12 @@ export function createElement<P extends {}>(
   props?: P | null,
   children?: ReactNode
 ): Element | HookElement {
-  let normalizedProps: any;
-  if (Element.isElementConstructor(type)) {
-    normalizedProps = {...props};
-  } else {
-    normalizedProps = {...(type as FunctionComponent<P>).defaultProps, ...props};
+  let normalizedProps: any = props || {};
+  if (!Element.isElementConstructor(type)) {
+    const Factory = (type as FunctionComponent);
+    if (Factory.defaultProps) {
+      normalizedProps = {...(type as FunctionComponent<P>).defaultProps, ...props};
+    }
   }
   
   if (arguments.length > 2) {
