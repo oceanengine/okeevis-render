@@ -25,6 +25,7 @@ import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
 import type Path from '../shapes/Path';
 import { HookElement } from '../react/hooks';
+import { SyntheticAnimationEvent } from '../event/SyntheticAnimationEvent';
 
 export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
@@ -92,6 +93,13 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionEase?: EasingName;
   transitionDuration?: number;
   transitionDelay?: number;
+  animation?: {
+    from: T;
+    to: T;
+    during?: number;
+    ease?: EasingName;
+    delay?: number;
+  }
 }
 
 export const defaultCanvasContext: ShapeAttr = {
@@ -732,6 +740,32 @@ export default class Element<T extends CommonAttr = ElementAttr>
       if (this.attr.onMounted || this._animations.length) {
         this._addToFrame();
       }
+    }
+    if (this.attr.animation) {
+      this.dispatch('animationstart', new SyntheticAnimationEvent(
+        'animationstart',
+        {
+          bubbles: false,
+          timeStamp: Date.now(),
+          elapsedTime: 0,
+        }
+      ));
+      this.addAnimation({
+        stopped: false,
+        during: 300,
+        ease: 'Linear',
+        ...this.attr.animation as AnimateOption<T>,
+        callback: () => {
+          this.dispatch('animationend', new SyntheticAnimationEvent(
+            'animationend',
+            {
+              bubbles: false,
+              timeStamp: Date.now(),
+              elapsedTime: 0,
+            }
+          ));
+        }
+      } as AnimateOption<T>)
     }
     this._mountClip();
   }
