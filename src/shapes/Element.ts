@@ -351,7 +351,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         this.setStatus('transition', false);
         break;
     }
-    this.attr.onEvent?.apply(null, params);
+    this._attr.onEvent?.apply(null, params);
   }
 
   public getComputedOpacity(): number {
@@ -484,14 +484,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (!(statusConfig && statusStyle)) {
       return normalAttr;
     }
-    if (!this._cascadingAttrDirty) {
+    if (!(this._cascadingAttrDirty ?? true)) {
       return this._cascadingAttr;
     }
     const keys = Object.keys(statusStyle) as Status[];
     const cascadingAttr: T = { ...normalAttr };
     for (const key of keys) {
       const keyAttr = statusStyle[key];
-      if (keyAttr) {
+      if (keyAttr && statusConfig[key]) {
         Object.assign(cascadingAttr, keyAttr);
       }
     }
