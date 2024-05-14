@@ -99,10 +99,18 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
     during?: number;
     ease?: EasingName;
     delay?: number;
-  }
+  };
 }
 
-type Status =  'transition' | 'animation' | 'hover'  | 'focus' | 'blur' | 'selected' | 'checked' | 'active';
+type Status =
+  | 'transition'
+  | 'animation'
+  | 'hover'
+  | 'focus'
+  | 'blur'
+  | 'selected'
+  | 'checked'
+  | 'active';
 type StatusConfig = Partial<Record<Status, boolean>>;
 type StatusStyle = Partial<Record<Status, CommonAttr>>;
 
@@ -162,12 +170,13 @@ const defaultTRansformConf: CommonAttr = {
 let nodeId = 1;
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful<RenderEventHandleParam>
-  implements AnimateAble<T> {
+  implements AnimateAble<T>
+{
   public static createPath: () => Path;
 
   public static $$isElement: boolean = true;
 
-  public static isHookElement(obj:  unknown): obj is HookElement {
+  public static isHookElement(obj: unknown): obj is HookElement {
     return (obj as Element).type === 'function-component';
   }
 
@@ -178,7 +187,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public $$isElement: boolean = true;
 
   public id: number;
-  
+
   public type: string;
 
   public svgTagName: string = 'path';
@@ -248,7 +257,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _inFrameAble: boolean;
 
   protected _refElements: Set<Element> | undefined;
-    
+
   private _statusStyle: StatusStyle = null;
 
   private _statusConfig: StatusConfig = null;
@@ -293,7 +302,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       'shadowColor',
       'shadowBlur',
       'shadowOffsetX',
-      'shadowOffsetY'
+      'shadowOffsetY',
     ] as Array<keyof CommonAttr>;
   }
 
@@ -314,6 +323,36 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (eventKey) {
       (this.attr[eventKey] as Function).apply(null, params);
     }
+    switch (type) {
+      case 'mouseenter':
+        this.setStatus('hover', true);
+        break;
+      case 'mousedown':
+        this.setStatus('active', true);
+        break;
+      case 'mouseup':
+        this.setStatus('active', false);
+        break;
+      case 'focus':
+        this.setStatus('focus', true);
+        this.setStatus('blur', false);
+        break;
+      case 'blur':
+        this.setStatus('blur', true);
+        this.setStatus('focus', true);
+        break;
+      case 'animationstart':
+        this.setStatus('animation', true);
+        break;
+      case 'animationend':
+        this.setStatus('animation', false);
+      case 'transitionstart':
+        this.setStatus('transition', true);
+        break;
+      case 'transitionend':
+        this.setStatus('transition', false);
+        break;
+    }
     this.attr.onEvent?.apply(null, params);
   }
 
@@ -322,7 +361,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let opacity = 1;
     while (node) {
       opacity *= node.attr.opacity ?? 1;
-      node = (node.parentNode as any) as Group;
+      node = node.parentNode as any as Group;
     }
     return opacity;
   }
@@ -338,7 +377,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       node = node.parentNode;
     }
 
-    if ((key === 'fill' || key === 'stroke') && value === 'currentColor' as any) {
+    if ((key === 'fill' || key === 'stroke') && value === ('currentColor' as any)) {
       return this.getExtendAttr('color') as T[U];
     }
 
@@ -347,7 +386,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     const globalTransform = this.getGlobalTransform();
     const scale = globalTransform[0];
-    return (((value as any) as number) / scale) as any;
+    return ((value as any as number) / scale) as any;
   }
 
   public hasFill(): boolean {
@@ -451,7 +490,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return this._cascadingAttr;
     }
     const keys = Object.keys(statusStyle) as Status[];
-    const cascadingAttr: T = {...normalAttr};
+    const cascadingAttr: T = { ...normalAttr };
     for (const key of keys) {
       const keyAttr = statusStyle[key];
       if (keyAttr) {
@@ -531,11 +570,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this.ownerRender.enableDirtyRect
     ) {
       this._refElements?.forEach(item => item.dirty(true));
-      this.parentNode?.onChildDirty()
+      this.parentNode?.onChildDirty();
       if (this.isGroup) {
-        leafNodeSize = ((this as any) as Group).getLeafNodesSize(
-          this.ownerRender.maxDirtyRects + 1,
-        );
+        leafNodeSize = (this as any as Group).getLeafNodesSize(this.ownerRender.maxDirtyRects + 1);
         this.beforeDirty(leafNodeSize);
       } else {
         this.beforeDirty(leafNodeSize);
@@ -672,10 +709,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     if (markerStart || markerEnd) {
       if (markerStart) {
-        boxList.push(markerStart.getMarkerDirtyRect((this as unknown) as Shape, 'start'));
+        boxList.push(markerStart.getMarkerDirtyRect(this as unknown as Shape, 'start'));
       }
       if (markerEnd) {
-        boxList.push(markerEnd.getMarkerDirtyRect((this as unknown) as Shape, 'end'));
+        boxList.push(markerEnd.getMarkerDirtyRect(this as unknown as Shape, 'end'));
       }
     }
 
@@ -793,32 +830,30 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     }
     if (this.attr.animation) {
-      this.setStatus('animation', true);
-      this.dispatch('animationstart', new SyntheticAnimationEvent(
+      this.dispatch(
         'animationstart',
-        {
+        new SyntheticAnimationEvent('animationstart', {
           bubbles: false,
           timeStamp: Date.now(),
           elapsedTime: 0,
-        }
-      ));
+        }),
+      );
       this.addAnimation({
         stopped: false,
         during: 300,
         ease: 'Linear',
-        ...this.attr.animation as AnimateOption<T>,
+        ...(this.attr.animation as AnimateOption<T>),
         callback: () => {
-          this.setStatus('animation', false);
-          this.dispatch('animationend', new SyntheticAnimationEvent(
+          this.dispatch(
             'animationend',
-            {
+            new SyntheticAnimationEvent('animationend', {
               bubbles: false,
               timeStamp: Date.now(),
               elapsedTime: 0,
-            }
-          ));
-        }
-      } as AnimateOption<T>)
+            }),
+          );
+        },
+      } as AnimateOption<T>);
     }
     this._mountClip();
   }
@@ -931,15 +966,18 @@ export default class Element<T extends CommonAttr = ElementAttr>
       ...this.attr,
       pathData: from,
     });
-    this.replaceWith(newNode)
-    newNode.animateTo({
-      pathData: to,
-    }, {
-      during,
-      callback: () => {
-        newNode.setAttr('pathData', path);
-      }
-    });
+    this.replaceWith(newNode);
+    newNode.animateTo(
+      {
+        pathData: to,
+      },
+      {
+        during,
+        callback: () => {
+          newNode.setAttr('pathData', path);
+        },
+      },
+    );
     return newNode;
   }
 
@@ -990,7 +1028,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const animateFromAttr = lodash.pick({ ...defaultTRansformConf, ...fromAttr }, animationKeys);
     animationKeys.forEach(key => {
       const value = animateFromAttr[key];
-      if (value === undefined || value === 'currentColor' as any) {
+      if (value === undefined || value === ('currentColor' as any)) {
         animateFromAttr[key] = this.getExtendAttr(key);
       }
     });
@@ -1052,7 +1090,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public divide(count: number): Element[] {
     return [];
     // for morphing animate;
-  }  
+  }
   // eslint-disable-next-line no-unused-vars
   protected prevProcessAttr(attr: T) {
     if (attr.position) {
