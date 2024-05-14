@@ -949,6 +949,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._clientBoundingRectDirty = true;
     this._bboxDirty = true;
     this._refElements?.clear();
+    this._statusConfig = undefined;
+    this._cascadingAttrDirty = true;
+    this._cascadingAttr = undefined;
+    this._statusStyle = undefined;
     const clip = this.getClipElement();
     if (clip && !clip.parentNode) {
       clip.destroy();
