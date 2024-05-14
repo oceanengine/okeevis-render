@@ -327,6 +327,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       case 'mouseenter':
         this.setStatus('hover', true);
         break;
+      case 'mouseleave':
+        this.setStatus('hover', false);
+        break;
       case 'mousedown':
         this.setStatus('active', true);
         break;
@@ -344,6 +347,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         break;
       case 'animationend':
         this.setStatus('animation', false);
+        break;
       case 'transitionstart':
         this.setStatus('transition', true);
         break;
@@ -504,9 +508,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (!this._statusConfig) {
       this._statusConfig = {};
     }
+    const prevValue = this._statusConfig[status] || false;
     this._statusConfig[status] = value;
-    if (this._statusStyle?.[status]) {
-      this._cascadingAttrDirty = true;
+    if (this._statusStyle?.[status] && prevValue !== value) {
+      this.dirtyStatusAttr(this._statusStyle[status] as T);
+    }
+  }
+
+  private dirtyStatusAttr(attr: T) {
+    const oldAttr = this.attr;
+    this._cascadingAttrDirty = true;
+    this.dirty();
+    for (const key in attr) {
+      this.onAttrChange(key, attr[key], this.attr[key])
     }
   }
 
@@ -516,7 +530,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     this._statusStyle[status] = attr;
     if (this._statusConfig?.[status]) {
-      this._cascadingAttrDirty = true;
+      this.dirtyStatusAttr(this._statusStyle[status] as T);
     }
   }
 

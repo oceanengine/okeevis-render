@@ -16,8 +16,9 @@ const rect = new Rect({
   draggable: true,
   rotation: 0.02,
 });
-rect.setStatusAttr('active', {
-  fill: 'red'
+rect.setStatusAttr('hover', {
+  fill: 'red',
+  rotation: Math.PI / 8,
 });
 
 // rect.stopAllAnimation().setAttr({scaleX: 0, scaleY: 0}).animateTo({scale: [2, 2]})
