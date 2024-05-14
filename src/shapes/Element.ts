@@ -793,6 +793,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     }
     if (this.attr.animation) {
+      this.setStatus('animation', true);
       this.dispatch('animationstart', new SyntheticAnimationEvent(
         'animationstart',
         {
@@ -807,6 +808,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         ease: 'Linear',
         ...this.attr.animation as AnimateOption<T>,
         callback: () => {
+          this.setStatus('animation', false);
           this.dispatch('animationend', new SyntheticAnimationEvent(
             'animationend',
             {
