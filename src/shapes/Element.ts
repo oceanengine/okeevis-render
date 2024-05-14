@@ -102,6 +102,10 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   }
 }
 
+type Status =  'transition' | 'animation' | 'hover'  | 'focus' | 'blur' | 'selected' | 'checked' | 'active';
+type StatusConfig = Record<Status, boolean>;
+type StatusStyle = Record<Status, CommonAttr>;
+
 export const defaultCanvasContext: ShapeAttr = {
   fill: 'none',
   stroke: 'none',
