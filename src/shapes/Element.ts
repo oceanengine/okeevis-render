@@ -505,7 +505,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._statusConfig = {};
     }
     this._statusConfig[status] = value;
-    this._cascadingAttrDirty = true;
+    if (this._statusStyle?.[status]) {
+      this._cascadingAttrDirty = true;
+    }
   }
 
   public setStatusAttr(status: Status, attr: T) {
@@ -513,7 +515,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._statusStyle = {};
     }
     this._statusStyle[status] = attr;
-    this._cascadingAttrDirty = true;
+    if (this._statusConfig?.[status]) {
+      this._cascadingAttrDirty = true;
+    }
   }
 
   public show() {
