@@ -18,7 +18,7 @@ const rect = new Rect({
 });
 rect.setStatusAttr('hover', {
   fill: 'red',
-  rotation: Math.PI / 8,
+  rotation: Math.PI / 18,
 });
 
 // rect.stopAllAnimation().setAttr({scaleX: 0, scaleY: 0}).animateTo({scale: [2, 2]})

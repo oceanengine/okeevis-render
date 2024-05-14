@@ -516,11 +516,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private dirtyStatusAttr(attr: T) {
-    const oldAttr = this.attr;
+    const oldAttr = this._cascadingAttr ?? this._attr;
     this._cascadingAttrDirty = true;
     this.dirty();
     for (const key in attr) {
-      this.onAttrChange(key, attr[key], this.attr[key])
+      const oldValue = oldAttr[key];
+      const newValue = this.attr[key];
+      if (oldValue !== newValue) {
+        this.onAttrChange(key, oldAttr[key], this.attr[key])
+      }
     }
   }
 
