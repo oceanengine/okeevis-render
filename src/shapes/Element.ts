@@ -103,8 +103,8 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
 }
 
 type Status =  'transition' | 'animation' | 'hover'  | 'focus' | 'blur' | 'selected' | 'checked' | 'active';
-type StatusConfig = Record<Status, boolean>;
-type StatusStyle = Record<Status, CommonAttr>;
+type StatusConfig = Partial<Record<Status, boolean>>;
+type StatusStyle = Partial<Record<Status, CommonAttr>>;
 
 export const defaultCanvasContext: ShapeAttr = {
   fill: 'none',
@@ -250,6 +250,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _inFrameAble: boolean;
 
   protected _refElements: Set<Element> | undefined;
+    
+  private _statusStyle: StatusStyle;
+
+  private _statusConfig: StatusConfig;
 
   public constructor(attr?: T) {
     super();
@@ -430,6 +434,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public removeAttr(attribute: keyof T) {
     this.setAttr(attribute, undefined);
+  }
+
+  public setStatus(status: Status, value: boolean) {
+    if (!this._statusConfig) {
+      this._statusConfig = {};
+    }
+    this._statusConfig[status] = value;
+  }
+
+  public setStatusAttr(status: Status, attr: T) {
+    if (!this._statusStyle) {
+      this._statusStyle = {};
+    }
+    this._statusStyle[status] = attr;
   }
 
   public show() {
