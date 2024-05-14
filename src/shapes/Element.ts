@@ -178,9 +178,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public $$isElement: boolean = true;
 
   public id: number;
-
-  public attr: T & CommonAttr = {} as T;
-
+  
   public type: string;
 
   public svgTagName: string = 'path';
@@ -251,14 +249,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected _refElements: Set<Element> | undefined;
     
-  private _statusStyle: StatusStyle;
+  private _statusStyle: StatusStyle = null;
 
-  private _statusConfig: StatusConfig;
+  private _statusConfig: StatusConfig = null;
+
+  private _attr: T;
+
+  private _cascadingAttr: T;
+
+  private _cascadingAttrDirty: boolean;
 
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
-    this.attr = this.getDefaultAttr();
+    this._attr = this.getDefaultAttr();
     attr && this.setAttr(attr);
     this.created();
   }
@@ -394,15 +398,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return this;
     }
     if (typeof attr === 'string') {
-      if (this.attr[attr as keyof T] === value) {
+      if (this._attr[attr as keyof T] === value) {
         return;
       }
       this.dirty();
-      const oldValue = this.attr[attr as keyof T];
+      const oldValue = this._attr[attr as keyof T];
       if (value !== undefined) {
-        this.attr[attr as keyof T] = value;
+        this._attr[attr as keyof T] = value;
       } else {
-        delete this.attr[attr as keyof T];
+        delete this._attr[attr as keyof T];
         if (this.ownerRender && this.ownerRender.renderer === 'svg') {
           this._removeSVGAttribute(attr as string);
         }
@@ -412,14 +416,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this.prevProcessAttr(attr as T);
       let dirty = false;
       for (const key in attr as T) {
-        const prevValue = this.attr[key as keyof T];
+        const prevValue = this._attr[key as keyof T];
         const nextValue = (attr as T)[key];
         if (prevValue !== nextValue) {
           if (!dirty) {
             dirty = true;
             this.dirty();
           }
-          this.attr[key] = nextValue;
+          this._attr[key] = nextValue;
           this.onAttrChange(key, nextValue, prevValue);
         }
       }
@@ -436,11 +440,35 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.setAttr(attribute, undefined);
   }
 
+  public get attr(): T {
+    const normalAttr = this._attr;
+    const statusConfig = this._statusConfig;
+    const statusStyle = this._statusStyle;
+    if (!(statusConfig && statusStyle)) {
+      return normalAttr;
+    }
+    if (!this._cascadingAttrDirty) {
+      return this._cascadingAttr;
+    }
+    const keys = Object.keys(statusStyle) as Status[];
+    const cascadingAttr: T = {...normalAttr};
+    for (const key of keys) {
+      const keyAttr = statusStyle[key];
+      if (keyAttr) {
+        Object.assign(cascadingAttr, keyAttr);
+      }
+    }
+    this._cascadingAttr = cascadingAttr;
+    this._cascadingAttrDirty = false;
+    return this._cascadingAttr;
+  }
+
   public setStatus(status: Status, value: boolean) {
     if (!this._statusConfig) {
       this._statusConfig = {};
     }
     this._statusConfig[status] = value;
+    this._cascadingAttrDirty = true;
   }
 
   public setStatusAttr(status: Status, attr: T) {
@@ -448,6 +476,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._statusStyle = {};
     }
     this._statusStyle[status] = attr;
+    this._cascadingAttrDirty = true;
   }
 
   public show() {

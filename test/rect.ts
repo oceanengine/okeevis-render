@@ -15,8 +15,12 @@ const rect = new Rect({
   lineWidth: 20,
   draggable: true,
   rotation: 0.02,
+  onMouseEnter: e => e.target.setStatus('hover', true),
+  onMouseLeave: e => e.target.setStatus('hover', false),
 });
-
+rect.setStatusAttr('hover', {
+  fill: 'red'
+});
 // rect.stopAllAnimation().setAttr({scaleX: 0, scaleY: 0}).animateTo({scale: [2, 2]})
 
 render.add(rect);
