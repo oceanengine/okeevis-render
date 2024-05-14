@@ -335,11 +335,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
         break;
       case 'focus':
         this.setStatus('focus', true);
-        this.setStatus('blur', false);
         break;
       case 'blur':
-        this.setStatus('blur', true);
-        this.setStatus('focus', true);
+        this.setStatus('focus', false);
         break;
       case 'animationstart':
         this.setStatus('animation', true);
