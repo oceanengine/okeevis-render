@@ -266,8 +266,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _cascadingAttr: T;
 
-  private _cascadingAttrDirty: boolean;
-
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
@@ -471,6 +469,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (!this._inTransaction) {
+      if (this._cascadingAttr) {
+        this.updateCascadeAttr();
+      }
       this.update();
     }
 
@@ -481,27 +482,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.setAttr(attribute, undefined);
   }
 
-  public get attr(): T {
-    const normalAttr = this._attr;
-    const statusConfig = this._statusConfig;
-    const statusStyle = this._statusStyle;
-    if (!(statusConfig && statusStyle)) {
-      return normalAttr;
-    }
-    if (!(this._cascadingAttrDirty ?? true)) {
-      return this._cascadingAttr;
-    }
-    const keys = Object.keys(statusStyle) as Status[];
-    const cascadingAttr: T = { ...normalAttr };
-    for (const key of keys) {
-      const keyAttr = statusStyle[key];
-      if (keyAttr && statusConfig[key]) {
-        Object.assign(cascadingAttr, keyAttr);
-      }
-    }
-    this._cascadingAttr = cascadingAttr;
-    this._cascadingAttrDirty = false;
-    return this._cascadingAttr;
+  public get attr(): T {   
+    return this._cascadingAttr || this._attr;
   }
 
   public setStatus(status: Status, value: boolean) {
@@ -515,10 +497,24 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  private dirtyStatusAttr(attr: T) {
-    const oldAttr = this._cascadingAttr ?? this._attr;
-    this._cascadingAttrDirty = true;
+  private updateCascadeAttr() {
     this.dirty();
+    const statusStyle = this._statusStyle;
+    const statusConfig = this._statusConfig;
+    const keys = Object.keys(statusStyle) as Status[];
+    const cascadingAttr: T = { ...this._attr };
+    for (const key of keys) {
+      const keyAttr = statusStyle[key];
+      if (keyAttr && statusConfig[key]) {
+        Object.assign(cascadingAttr, keyAttr);
+      }
+    }
+    this._cascadingAttr = cascadingAttr;
+  }
+
+  private dirtyStatusAttr(attr: T) {
+    const oldAttr = this.attr;
+    this.updateCascadeAttr();
     for (const key in attr) {
       const oldValue = oldAttr[key];
       const newValue = this.attr[key];
@@ -836,7 +832,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   protected update() {
-    // nothing
+   
   }
 
   public mounted() {
@@ -968,7 +964,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._bboxDirty = true;
     this._refElements?.clear();
     this._statusConfig = undefined;
-    this._cascadingAttrDirty = true;
     this._cascadingAttr = undefined;
     this._statusStyle = undefined;
     const clip = this.getClipElement();
