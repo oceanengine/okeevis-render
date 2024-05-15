@@ -100,6 +100,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
     ease?: EasingName;
     delay?: number;
   };
+  stateStyle?: stateStyle;
 }
 
 type Status =
@@ -112,7 +113,7 @@ type Status =
   | 'checked'
   | 'active';
 type StatusConfig = Partial<Record<Status, boolean>>;
-type StatusStyle = Partial<Record<Status, CommonAttr>>;
+type stateStyle = Partial<Record<Status, ElementAttr>>;
 
 export const defaultCanvasContext: ShapeAttr = {
   fill: 'none',
@@ -260,8 +261,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected _refElements: Set<Element> | undefined;
 
-  private _statusStyle: StatusStyle = null;
-
   private _statusConfig: StatusConfig = null;
 
   private _attr: T;
@@ -323,34 +322,34 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     switch (type) {
       case 'mouseenter':
-        this.setStatus('hover', true);
+        this.setState('hover', true);
         break;
       case 'mouseleave':
-        this.setStatus('hover', false);
+        this.setState('hover', false);
         break;
       case 'mousedown':
-        this.setStatus('active', true);
+        this.setState('active', true);
         break;
       case 'mouseup':
-        this.setStatus('active', false);
+        this.setState('active', false);
         break;
       case 'focus':
-        this.setStatus('focus', true);
+        this.setState('focus', true);
         break;
       case 'blur':
-        this.setStatus('focus', false);
+        this.setState('focus', false);
         break;
       case 'animationstart':
-        this.setStatus('animation', true);
+        this.setState('animation', true);
         break;
       case 'animationend':
-        this.setStatus('animation', false);
+        this.setState('animation', false);
         break;
       case 'transitionstart':
-        this.setStatus('transition', true);
+        this.setState('transition', true);
         break;
       case 'transitionend':
-        this.setStatus('transition', false);
+        this.setState('transition', false);
         break;
     }
     this._attr.onEvent?.apply(null, params);
@@ -429,6 +428,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     };
   }
 
+  public getUserAttr(): T {
+    return this._attr;
+  }
+
   public setAttr<U extends keyof T | T>(
     attr: U,
     value?: U extends keyof T ? T[U] : undefined,
@@ -482,20 +485,21 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.setAttr(attribute, undefined);
   }
 
-  public setStatus(status: Status, value: boolean) {
+  public setState(state: Status, value: boolean) {
     if (!this._statusConfig) {
       this._statusConfig = {};
     }
-    const prevValue = this._statusConfig[status] || false;
-    this._statusConfig[status] = value;
-    if (this._statusStyle?.[status] && prevValue !== value) {
-      this.dirtyStatusAttr(this._statusStyle[status] as T);
+    const { stateStyle } = this._attr;
+    const prevValue = this._statusConfig[state] || false;
+    this._statusConfig[state] = value;
+    if (stateStyle?.[state] && prevValue !== value) {
+      this.dirtyStatusAttr(stateStyle[state] as T);
     }
   }
 
   private updateCascadeAttr() {
     this.dirty();
-    const statusStyle = this._statusStyle;
+    const statusStyle = this._attr.stateStyle;
     const statusConfig = this._statusConfig;
     const keys = Object.keys(statusStyle) as Status[];
     const cascadingAttr: T = { ...this._attr };
@@ -517,16 +521,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
       if (oldValue !== newValue) {
         this.onAttrChange(key, oldAttr[key], this.attr[key])
       }
-    }
-  }
-
-  public setStatusAttr(status: Status, attr: T) {
-    if (!this._statusStyle) {
-      this._statusStyle = {};
-    }
-    this._statusStyle[status] = attr;
-    if (this._statusConfig?.[status]) {
-      this.dirtyStatusAttr(this._statusStyle[status] as T);
     }
   }
 
@@ -961,7 +955,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._refElements?.clear();
     this._statusConfig = undefined;
     this.attr = this._attr;
-    this._statusStyle = undefined;
     const clip = this.getClipElement();
     if (clip && !clip.parentNode) {
       clip.destroy();
