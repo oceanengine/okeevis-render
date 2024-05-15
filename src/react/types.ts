@@ -90,3 +90,9 @@ export {
   NamedExoticComponent,
   MemoComponent,
 };
+
+declare global {
+  namespace JSX {
+      interface IntrinsicAttributes {key?: string | number}
+  }
+}
