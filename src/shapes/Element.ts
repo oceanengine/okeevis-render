@@ -100,7 +100,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
     ease?: EasingName;
     delay?: number;
   };
-  stateStyle?: stateStyle;
+  stateStyles?: stateStyle;
 }
 
 type Status =
@@ -489,22 +489,22 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (!this._statusConfig) {
       this._statusConfig = {};
     }
-    const { stateStyle } = this._attr;
+    const { stateStyles } = this._attr;
     const prevValue = this._statusConfig[state] || false;
     this._statusConfig[state] = value;
-    if (stateStyle?.[state] && prevValue !== value) {
-      this.dirtyStatusAttr(stateStyle[state] as T);
+    if (stateStyles?.[state] && prevValue !== value) {
+      this.dirtyStatusAttr(stateStyles[state] as T);
     }
   }
 
   private updateCascadeAttr() {
     this.dirty();
-    const statusStyle = this._attr.stateStyle;
+    const stateStyles = this._attr.stateStyles;
     const statusConfig = this._statusConfig;
-    const keys = Object.keys(statusStyle) as Status[];
+    const keys = Object.keys(stateStyles) as Status[];
     const cascadingAttr: T = { ...this._attr };
     for (const key of keys) {
-      const keyAttr = statusStyle[key];
+      const keyAttr = stateStyles[key];
       if (keyAttr && statusConfig[key]) {
         Object.assign(cascadingAttr, keyAttr);
       }
