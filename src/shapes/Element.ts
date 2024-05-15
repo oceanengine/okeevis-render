@@ -188,6 +188,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public id: number;
 
+  public attr: T & CommonAttr = {} as T;
+
   public type: string;
 
   public svgTagName: string = 'path';
@@ -264,12 +266,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _attr: T;
 
-  private _cascadingAttr: T;
-
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
-    this._attr = this.getDefaultAttr();
+    this.attr = this._attr = this.getDefaultAttr();
     attr && this.setAttr(attr);
     this.created();
   }
@@ -469,7 +469,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (!this._inTransaction) {
-      if (this._cascadingAttr) {
+      if (this.attr !== this._attr) {
         this.updateCascadeAttr();
       }
       this.update();
@@ -480,10 +480,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public removeAttr(attribute: keyof T) {
     this.setAttr(attribute, undefined);
-  }
-
-  public get attr(): T {   
-    return this._cascadingAttr || this._attr;
   }
 
   public setStatus(status: Status, value: boolean) {
@@ -509,7 +505,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         Object.assign(cascadingAttr, keyAttr);
       }
     }
-    this._cascadingAttr = cascadingAttr;
+    this.attr = cascadingAttr;
   }
 
   private dirtyStatusAttr(attr: T) {
@@ -964,7 +960,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._bboxDirty = true;
     this._refElements?.clear();
     this._statusConfig = undefined;
-    this._cascadingAttr = undefined;
+    this.attr = this._attr;
     this._statusStyle = undefined;
     const clip = this.getClipElement();
     if (clip && !clip.parentNode) {
