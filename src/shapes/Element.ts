@@ -472,10 +472,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (!this._inTransaction) {
-      if (this.attr !== this._attr) {
-        this.updateCascadeAttr();
-      }
-      this.update();
+      this.afterAttrChanged();
     }
 
     return this;
@@ -538,7 +535,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public endAttrTransaction() {
     this._inTransaction = false;
-    this.update();
+    this.afterAttrChanged();
   }
 
   public get isGroup(): boolean {
@@ -821,8 +818,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  protected update() {
-   
+  protected afterAttrChanged() {
+    if (this.attr !== this._attr) {
+      this.updateCascadeAttr();
+    }
   }
 
   public mounted() {

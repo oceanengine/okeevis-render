@@ -61,7 +61,8 @@ export default class ScrollView extends Group {
     this._debounceStopScroll = lodash.debounce(this._debounceStopScroll, 80).bind(this);
   }
 
-  protected update(): void {
+  protected afterAttrChanged(): void {
+    super.afterAttrChanged();
     const { x, y, width, height } = this.attr;
     (this._clipGroup?.attr.clip as Rect)?.setAttr({ x, y, width, height });
     this._bgRect?.setAttr({ x, y, width, height });

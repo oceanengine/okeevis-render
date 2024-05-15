@@ -535,8 +535,8 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
 
   private _diffUpdateElement(prevElement: Element, nextElement: Element, transition: boolean) {
    
-    const prevAttr = prevElement.attr;
-    const nextAttr = nextElement.attr;
+    const prevAttr = prevElement.getUserAttr();
+    const nextAttr = nextElement.getUserAttr();
     if (Element.isHookElement(prevElement) && Element.isHookElement(nextElement)) {
       if (prevElement.$$type === nextElement.$$type) {
         (prevElement as HookElement).updateProps((nextElement as HookElement).props);
