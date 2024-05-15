@@ -16,11 +16,6 @@ const rect = new Rect({
   draggable: true,
   rotation: 0.02,
 });
-rect.setStatusAttr('hover', {
-  fill: 'red',
-  rotation: Math.PI / 18,
-});
-
 // rect.stopAllAnimation().setAttr({scaleX: 0, scaleY: 0}).animateTo({scale: [2, 2]})
 
 render.add(rect);
