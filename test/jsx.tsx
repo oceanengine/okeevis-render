@@ -79,6 +79,11 @@ const MyGroup = (props: { a: number; b: number }) => {
             fill={time === 10 ? 'red' : 'blue'}
             fontSize={24 + time * 12}
             transitionProperty='all'
+            stateStyles={{
+              hover:{
+                fill: 'yellow'
+              }
+            }}
             onClick={() => {
               setTime(20);
             }}

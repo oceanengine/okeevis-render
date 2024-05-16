@@ -15,7 +15,7 @@ class CustomElement extends Group {
   }
 
   public forceUpdate() {
-    this.update();
+    this.afterAttrChanged();
   }
 
   protected getObservedAttr(): string[] {
@@ -24,7 +24,7 @@ class CustomElement extends Group {
 
   protected created() {
     if (!this._updated) {
-      this.update();
+      this.afterAttrChanged();
     }
   }
 
@@ -32,7 +32,8 @@ class CustomElement extends Group {
     return !this._updated;
   }
 
-  protected update() {
+  protected afterAttrChanged() {
+    super.afterAttrChanged();
     if (this.shouldUpdate()) {
       const renderObjs = this.render();
       this.clear();
