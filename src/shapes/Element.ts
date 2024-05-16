@@ -330,9 +330,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       case 'mousedown':
         this.setState('active', true);
         break;
-      case 'mouseup':
-        this.setState('active', false);
-        break;
+      // case 'mouseup':// trigger in event handle
+      //   this.setState('active', false);
+      //   break;
       case 'focus':
         this.setState('focus', true);
         break;

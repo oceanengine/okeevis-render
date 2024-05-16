@@ -45,6 +45,8 @@ export default class EventHandle {
 
   private _draggingTarget: Element | null = null;
 
+  private _mouseDownTarget: Element | null = null;
+
   private _prevMouseTarget: Element | null = null;
 
   private _prevMousePosition: { x: number; y: number } | null = null;
@@ -232,6 +234,9 @@ export default class EventHandle {
 
     if (event.type === 'mousedown' || event.type === 'mousemove') {
       if (event.type === 'mousedown' && nativeEvent.button !== 2) {
+        if (event.type === 'mousedown') {
+          this._mouseDownTarget = target;
+        }
         const parentNodes = target.getAncestorNodes(true);
         for (let i = 0; i < parentNodes.length; i++) {
           if (parentNodes[i].attr.draggable) {
@@ -571,6 +576,8 @@ export default class EventHandle {
   };
 
   private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
+    this._mouseDownTarget?.setState('active', false);
+    this._prevMouseTarget = null;
     const { x, y } = this._getMousePosition(nativeEvent);
     const mouseEventParam: SyntheticMouseEventParams = {
       x,
