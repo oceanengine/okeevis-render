@@ -61,11 +61,12 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
     }
     if (this.ownerRender) {
       this.ownerRender.getDom().appendChild(this._container);
-      this.update();
+      this.afterAttrChanged();
     }
   }
 
-  public update() {
+  public afterAttrChanged() {
+    super.afterAttrChanged();
     const container = this._container;
     if (!container) {
       return;
