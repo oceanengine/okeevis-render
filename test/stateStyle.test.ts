@@ -10,9 +10,13 @@ const textEl = new Text({
   text: 'hover me',
   fill: '#333',
   fontSize: 80,
+  tabIndex: 0,
   stateStyles: {
     hover: {
       fill: 'blue',
+    },
+    focus:{
+      fill: 'yellow'
     }
   }
 })
@@ -22,9 +26,11 @@ const textEl2 = new Text({
   y: 220,
   text: 'click me',
   fill: '#333',
+  tabIndex: -1,
   fontSize: 80,
+  onClick: e => console.log(e),
   stateStyles: {
-    active: {
+    focus: {
       fill: 'blue',
     }
   }
@@ -33,15 +39,28 @@ const textEl2 = new Text({
 const textEl3 = new Text({
   x: 120,
   y: 320,
-  text: 'click me',
+  text: 'click me, focus able',
   fill: '#333',
   fontSize: 80,
+  tabIndex: 0,
+  onFocus: e => console.log(e),
+  onBlur: e => console.log(e),
+  onKeyDown: e => console.log(e),
   stateStyles: {
-    selected: {
+    focus: {
       fill: 'blue',
     }
-  },
-  onClick: e => e.target.setState('selected', true),
+  }
 })
+;
+(window as any).node = textEl3;
+
+setTimeout(() => {
+    textEl3.focus();
+}, 1000);
 
 render.addAll([textEl, textEl2, textEl3])
+// render.on('focus', e => console.log(e));
+// render.on('focusin', e => console.log(e));
+// render.on('blur',e => console.log(e))
+// render.on('keydown', e => console.log(e));

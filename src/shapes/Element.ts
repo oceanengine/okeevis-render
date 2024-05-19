@@ -93,6 +93,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionEase?: EasingName;
   transitionDuration?: number;
   transitionDelay?: number;
+  tabIndex?: number;
   animation?: {
     from: T;
     to: T;
@@ -527,6 +528,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public hide() {
     this.setAttr('display', false as any);
+  }
+  
+  public focus(options?:{ preventScroll?: boolean  }) {
+    this.ownerRender?.getEventHandle().focusElement(this, options);
+  }
+
+  public blur() {
+    this.ownerRender?.getEventHandle().blurElement(this);
   }
 
   public startAttrTransaction() {

@@ -13,10 +13,6 @@ export default class SyntheticMouseEvent<T extends MouseEvent = MouseEvent> exte
 
   public y: number;
 
-  public target: Element;
-
-  public currentTarget: Element;
-
   public detail: number;
 
   public constructor(type: string, params: SyntheticMouseEventParams) {
