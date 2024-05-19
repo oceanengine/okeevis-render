@@ -11,10 +11,14 @@ import {
   SyntheticTouchEvent,
   SyntheticDragEvent,
   SyntheticWheelEvent,
+  SyntheticFocusEvent,
+  SyntheticKeyboardEvent,
 } from './index';
 import { SyntheticDragEventParams } from './SyntheticDragEvent';
 import { SyntheticMouseEventParams } from './SyntheticMouseEvent';
 import { SyntheticWheelEventParams } from './SyntheticWheelEvent';
+import { SyntheticFocusEventParams } from './SyntheticFocusEvent';
+import { SyntheticKeyboardEventParams } from './SyntheticKeyboardEvent';
 import { SyntheticTouchEventParams, SyntheticTouch } from './SyntheticTouchEvent';
 import { getTouchOffsetPosition } from '../utils/touch-offset';
 import { inBBox } from '../utils/bbox';
@@ -46,6 +50,8 @@ export default class EventHandle {
   private _draggingTarget: Element | null = null;
 
   private _mouseDownTarget: Element | null = null;
+
+  private _focusTarget: Element | null = null;
 
   private _prevMouseTarget: Element | null = null;
 
@@ -192,6 +198,30 @@ export default class EventHandle {
     return target || this._getHandleGroup();
   }
 
+  public focusElement(el: Element<any>, options: { preventScroll?: boolean  }) {
+    if (!lodash.isNumber(el.attr.tabIndex)) {
+      return;
+    }
+    if (this._focusTarget === el) {
+      return;
+    }
+    if (!this._focusTarget) {
+      this.render.getDom().focus();
+    }
+
+    this._syntheticFocusEvent(this._focusTarget, el);
+  }
+
+  public blurElement(el: Element<any>) {
+    if (!lodash.isNumber(el.attr.tabIndex)) {
+      return;
+    }
+    if (this._focusTarget !== el) {
+      return;
+    }
+    this._syntheticFocusEvent(this._focusTarget, null);
+  }
+
   public dispose() {
     if (this.render.isBrowser()) {
       this._detachEvents();
@@ -234,18 +264,21 @@ export default class EventHandle {
 
     if (event.type === 'mousedown' || event.type === 'mousemove') {
       if (event.type === 'mousedown' && nativeEvent.button !== 2) {
-        if (event.type === 'mousedown') {
-          this._mouseDownTarget = target;
-        }
+        this._mouseDownTarget = target;
         const parentNodes = target.getAncestorNodes(true);
+        let focusNode: Element;
         for (let i = 0; i < parentNodes.length; i++) {
           if (parentNodes[i].attr.draggable) {
             this._draggingTarget = parentNodes[i];
             this._dragStartMouse = { x, y };
             nativeEvent.preventDefault && nativeEvent.preventDefault();
-            break;
+          }
+          if (lodash.isNumber(parentNodes[i].attr.tabIndex)) {
+            focusNode = parentNodes[i];
           }
         }
+
+        this._syntheticFocusEvent(this._focusTarget, focusNode);
       }
       if (this._draggingTarget) {
         const eventMap = {
@@ -487,9 +520,9 @@ export default class EventHandle {
         ...this._getDragParam(eventParam),
       });
       this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
-      this._prevMousePosition = {x, y};
+      this._prevMousePosition = { x, y };
     }
-    this._prevMouseTarget = this._draggingTarget ? this._draggingTarget : null
+    this._prevMouseTarget = this._draggingTarget ? this._draggingTarget : null;
     this._dispatchSyntheticEvent(mouseoutEvent, target);
     const parentNodes = target.getAncestorNodes(true);
     parentNodes.forEach(node => {
@@ -529,14 +562,14 @@ export default class EventHandle {
       });
       this._dispatchSyntheticEvent(mouseEnterEvent, node);
     });
-    
+
     if (this._draggingTarget) {
       const onDragEvent = new SyntheticDragEvent('drag', {
         ...eventParam,
         ...this._getDragParam(eventParam),
       });
       this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
-      this._prevMousePosition = {x, y};
+      this._prevMousePosition = { x, y };
     }
 
     this._prevMousePosition = { x, y };
@@ -575,6 +608,106 @@ export default class EventHandle {
     }
   };
 
+  private _handleNativeKeyboardEvent = (nativeEvent: KeyboardEvent) => {
+    const {
+      altKey,
+      char,
+      charCode,
+      code,
+      ctrlKey,
+      isComposing,
+      key,
+      keyCode,
+      location,
+      metaKey,
+      repeat,
+      shiftKey,
+    } = nativeEvent;
+    const param: SyntheticKeyboardEventParams = {
+      bubbles: true,
+      original: nativeEvent,
+      altKey,
+      char,
+      charCode,
+      code,
+      ctrlKey,
+      isComposing,
+      key,
+      keyCode,
+      location,
+      metaKey,
+      repeat,
+      shiftKey,
+    };
+    const keyboardEvent = new SyntheticKeyboardEvent(nativeEvent.type, param);
+    const target = this._focusTarget ?? this._getHandleGroup();
+    this._dispatchSyntheticEvent(keyboardEvent, target);
+    // tab switch focus
+    if (nativeEvent.type === 'keydown' && !this._eventOnly && nativeEvent.keyCode === 9) {
+      const tabFocusableNodes: Element[] = [];
+      this._getHandleGroup().tranverse(node => {
+        if (lodash.isNumber(node.attr.tabIndex) && node.attr.display) {
+          if (node.attr.tabIndex >=0 || node === this._focusTarget) {
+            tabFocusableNodes.push(node);
+          }
+        }
+      });
+ 
+      // [1, 2, 3, 0, 0, 0]; -1 keep position
+      tabFocusableNodes.sort((a, b) => {
+        // keep currentzindex
+        const tabIndexA = a.attr.tabIndex;
+        const tabIndexB = b.attr.tabIndex
+        if (tabIndexA < 0 || tabIndexB < 0) {
+          return 0;
+        }
+        if (tabIndexA === 0 || tabIndexB === 0) {
+          // nagative in from
+          return tabIndexB - tabIndexA
+        }
+
+        if (tabIndexA > 0 && tabIndexB > 0) {
+          return tabIndexA - tabIndexB;
+        }
+
+      });
+
+      if (this._focusTarget) {
+        const curIndex = tabFocusableNodes.indexOf(this._focusTarget);
+        const prev = tabFocusableNodes[curIndex - 1];
+        const next = tabFocusableNodes[curIndex + 1];
+        if (nativeEvent.shiftKey) {
+          prev && nativeEvent.preventDefault();
+          this._syntheticFocusEvent(this._focusTarget, prev);
+        } else if (next) {
+          nativeEvent.preventDefault();
+          this._syntheticFocusEvent(this._focusTarget, next);
+        }
+      } else {
+        if (tabFocusableNodes.length) {
+          nativeEvent.preventDefault();
+          if (!nativeEvent.shiftKey) {
+            this._syntheticFocusEvent(null, tabFocusableNodes[0]);
+          } else {
+            this._syntheticFocusEvent(null, tabFocusableNodes[tabFocusableNodes.length -1]);
+          }
+        }
+      }
+    }
+    // simulate enter click event
+    // if (nativeEvent.type === 'keydown' && !this._eventOnly && nativeEvent.keyCode === 13) {
+    //   // html trigger click only on <a>
+    //   if (this._focusTarget) {
+    //     const clickEvent = new SyntheticMouseEvent('click', {
+    //       x: 0,
+    //       y: 0,
+    //       bubbles: true,
+    //     });
+    //     this._dispatchSyntheticEvent(clickEvent, this._focusTarget);
+    //   }
+    // }
+  };
+
   private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
     this._mouseDownTarget?.setState('active', false);
     this._prevMouseTarget = null;
@@ -601,10 +734,10 @@ export default class EventHandle {
     const target = nativeEvent.target;
     if (!this._draggingTarget || this.render.getDom().contains(target as HTMLElement)) {
       return;
-    };
+    }
     (nativeEvent as any).__OUTSIDE_MOVE__ = true;
     this._syntheticMouseEvent(nativeEvent);
-  }
+  };
 
   private _isEventFromDomNode(event: MouseEvent | Touch) {
     const target = event.target as HTMLElement;
@@ -662,6 +795,11 @@ export default class EventHandle {
     dom.removeEventListener('mouseenter', this._handleMouseEnter);
     dom.removeEventListener('drop', this._handleNativeDnDEvent);
     dom.removeEventListener('dragover', this._handleNativeDnDEvent);
+    dom.removeEventListener('focus', this._handleDomFocus);
+    dom.removeEventListener('blur', this._handleDomBlur);
+    dom.removeEventListener('keydown', this._handleNativeKeyboardEvent);
+    dom.removeEventListener('keypress', this._handleNativeKeyboardEvent);
+    dom.removeEventListener('keyup', this._handleNativeKeyboardEvent);
     document.removeEventListener('mouseup', this._handleDocumentMouseUp);
     document.removeEventListener('mousemove', this._handleDocumentMouseMove);
   }
@@ -671,6 +809,8 @@ export default class EventHandle {
       return;
     }
     const dom = this.render.getDom();
+    dom.tabIndex = 0;
+    dom.style.outline = 'none';
     // https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/addEventListener
     let passiveSupported = false;
     try {
@@ -712,17 +852,22 @@ export default class EventHandle {
     dom.addEventListener('mouseenter', this._handleMouseEnter);
     dom.addEventListener('drop', this._handleNativeDnDEvent);
     dom.addEventListener('dragover', this._handleNativeDnDEvent);
+    dom.addEventListener('focus', this._handleDomFocus);
+    dom.addEventListener('blur', this._handleDomBlur);
+    dom.addEventListener('keydown', this._handleNativeKeyboardEvent);
+    dom.addEventListener('keypress', this._handleNativeKeyboardEvent);
+    dom.addEventListener('keyup', this._handleNativeKeyboardEvent);
     document.addEventListener('mouseup', this._handleDocumentMouseUp);
     document.addEventListener('mousemove', this._handleDocumentMouseMove);
   }
 
-  private _dispatchSyntheticEvent(event: SyntheticEvent, target: Element, count = 0) {
+  private _dispatchSyntheticEvent(event: SyntheticEvent<any>, target: Element, count = 0) {
     if (!target) {
       return;
     }
     const isRoot = this.render.getRoot() === target;
 
-    if (event instanceof SyntheticMouseEvent) {
+    if (event.type.indexOf('touch') !== 0) {
       if (count === 0) {
         event.target = target;
       }
@@ -738,7 +883,7 @@ export default class EventHandle {
       const dragEvent = event as SyntheticDragEvent;
       let dx = dragEvent.dx;
       let dy = dragEvent.dy;
-      
+
       if (target.attr.getDragOffset) {
         const offset = target.attr.getDragOffset(dragEvent);
         dx = offset.x;
@@ -748,13 +893,11 @@ export default class EventHandle {
       // 当使用脏矩形时，如果修改的步调和tick的不一致，会导致脏矩形错误,需要同步刷新
       // 事件的触发频率和tick不同步，如果不同步重绘，会导致残影
       if (!this._eventOnly && this.render.enableDirtyRect) {
-      
         this._frameCallback.push(() => {
           target.dragMoveBy(dx, dy);
         });
-        
-        this.render.nextTick();
 
+        this.render.nextTick();
       } else {
         target.dragMoveBy(dx, dy);
       }
@@ -778,7 +921,7 @@ export default class EventHandle {
     const offsetY = y - startY;
     const dx = x - prevX;
     const dy = y - prevY;
-  
+
     return {
       startX,
       startY,
@@ -808,6 +951,62 @@ export default class EventHandle {
       } as any,
       false,
     );
+  };
+
+  private _syntheticFocusEvent = (prevFocus: Element | null, curFocus: Element | null) => {
+    if (prevFocus && curFocus && prevFocus.contains(curFocus)) {
+      return;
+    }
+    this._focusTarget = curFocus;
+    const focusEventParam: SyntheticFocusEventParams = {
+      bubbles: false,
+    };
+    const blurEventParam: SyntheticFocusEventParams = {
+      bubbles: false,
+    };
+    if (prevFocus) {
+      const blurEvent = new SyntheticFocusEvent('blur', blurEventParam);
+      const blurOutEvent = new SyntheticFocusEvent('focusout', {
+        ...blurEventParam,
+        relatedTarget: curFocus,
+        bubbles: true,
+      });
+      this._dispatchSyntheticEvent(blurEvent, prevFocus);
+      this._dispatchSyntheticEvent(blurOutEvent, prevFocus);
+    }
+    if (curFocus) {
+      const focusEvent = new SyntheticFocusEvent('focus', focusEventParam);
+      const focusInEvent = new SyntheticFocusEvent('focusin', {
+        ...focusEventParam,
+        bubbles: true,
+      });
+      this._dispatchSyntheticEvent(focusEvent, curFocus);
+      this._dispatchSyntheticEvent(focusInEvent, curFocus);
+    }
+  };
+
+  private _handleDomBlur = () => {
+    this._syntheticFocusEvent(this._focusTarget, null);
+    if (!this._eventOnly) {
+      this._dispatchSyntheticEvent(
+        new SyntheticFocusEvent('blur', {
+          bubbles: false,
+        }),
+        this.render.getRoot(),
+      );
+    }
+  };
+
+  private _handleDomFocus = (event: FocusEvent) => {
+    if (!this._eventOnly) {
+      this._dispatchSyntheticEvent(
+        new SyntheticFocusEvent('focus', {
+          bubbles: false,
+          original: event,
+        }),
+        this.render.getRoot(),
+      );
+    }
   };
 
   private _synthetickOverOutEvent(
