@@ -11,7 +11,7 @@ const textEl = new Text({
   fill: '#333',
   fontSize: 200,
   tabIndex: 0,
-  textDecoration: 'underline',
+  textDecoration: 'underline line-through',
   stateStyles: {
     hover: {
       fill: 'blue',
@@ -25,10 +25,11 @@ const textEl = new Text({
 const textEl2 = new Text({
   x: 120,
   y: 220,
-  text: 'click me',
+  text: '国家',
   fill: '#333',
   tabIndex: -1,
-  textDecoration: 'line-through',
+  draggable: true,
+  textDecoration: 'overline',
   fontSize: 80,
   onClick: e => console.log(e),
   stateStyles: {

@@ -189,7 +189,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   }
 
   if (textDecoration !== undefined) {
-    ret['text-decoration'] = textDecoration;
+    ret['text-decoration'] =  textDecoration;
   }
 
   if (lineDash) {

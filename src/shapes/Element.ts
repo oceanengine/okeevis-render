@@ -26,6 +26,7 @@ import Path2D from '../geometry/Path2D';
 import type Path from '../shapes/Path';
 import { HookElement } from '../react/hooks';
 import { SyntheticAnimationEvent } from '../event/SyntheticAnimationEvent';
+import { TextAttr } from './Text';
 
 export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
@@ -517,7 +518,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       const oldValue = oldAttr[key];
       const newValue = this.attr[key];
       if (oldValue !== newValue) {
-        this.onAttrChange(key, oldAttr[key], this.attr[key])
+        this.onAttrChange(key, oldAttr[key], this.attr[key]);
       }
     }
   }
@@ -529,8 +530,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public hide() {
     this.setAttr('display', false as any);
   }
-  
-  public focus(options?:{ preventScroll?: boolean  }) {
+
+  public focus(options?: { preventScroll?: boolean }) {
     this.ownerRender?.getEventHandle().focusElement(this, options);
   }
 
@@ -742,6 +743,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
   protected computeBoundingClientRect(out: BBox): BBox {
     // todo gc optimize
     let { x, y, width, height } = this.getBBox();
+    if (
+      this.type === 'text' &&
+      (this.attr as TextAttr).textDecoration &&
+      (this.attr as TextAttr).textDecoration.indexOf('overline') !== -1
+    ) {
+      const fontSize = (this as any).getExtendAttr('fontSize');
+      y -= fontSize * 0.1;
+      height += fontSize * 0.1;
+    }
     const hasStroke = this.hasStroke();
     const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
     const offsetLineWidth = (Math.sqrt(2) / 2) * lineWidth;

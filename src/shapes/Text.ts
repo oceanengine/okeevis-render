@@ -4,6 +4,7 @@ import * as lodash from '../utils/lodash';
 import { BBox, inBBox } from '../utils/bbox';
 import { measureText } from '../utils/measureText';
 
+type TextDecoration = 'underline' | 'line-through' | 'overline';
 export interface TextAttr extends CommonAttr {
   x?: number;
   y?: number;
@@ -14,7 +15,7 @@ export interface TextAttr extends CommonAttr {
   fontFamily?: string;
   fontVariant?: string;
   fontStyle?: 'normal' | 'italic' | 'oblique';
-  textDecoration?: 'underline' | 'line-through';
+  textDecoration?: TextDecoration | string;
   textAlign?: CanvasTextAlign;
   textBaseline?: CanvasTextBaseline;
   lineHeight?: number;
@@ -36,6 +37,7 @@ export const shapeKeys: Array<keyof TextAttr> = [
   'textBaseline',
   'fontWeight',
   'children',
+  'textDecoration',
 ];
 export interface TextSpan {
   x: number;
@@ -142,15 +144,8 @@ export default class Text extends Shape<TextAttr> {
         }
       }
       if (textDecoration) {
-        const { x, y, width, height } = this.getBBox();
-        const size = 0.1;
-        if (textDecoration === 'underline') {
-          ctx.rect(x, y + height * (1 - size), width, height * size);
-        } else if (textDecoration === 'line-through') {
-          ctx.rect(x, y + height / 2 - height * size / 2, width, height * size);
-        }
-        needFill && ctx.fill();
-        needStroke && ctx.stroke();
+        const decorations = textDecoration.split(/\s+/g) as TextDecoration[];
+        decorations.forEach(d => this.paintTextDecoration(d, ctx, needFill, needStroke));
       }
       return;
     }
@@ -187,16 +182,36 @@ export default class Text extends Shape<TextAttr> {
       textAlign: this.getExtendAttr('textAlign'),
       textBaseline: this.getExtendAttr('textBaseline'),
       lineHeight: this.attr.lineHeight || fontSize,
+      textDecoration: this.getExtendAttr('textDecoration'),
     };
+  }
+
+  protected paintTextDecoration(
+    decoration: TextDecoration,
+    ctx: CanvasRenderingContext2D,
+    needFill: boolean,
+    needStroke: boolean,
+  ) {
+    const { x, y, width, height } = this.getBBox();
+    const size = 0.1 * height;
+    if (decoration === 'underline') {
+      ctx.rect(x, y + height - size, width, size);
+    } else if (decoration === 'line-through') {
+      ctx.rect(x, y + height / 2 - size / 2, width, size);
+    } else if (decoration === 'overline') {
+      ctx.rect(x, y - size, width, size);
+    }
+    needFill && ctx.fill();
+    needStroke && ctx.stroke();
   }
 
   protected computeBBox(): BBox {
     if (this._isEmpty) {
       return { x: 0, y: 0, width: 0, height: 0 };
     }
-    const { x, y } = this.attr;
+    const { x, y, } = this.attr;
     const textStyle = this.getTextStyle();
-    const { fontSize, textAlign, textBaseline, lineHeight } = textStyle;
+    const { fontSize, textAlign, textBaseline, lineHeight, textDecoration } = textStyle;
     let textWidth: number;
     let textHeight: number;
 
