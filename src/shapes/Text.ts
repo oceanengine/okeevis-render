@@ -14,6 +14,7 @@ export interface TextAttr extends CommonAttr {
   fontFamily?: string;
   fontVariant?: string;
   fontStyle?: 'normal' | 'italic' | 'oblique';
+  textDecoration?: 'underline' | 'line-through';
   textAlign?: CanvasTextAlign;
   textBaseline?: CanvasTextBaseline;
   lineHeight?: number;
@@ -34,7 +35,7 @@ export const shapeKeys: Array<keyof TextAttr> = [
   'textAlign',
   'textBaseline',
   'fontWeight',
-  'children'
+  'children',
 ];
 export interface TextSpan {
   x: number;
@@ -113,7 +114,7 @@ export default class Text extends Shape<TextAttr> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { text: _text } = this.attr;
+    const { text: _text, textDecoration } = this.attr;
     if (this._isEmpty) {
       return;
     }
@@ -139,6 +140,17 @@ export default class Text extends Shape<TextAttr> {
         } else {
           ctx.fillText(text, this.attr.x, this.attr.y);
         }
+      }
+      if (textDecoration) {
+        const { x, y, width, height } = this.getBBox();
+        const size = 0.1;
+        if (textDecoration === 'underline') {
+          ctx.rect(x, y + height * (1 - size), width, height * size);
+        } else if (textDecoration === 'line-through') {
+          ctx.rect(x, y + height / 2 - height * size / 2, width, height * size);
+        }
+        needFill && ctx.fill();
+        needStroke && ctx.stroke();
       }
       return;
     }

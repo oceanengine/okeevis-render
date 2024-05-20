@@ -38,6 +38,7 @@ export interface SVGElementStyle {
   'font-weight': string;
   'font-family': string;
   'font-style': string;
+  'text-decoration': string;
   display: string;
   anchor: string;
   transform: string;
@@ -108,6 +109,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     fontFamily,
     fontWeight,
     fontStyle,
+    textDecoration,
     shadowColor,
     shadowBlur,
     markerStart,
@@ -184,6 +186,10 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
 
   if (fontStyle !== undefined) {
     ret['font-style'] = fontStyle;
+  }
+
+  if (textDecoration !== undefined) {
+    ret['text-decoration'] = textDecoration;
   }
 
   if (lineDash) {

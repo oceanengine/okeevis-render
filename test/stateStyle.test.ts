@@ -7,10 +7,11 @@ const render = new Render(dom, {renderer: 'canvas'})
 const textEl = new Text({
   x: 120,
   y: 120,
-  text: 'hover me',
+  text: 'hover me 李国',
   fill: '#333',
-  fontSize: 80,
+  fontSize: 200,
   tabIndex: 0,
+  textDecoration: 'underline',
   stateStyles: {
     hover: {
       fill: 'blue',
@@ -27,6 +28,7 @@ const textEl2 = new Text({
   text: 'click me',
   fill: '#333',
   tabIndex: -1,
+  textDecoration: 'line-through',
   fontSize: 80,
   onClick: e => console.log(e),
   stateStyles: {
