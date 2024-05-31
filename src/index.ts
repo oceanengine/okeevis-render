@@ -17,6 +17,7 @@ export { default as Text, TextAttr } from './shapes/Text';
 export { default as TextPath, TextPathAttr } from './shapes/TextPath';
 export { default as Marker, MarkerAttr } from './shapes/Marker';
 export { default as Use, UseAttr } from './shapes/Use';
+export { default as ScrollView, ScrollViewAttr } from './shapes/ScrollView';
 export { default as RichText } from './RichText';
 export { default as DOMNode } from './shapes/DOMNode';
 export { default as CompoundPath, CompoundPathAttr } from './shapes/CompoundPath';

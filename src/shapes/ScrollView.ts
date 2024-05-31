@@ -5,7 +5,7 @@ import * as lodash from '../utils/lodash';
 import type DOMNode from './DOMNode';
 import { isMobile } from '../utils/env';
 
-interface ScrollViewAttr extends GroupAttr {
+export interface ScrollViewAttr extends GroupAttr {
   x: number;
   y: number;
   width: number;
@@ -78,6 +78,14 @@ export default class ScrollView extends Group {
       this._updateHorizontalBar();
       this._updateVerticalBar();
     });
+  }
+
+  /**
+   * 
+   * @param children children
+   */
+  protected updateChildren(children: Element | Element[]) {
+    this._scrollContentGroup?.updateAll(Array.isArray(children) ? children : [children]);
   }
 
   public getContentGroup(): Group {
@@ -161,7 +169,7 @@ export default class ScrollView extends Group {
   }
 
   protected created() {
-    const { x, y, width, height } = this.attr;
+    const { x, y, width, height, children } = this.attr;
     const clipRect = new Rect({ x, y, width, height });
     const clipGroup = (this._clipGroup = new Group({
       key: 'clip-group',
@@ -228,6 +236,9 @@ export default class ScrollView extends Group {
     clipGroup.add(contentGroup);
     this._scrollContentGroup = contentGroup;
     this._attachScrollBar();
+    if (children) {
+      this.updateChildren(children);
+    }
   }
 
   private _eventScrollBy(target: ScrollView, dx: number, dy: number) {

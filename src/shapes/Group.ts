@@ -54,9 +54,17 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     if (shapeKeys.indexOf(key) !== -1) {
       this.dirtyTextChildBBox();
     }
-    if (key === 'children') {
-      this.updateAll(Array.isArray(value) ? value : [value]);
+  }
+
+  protected afterAttrChanged() {
+    const { children } = this.attr;
+    if (children) {
+      this.updateChildren(children);
     }
+  }
+
+  protected updateChildren(children: T | T[]) {
+    this.updateAll(Array.isArray(children) ? children : [children]);
   }
 
   public getAnimationKeys(): Array<keyof GroupAttr> {
