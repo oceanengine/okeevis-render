@@ -4,6 +4,7 @@ import Rect, { RectAttr } from './Rect';
 import * as lodash from '../utils/lodash';
 import type DOMNode from './DOMNode';
 import { isMobile } from '../utils/env';
+import { SyntheticEvent } from '../event';
 
 export interface ScrollViewAttr extends GroupAttr {
   x: number;
@@ -14,7 +15,7 @@ export interface ScrollViewAttr extends GroupAttr {
   scrollHeight?: number;
   scrollX?: boolean;
   scrollY?: boolean;
-  onScroll?: Function;
+  onScroll?: (event: SyntheticEvent) => void;
   maxScrollLeft?: number;
   maxScrollTop?: number;
   showScrollBar?: boolean | 'hover' | 'scrolling';
@@ -242,7 +243,7 @@ export default class ScrollView extends Group {
   }
 
   private _eventScrollBy(target: ScrollView, dx: number, dy: number) {
-    const { scrollX, scrollY, onScroll, showScrollBar } = target.attr;
+    const { scrollX, scrollY, showScrollBar } = target.attr;
     if (showScrollBar === 'scrolling') {
       const elements = [
         this._horizontalScrollBar,
@@ -254,7 +255,11 @@ export default class ScrollView extends Group {
       target._debouncedFadeScrollBar();
     }
     target.scrollBy(scrollX ? dx : 0, scrollY ? dy : 0);
-    onScroll && onScroll();
+    this.dispatch('scroll', new SyntheticEvent('scroll', {
+      timeStamp: Date.now(),
+      bubbles: false,
+      original: undefined,
+    }));
   }
 
   private _attachScrollBar() {
@@ -448,14 +453,14 @@ export default class ScrollView extends Group {
         const boxBottom = bbox.y + bbox.height;
         const boxRight = bbox.x + bbox.width;
         if (lodash.isNumber(sticky.top) &&  scrollViewTop - bbox.y > sticky.top) {
-          offsetY = scrollViewTop - bbox.y - sticky.top;
+          offsetY = scrollViewTop - bbox.y + sticky.top;
         }
         if (lodash.isNumber(sticky.bottom) && boxBottom - scrollViewBottom > sticky.bottom) {
           offsetY = scrollViewBottom - sticky.bottom - boxBottom;
         }
 
         if (lodash.isNumber(sticky.left) && scrollViewLeft - bbox.x > sticky.left) {
-          offsetX = scrollViewLeft - bbox.x - sticky.left;
+          offsetX = scrollViewLeft - bbox.x + sticky.left;
         }
 
         if (lodash.isNumber(sticky.right) && boxRight - scrollViewRight > sticky.right) {

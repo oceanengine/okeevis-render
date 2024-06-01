@@ -6,7 +6,7 @@ export interface SyntheticEventParams {
   relatedTarget?: Element;
 }
 
-export default class SyntheticEvent<T extends MouseEvent | TouchEvent | FocusEvent | KeyboardEvent = MouseEvent | TouchEvent> {
+export default class SyntheticEvent<T extends  MouseEvent | TouchEvent | FocusEvent | KeyboardEvent = MouseEvent | TouchEvent> {
   public type: string;
 
   public syntheticType: string;

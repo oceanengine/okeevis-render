@@ -30,7 +30,7 @@ scrollView.addContent(new Rect({
   fill: 'red',
   stroke: 'blue',
   lineWidth: 1,
-  sticky: {top: 0, bottom: 0, left: 0, right: 0}
+  sticky: {top: -10, bottom: -10, left: 10, right: 10},
 }));
 (window as any).test = scrollView;
 
