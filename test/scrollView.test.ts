@@ -1,6 +1,5 @@
 import Render from '../src/render';
-import ScrollView from '../src/shapes/ScrollView';
-import Text from '../src/shapes/DOMNode';
+import {ScrollView, Rect } from '../src'
 
 const dom = document.getElementById('root') as HTMLDivElement;
 const render = new Render(dom, {renderer: 'canvas'});
@@ -23,14 +22,15 @@ const scrollView = new ScrollView({
   scrollTrackColor: '#000',
 });
 
-scrollView.addContent(new Text({
-  x: 100,
-  y: 100,
-  textAlign: 'left',
-  textBaseline: 'top',
-  fontSize: 40,
-  text: '<div style="width: 410px;word-break: break-all">01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789</div>',
-  fill: '#333',
+scrollView.addContent(new Rect({
+  x: 300,
+  y:200,
+  width: 100,
+  height: 100,
+  fill: 'red',
+  stroke: 'blue',
+  lineWidth: 1,
+  sticky: {top: 0, bottom: 0, left: 0, right: 0}
 }));
 (window as any).test = scrollView;
 

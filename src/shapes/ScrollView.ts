@@ -137,7 +137,7 @@ export default class ScrollView extends Group {
     this._scrollLeft = scrollLeft;
     this._scrollContentGroup?.setAttr('translateX', -scrollLeft);
     this._updateHorizontalBar();
-    this._updateDomNodeClip();
+    this._updateDomNodeClipAndSticky();
   }
 
   public get scrollTop(): number {
@@ -151,7 +151,7 @@ export default class ScrollView extends Group {
     this._scrollTop = scrollTop;
     this._scrollContentGroup?.setAttr('translateY', -scrollTop);
     this._updateVerticalBar();
-    this._updateDomNodeClip();
+    this._updateDomNodeClipAndSticky();
   }
 
   public scrollBy(dx: number, dy: number) {
@@ -165,7 +165,7 @@ export default class ScrollView extends Group {
 
   public mounted() {
     super.mounted();
-    this._updateDomNodeClip();
+    this._updateDomNodeClipAndSticky();
   }
 
   protected created() {
@@ -430,10 +430,40 @@ export default class ScrollView extends Group {
     this._isScrolling = false;
   }
 
-  private _updateDomNodeClip() {
-    this.tranverse(item => {
+  private _updateDomNodeClipAndSticky() {
+    let hasChildScrollView = false;
+    this.traverse(item => {
+      if (item.type === 'scrollView') {
+        hasChildScrollView = true;
+      }
+      const {x, y ,textAlign, textBaseline, sticky} = (item as DOMNode).attr;
+      if (sticky && !hasChildScrollView) {
+        let offsetX: number = 0;
+        let offsetY: number = 0;
+        const bbox = item.getBBox();
+        const scrollViewTop = this.attr.y + this.scrollTop;
+        const scrollViewBottom = scrollViewTop + this.clientHeight;
+        const scrollViewLeft = this.attr.x + this.scrollLeft;
+        const scrollViewRight = scrollViewLeft + this.clientWidth;
+        const boxBottom = bbox.y + bbox.height;
+        const boxRight = bbox.x + bbox.width;
+        if (lodash.isNumber(sticky.top) &&  scrollViewTop - bbox.y > sticky.top) {
+          offsetY = scrollViewTop - bbox.y - sticky.top;
+        }
+        if (lodash.isNumber(sticky.bottom) && boxBottom - scrollViewBottom > sticky.bottom) {
+          offsetY = scrollViewBottom - sticky.bottom - boxBottom;
+        }
+
+        if (lodash.isNumber(sticky.left) && scrollViewLeft - bbox.x > sticky.left) {
+          offsetX = scrollViewLeft - bbox.x - sticky.left;
+        }
+
+        if (lodash.isNumber(sticky.right) && boxRight - scrollViewRight > sticky.right) {
+          offsetX = scrollViewRight - sticky.right - boxRight;
+        }
+        item.setStickyOffset(offsetX, offsetY);
+      }
       if (item.type === 'dom') {
-        const {x, y ,textAlign, textBaseline} = (item as DOMNode).attr;
         const {width, height} = (item as DOMNode).getBBox();
         const widthOffset: any = {
           left: 0,

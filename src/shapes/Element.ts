@@ -102,6 +102,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
     ease?: EasingName;
     delay?: number;
   };
+  sticky?: {top?: number; left?: number; right?: number; bottom?: number};
   stateStyles?: stateStyle;
 }
 
@@ -266,6 +267,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _statusConfig: StatusConfig = null;
 
   private _attr: T;
+
+  private _stickOffsetX: number = 0;
+
+  private _stickOffsetY: number = 0;
 
   public constructor(attr?: T) {
     super();
@@ -973,6 +978,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._refElements?.clear();
     this._statusConfig = undefined;
     this.attr = this._attr;
+    this._stickOffsetX = 0;
+    this._stickOffsetY = 0;
     const clip = this.getClipElement();
     if (clip && !clip.parentNode) {
       clip.destroy();
@@ -1015,6 +1022,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this._dragOffset[1] = y;
     this.dirty();
     this.dirtyGlobalTransform();
+  }
+
+  public setStickyOffset(x: number, y: number) {
+    this._stickOffsetX = x;
+    this._stickOffsetY = y;
+    this.dirty();
+    this.dirtyTransform();
   }
 
   public dragMoveBy(dx: number, dy: number) {
@@ -1260,6 +1274,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
       translateY = 0,
       matrix,
     } = this.attr;
+    const offsetX = this._stickOffsetX;
+    const offsetY = this._stickOffsetY;
     let flagDirty = false;
     if (translateX !== 0 || translateY !== 0) {
       flagDirty = true;
@@ -1277,6 +1293,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (matrix) {
       flagDirty = true;
       mat3.multiply(out, out, matrix);
+    }
+    if (offsetX !== 0 || offsetY !== 0) {
+      flagDirty = true;
+      mat3.translate(out, out, [offsetX, offsetY])
     }
     return flagDirty ? out : null;
   }

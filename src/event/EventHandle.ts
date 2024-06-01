@@ -645,7 +645,7 @@ export default class EventHandle {
     // tab switch focus
     if (nativeEvent.type === 'keydown' && !this._eventOnly && nativeEvent.keyCode === 9) {
       const tabFocusableNodes: Element[] = [];
-      this._getHandleGroup().tranverse(node => {
+      this._getHandleGroup().traverse(node => {
         if (lodash.isNumber(node.attr.tabIndex) && node.attr.display) {
           if (node.attr.tabIndex >=0 || node === this._focusTarget) {
             tabFocusableNodes.push(node);

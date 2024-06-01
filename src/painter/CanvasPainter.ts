@@ -724,7 +724,7 @@ export default class CanvasPainter implements Painter {
     this._isFirstFrame = true;
     if (window.devicePixelRatio !== this.dpr) {
       this.resize(this.render.getWidth(), this.render.getHeight(), window.devicePixelRatio);
-      this.render.getRoot().tranverse(node => {
+      this.render.getRoot().traverse(node => {
         const { fill } = node.attr;
         if (isPattern(fill)) {
           fill.reload();
