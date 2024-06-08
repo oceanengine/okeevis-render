@@ -20,6 +20,7 @@ const scrollView = new ScrollView({
   scrollThumbColor: 'red',
   scrollThumbHoverColor: 'blue',
   scrollTrackColor: '#000',
+  onScroll: () => console.log('scrolled')
 });
 
 scrollView.addContent(new Rect({

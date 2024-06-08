@@ -51,9 +51,9 @@ export default class ScrollView extends Group {
 
   private _isMouseEnter: boolean = false;
 
-  private _isOverBar: boolean = false;
-
   private _isScrolling: boolean = false;
+
+  private _inTransction: boolean = false;
 
   // eslint-disable-next-line no-useless-constructor
   public constructor(attr: ScrollViewAttr) {
@@ -135,10 +135,14 @@ export default class ScrollView extends Group {
     const { scrollWidth, maxScrollLeft } = this.attr;
     const width = this.clientWidth;
     const scrollLeft = lodash.clamp(x, 0, maxScrollLeft || scrollWidth - width);
+    if (scrollLeft === this._scrollLeft) {
+      return;
+    }
     this._scrollLeft = scrollLeft;
     this._scrollContentGroup?.setAttr('translateX', -scrollLeft);
     this._updateHorizontalBar();
     this._updateDomNodeClipAndSticky();
+    this._dispatchScrollEvent();
   }
 
   public get scrollTop(): number {
@@ -149,10 +153,14 @@ export default class ScrollView extends Group {
     const { scrollHeight, maxScrollTop } = this.attr;
     const height = this.clientHeight;
     const scrollTop = lodash.clamp(y, 0, maxScrollTop || scrollHeight - height);
+    if (scrollTop === this._scrollTop) {
+      return;
+    }
     this._scrollTop = scrollTop;
     this._scrollContentGroup?.setAttr('translateY', -scrollTop);
     this._updateVerticalBar();
     this._updateDomNodeClipAndSticky();
+    this._dispatchScrollEvent();
   }
 
   public scrollBy(dx: number, dy: number) {
@@ -160,8 +168,14 @@ export default class ScrollView extends Group {
   }
 
   public scrollTo(x: number, y: number) {
+    const {scrollLeft, scrollTop} = this;
+    this._inTransction = true;
     this.scrollLeft = x;
     this.scrollTop = y;
+    this._inTransction = false;
+    if (scrollLeft !== this.scrollLeft || scrollTop !== this.scrollTop) {
+      this._dispatchScrollEvent();
+    }
   }
 
   public mounted() {
@@ -255,6 +269,13 @@ export default class ScrollView extends Group {
       target._debouncedFadeScrollBar();
     }
     target.scrollBy(scrollX ? dx : 0, scrollY ? dy : 0);
+    this._dispatchScrollEvent();
+  }
+
+  private _dispatchScrollEvent() {
+    if (this._inTransction) {
+      return;
+    }
     this.dispatch('scroll', new SyntheticEvent('scroll', {
       timeStamp: Date.now(),
       bubbles: false,
