@@ -31,6 +31,12 @@ export function dot(a: Vec2, b: Vec2): number {
   return a[0] * b[0] + a[1] * b[1];
 }
 
+export function add(out: Vec2, a: Vec2, b: Vec2) {
+  out[0] = a[0] + b[0];
+  out[1] = a[1] + b[1];
+  return out;
+}
+
 export function subtract(out: Vec2, a: Vec2, b: Vec2) {
   out[0] = a[0] - b[0];
   out[1] = a[1] - b[1];
@@ -86,5 +92,19 @@ export function vec2BBox(vectors: [number, number][], out: BBox): BBox {
   out.y = minY;
   out.width = maxX - minX;
   out.height = maxY - minY;
+  return out;
+}
+
+/**
+ * Scales a vec2 by a scalar number
+ *
+ * @param {vec2} out the receiving vector
+ * @param {ReadonlyVec2} a the vector to scale
+ * @param {Number} b amount to scale the vector by
+ * @returns {vec2} out
+ */
+ export function scale(out: Vec2, a: Vec2, b: number): Vec2 {
+  out[0] = a[0] * b;
+  out[1] = a[1] * b;
   return out;
 }

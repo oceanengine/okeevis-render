@@ -9,6 +9,8 @@ import isObject from 'lodash-es/isObject';
 import min from 'lodash-es/min';
 import max from 'lodash-es/max';
 import sum from 'lodash-es/sum';
+import minBy from 'lodash-es/minBy';
+import maxBy from 'lodash-es/maxBy';
 import isArray from 'lodash-es/isArray';
 import findIndex from 'lodash-es/findIndex';
 import find from 'lodash-es/find';
@@ -57,4 +59,6 @@ export {
   flatten,
   cloneDeep,
   set,
+  minBy,
+  maxBy,
 };

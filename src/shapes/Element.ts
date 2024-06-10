@@ -27,6 +27,7 @@ import type Path from '../shapes/Path';
 import { HookElement } from '../react/hooks';
 import { SyntheticAnimationEvent } from '../event/SyntheticAnimationEvent';
 import { TextAttr } from './Text';
+import { parseCssGradient, isCssGradient } from '../color/css-gradient-parser';
 
 export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
@@ -819,6 +820,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
     if (key === 'shadowBlur') {
       this._currentPaintAreaDirty = true;
+    }
+
+    if ((key === 'fill' || key === 'color' || key === 'stroke') && typeof newValue === 'string' && isCssGradient(newValue)) {
+      this.attr[key] = parseCssGradient(newValue) as any;
     }
 
     if (this.shapeKeys.indexOf(key) !== -1) {
