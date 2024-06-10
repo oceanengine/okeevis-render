@@ -109,7 +109,9 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     fontFamily,
     fontWeight,
     fontStyle,
-    textDecoration,
+    underline,
+    overline,
+    linethrough,
     shadowColor,
     shadowBlur,
     markerStart,
@@ -188,8 +190,21 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     ret['font-style'] = fontStyle;
   }
 
-  if (textDecoration !== undefined) {
-    ret['text-decoration'] =  textDecoration;
+  if (underline || linethrough || overline) {
+    const textDecoration: string[] = []
+    if (underline) {
+      textDecoration.push('underline');
+    }
+    if (linethrough) {
+      textDecoration.push('line-through');
+    }
+    if (overline) {
+      textDecoration.push('overline');
+    }
+
+    if (textDecoration.length) {
+      ret['text-decoration'] =  textDecoration.join(' ');
+    }
   }
 
   if (lineDash) {

@@ -5,6 +5,10 @@ import { BBox, inBBox } from '../utils/bbox';
 import { measureText } from '../utils/measureText';
 
 type TextDecoration = 'underline' | 'line-through' | 'overline';
+
+/**
+ * text-docartion暂不支持继承
+ */
 export interface TextAttr extends CommonAttr {
   x?: number;
   y?: number;
@@ -15,11 +19,12 @@ export interface TextAttr extends CommonAttr {
   fontFamily?: string;
   fontVariant?: string;
   fontStyle?: 'normal' | 'italic' | 'oblique';
-  textDecoration?: TextDecoration | string;
   textAlign?: CanvasTextAlign;
   textBaseline?: CanvasTextBaseline;
   lineHeight?: number;
-  // todo
+  underline?: boolean;
+  linethrough?: boolean;
+  overline?: boolean;
   truncate?: {
     outerWidth?: number;
     outerHeight?: number;
@@ -37,7 +42,9 @@ export const shapeKeys: Array<keyof TextAttr> = [
   'textBaseline',
   'fontWeight',
   'children',
-  'textDecoration',
+  'underline',
+  'overline',
+  'linethrough'
 ];
 export interface TextSpan {
   x: number;
@@ -116,7 +123,7 @@ export default class Text extends Shape<TextAttr> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { text: _text, textDecoration } = this.attr;
+    const { text: _text, underline, overline, linethrough } = this.attr;
     if (this._isEmpty) {
       return;
     }
@@ -143,9 +150,14 @@ export default class Text extends Shape<TextAttr> {
           ctx.fillText(text, this.attr.x, this.attr.y);
         }
       }
-      if (textDecoration) {
-        const decorations = textDecoration.split(/\s+/g) as TextDecoration[];
-        decorations.forEach(d => this.paintTextDecoration(d, ctx, needFill, needStroke));
+      if (underline) {
+        this.paintTextDecoration('underline', ctx, needFill, needStroke);
+      }
+      if (linethrough) {
+        this.paintTextDecoration('line-through', ctx, needFill, needStroke);
+      }
+      if (overline) {
+        this.paintTextDecoration('overline', ctx, needFill, needStroke);
       }
       return;
     }
@@ -182,7 +194,6 @@ export default class Text extends Shape<TextAttr> {
       textAlign: this.getExtendAttr('textAlign'),
       textBaseline: this.getExtendAttr('textBaseline'),
       lineHeight: this.attr.lineHeight || fontSize,
-      textDecoration: this.getExtendAttr('textDecoration'),
     };
   }
 
@@ -211,7 +222,7 @@ export default class Text extends Shape<TextAttr> {
     }
     const { x, y, } = this.attr;
     const textStyle = this.getTextStyle();
-    const { fontSize, textAlign, textBaseline, lineHeight, textDecoration } = textStyle;
+    const { fontSize, textAlign, textBaseline, lineHeight } = textStyle;
     let textWidth: number;
     let textHeight: number;
 

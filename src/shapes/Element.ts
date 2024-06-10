@@ -750,8 +750,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let { x, y, width, height } = this.getBBox();
     if (
       this.type === 'text' &&
-      (this.attr as TextAttr).textDecoration &&
-      (this.attr as TextAttr).textDecoration.indexOf('overline') !== -1
+      (this.attr as TextAttr).overline
     ) {
       const fontSize = (this as any).getExtendAttr('fontSize');
       y -= fontSize * 0.1;
