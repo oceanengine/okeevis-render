@@ -28,6 +28,7 @@ import { HookElement } from '../react/hooks';
 import { SyntheticAnimationEvent } from '../event/SyntheticAnimationEvent';
 import { TextAttr } from './Text';
 import { parseCssGradient, isCssGradient } from '../color/css-gradient-parser';
+import type ScrollView from './ScrollView';
 
 export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
@@ -432,6 +433,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return false;
   }
 
+  public closest(match: (node: Element) => boolean): Element | undefined {
+    let node = this as any as Element;
+    while (node) {
+      if (match(node)) {
+        return node;
+      }
+      node = node.parentNode;
+    }
+  }
+
   public getAncestorNodes(containSelf: boolean = true): Element[] {
     let node = containSelf ? this : this.parentNode;
     const out: Element[] = [];
@@ -558,6 +569,25 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public blur() {
     this.ownerRender?.getEventHandle().blurElement(this);
+  }
+
+  public scrollIntoView(scrollOptions: boolean | ScrollIntoViewOptions = true): void {
+    const scrollView = this.closest(node => node.type === 'scrollView') as ScrollView;
+    if (!scrollView) {
+      return;
+    }
+    const itemBBox = this.getBBox();
+    let scrollTop: number = scrollView.scrollTop;
+    let scrollLeft: number = itemBBox.x - scrollView.attr.x;
+    let behavior: ScrollBehavior = 'smooth';
+    if (lodash.isBoolean(scrollOptions)) {
+      if (scrollOptions === true) {
+        scrollTop = itemBBox.y -  scrollView.attr.y;
+      } else {
+        scrollTop = itemBBox.y - scrollView.attr.y - scrollView.clientHeight + itemBBox.height;
+      }
+    }
+    scrollView.scrollTo(scrollLeft, scrollTop);
   }
 
   public startAttrTransaction() {

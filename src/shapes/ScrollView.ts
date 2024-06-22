@@ -123,8 +123,8 @@ export default class ScrollView extends Group {
   }
 
   public get clientHeight() {
-    const { showScrollBar, scrollX, height, scrollWidth, width, scrollBarSize } = this.attr;
-    return showScrollBar && scrollX && width < scrollWidth ? height - scrollBarSize : height;
+    const { showScrollBar, scrollY, height, scrollHeight, scrollBarSize } = this.attr;
+    return showScrollBar && scrollY && height < scrollHeight ? height - scrollBarSize : height;
   }
 
   public get scrollLeft(): number {
