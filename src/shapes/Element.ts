@@ -586,8 +586,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
       } else {
         scrollTop = itemBBox.y - scrollView.attr.y - scrollView.clientHeight + itemBBox.height;
       }
+    } else {
+      scrollTop = itemBBox.y -  scrollView.attr.y;
     }
-    scrollView.scrollTo(scrollLeft, scrollTop);
+    scrollView.scrollTo({
+      top: scrollTop,
+      left: scrollLeft,
+      behavior,
+    });
   }
 
   public startAttrTransaction() {

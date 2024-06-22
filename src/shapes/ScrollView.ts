@@ -5,6 +5,7 @@ import * as lodash from '../utils/lodash';
 import type DOMNode from './DOMNode';
 import { isMobile } from '../utils/env';
 import { SyntheticEvent } from '../event';
+import { interpolateNumber } from '../interpolate';
 
 export interface ScrollViewAttr extends GroupAttr {
   x: number;
@@ -167,15 +168,51 @@ export default class ScrollView extends Group {
     this.scrollTo(this._scrollLeft + dx, this._scrollTop + dy);
   }
 
-  public scrollTo(x: number, y: number) {
+  public scrollTo(x: number, y: number): void;
+
+  public scrollTo(options: ScrollToOptions): void;
+
+  public scrollTo(x: unknown, y?: unknown) {
     const {scrollLeft, scrollTop} = this;
-    this._inTransction = true;
-    this.scrollLeft = x;
-    this.scrollTop = y;
-    this._inTransction = false;
-    if (scrollLeft !== this.scrollLeft || scrollTop !== this.scrollTop) {
-      this._dispatchScrollEvent();
+    let left: number = 0;
+    let top: number = 0;
+    let behavior: ScrollBehavior = 'auto';
+    if (x && lodash.isObject(x)) {
+      const scrollOptions = x as ScrollToOptions;
+      left = scrollOptions.left ?? 0;
+      top = scrollOptions.top ?? 0;
+      behavior = scrollOptions.behavior ?? 'auto';
+    } else {
+      left = x as number ?? 0;
+      top = y as number ?? 0;
     }
+
+    const applyScroll = (x: number, y: number) => {
+      this._inTransction = true;
+      this.scrollLeft = x;
+      this.scrollTop = y;
+      this._inTransction = false;
+      if (x !== this.scrollLeft || y !== this.scrollTop) {
+        this._dispatchScrollEvent();
+      }
+    }
+
+    if (behavior === 'smooth') {
+      this.addAnimation({
+        from: {} as any,
+        to: {} as any,
+        ease: 'CubicIn',
+        stopped: false,
+        during: 300,
+        delay: 0,
+        onFrame: (e: number) => {
+          applyScroll(interpolateNumber(scrollLeft, left, e), interpolateNumber(scrollTop, top, e));
+        }
+      })
+    } else {
+      applyScroll(left, top);
+    }
+    
   }
 
   public mounted() {
