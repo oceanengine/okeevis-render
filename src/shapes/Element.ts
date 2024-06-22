@@ -577,17 +577,33 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
     const itemBBox = this.getBBox();
-    let scrollTop: number = scrollView.scrollTop;
-    let scrollLeft: number = itemBBox.x - scrollView.attr.x;
+    let scrollTop: number;
+    let scrollLeft: number;
     let behavior: ScrollBehavior = 'smooth';
+    const topMap = {
+      start: itemBBox.y -  scrollView.attr.y,
+      center: itemBBox.y + itemBBox.height / 2 - scrollView.attr.y - scrollView.clientHeight / 2,
+      end:  itemBBox.y - scrollView.attr.y - scrollView.clientHeight + itemBBox.height,
+      nearest: 0,
+    };
+    const leftMap = {
+      start: itemBBox.x - scrollView.attr.x,
+      center: itemBBox.x + itemBBox.width / 2 - scrollView.attr.x - scrollView.clientWidth / 2,
+      end:  itemBBox.x - scrollView.attr.x - scrollView.clientWidth + itemBBox.width,
+      nearest: 0,
+    };
     if (lodash.isBoolean(scrollOptions)) {
       if (scrollOptions === true) {
-        scrollTop = itemBBox.y -  scrollView.attr.y;
+        scrollTop = topMap.start;
       } else {
-        scrollTop = itemBBox.y - scrollView.attr.y - scrollView.clientHeight + itemBBox.height;
+        scrollTop = topMap.end;
       }
+      scrollLeft = leftMap.start;
     } else {
-      scrollTop = itemBBox.y -  scrollView.attr.y;
+      const { block = 'start', inline = 'start', } = scrollOptions;
+      behavior = scrollOptions.behavior || behavior;
+      scrollTop = topMap[block];
+      scrollLeft = leftMap[inline];
     }
     scrollView.scrollTo({
       top: scrollTop,

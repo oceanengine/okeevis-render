@@ -35,6 +35,9 @@ const rect = new Rect({
   });
 
 scrollView.addContent(rect);
-rect.scrollIntoView();
+rect.scrollIntoView({
+  block: "center",
+  inline: 'center',
+});
 
 render.add(scrollView)
