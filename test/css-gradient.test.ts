@@ -1,6 +1,5 @@
 import { parseCssGradient } from '../src/color/css-gradient-parser';
-import Render from '../src/render'
-import Rect from '../src/shapes/Rect'
+import {Render, Use, Rect} from '../src'
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom)
@@ -8,9 +7,8 @@ const render = new Render(dom)
 const rect = new Rect({
   x: 100,
   y: 100,
-  width: 394,
+  width: 454,
   height: 268,
-  fill: 'linear-gradient(45deg,red, blue)',
   stroke: 'red',
   lineWidth: 0,
   draggable: true,
@@ -20,8 +18,26 @@ const rect = new Rect({
     }
   }
 });
+const use = new Use({
+  shape: rect,
+  fill: 'linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%)',
+});
 
-render.add(rect);
+const use2 = new Use({
+  shape: rect,
+  draggable: true,
+  fill: 'linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%)',
+  blendMode: 'lighten',
+})
+const use3 = new Use({
+  shape: rect,
+  draggable: true,
+  fill: 'linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%);',
+  blendMode: 'lighten',
+})
+
+
+render.addAll([use, use2, use3]);
 
 
 // parseCssGradient('linear-gradient(red, blue)');
