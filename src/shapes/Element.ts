@@ -586,12 +586,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
       end:  itemBBox.y - scrollView.attr.y - scrollView.clientHeight + itemBBox.height,
       nearest: 0,
     };
+    const currentScrollTop = scrollView.scrollTop;
+    const currentScrollLeft = scrollView.scrollLeft;
+    topMap.nearest = Math.abs(currentScrollTop - topMap.start) < Math.abs(currentScrollTop - topMap.end) ? topMap.start : topMap.end;
     const leftMap = {
       start: itemBBox.x - scrollView.attr.x,
       center: itemBBox.x + itemBBox.width / 2 - scrollView.attr.x - scrollView.clientWidth / 2,
       end:  itemBBox.x - scrollView.attr.x - scrollView.clientWidth + itemBBox.width,
       nearest: 0,
     };
+    leftMap.nearest = Math.abs(currentScrollLeft - leftMap.start) < Math.abs(currentScrollLeft - leftMap.end) ? leftMap.start : leftMap.end;
+
     if (lodash.isBoolean(scrollOptions)) {
       if (scrollOptions === true) {
         scrollTop = topMap.start;
@@ -600,7 +605,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
       scrollLeft = leftMap.start;
     } else {
-      const { block = 'start', inline = 'start', } = scrollOptions;
+      const { block = 'start', inline = 'nearest', } = scrollOptions;
       behavior = scrollOptions.behavior || behavior;
       scrollTop = topMap[block];
       scrollLeft = leftMap[inline];
