@@ -13,7 +13,7 @@ export type GradientPoints = [[number, number], [number, number]];
 
 const enum State {
   INIT,
-  IN_GRADIENT_TYPE, // linear-gradent
+  IN_GRADIENT_TYPE, // linear-gradient
   BEFORE_START_BRACKET, // linear-gradient
   AFTER_START_BRACKET, // linear-gradient ()
   IN_ANGLE_VALUE, // linear-gradient(18
@@ -40,7 +40,7 @@ const enum EnumAngleType {
   NUMBER,
 }
 
-type AnlgeUnit = 'deg' | 'rad' | 'grad' | 'turn';
+type AngleUnit = 'deg' | 'rad' | 'grad' | 'turn';
 
 const parseCache: Record<string, Gradient> = {};
 
@@ -386,13 +386,13 @@ export function parseCssGradient(str: string): Gradient {
     ];
   } else if (angleType === EnumAngleType.NUMBER) {
     const value = parseFloat(angleValueString);
-    const radMap: Record<AnlgeUnit, number> = {
+    const radMap: Record<AngleUnit, number> = {
       deg: Math.PI / 180,
       rad: 1,
       grad: (Math.PI * 2) / 400,
       turn: Math.PI * 2,
     };
-    angle = value * radMap[angleUnit as AnlgeUnit];
+    angle = value * radMap[angleUnit as AngleUnit];
     gradientPoints = [[0, 0], [0, 0]];
   } else if (angleType === EnumAngleType.SIDE) {
     const sideMap = {
