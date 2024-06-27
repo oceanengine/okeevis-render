@@ -59,15 +59,15 @@ export function alpha(color: string, alpha: number): string {
   return `rgba(${[red, green, blue, alpha].join(',')})`;
 }
 
-export function isGradient(color: ColorValue): color is Gradient {
+export function isGradient(color: unknown): color is Gradient {
   return color && (color as Gradient).isGradient;
 }
 
-export function isPattern(color: ColorValue): color is Pattern {
+export function isPattern(color: unknown): color is Pattern {
   return color && (color as Pattern).isPattern;
 }
 
-export function isTransparent(color: ColorValue): boolean {
+export function isTransparent(color: unknown): boolean {
   return color === RGBA_TRANSPARENT || color === NAME_TRANSPARENT;
 }
 
