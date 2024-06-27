@@ -320,6 +320,7 @@ export default class ScrollView extends Group {
         const targetLeft = scrollLeftMap[event.keyCode] ?? scrollLeft;
         const deltaTop = targetTop - scrollTop;
         const deltaLeft = targetLeft - scrollLeft;
+        // 优化，考虑双向滚动，或未开启scroll
         if (scrollTop === 0 && deltaTop < 0 || isToBottom && deltaTop > 0) {
           return;
         }

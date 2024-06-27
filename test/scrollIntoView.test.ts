@@ -12,7 +12,7 @@ const scrollView = new ScrollView({
   width: 200,
   height: 200,
   scrollX: true,
-  scrollY: true,
+  scrollY: false,
   scrollWidth: 410,
   scrollHeight: 800,
   showScrollBar: true,
