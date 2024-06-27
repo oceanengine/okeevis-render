@@ -272,10 +272,18 @@ export default class EventHandle {
             this._draggingTarget = parentNodes[i];
             this._dragStartMouse = { x, y };
             nativeEvent.preventDefault && nativeEvent.preventDefault();
+            break;
           }
+        }
+        for (let i = 0; i < parentNodes.length; i++) {
           if (lodash.isNumber(parentNodes[i].attr.tabIndex)) {
             focusNode = parentNodes[i];
+            break;
           }
+        }
+
+        if (!this._focusTarget && focusNode && this.render.isBrowser()) {
+          this.render.getDom().focus();
         }
 
         this._syntheticFocusEvent(this._focusTarget, focusNode);

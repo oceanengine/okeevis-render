@@ -26,6 +26,19 @@ export interface ScrollViewAttr extends GroupAttr {
   scrollTrackColor?: string;
   scrollTrackBorderColor?: string;
 }
+const enum KEY_CODE {
+  ARROW_DOWN = 40,
+  ARROW_UP = 38,
+  ARROW_LEFT = 37,
+  ARROW_RIGHT = 39,
+  PAGE_DOWN = 34,
+  PAGE_UP = 33,
+  HOME = 36,
+  END = 35,
+  SPACE = 32,
+}
+
+const LINE_HEIGHT = 40;
 
 export default class ScrollView extends Group {
   public type = 'scrollView';
@@ -83,7 +96,7 @@ export default class ScrollView extends Group {
   }
 
   /**
-   * 
+   *
    * @param children children
    */
   protected updateChildren(children: Element | Element[]) {
@@ -101,6 +114,7 @@ export default class ScrollView extends Group {
   public getDefaultAttr(): ScrollViewAttr {
     return {
       display: true,
+      tabIndex: -1,
       x: 0,
       y: 0,
       width: 0,
@@ -173,7 +187,7 @@ export default class ScrollView extends Group {
   public scrollTo(options: ScrollToOptions): void;
 
   public scrollTo(x: unknown, y?: unknown) {
-    const {scrollLeft, scrollTop} = this;
+    const { scrollLeft, scrollTop } = this;
     let left: number = 0;
     let top: number = 0;
     let behavior: ScrollBehavior = 'auto';
@@ -183,19 +197,20 @@ export default class ScrollView extends Group {
       top = scrollOptions.top ?? 0;
       behavior = scrollOptions.behavior ?? 'auto';
     } else {
-      left = x as number ?? 0;
-      top = y as number ?? 0;
+      left = (x as number) ?? 0;
+      top = (y as number) ?? 0;
     }
 
     const applyScroll = (x: number, y: number) => {
+      const { scrollLeft: prevLeft, scrollTop: prevTop} = this;
       this._inTransction = true;
       this.scrollLeft = x;
       this.scrollTop = y;
       this._inTransction = false;
-      if (x !== this.scrollLeft || y !== this.scrollTop) {
+      if (this.scrollLeft !== prevLeft || this.scrollTop !== prevTop) {
         this._dispatchScrollEvent();
       }
-    }
+    };
 
     if (behavior === 'smooth') {
       this.addAnimation({
@@ -207,12 +222,11 @@ export default class ScrollView extends Group {
         delay: 0,
         onFrame: (e: number) => {
           applyScroll(interpolateNumber(scrollLeft, left, e), interpolateNumber(scrollTop, top, e));
-        }
-      })
+        },
+      });
     } else {
       applyScroll(left, top);
     }
-    
   }
 
   public mounted() {
@@ -230,7 +244,8 @@ export default class ScrollView extends Group {
       getDragOffset: () => {
         return { x: 0, y: 0 };
       },
-      onDrag: e => isMobile && this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy),
+      onDrag: e =>
+        isMobile && this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy),
     }));
     this._bgRect = new Rect({
       key: 'event-rect',
@@ -257,12 +272,20 @@ export default class ScrollView extends Group {
       },
       onWheel: event => {
         const _this = event.currentTarget as ScrollView;
-        const { scrollTop, scrollLeft, clientWidth, clientHeight, attr } =_this;
-        const isToBottom = scrollTop +  clientHeight - attr.scrollHeight === 0;
-        const isToRight =  scrollLeft + clientWidth -  attr.scrollWidth === 0;
-        const { pixelX, pixelY} = event.normalizeWheel;
-        const nopreventX = pixelX === 0 || !_this.attr.scrollX || (_this.scrollLeft === 0 && pixelX < 0) || (isToRight && pixelX > 0);
-        const nopreventY =  pixelY === 0 || !_this.attr.scrollY || (_this.scrollTop === 0 && pixelY < 0 || (isToBottom && pixelY > 0));
+        const { scrollTop, scrollLeft, clientWidth, clientHeight, attr } = _this;
+        const isToBottom = scrollTop + clientHeight - attr.scrollHeight === 0;
+        const isToRight = scrollLeft + clientWidth - attr.scrollWidth === 0;
+        const { pixelX, pixelY } = event.normalizeWheel;
+        const nopreventX =
+          pixelX === 0 ||
+          !_this.attr.scrollX ||
+          (_this.scrollLeft === 0 && pixelX < 0) ||
+          (isToRight && pixelX > 0);
+        const nopreventY =
+          pixelY === 0 ||
+          !_this.attr.scrollY ||
+          (_this.scrollTop === 0 && pixelY < 0) ||
+          (isToBottom && pixelY > 0);
         if (!(nopreventX && nopreventY)) {
           this._isScrolling = true;
         }
@@ -272,11 +295,39 @@ export default class ScrollView extends Group {
           this._debounceStopScroll();
         }
 
-        this._eventScrollBy(
-          event.currentTarget as ScrollView,
-          pixelX,
-          pixelY,
-        );
+        this._eventScrollBy(event.currentTarget as ScrollView, pixelX, pixelY);
+      },
+      onKeyDown: function (event) {
+        const _this = event.currentTarget as ScrollView;
+        const { scrollTop, scrollLeft, clientWidth, clientHeight, attr } = _this;
+        const bottomEnd = attr.scrollHeight - clientHeight;
+        const isToBottom = scrollTop + clientHeight - attr.scrollHeight === 0;
+        const isToRight = scrollLeft + clientWidth - attr.scrollWidth === 0;
+        const scrollTopMap: any = {
+          [KEY_CODE.ARROW_DOWN]: event.metaKey ? bottomEnd : scrollTop + LINE_HEIGHT,
+          [KEY_CODE.ARROW_UP]: event.metaKey ? 0 : scrollTop - LINE_HEIGHT,
+          [KEY_CODE.HOME]: 0,
+          [KEY_CODE.END]: attr.scrollHeight - clientHeight,
+          [KEY_CODE.SPACE]: scrollTop + (event.shiftKey ? -clientHeight : clientHeight),
+          [KEY_CODE.PAGE_DOWN]: scrollTop + clientHeight,
+          [KEY_CODE.PAGE_UP]: scrollTop - clientHeight,
+        };
+        const scrollLeftMap: any = {
+          [KEY_CODE.ARROW_LEFT]: scrollLeft - 40,
+          [KEY_CODE.ARROW_RIGHT]: scrollLeft + 40,
+        };
+        const targetTop = scrollTopMap[event.keyCode] ?? scrollTop;
+        const targetLeft = scrollLeftMap[event.keyCode] ?? scrollLeft;
+        const deltaTop = targetTop - scrollTop;
+        const deltaLeft = targetLeft - scrollLeft;
+        if (scrollTop === 0 && deltaTop < 0 || isToBottom && deltaTop > 0) {
+          return;
+        }
+        if (scrollLeft === 0 && deltaLeft < 0 || isToRight && deltaLeft > 0) {
+          return;
+        }
+        event.nativePreventDefault();
+        _this.scrollTo(targetLeft, targetTop);
       },
     });
     const contentGroup = new Group({
@@ -306,18 +357,20 @@ export default class ScrollView extends Group {
       target._debouncedFadeScrollBar();
     }
     target.scrollBy(scrollX ? dx : 0, scrollY ? dy : 0);
-    this._dispatchScrollEvent();
   }
 
   private _dispatchScrollEvent() {
     if (this._inTransction) {
       return;
     }
-    this.dispatch('scroll', new SyntheticEvent('scroll', {
-      timeStamp: Date.now(),
-      bubbles: false,
-      original: undefined,
-    }));
+    this.dispatch(
+      'scroll',
+      new SyntheticEvent('scroll', {
+        timeStamp: Date.now(),
+        bubbles: false,
+        original: undefined,
+      }),
+    );
   }
 
   private _attachScrollBar() {
@@ -499,7 +552,7 @@ export default class ScrollView extends Group {
       if (item.type === 'scrollView') {
         hasChildScrollView = true;
       }
-      const {x, y ,textAlign, textBaseline, sticky} = (item as DOMNode).attr;
+      const { x, y, textAlign, textBaseline, sticky } = (item as DOMNode).attr;
       if (sticky && !hasChildScrollView) {
         let offsetX: number = 0;
         let offsetY: number = 0;
@@ -510,7 +563,7 @@ export default class ScrollView extends Group {
         const scrollViewRight = scrollViewLeft + this.clientWidth;
         const boxBottom = bbox.y + bbox.height;
         const boxRight = bbox.x + bbox.width;
-        if (lodash.isNumber(sticky.top) &&  scrollViewTop - bbox.y > sticky.top) {
+        if (lodash.isNumber(sticky.top) && scrollViewTop - bbox.y > sticky.top) {
           offsetY = scrollViewTop - bbox.y + sticky.top;
         }
         if (lodash.isNumber(sticky.bottom) && boxBottom - scrollViewBottom > sticky.bottom) {
@@ -527,7 +580,7 @@ export default class ScrollView extends Group {
         item.setStickyOffset(offsetX, offsetY);
       }
       if (item.type === 'dom') {
-        const {width, height} = (item as DOMNode).getBBox();
+        const { width, height } = (item as DOMNode).getBBox();
         const widthOffset: any = {
           left: 0,
           center: width / 2,
@@ -537,7 +590,7 @@ export default class ScrollView extends Group {
           top: 0,
           middle: height / 2,
           bottom: height,
-        }
+        };
         const path = new Rect({
           x: this.scrollLeft - x + this.attr.x + widthOffset[textAlign],
           y: this.scrollTop - y + this.attr.y + topOffset[textBaseline],
