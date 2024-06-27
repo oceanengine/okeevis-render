@@ -27,7 +27,7 @@ export default class SyntheticEvent<T extends  MouseEvent | TouchEvent | FocusEv
 
   public relatedTarget: Element | null = null;
 
-  private _defaultHandles: Record<string, () => void> = {};
+  private _defaultHandle: () => void | undefined;
 
   public constructor(type: string, params: SyntheticEventParams) {
     this.type = type;
@@ -50,19 +50,17 @@ export default class SyntheticEvent<T extends  MouseEvent | TouchEvent | FocusEv
     }
   }
 
-  public registerDefaultHandler(type: string, handler: () => void): void {
-    if (!this._defaultHandles[type]) {
-      this._defaultHandles[type] = handler;
+  public setDefaultHandle(handler: () => void): void {
+    if (!this._defaultHandle) {
+      this._defaultHandle = handler;
     }
   }
 
-  public executeDefaultHandlers(): void {
+  public runDefaultHandle(): void {
     if (this.isDefaultPrevented) {
       return;
     }
-    for (const key in this._defaultHandles) {
-      this._defaultHandles[key]();
-    }
+    this._defaultHandle?.();
   }
 
   public stopPropagation(): void {
