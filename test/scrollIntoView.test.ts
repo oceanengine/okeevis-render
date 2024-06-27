@@ -31,6 +31,7 @@ const rect = new Rect({
     fill: 'red',
     stroke: 'blue',
     lineWidth: 1,
+    draggable: true,
     sticky: {top: 0}
   });
 

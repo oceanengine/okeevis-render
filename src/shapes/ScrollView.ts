@@ -230,7 +230,7 @@ export default class ScrollView extends Group {
       getDragOffset: () => {
         return { x: 0, y: 0 };
       },
-      onDrag: e => this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy),
+      onDrag: e => isMobile && this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy),
     }));
     this._bgRect = new Rect({
       key: 'event-rect',
