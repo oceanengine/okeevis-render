@@ -15,7 +15,7 @@ export default class SyntheticEvent<T extends  MouseEvent | TouchEvent | FocusEv
 
   public isPropagationStopped: boolean;
 
-  // public isDefaultPrevented: boolean;
+  public isDefaultPrevented: boolean;
 
   public bubbles: boolean;
 
@@ -26,6 +26,8 @@ export default class SyntheticEvent<T extends  MouseEvent | TouchEvent | FocusEv
   public currentTarget: Element;
 
   public relatedTarget: Element | null = null;
+
+  private _defaultHandles: Record<string, () => void> = {};
 
   public constructor(type: string, params: SyntheticEventParams) {
     this.type = type;
@@ -38,6 +40,28 @@ export default class SyntheticEvent<T extends  MouseEvent | TouchEvent | FocusEv
   public preventDefault(): void {
     if (this.original.preventDefault) {
       this.original.preventDefault();
+    }
+    this.isDefaultPrevented = true;
+  }
+
+  public nativePreventDefault(): void {
+    if (this.original.preventDefault) {
+      this.original.preventDefault();
+    }
+  }
+
+  public registerDefaultHandler(type: string, handler: () => void): void {
+    if (!this._defaultHandles[type]) {
+      this._defaultHandles[type] = handler;
+    }
+  }
+
+  public executeDefaultHandlers(): void {
+    if (this.isDefaultPrevented) {
+      return;
+    }
+    for (const key in this._defaultHandles) {
+      this._defaultHandles[key]();
     }
   }
 

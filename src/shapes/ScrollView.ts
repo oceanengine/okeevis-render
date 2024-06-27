@@ -268,7 +268,7 @@ export default class ScrollView extends Group {
         }
 
         if (this._isScrolling) {
-          event.preventDefault();
+          event.nativePreventDefault();
           this._debounceStopScroll();
         }
 
