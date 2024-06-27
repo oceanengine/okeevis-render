@@ -12,32 +12,38 @@ const rect = new Rect({
   stroke: 'red',
   lineWidth: 0,
   draggable: true,
+  fill: [
+    'linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%)', 
+    'linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%)', 
+    'linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%)'
+  ],
   stateStyles:{
     hover: {
       fill: 'red'
     }
   }
 });
-const use = new Use({
-  shape: rect,
-  fill: 'linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%)',
-});
+(window as any).rect = rect;
+// const use = new Use({
+//   shape: rect,
+//   fill: 'linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%)',
+// });
 
-const use2 = new Use({
-  shape: rect,
-  draggable: true,
-  fill: 'linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%)',
-  blendMode: 'lighten',
-})
-const use3 = new Use({
-  shape: rect,
-  draggable: true,
-  fill: 'linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%);',
-  blendMode: 'lighten',
-})
+// const use2 = new Use({
+//   shape: rect,
+//   draggable: true,
+//   fill: 'linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%)',
+//   blendMode: 'lighten',
+// })
+// const use3 = new Use({
+//   shape: rect,
+//   draggable: true,
+//   fill: 'linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%);',
+//   blendMode: 'lighten',
+// })
 
 
-render.addAll([use, use2, use3]);
+render.addAll([rect]);
 
 
 // parseCssGradient('linear-gradient(red, blue)');

@@ -49,9 +49,9 @@ export interface BaseAttr extends TransformConf, EventConf {
 
   zIndex?: number; // deprecated
 
-  fill?: ColorValue;
+  fill?: ColorValue | ColorValue[];
   stroke?: ColorValue;
-  color?: ColorValue;
+  color?: ColorValue
   strokeNoScale?: boolean;
   lineWidth?: number;
   pickingBuffer?: number;
@@ -414,7 +414,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public hasFill(): boolean {
     const fill = this.getExtendAttr('fill');
-    return fill && fill !== 'none';
+    return fill && fill !== 'none' && (fill as ColorValue[]).length !== 0
   }
 
   public hasStroke() {
@@ -522,6 +522,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     const { stateStyles } = this._attr;
     const prevValue = this._statusConfig[state] || false;
+
     this._statusConfig[state] = value;
     if (stateStyles?.[state] && prevValue !== value) {
       this.dirtyStatusAttr(stateStyles[state] as T);
@@ -550,7 +551,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       const oldValue = oldAttr[key];
       const newValue = this.attr[key];
       if (oldValue !== newValue) {
-        this.onAttrChange(key, oldAttr[key], this.attr[key]);
+        this.onAttrChange(key, newValue, oldValue);
       }
     }
   }
@@ -893,9 +894,18 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (key === 'shadowBlur') {
       this._currentPaintAreaDirty = true;
     }
-
-    if ((key === 'fill' || key === 'color' || key === 'stroke') && typeof newValue === 'string' && isCssGradient(newValue)) {
-      this.attr[key] = parseCssGradient(newValue) as any;
+    
+    if ((key === 'fill' || key === 'color' || key === 'stroke') && ((lodash.isString(newValue) && isCssGradient(newValue)) || lodash.isArray(newValue))) {
+      if (lodash.isArray(newValue)) {
+        this.attr[key] = newValue.map(item => {
+          if (isCssGradient(item)) {
+            return parseCssGradient(item) as any;
+          }
+          return item;
+        }) as any;
+      } else {
+        this.attr[key] = parseCssGradient(newValue) as any;
+      }
     }
 
     if (this.shapeKeys.indexOf(key) !== -1) {

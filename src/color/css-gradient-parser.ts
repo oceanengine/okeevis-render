@@ -8,6 +8,7 @@ import Gradient, { ColorStop } from '../abstract/Gradient';
 import LinearGradient from './LinearGradient';
 import RadialGradient from './RadialGradient';
 import { interpolateNumber } from '../interpolate';
+import { isString } from 'lodash-es';
 
 export type GradientPoints = [[number, number], [number, number]];
 
@@ -49,7 +50,7 @@ function isWhiteSpace(c: string) {
 }
 
 export function isCssGradient(color: string) {
-  return matchStr(color, 'linear-gradient') || matchStr(color, 'radial-gradient')
+  return isString(color) && matchStr(color, 'linear-gradient') || matchStr(color, 'radial-gradient')
 }
 
 function matchStr(a: string, b: string) {

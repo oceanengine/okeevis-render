@@ -10,6 +10,7 @@ import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
 import { fpsRect, fpsText } from './fps';
+import { isArray } from 'lodash-es';
 
 const contextKeys: Array<keyof ShapeAttr> = [
   'fill',
@@ -56,6 +57,10 @@ export default class CanvasPainter implements Painter {
   private _viewPort: BBox;
 
   private _inUse: boolean = false;
+
+  private _ctxFill: ColorValue | ColorValue[];
+
+  private _ctxStroke: ColorValue;
 
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
@@ -361,7 +366,14 @@ export default class CanvasPainter implements Painter {
         item.type !== 'text' &&
         !(isPattern(fill) && !(fill as Pattern).isReady())
       ) {
-        ctx.fill();
+        if (!isArray(fill)) {
+          ctx.fill();
+        } else {
+          fill.forEach(fillColor => {
+            styleHelper.setFillStyle(ctx, getCtxColor(ctx, fillColor, item));
+            ctx.fill();
+          })
+        }
       }
       if (item.strokeAble && needStroke && !this._isPixelPainter) {
         if (fillOpacity !== strokeOpacity) {
@@ -534,7 +546,7 @@ export default class CanvasPainter implements Painter {
   private _setElementCanvasContext(
     ctx: CanvasRenderingContext2D,
     item: Element<GroupAttr>,
-    computedFill: ColorValue,
+    computedFill: ColorValue | ColorValue[],
     computedStroke: ColorValue,
     fillOpacity: number,
     strokeOpacity: number,
@@ -605,7 +617,7 @@ export default class CanvasPainter implements Painter {
     }
 
     // gradient color can't be extended
-    if (fill && fill !== 'none' && !(item.isGroup && isGradient(fill))) {
+    if (fill && fill !== 'none' && !isArray(fill) && !(item.isGroup && isGradient(fill))) {
       styleHelper.setFillStyle(ctx, getCtxColor(ctx, fill, item));
     }
 
@@ -653,7 +665,7 @@ export default class CanvasPainter implements Painter {
 
   protected _hasSelfContext(
     item: Element<ShapeAttr>,
-    fill: ColorValue,
+    fill: ColorValue | ColorValue[],
     fillOpacity: number,
     stroke: ColorValue,
     strokeOpacity: number,
@@ -661,7 +673,7 @@ export default class CanvasPainter implements Painter {
     if (contextKeys.some(key => item.attr[key] !== undefined)) {
       return true;
     }
-    if (isGradient(fill) || isGradient(stroke)) {
+    if (isGradient(fill) || isGradient(stroke) || (isArray(fill) && fill.length)) {
       return true;
     }
 

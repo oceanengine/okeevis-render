@@ -15,6 +15,8 @@ import {
   isPattern,
 } from '../color';
 
+import { isArray } from 'lodash-es';
+
 function getSvgMatrix(matrix: mat3): string {
   const transform = [matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]];
   return `matrix(${transform.join(' ')})`;
@@ -141,6 +143,9 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   }
 
   if (fill) {
+    if (isArray(fill)) {
+      throw new Error('svg fill is not support array');
+    }
     ret.fill = getSVGColor(fill);
   }
 
