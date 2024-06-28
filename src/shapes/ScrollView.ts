@@ -300,6 +300,7 @@ export default class ScrollView extends Group {
       onKeyDown: function (event) {
         const _this = event.currentTarget as ScrollView;
         const { scrollTop, scrollLeft, clientWidth, clientHeight, attr } = _this;
+        const { scrollX, scrollY } = attr;
         const bottomEnd = attr.scrollHeight - clientHeight;
         const isToBottom = scrollTop + clientHeight - attr.scrollHeight === 0;
         const isToRight = scrollLeft + clientWidth - attr.scrollWidth === 0;
@@ -316,19 +317,23 @@ export default class ScrollView extends Group {
           [KEY_CODE.ARROW_LEFT]: scrollLeft - 40,
           [KEY_CODE.ARROW_RIGHT]: scrollLeft + 40,
         };
-        const targetTop = scrollTopMap[event.keyCode] ?? scrollTop;
-        const targetLeft = scrollLeftMap[event.keyCode] ?? scrollLeft;
+        const targetTop =   scrollY ? scrollTopMap[event.keyCode] ?? scrollTop : scrollTop;
+        const targetLeft =  scrollX ? scrollLeftMap[event.keyCode] ?? scrollLeft : scrollLeft;
         const deltaTop = targetTop - scrollTop;
         const deltaLeft = targetLeft - scrollLeft;
+        let yScrolled = scrollY;
+        let xSCrolled = scrollX;
         // 优化，考虑双向滚动，或未开启scroll
-        if (scrollTop === 0 && deltaTop < 0 || isToBottom && deltaTop > 0) {
-          return;
-        }
         if (scrollLeft === 0 && deltaLeft < 0 || isToRight && deltaLeft > 0) {
-          return;
+          xSCrolled = false;
         }
-        event.nativePreventDefault();
-        _this.scrollTo(targetLeft, targetTop);
+        if (scrollTop === 0 && deltaTop < 0 || isToBottom && deltaTop > 0) {
+          yScrolled = false;
+        }
+        if (xSCrolled || yScrolled) {
+          event.nativePreventDefault();
+          _this.scrollTo(targetLeft, targetTop);
+        }
       },
     });
     const contentGroup = new Group({
