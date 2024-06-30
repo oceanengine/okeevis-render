@@ -293,9 +293,9 @@ export default class ScrollView extends Group {
         if (this._isScrolling) {
           event.nativePreventDefault();
           this._debounceStopScroll();
+          this._defaultScrollBy(event, pixelX, pixelY);
         }
 
-        this._eventScrollBy(event.currentTarget as ScrollView, pixelX, pixelY);
       },
       onKeyDown: function (event) {
         const _this = event.currentTarget as ScrollView;
@@ -324,15 +324,15 @@ export default class ScrollView extends Group {
         let yScrolled = scrollY;
         let xSCrolled = scrollX;
         // 优化，考虑双向滚动，或未开启scroll
-        if (scrollLeft === 0 && deltaLeft < 0 || isToRight && deltaLeft > 0) {
+        if (scrollLeft === 0 && deltaLeft <= 0 || isToRight && deltaLeft >= 0) {
           xSCrolled = false;
         }
-        if (scrollTop === 0 && deltaTop < 0 || isToBottom && deltaTop > 0) {
+        if (scrollTop === 0 && deltaTop <= 0 || isToBottom && deltaTop >= 0) {
           yScrolled = false;
         }
         if (xSCrolled || yScrolled) {
           event.nativePreventDefault();
-          _this.scrollTo(targetLeft, targetTop);
+          _this._defaultScrollBy(event, deltaLeft, deltaTop);
         }
       },
     });
@@ -363,6 +363,13 @@ export default class ScrollView extends Group {
       target._debouncedFadeScrollBar();
     }
     target.scrollBy(scrollX ? dx : 0, scrollY ? dy : 0);
+  }
+
+  private _defaultScrollBy(event: SyntheticEvent, dx: number, dy: number) {
+    const target = event.currentTarget as ScrollView;
+    event.setDefaultHandle(() => {
+      target.scrollBy(dx, dy);
+    });
   }
 
   private _dispatchScrollEvent() {

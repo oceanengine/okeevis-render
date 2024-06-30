@@ -23,6 +23,21 @@ const scrollView = new ScrollView({
   onScroll: () => console.log('scrolled')
 });
 
+const nestScrollView = new ScrollView({
+  x: 100,
+  y: 10,
+  width: 300,
+  height: 400,
+  scrollX: true,
+  scrollY: true,
+  scrollWidth: 410,
+  scrollHeight: 800,
+  onScroll: () => console.log('nest scrolled'),
+  showScrollBar: true,
+});
+
+nestScrollView.addContent(scrollView);
+
 scrollView.addContent(new Rect({
   x: 300,
   y:200,
@@ -33,6 +48,6 @@ scrollView.addContent(new Rect({
   lineWidth: 1,
   sticky: {top: -10, bottom: -10, left: 10, right: 10},
 }));
-(window as any).test = scrollView;
+(window as any).test = nestScrollView;
 
-render.add(scrollView)
+render.add(nestScrollView)
