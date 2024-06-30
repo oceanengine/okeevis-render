@@ -121,6 +121,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   };
   sticky?: {top?: number; left?: number; right?: number; bottom?: number};
   stateStyles?: stateStyle;
+  className?: string;
 }
 
 type Status =
@@ -299,6 +300,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public get dataset(): unknown {
     return this.attr.data;
+  }
+
+  public get className(): string {
+    return this.attr.className || '';
   }
 
   public getAnimationKeys(): Array<keyof T> {

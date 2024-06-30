@@ -7,6 +7,7 @@ const render = new Render(dom, {renderer: 'canvas'});
 
 
 const scrollView = new ScrollView({
+  className: 'scrollView',
   x: 100,
   y: 100,
   width: 200,
@@ -24,6 +25,7 @@ const scrollView = new ScrollView({
 });
 
 const nestScrollView = new ScrollView({
+  className: 'nestScrollView',
   x: 100,
   y: 10,
   width: 300,
