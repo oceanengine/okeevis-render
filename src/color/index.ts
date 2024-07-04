@@ -12,6 +12,8 @@ export { Color };
 export type ColorValue =
   | 'none'
   | 'currentColor'
+  | 'context-fill'
+  | 'context-stroke'
   | string
   | LinearGradient
   | RadialGradient

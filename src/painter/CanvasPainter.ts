@@ -58,9 +58,9 @@ export default class CanvasPainter implements Painter {
 
   private _inUse: boolean = false;
 
-  private _ctxFill: ColorValue | ColorValue[];
+  private _contextFill: ColorValue;
 
-  private _ctxStroke: ColorValue;
+  private _contextStroke: ColorValue;
 
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
@@ -557,8 +557,8 @@ export default class CanvasPainter implements Painter {
       lineCap,
       lineJoin,
       miterLimit,
-      stroke,
-      fill,
+      stroke: attrStroke,
+      fill: attrFill,
       fontSize,
       fontFamily,
       fontWeight,
@@ -574,6 +574,8 @@ export default class CanvasPainter implements Painter {
       shadowColor,
       lineDash,
     } = item.attr;
+    let fill = attrFill;
+    let stroke = attrStroke;
 
     this._applyTransform(ctx, item);
 
@@ -606,6 +608,21 @@ export default class CanvasPainter implements Painter {
       styleHelper.setFillStyle(ctx, pickColor);
       styleHelper.setStrokeStyle(ctx, pickColor);
       return;
+    }
+
+    if (fill && fill !== 'context-fill' && fill !== 'context-stroke') {
+      this._contextFill = fill as ColorValue;
+    }
+
+    if (stroke && stroke !== 'context-fill' && stroke !== 'context-stroke') {
+      this._contextStroke = stroke;
+    }
+
+    if (fill === 'context-fill' || fill === 'context-stroke') {
+      fill = fill === 'context-fill' ? this._contextFill : this._contextStroke;
+    }
+    if (stroke === 'context-fill' || stroke === 'context-stroke') {
+      stroke = stroke === 'context-fill' ? this._contextFill : this._contextStroke;
     }
 
     if (stroke && stroke !== 'none' && !(item.isGroup && isGradient(stroke))) {
