@@ -16,13 +16,16 @@ import { getDomContentSize } from './utils/dom';
 import type { CommandBufferEncoder } from './multi-thread/command-buffer';
 import { BBox } from './utils/bbox';
 import { getFeature } from './utils/featureManager';
+import { PluginManager, AbstractPlugin } from './PluginManager'
 
 registerPainter('canvas', CanvasPainter);
 registerPainter('svg', SVGPainter);
 
+
+type RendererType = 'canvas' | 'svg' | 'roughCanvas';
 export interface RenderOptions {
   dpr?: number;
-  renderer?: 'canvas' | 'svg';
+  renderer?: RendererType;
   width?: number;
   height?: number;
   workerEnabled?: boolean;
@@ -60,7 +63,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
 
   private _height: number;
 
-  private _renderer: 'canvas' | 'svg';
+  private _renderer: RendererType;
 
   private _isBrowser: boolean;
 
@@ -99,6 +102,8 @@ export default class Render extends EventFul<RenderEventHandleParam> {
   private _effectPending: boolean = false;
 
   private _hookElementEffects: Function[] = [];
+
+  private _pluginManager: PluginManager;
 
   public constructor(dom?: HTMLElement, option: RenderOptions = {}) {
     super();
@@ -162,6 +167,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
       this._raf = getRequestAnimationFrame();
       this._caf = getCancelAnimationFrame();
     }
+    this._pluginManager = new PluginManager(this);
     this.nextTick();
   }
 
@@ -214,7 +220,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     return this._height;
   }
 
-  public get renderer(): 'canvas' | 'svg' {
+  public get renderer(): RendererType {
     return this._renderer;
   }
 
@@ -277,8 +283,17 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     return this._needUpdate;
   }
 
+  public addPlugin(plugin: AbstractPlugin) {
+    this._pluginManager.addPlugin(plugin);
+  }
+
+  public removePlugin(plugin: AbstractPlugin) {
+    this._pluginManager.removePlugin(plugin);
+  }
+
   public dispose() {
     // todo polyfill
+    this._pluginManager.destroy();
     this._caf(this._requestAnimationFrameId);
     if (this._workerEnabled) {
       this._unregisterWorker();

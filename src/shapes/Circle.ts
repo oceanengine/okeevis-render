@@ -1,3 +1,5 @@
+import { Options as RoughOptions, Drawable } from 'roughjs/bin/core';
+import type { RoughCanvas } from 'roughjs/bin/canvas';
 import Shape from './Shape';
 import { CommonAttr } from './Element';
 import { BBox, circleBBox } from '../utils/bbox';
@@ -33,6 +35,12 @@ export default class Circle extends Shape<CircleAttr> {
   public brush(ctx: CanvasRenderingContext2D) {
     const { cx, cy, radius } = this.attr;
     ctx.arc(cx, cy, Math.max(radius, 0), 0, PI2, false);
+  }
+
+  protected createRough(roughCanvas: RoughCanvas, options?: RoughOptions): Drawable {
+    const { cx, cy, radius } = this.attr;
+    const path = this.getPathData().getSVGPathString();
+    return roughCanvas.circle(cx, cy, radius * 2, options);
   }
 
   public isPointInFill(x: number, y: number): boolean {
