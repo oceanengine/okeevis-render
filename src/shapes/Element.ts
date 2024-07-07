@@ -1,3 +1,4 @@
+import type { Options as RoughOptions, Drawable } from 'roughjs/bin/core';
 import Eventful from '../utils/Eventful';
 import type Render from '../render';
 import type CanvasPainter from '../painter/CanvasPainter';
@@ -113,8 +114,8 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionDelay?: number;
   tabIndex?: number;
   animation?: {
-    from: T;
-    to: T;
+    from: ElementAttr;
+    to: ElementAttr;
     during?: number;
     ease?: EasingName;
     delay?: number;
@@ -122,6 +123,8 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   sticky?: {top?: number; left?: number; right?: number; bottom?: number};
   stateStyles?: stateStyle;
   className?: string;
+  rough?: boolean;
+  roughOptions?: RoughOptions;
 }
 
 type Status =
@@ -241,6 +244,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public needFill: boolean = false;
 
   public needStroke: boolean = false;
+
+  protected _cacheRough: Drawable;
 
   private _dirty: boolean = true;
 
@@ -934,6 +939,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   protected afterAttrChanged() {
+    this._cacheRough = undefined;
     if (this.attr !== this._attr) {
       this.updateCascadeAttr();
     }

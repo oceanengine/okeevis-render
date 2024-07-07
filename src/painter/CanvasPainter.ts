@@ -1,3 +1,5 @@
+import type { RoughCanvas } from 'roughjs/bin/canvas';
+import type { Options as RoughOptions } from 'roughjs/bin/core';
 import Painter from '../abstract/Painter';
 import Render from '../render';
 import Element, { defaultCanvasContext } from '../shapes/Element';
@@ -39,7 +41,7 @@ export default class CanvasPainter implements Painter {
   public render: Render;
 
   public dpr: number;
-
+  
   private _canvas: HTMLCanvasElement;
 
   private _canvasByCreated: boolean;
@@ -61,6 +63,10 @@ export default class CanvasPainter implements Painter {
   private _contextFill: ColorValue;
 
   private _contextStroke: ColorValue;
+
+  private roughCanvas: RoughCanvas = undefined;
+
+  private roughConfig: {rough: boolean; options: RoughOptions} = { rough: false, options: {} };
 
   public constructor(render: Render, isPixelPainter: boolean = false) {
     this.render = render;
@@ -327,6 +333,8 @@ export default class CanvasPainter implements Painter {
     const needStroke = hasStroke && strokeOpacity !== 0 && !isTransparent(stroke);
     item.needFill = needFill;
     item.needStroke = needStroke;
+    const rough = item.attr.rough ?? this.roughConfig.rough;
+    const roughOptions = item.attr.roughOptions
 
     // item.getFillAndStrokeStyle(renderingContext);
     // if (isInBatch) {
@@ -356,36 +364,47 @@ export default class CanvasPainter implements Painter {
           styleHelper.setGlobalAlpha(ctx, fillOpacity);
         }
       }
-      if (item.fillAble || (item.strokeAble && item.type !== 'text')) {
-        ctx.beginPath();
-      }
-      (item as Shape).brush(ctx);
-      if (
-        item.fillAble &&
-        (needFill || (this._isPixelPainter && hasFill)) &&
-        item.type !== 'text' &&
-        !(isPattern(fill) && !(fill as Pattern).isReady())
-      ) {
-        if (!isArray(fill)) {
-          ctx.fill();
-        } else {
-          fill.forEach(fillColor => {
-            styleHelper.setFillStyle(ctx, getCtxColor(ctx, fillColor, item));
+      if (!(this.roughCanvas && rough && !(this._isPixelPainter || item.type === 'text' || item.type === 'image'))) {
+        if (item.fillAble || (item.strokeAble && item.type !== 'text')) {
+          ctx.beginPath();
+        }
+        (item as Shape).brush(ctx);
+        if (
+          item.fillAble &&
+          (needFill || (this._isPixelPainter && hasFill)) &&
+          item.type !== 'text' &&
+          !(isPattern(fill) && !(fill as Pattern).isReady())
+        ) {
+          if (!isArray(fill)) {
             ctx.fill();
-          })
+          } else {
+            (fill as any[]).forEach(fillColor => {
+              styleHelper.setFillStyle(ctx, getCtxColor(ctx, fillColor, item));
+              ctx.fill();
+            });
+          }
         }
-      }
-      if (item.strokeAble && needStroke && !this._isPixelPainter) {
-        if (fillOpacity !== strokeOpacity) {
-          styleHelper.setGlobalAlpha(ctx, strokeOpacity);
+        if (item.strokeAble && needStroke && !this._isPixelPainter) {
+          if (fillOpacity !== strokeOpacity) {
+            styleHelper.setGlobalAlpha(ctx, strokeOpacity);
+          }
         }
-      }
-      if (
-        item.strokeAble &&
-        (needStroke || (this._isPixelPainter && hasStroke)) &&
-        item.type !== 'text'
-      ) {
-        ctx.stroke();
+        if (
+          item.strokeAble &&
+          (needStroke || (this._isPixelPainter && hasStroke)) &&
+          item.type !== 'text'
+        ) {
+          ctx.stroke();
+        }
+      } else {
+       (item as Shape).drawRough(this.roughCanvas, {
+          fill: item.getExtendAttr('fill') as string,
+          stroke: item.getExtendAttr('stroke') as string,
+          strokeWidth: item.getExtendAttr('lineWidth') as number,
+          strokeLineDash: item.getExtendAttr('lineDash') as number[],
+          ...this.roughConfig.options,
+          ...item.attr.roughOptions,
+       });
       }
 
       // render marker
@@ -758,9 +777,9 @@ export default class CanvasPainter implements Painter {
         if (isPattern(fill)) {
           fill.reload();
         }
-      })
+      });
     }
-  }
+  };
 
   private _drawFPS() {
     fpsText.setAttr('display', this.render.showFPS);

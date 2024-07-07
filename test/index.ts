@@ -1,1 +1,1 @@
-import './ctx-fill-stroke.test'
+import './jsx'

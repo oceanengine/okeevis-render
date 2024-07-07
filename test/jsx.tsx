@@ -6,6 +6,7 @@ import React, {
   useCallback,
   createContext,
   createPortal,
+  createRoot,
   memo,
 } from '../src/react';
 import { Render, Group, Rect, Line, Text } from '../src';
@@ -13,7 +14,6 @@ import { useContext, useReducer } from '../src/react/hooks';
 
 const dom = document.getElementById('root') as HTMLDivElement;
 
-const render = new Render(dom, { workerEnabled: true });
 
 const Context = createContext(3);
 
@@ -125,6 +125,5 @@ const App = () => {
     </Context.Provider>
   );
 };
-render.add(portalCotainer);
-render.add(<App />);
-(window as any).render = render;
+const app = createRoot(dom);
+app.render(<App />);

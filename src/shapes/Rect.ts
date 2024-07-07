@@ -2,7 +2,6 @@ import Shape from './Shape';
 import { CommonAttr } from './Element';
 import * as lodash from '../utils/lodash';
 import { BBox, rectBBox, inBBox, getOffsetBBox } from '../utils/bbox';
-
 interface Point {
   x: number;
   y: number;
