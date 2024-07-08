@@ -13,7 +13,7 @@ import {
   SegmentPoint,
 } from './pathSegment';
 import { pathToCurve } from './toCurve';
-import { bezierSubDivision } from './beziersubdivision';
+import { bezierSubDivision } from './bezierSubdivision';
 
 export type PointOnPath = SegmentPoint;
 
