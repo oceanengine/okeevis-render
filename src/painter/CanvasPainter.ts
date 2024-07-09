@@ -25,6 +25,7 @@ const contextKeys: Array<keyof ShapeAttr> = [
   'lineDashOffset',
   'lineJoin',
   'lineWidth',
+  'direction',
   'miterLimit',
   'shadowBlur',
   'shadowColor',
@@ -583,6 +584,7 @@ export default class CanvasPainter implements Painter {
       fontWeight,
       fontStyle,
       fontVariant,
+      direction,
       textBaseline,
       textAlign,
       blendMode,
@@ -615,6 +617,10 @@ export default class CanvasPainter implements Painter {
 
     if (lineJoin) {
       styleHelper.setLineJoin(ctx, lineJoin);
+    }
+
+    if (direction) {
+      ctx.direction = direction;
     }
 
     if (miterLimit >= 0) {

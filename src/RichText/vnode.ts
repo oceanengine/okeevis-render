@@ -35,6 +35,7 @@ export interface VNodeProps {
   fontSize?: number;
   fontFamily?: string;
   fontWeight?: string;
+  direction?: string;
   lineClamp?: number;
   lineHeight?: number;
   src?: string;
@@ -104,6 +105,7 @@ export const NodeAttributeParser: Record<
   fontWeight: parseNumberOrString,
   lineHeight: parseNumber,
   lineClamp: parseNumber,
+  direction: parseString,
   src: parseString,
   value: parseString,
   color: parseString,

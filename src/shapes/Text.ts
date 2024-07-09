@@ -25,6 +25,7 @@ export interface TextAttr extends CommonAttr {
   underline?: boolean;
   linethrough?: boolean;
   overline?: boolean;
+  direction?: CanvasDirection;
   truncate?: {
     outerWidth?: number;
     outerHeight?: number;

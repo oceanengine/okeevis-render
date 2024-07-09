@@ -41,6 +41,7 @@ export interface SVGElementStyle {
   'font-family': string;
   'font-style': string;
   'text-decoration': string;
+  direction: string;
   display: string;
   anchor: string;
   transform: string;
@@ -114,6 +115,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
     underline,
     overline,
     linethrough,
+    direction,
     shadowColor,
     shadowBlur,
     markerStart,
@@ -174,6 +176,7 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
   if (!display) {
     ret.display = 'none';
   }
+  
 
   if (cursor) {
     ret.cursor = cursor;
@@ -193,6 +196,10 @@ export function getSVGStyleAttributes(node: Element): Partial<SVGElementStyle> {
 
   if (fontStyle !== undefined) {
     ret['font-style'] = fontStyle;
+  }
+
+  if (direction) {
+    ret.direction = direction;
   }
 
   if (underline || linethrough || overline) {

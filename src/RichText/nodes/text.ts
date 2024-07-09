@@ -47,6 +47,7 @@ export default class VText extends VNode {
       fontFamily: this.getFontFamily(),
       fontWeight: this.getFontWeight() as string,
       lineHeight: this.getExtendAttr('lineHeight') as number,
+      direction: this.getExtendAttr('direction') as CanvasDirection,
       fill: color,
       truncate: ellipsis && this.getTruncate(),
     });
