@@ -1,5 +1,6 @@
 import { AbstractPlugin } from './abstract/AbstractPlugin';
 import type Render from './render';
+import { find } from 'lodash-es';
 
 export type { AbstractPlugin }
 
@@ -25,6 +26,10 @@ export class PluginManager {
             plugin.destroy();
             this._plugins.splice(index, 1);
         }
+    }
+
+    public getPlugin(name: string): AbstractPlugin | undefined {
+        return find(this._plugins, plugin => plugin.name === name);
     }
 
     public destroy() {

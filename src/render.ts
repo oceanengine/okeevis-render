@@ -291,6 +291,10 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._pluginManager.removePlugin(plugin);
   }
 
+  public getPlugin(name: string): AbstractPlugin | undefined {
+    return this._pluginManager.getPlugin(name);
+  }
+
   public dispose() {
     // todo polyfill
     this._pluginManager.destroy();

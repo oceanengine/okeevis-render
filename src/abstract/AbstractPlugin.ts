@@ -16,7 +16,7 @@ export abstract class AbstractPlugin<T=unknown> {
 
   public getConfig(): T {
     return this.config;
-  } 
+  }
 
   public destroy(): void {
     // empty;

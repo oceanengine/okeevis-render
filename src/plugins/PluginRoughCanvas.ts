@@ -16,6 +16,17 @@ export class PluginRoughCanvas extends AbstractPlugin<PluginRoughCanvasConfig> {
         const canvasPainter = this.render.getPainter() as CanvasPainter;
         const roughCanvas = new RoughCanvas(canvasPainter.getCanvas());
         (canvasPainter as any).roughCanvas = roughCanvas;
+        this._setConfig();
+        
+    }
+    
+    updateConfig(config: PluginRoughCanvasConfig) {
+        this.config = config;
+        this._setConfig();
+    }
+
+    private _setConfig() {
+        const canvasPainter = this.render.getPainter() as CanvasPainter;
         (canvasPainter as any).roughConfig = {
             rough: this.config.rough ?? true,
             options: {
