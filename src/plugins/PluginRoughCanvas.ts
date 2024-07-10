@@ -30,7 +30,6 @@ export class PluginRoughCanvas extends AbstractPlugin<PluginRoughCanvasConfig> {
         (canvasPainter as any).roughConfig = {
             rough: this.config.rough ?? true,
             options: {
-                seed: 1,
                 ...this.config.options
             },
         }

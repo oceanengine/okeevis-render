@@ -399,6 +399,7 @@ export default class CanvasPainter implements Painter {
         }
       } else {
        (item as Shape).drawRough(this.roughCanvas, {
+          seed: (item as Shape).getRoughSeed(),
           ...this.roughConfig.options,
           ...item.attr.roughOptions,
           fill: item.getExtendAttr('fill') as string,

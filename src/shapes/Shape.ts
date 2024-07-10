@@ -31,6 +31,8 @@ export type ShapeAttr = ArcAttr &
 
 export default class Shape<T extends CommonAttr = ShapeAttr> extends Element<T> {
   public svgTagName = 'path';
+
+  private _roughSeed: number;
   
   public brush(ctx: CanvasRenderingContext2D) {
     ctx;
@@ -47,6 +49,13 @@ export default class Shape<T extends CommonAttr = ShapeAttr> extends Element<T> 
   protected createRough(roughCanvas: RoughCanvas, options?: RoughOptions): Drawable {
     const path = this.getPathData().getSVGPathString();
     return roughCanvas.path(path, options);
+  }
+
+  public getRoughSeed() {
+    if (!this._roughSeed) {
+      this._roughSeed = Math.floor(Math.random() * Math.pow(2, 31));
+    }
+    return this._roughSeed;
   }
 
   public getSvgAttributes(): any {

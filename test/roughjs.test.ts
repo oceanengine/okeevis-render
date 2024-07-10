@@ -86,12 +86,10 @@ const circle = new Circle({
   lineWidth: 1,
   draggable: true,
   roughOptions: {
-    fillWeight: 1,
-    fillLineDash: [5],
     strokeWidth: 10,
     fillLineDashOffset: 0,
     fillStyle: 'cross-hatch',
-    hachureAngle: 0,
+    hachureGap: 10,
   },
   onClick: e => e.target.setAttr('fill',  '#' + Math.random().toString(16).substr(2, 6))
 })
