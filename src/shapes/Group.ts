@@ -391,8 +391,8 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
         }
       }
       // todo clone matrix
-      // const dragOffset = nextElement.getDragOffset();
-      // prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
+      const dragOffset = nextElement.getDragOffset();
+      prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
       this._diffUpdateElement(prevElement, nextElement, transition);
     });
 
