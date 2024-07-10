@@ -768,6 +768,7 @@ export default class CanvasPainter implements Painter {
   private _handleDocumentVisibilityChange = () => {
     if (document.visibilityState === 'visible') {
       this._isFirstFrame = true;
+      this.render.refresh();
     }
   };
 
