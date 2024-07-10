@@ -399,12 +399,12 @@ export default class CanvasPainter implements Painter {
         }
       } else {
        (item as Shape).drawRough(this.roughCanvas, {
+          ...this.roughConfig.options,
+          ...item.attr.roughOptions,
           fill: item.getExtendAttr('fill') as string,
           stroke: item.getExtendAttr('stroke') as string,
           strokeWidth: item.getExtendAttr('lineWidth') as number,
           strokeLineDash: item.getExtendAttr('lineDash') as number[],
-          ...this.roughConfig.options,
-          ...item.attr.roughOptions,
        });
       }
 
