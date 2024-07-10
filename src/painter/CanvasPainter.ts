@@ -335,7 +335,6 @@ export default class CanvasPainter implements Painter {
     item.needFill = needFill;
     item.needStroke = needStroke;
     const rough = item.attr.rough ?? this.roughConfig.rough;
-    const roughOptions = item.attr.roughOptions
 
     // item.getFillAndStrokeStyle(renderingContext);
     // if (isInBatch) {
