@@ -77,6 +77,7 @@ export default class Text extends Shape<TextAttr> {
   }
 
   protected prevProcessAttr(attr: TextAttr) {
+    super.prevProcessAttr(attr);
     if (attr.children && !attr.text) {
       attr.text = Array.isArray(attr.children) ? attr.children.join('') : attr.children;
     }
