@@ -25,6 +25,7 @@ export interface ScrollViewAttr extends GroupAttr {
   scrollThumbHoverColor?: string;
   scrollTrackColor?: string;
   scrollTrackBorderColor?: string;
+  directionalLockEnabled?: boolean;
 }
 const enum KEY_CODE {
   ARROW_DOWN = 40,
@@ -68,6 +69,8 @@ export default class ScrollView extends Group {
   private _isScrolling: boolean = false;
 
   private _inTransction: boolean = false;
+
+  private _lockedDirection: 'horizonal' | 'vertical' | undefined;
 
   // eslint-disable-next-line no-useless-constructor
   public constructor(attr: ScrollViewAttr) {
