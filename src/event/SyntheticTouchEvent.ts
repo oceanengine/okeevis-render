@@ -12,6 +12,8 @@ export interface SyntheticTouch {
   readonly identifier: number;
   x: number;
   y: number;
+  clientX: number;
+  clientY: number;
   target: Element;
   currentTarget?: Element;
 }

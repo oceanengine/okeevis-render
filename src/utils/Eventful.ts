@@ -17,6 +17,14 @@ export default class EventFul<T extends DefaultEventHandle = DefaultEventHandle>
     }
   }
 
+  public addEventListener<U extends keyof T>(eventName: U, listener: Callback<T[U]>): void {
+    this.on(eventName, listener);
+  }
+
+  public removeEventListener<U extends keyof T>(eventName: U, listener?: Callback<T[U]>): void {
+    this.off(eventName, listener);
+  }
+
   public off<U extends keyof T>(eventName: U, listener?: Callback<T[U]>): void {
     const listenerList = this._eventListeners[eventName] || [];
     if (typeof listener === 'undefined') {
@@ -29,6 +37,7 @@ export default class EventFul<T extends DefaultEventHandle = DefaultEventHandle>
       this._eventListeners[eventName] = listenerList;
     }
   }
+  
 
   public dispatch<U extends keyof T>(type: U, ...args: T[U]): void {
     const listenerList = this._eventListeners[type] || [];

@@ -23,6 +23,7 @@ import { SyntheticTouchEventParams, SyntheticTouch } from './SyntheticTouchEvent
 import { getTouchOffsetPosition } from '../utils/touch-offset';
 import { inBBox } from '../utils/bbox';
 import * as lodash from '../utils/lodash';
+import { isMobile } from '../utils/env';
 
 function toTouchArray(touches: TouchList): Touch[] {
   const len = touches.length;
@@ -353,6 +354,8 @@ export default class EventHandle {
         identifier: touch.identifier,
         x,
         y,
+        clientX: x,
+        clientY: y,
         target,
       };
     });
@@ -718,7 +721,9 @@ export default class EventHandle {
 
   private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
     this._mouseDownTarget?.setState('active', false);
-    this._prevMouseTarget = null;
+    if (!isMobile()) {
+      this._prevMouseTarget = null;
+    }
     const { x, y } = this._getMousePosition(nativeEvent);
     const mouseEventParam: SyntheticMouseEventParams = {
       x,

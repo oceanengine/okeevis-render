@@ -1,1 +1,1 @@
-import './roughjs.test'
+import './hammer.test'
