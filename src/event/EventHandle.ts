@@ -721,7 +721,7 @@ export default class EventHandle {
 
   private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
     this._mouseDownTarget?.setState('active', false);
-    if (!isMobile()) {
+    if (!isMobile) {
       this._prevMouseTarget = null;
     }
     const { x, y } = this._getMousePosition(nativeEvent);
