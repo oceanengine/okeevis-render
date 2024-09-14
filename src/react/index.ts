@@ -6,6 +6,7 @@ import { createRoot } from './createRoot';
 import { useState, useEffect, useCallback, useMemo, useRef, useContext, useReducer } from './hooks';
 import { memo } from './memo';
 import { createRef } from '../utils/ref';
+import { cloneElement } from './cloneElement';
 
 export {
   createContext,
@@ -22,7 +23,8 @@ export {
   useReducer,
   memo,
   createRef,
-  createRoot
+  createRoot,
+  cloneElement,
 };
 export * from './types';
 export default {
@@ -40,5 +42,6 @@ export default {
   useReducer,
   memo,
   createRef,
-  createRoot
+  createRoot,
+  cloneElement
 };
