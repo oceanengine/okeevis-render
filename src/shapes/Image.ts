@@ -10,6 +10,7 @@ export interface ImageAttr extends CommonAttr {
   width?: number;
   height?: number;
   src?: string;
+  objectFit?: 'none' | 'fill' | 'scale-down' | 'contain' | 'cover';
   /**
    * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/preserveAspectRatio
    */

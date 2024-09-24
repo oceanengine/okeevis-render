@@ -1,9 +1,17 @@
 /**
  * hbox
  */
-import Image from '../../shapes/Image';
+import Image, { ImageAttr } from '../../shapes/Image';
 import Rect from '../../shapes/Rect';
 import VNode, { VNodeProps } from '../vnode';
+
+const objectFitMap: Record<CSSStyleDeclaration['objectFit'], ImageAttr['preserveAspectRatio']> = {
+  'none': 'xMidYMid',
+  'contain': 'xMidYMid',
+  'cover': 'xMidYMid',
+  'fill': 'none',
+  'scale-down': 'xMidYMid',
+}
 
 export default class VImage extends VNode {
   public type = 'image';
@@ -11,6 +19,7 @@ export default class VImage extends VNode {
   public defaultProps: VNodeProps = {
     borderWidth: 1,
     borderColor: '#333333',
+    objectFit: 'fill',
   };
 
   public constructor(props: VNodeProps) {
@@ -19,15 +28,17 @@ export default class VImage extends VNode {
   }
 
   public render(): Image {
-    const clip = this.props.borderRadius > 0 ? new Rect({
+    const {borderRadius, src, objectFit} = this.props;
+    const clip = borderRadius > 0 ? new Rect({
       ...this.bbox,
-      borderRadius: this.props.borderRadius
+      borderRadius: borderRadius
     }): null;
     return new Image({
       clip,
       ...this.bbox,
       ...this.getEventsAndCursor(),
-      src: this.props.src,
+      src: src,
+      preserveAspectRatio: objectFitMap[objectFit],
     });
   }
 
