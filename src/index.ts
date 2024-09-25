@@ -38,4 +38,3 @@ export {
   getCancelAnimationFrame,
 } from './utils/rAF';
 export { registerFeature } from './utils/featureManager';
-export * from './plugins/PluginRoughCanvas';
