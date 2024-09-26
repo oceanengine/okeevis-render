@@ -79,6 +79,7 @@ export class HookElement<T = {}> extends Group {
     this._hooks = null;
 
     if ((this.$$type as MemoComponent<unknown>).$$typeof === 'react.portal') {
+      this._portalFragment.$$portal = null;
       this._portalFragment.parentNode?.remove(this._portalFragment);
       this._portalFragment = null;
     }
@@ -117,6 +118,7 @@ export class HookElement<T = {}> extends Group {
       children,
     });
     this._portalFragment = fragment;
+    fragment.$$portal = this;
     container.add(fragment);
   }
 

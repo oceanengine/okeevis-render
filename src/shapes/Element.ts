@@ -211,6 +211,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public $$isElement: boolean = true;
 
+  public $$portal: Element = null;
+
   public id: number;
 
   public attr: T & CommonAttr = {} as T;

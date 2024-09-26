@@ -921,7 +921,7 @@ export default class EventHandle {
 
     if (bubbles && !isPropagationStopped && target.parentNode) {
       count++;
-      this._dispatchSyntheticEvent(event, target.parentNode as any as Element, count);
+      this._dispatchSyntheticEvent(event, target.$$portal || target.parentNode as any as Element, count);
     }
   }
 
