@@ -1,1 +1,1 @@
-import './hammer.test'
+import './jsx'

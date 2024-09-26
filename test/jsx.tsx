@@ -125,5 +125,6 @@ const App = () => {
     </Context.Provider>
   );
 };
-const app = createRoot(dom);
+const render = new Render(dom, { renderer: 'canvas' });
+const app = createRoot(render.getRoot());
 app.render(<App />);

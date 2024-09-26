@@ -1,14 +1,13 @@
 import { ReactNode } from './types';
-import Render from '../render';
+import Group from '../shapes/Group';
 
-export function createRoot(dom: HTMLElement) {
-  const render = new Render(dom);
+export function createRoot(root: Group) {
   return {
     render(node: ReactNode) {
-      render.updateAll([node as any])
+      root.updateAll([node as any])
     },
     unmount() {
-      render.dispose();
+      root.clear();
     },
   };
 }
