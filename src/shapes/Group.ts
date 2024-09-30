@@ -542,8 +542,6 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
   }
 
   private _diffUpdateElement(prevElement: Element, nextElement: Element, transition: boolean) {
-   
-    const prevAttr = prevElement.getUserAttr();
     const nextAttr = nextElement.getUserAttr();
     if (Element.isHookElement(prevElement) && Element.isHookElement(nextElement)) {
       if (prevElement.$$type === nextElement.$$type) {
@@ -553,33 +551,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       }
       return;
     }
-    const {
-      transitionDuration = defaultSetting.during,
-      transitionEase = defaultSetting.ease,
-      transitionProperty = 'all',
-      transitionDelay = 0,
-    } = nextElement.attr;
-    prevElement.startAttrTransaction();
-    for (const key in prevAttr) {
-      if (!(key in nextAttr)) {
-        prevElement.removeAttr(key as any);
-      }
-    }
-
-    if (!transition || transitionProperty === 'none' || transitionProperty.length === 0) {
-      prevElement.setAttr(nextAttr);
-    } else {
-      // todo transition property array support
-      const transitionAttr =
-        transitionProperty === 'all' ? nextAttr : lodash.pick(nextAttr, transitionProperty as any);
-      prevElement
-        .stopAllAnimation()
-        .animateTo(transitionAttr, transitionDuration, transitionEase, null, transitionDelay);
-    }
-    if ((prevElement as TypeCustomElement).$$CustomType) {
-      (prevElement as TypeCustomElement).skipUpdate();
-    }
-    prevElement.endAttrTransaction();
+    prevElement.replaceAttr(nextAttr);
   }
 
   private _findSVGDomNode(item: Element) {

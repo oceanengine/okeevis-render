@@ -30,6 +30,7 @@ import { SyntheticAnimationEvent } from '../event/SyntheticAnimationEvent';
 import { TextAttr } from './Text';
 import { parseCssGradient, isCssGradient } from '../color/css-gradient-parser';
 import type ScrollView from './ScrollView';
+import { TypeCustomElement } from './CustomElement';
 
 export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
 
@@ -522,6 +523,36 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     return this;
+  }
+
+  public replaceAttr(nextAttr: T): void {
+    const prevAttr = this._attr;
+    const {
+      transitionDuration = defaultSetting.during,
+      transitionEase = defaultSetting.ease,
+      transitionProperty = 'all',
+      transitionDelay = 0,
+    } = nextAttr;
+    this.startAttrTransaction();
+    for (const key in prevAttr) {
+      if (!(key in nextAttr)) {
+        this.removeAttr(key as any);
+      }
+    }
+
+    if (transitionProperty === 'none' || transitionProperty.length === 0) {
+      this.setAttr(nextAttr);
+    } else {
+      const transitionAttr =
+        transitionProperty === 'all' ? nextAttr : lodash.pick(nextAttr, transitionProperty as any);
+      this
+        .stopAllAnimation()
+        .animateTo(transitionAttr, transitionDuration, transitionEase, null, transitionDelay);
+    }
+    if ((this as any as TypeCustomElement).$$CustomType) {
+      (this as any as TypeCustomElement).skipUpdate();
+    }
+    this.endAttrTransaction();
   }
 
   public removeAttr(attribute: keyof T) {
