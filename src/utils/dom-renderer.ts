@@ -22,7 +22,7 @@ export function createReactRenderer(ReactDOM: {
   render: Function;
   unmountComponentAtNode: Function;
   version: string;
-  createRoot: any;
+  createRoot?: any;
 }): DOMRenderer {
   if (ReactDOM.createRoot) {
     let app: any;
