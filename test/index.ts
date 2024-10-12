@@ -1,1 +1,1 @@
-import './jsx'
+import './image'

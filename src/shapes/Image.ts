@@ -3,6 +3,21 @@ import { CommonAttr } from './Element';
 import { getImage } from '../utils/imageLoader';
 import { BBox, rectBBox, inBBox, alignBox, BoxAlign, BoxVerticalAlign } from '../utils/bbox';
 
+
+export type ImageAlign =  | 'none'
+| 'xMinYMin'
+| 'xMidYMin'
+| 'xMaxYMin'
+| 'xMinYMid'
+| 'xMidYMid'
+| 'xMaxYMid'
+| 'xMinYMax'
+| 'xMidYMax'
+| 'xMaxYMax';
+
+type MeetOrSlice = '' | ' meet' | ' slice';
+
+type ImagePreserveAspectRatio = `${ImageAlign}${MeetOrSlice}`;
 export interface ImageAttr extends CommonAttr {
   x?: number;
   y?: number;
@@ -10,25 +25,14 @@ export interface ImageAttr extends CommonAttr {
   width?: number;
   height?: number;
   src?: string;
-  objectFit?: 'none' | 'fill' | 'scale-down' | 'contain' | 'cover';
   /**
    * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/preserveAspectRatio
    */
-  preserveAspectRatio?:
-    | 'none'
-    | 'xMinYMin'
-    | 'xMidYMin'
-    | 'xMaxYMin'
-    | 'xMinYMid'
-    | 'xMidYMid'
-    | 'xMaxYMid'
-    | 'xMinYMax'
-    | 'xMidYMax'
-    | 'xMaxYMax';
+  preserveAspectRatio?: ImagePreserveAspectRatio;
 }
 
 const boxAlign: Record<
-  Exclude<ImageAttr['preserveAspectRatio'], 'none'>,
+  Exclude<ImageAlign, 'none'>,
   [BoxAlign, BoxVerticalAlign]
 > = {
   xMinYMin: ['left', 'top'],
@@ -80,11 +84,17 @@ export default class Image extends Shape<ImageAttr> {
       this.dirty();
     });
     if (image) {
-      const { x, y, width, height } = this._getImagePosition(image);
+      const { x, y, width, height, clip } = this._getImagePosition(image);
       if (width === 0 || height === 0) {
         return;
       }
       if (image.width && image.height && preserveAspectRatio !== 'none') {
+        if (clip) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(this.attr.x, this.attr.y, this.attr.width, this.attr.height);
+          ctx.clip();
+        }
         ctx.drawImage(
           image,
           0,
@@ -96,6 +106,9 @@ export default class Image extends Shape<ImageAttr> {
           width >= 0 ? width : image.width,
           height >= 0 ? height : image.height,
         );
+        if (clip) {
+          ctx.restore();
+        }
       } else {
         ctx.drawImage(image, x, y, width, height);
       }
@@ -123,12 +136,13 @@ export default class Image extends Shape<ImageAttr> {
     return rectBBox(x, y, width, height);
   }
 
-  private _getImagePosition(image: HTMLImageElement): BBox {
+  private _getImagePosition(image: HTMLImageElement): BBox & { clip: boolean } {
     const { x, y, width, height, preserveAspectRatio = 'none' } = this.attr;
     if (!preserveAspectRatio || preserveAspectRatio === 'none' || !image.width || !image.height) {
-      return { x, y, width, height };
+      return { x, y, width, height, clip: false };
     }
-    const [align, verticalAlign] = boxAlign[preserveAspectRatio];
+    const [imageAlign, meetOrSlice = 'meet'] = preserveAspectRatio.split(' ');
+    const [align, verticalAlign] = boxAlign[imageAlign as keyof typeof boxAlign];
     const imageWidth = image.width;
     const imageHeight = image.height;
     let outWidth = width;
@@ -138,6 +152,13 @@ export default class Image extends Shape<ImageAttr> {
     } else {
       outHeight = (width * imageHeight) / imageWidth;
     }
+    let clip = false;
+    if (meetOrSlice === 'slice') {
+      const scale = Math.max(width / outWidth, height / outHeight);
+      outWidth *= scale;
+      outHeight *= scale;
+      clip = scale > 1;
+    }
     const { x: imageX, y: imageY } = alignBox(
       { x, y, width, height },
       outWidth,
@@ -145,6 +166,6 @@ export default class Image extends Shape<ImageAttr> {
       align,
       verticalAlign,
     );
-    return { x: imageX, y: imageY, width: outWidth, height: outHeight };
+    return { x: imageX, y: imageY, width: outWidth, height: outHeight, clip };
   }
 }

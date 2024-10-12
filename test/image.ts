@@ -12,16 +12,16 @@ const img = new Image({
   showBBox: true,
   src: './test.png',
   draggable: true,
-  preserveAspectRatio: 'xMidYMin',
+  preserveAspectRatio: 'xMidYMid meet',
 })
 const img2 = new Image({
   x: 300,
   y: 400,
-  width: 100,
+  width: 400,
   height: 100,
   showBBox: true,
   src: '/test.png',
-  preserveAspectRatio: 'xMidYMin',
+  preserveAspectRatio: 'xMidYMid slice',
 })
 
 render.add(img)

@@ -7,8 +7,8 @@ import VNode, { VNodeProps } from '../vnode';
 
 const objectFitMap: Record<CSSStyleDeclaration['objectFit'], ImageAttr['preserveAspectRatio']> = {
   'none': 'xMidYMid',
-  'contain': 'xMidYMid',
-  'cover': 'xMidYMid',
+  'contain': 'xMidYMid meet',
+  'cover': 'xMidYMid slice',
   'fill': 'none',
   'scale-down': 'xMidYMid',
 }
