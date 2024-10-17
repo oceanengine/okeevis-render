@@ -45,6 +45,7 @@ export interface VNodeProps {
   cursor?: string;
   boxShadow?: ShadowStyle;
   objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
+  crossOrigin?: 'anonymous' | 'use-credentials' | '';
 }
 
 function parseNumber(attr: string): number {
@@ -114,6 +115,7 @@ export const NodeAttributeParser: Record<
   boxShadow: parseBoxShadow,
   cursor: parseString,
   objectFit: parseString,
+  crossOrigin: parseString,
 };
 
 export const attributeList = Object.keys(NodeAttributeParser) as Array<keyof VNodeProps>;

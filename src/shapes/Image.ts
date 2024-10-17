@@ -29,6 +29,7 @@ export interface ImageAttr extends CommonAttr {
    * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/preserveAspectRatio
    */
   preserveAspectRatio?: ImagePreserveAspectRatio;
+  crossOrigin?: 'anonymous' | 'use-credentials' | '';
 }
 
 const boxAlign: Record<
@@ -76,11 +77,11 @@ export default class Image extends Shape<ImageAttr> {
   }
 
   public brush(ctx: CanvasRenderingContext2D) {
-    const { src, preserveAspectRatio } = this.attr;
+    const { src, crossOrigin, preserveAspectRatio } = this.attr;
     if (!src) {
       return;
     }
-    const image = getImage(src, this.id, () => {
+    const image = getImage({ src, crossOrigin }, this.id, () => {
       this.dirty();
     });
     if (image) {

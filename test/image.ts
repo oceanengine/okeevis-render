@@ -22,6 +22,7 @@ const img2 = new Image({
   showBBox: true,
   src: '/test.png',
   preserveAspectRatio: 'xMidYMid slice',
+  crossOrigin: 'use-credentials'
 })
 
 render.add(img)

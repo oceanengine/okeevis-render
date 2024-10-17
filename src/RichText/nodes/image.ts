@@ -28,7 +28,7 @@ export default class VImage extends VNode {
   }
 
   public render(): Image {
-    const {borderRadius, src, objectFit} = this.props;
+    const {borderRadius, src, objectFit, crossOrigin} = this.props;
     const clip = borderRadius > 0 ? new Rect({
       ...this.bbox,
       borderRadius: borderRadius
@@ -39,6 +39,7 @@ export default class VImage extends VNode {
       ...this.getEventsAndCursor(),
       src: src,
       preserveAspectRatio: objectFitMap[objectFit],
+      crossOrigin,
     });
   }
 
