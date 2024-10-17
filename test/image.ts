@@ -13,6 +13,7 @@ const img = new Image({
   src: './test.png',
   draggable: true,
   preserveAspectRatio: 'xMidYMid meet',
+  onMouseLeave: e => console.log(e.type)
 })
 const img2 = new Image({
   x: 300,
