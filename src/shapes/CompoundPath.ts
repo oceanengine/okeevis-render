@@ -7,6 +7,7 @@ export interface CompoundPathAttr extends CommonAttr {
   shapes?: Shape[];
   pathData?: Path2D;
   closePath?: boolean;
+  pickByShape?: boolean;
 }
 
 const shapeKeys: Array<keyof CompoundPathAttr> = ['shapes', 'pathData'];
@@ -57,7 +58,15 @@ export default class CompoundPath extends Shape<CompoundPathAttr> {
     return this.attr.pathData.getPathBBox();
   }
 
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
+    return this.attr.shapes.some(shape => shape.isPointInStroke(x, y, lineWidth));
+  }
+
+  public isPointInFill(x: number, y: number): boolean {
+    return this.attr.shapes.some(shape => shape.isPointInFill(x, y));
+  }
+
   public pickByGPU(): boolean {
-    return true;
+    return !this.attr.pickByShape;
   }
 }

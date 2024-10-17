@@ -42,11 +42,9 @@ const shape = new CompoundPath({
   fill: 'blue',
   stroke: '#333',
   lineWidth: 5,
+  draggable: true,
+  pickByShape: true,
 })
 
-shape.animateTo({
-  shapes: [shape1, shape3],
-})
 
 render.add(shape)
-shape
