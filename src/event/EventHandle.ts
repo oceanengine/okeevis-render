@@ -261,7 +261,9 @@ export default class EventHandle {
     } else {
       event = new SyntheticMouseEvent(nativeEvent.type, mouseEventParam);
     }
-    this._dispatchSyntheticEvent(event, target);
+    if (!this._draggingTarget) {
+      this._dispatchSyntheticEvent(event, target);
+    }
 
     if (event.type === 'mousedown' || event.type === 'mousemove') {
       if (event.type === 'mousedown' && nativeEvent.button !== 2) {
@@ -331,7 +333,7 @@ export default class EventHandle {
           : target.getExtendAttr('cursor');
         this.render.getDom().style.cursor = cursor;
       }
-      if (prevMouseTarget !== target) {
+      if (prevMouseTarget !== target && !this._draggingTarget) {
         this._synthetickOverOutEvent(prevMouseTarget, target, mouseEventParam);
       }
     }
@@ -359,6 +361,7 @@ export default class EventHandle {
         target,
       };
     });
+    const draggingTouch = this._findTouch(touchesList, this._dragStartTouchId);
     const synthetichTouches: SyntheticTouch[] = toTouchArray(touches).map((touch: Touch) => {
       const index = allTouches.indexOf(touch);
       return touchesList[index];
@@ -379,11 +382,11 @@ export default class EventHandle {
     };
 
     const event = new SyntheticTouchEvent(nativeEvent.type, touchEventParam);
-
-    touchEventParam.changedTouches.forEach(touch =>
-      this._dispatchSyntheticEvent(event, touch.target),
-    );
-
+    if (!draggingTouch) {
+      touchEventParam.changedTouches.forEach(touch =>
+        this._dispatchSyntheticEvent(event, touch.target),
+      );
+    }
     const dragEventParam: SyntheticDragEventParams = {
       startX: null,
       startY: null,
@@ -438,22 +441,21 @@ export default class EventHandle {
           this._cancelClick = true;
         }
       }
-      const touch = this._findTouch(touchesList, dragStartTouchId);
-      if (this._draggingTarget && touch) {
+      if (this._draggingTarget && draggingTouch) {
         if (this._getHandleGroup() === this.render.getRoot()) {
           nativeEvent.preventDefault && nativeEvent.preventDefault();
         }
         const dragParam = {
           ...dragEventParam,
-          x: touch.x,
-          y: touch.y,
+          x: draggingTouch.x,
+          y: draggingTouch.y,
           ...this._getDragParam(this._findTouch(touchesList, dragStartTouchId)),
         };
         const onDragEvent = new SyntheticDragEvent('drag', dragParam);
         this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
       }
-      if (touch) {
-        this._prevMousePosition = { x: touch.x, y: touch.y };
+      if (draggingTouch) {
+        this._prevMousePosition = { x: draggingTouch.x, y: draggingTouch.y };
       }
     }
 
@@ -493,7 +495,7 @@ export default class EventHandle {
     // synthetic mouseover mouseout
     if (changedTouches.length) {
       const target = synthetichChangedTouches[0].target;
-      if (target !== prevMouseTarget) {
+      if (target !== prevMouseTarget && !draggingTouch) {
         const mouseEventParam: SyntheticMouseEventParams = {
           x: synthetichChangedTouches[0].x,
           y: synthetichChangedTouches[0].y,
