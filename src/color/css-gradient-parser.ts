@@ -50,18 +50,8 @@ function isWhiteSpace(c: string) {
 }
 
 export function isCssGradient(color: string) {
-  return isString(color) && matchStr(color, 'linear-gradient') || matchStr(color, 'radial-gradient')
+  return isString(color) && (color.startsWith('linear-gradient') || color.startsWith('radial-gradient'));
 }
-
-function matchStr(a: string, b: string) {
-  for (let i = 0; i < b.length; i++) {
-    if (a[i] !== b[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 // 关键字: (),空格
 
 export function parseCssGradient(str: string): Gradient {
