@@ -956,6 +956,9 @@ export default class EventHandle {
   }
 
   private _onRenderDirty = () => {
+    if (isMobile) {
+      return;
+    }
     if (!this._prevMousePosition) {
       return;
     }
