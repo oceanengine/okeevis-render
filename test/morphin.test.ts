@@ -78,6 +78,9 @@ const circle = new Circle({
 const path = new Path({
   pathData: symbols[0],
   fill: 'red',
+  translateX: 100,
+  translateY: 100,
+  scale: [10, 10],
 });
 
 render.add(path)

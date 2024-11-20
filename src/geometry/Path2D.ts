@@ -500,6 +500,17 @@ export default class Path2D {
     return path;
   }
 
+  public stroke(options: {
+    width: number,
+    miterLimit: string;
+    join: CanvasLineJoin;
+    cap: CanvasLineCap;
+    cornerRadius: number;
+    align: 'inside' | 'outside' | 'center';
+  }) {
+    // todo
+  }
+
   private _pushBBoxPoints(points: Point[], bbox: BBox) {
     const { x, y, width, height } = bbox;
     points.push({ x, y });
