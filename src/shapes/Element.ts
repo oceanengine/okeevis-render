@@ -525,7 +525,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this;
   }
 
-  public replaceAttr(nextAttr: T): void {
+  public replaceAttr(nextAttr: T, transition: boolean): void {
     const prevAttr = this._attr;
     const {
       transitionDuration = defaultSetting.during,
@@ -540,7 +540,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     }
 
-    if (transitionProperty === 'none' || transitionProperty.length === 0) {
+    if (!transition || transitionProperty === 'none' || transitionProperty.length === 0) {
       this.setAttr(nextAttr);
     } else {
       const transitionAttr =

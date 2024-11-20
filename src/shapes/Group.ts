@@ -551,7 +551,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       }
       return;
     }
-    prevElement.replaceAttr(nextAttr);
+    prevElement.replaceAttr(nextAttr, transition);
   }
 
   private _findSVGDomNode(item: Element) {
