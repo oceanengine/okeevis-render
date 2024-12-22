@@ -209,9 +209,8 @@ export default class Path2D {
     return this;
   }
 
-  public toCurve(): this {
-    this._pathList = pathToCurve(this);
-    return this;
+  public toCurve(): Path2D {
+    return pathToCurve(this);
   }
 
   public reverse() {
@@ -498,6 +497,16 @@ export default class Path2D {
     const pathList = lodash.cloneDeep(this._pathList);
     path.setPathList(pathList);
     return path;
+  }
+
+  public getIntersections(path: Path2D) {
+    // todo
+  }
+
+  public getLineIntersections(x1: number, y1: number, x2: number, y2: number) {
+    const bezierCurves = this.toCurve().getPathList();
+    
+    
   }
 
   public stroke(options: {

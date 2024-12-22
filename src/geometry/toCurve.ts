@@ -4,9 +4,8 @@ import * as mat3 from '../../js/mat3';
 import { transformMat3 } from '../utils/vec2';
 import { equalWithTolerance } from '../utils/math';
 
-export function pathToCurve(path: Path2D): PathAction[] {
+export function getPathCurveList(path: Path2D): number[][] {
   const segments = getPathSegments(path, []);
-  const curvePath = new Path2D();
   const curveList: number[][] = [];
   segments.forEach(seg => {
     const { type, params } = seg;
@@ -23,9 +22,15 @@ export function pathToCurve(path: Path2D): PathAction[] {
       ellipseToCurve(cx, cy, rx, ry, rotation, start, end, clockWise as any as boolean, curveList);
     }
   });
+
+  return curveList;
+}
+
+export function pathToCurve(path: Path2D): Path2D {
+  const curveList: number[][] = getPathCurveList(path);
+  const curvePath = new Path2D();
   let prevX: number;
   let prevY: number;
-
   for (let i = 0; i < curveList.length; i++) {
     const [p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y] = curveList[i];
     if (!equalWithTolerance(p1x, prevX, 1e-4) || !equalWithTolerance(p1y, prevY, 1e-4)) {
@@ -35,9 +40,8 @@ export function pathToCurve(path: Path2D): PathAction[] {
     prevX = p4x;
     prevY = p4y;
   }
-  return curvePath.getPathList();
+  return curvePath;
 }
-
 function lineToCurve(x1: number, y1: number, x2: number, y2: number): number[] {
   return [x1, y1, x1, y1, x2, y2, x2, y2];
 }
