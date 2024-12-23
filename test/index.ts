@@ -1,1 +1,1 @@
-import './morphin.test';
+import './intersection.test'

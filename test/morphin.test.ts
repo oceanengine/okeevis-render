@@ -90,5 +90,5 @@ let node = path;
 
 setInterval(() => {
   i++;
-  node = node.animateMorphing(symbols[i%symbols.length], 1500)
-}, 2000)
+  node = node.animateMorphing(symbols[i%symbols.length], 1000)
+}, 1000)

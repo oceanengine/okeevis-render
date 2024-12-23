@@ -12,8 +12,9 @@ import {
   getPointAtSegment,
   SegmentPoint,
 } from './pathSegment';
-import { pathToCurve } from './toCurve';
+import { getPathCurveList, pathToCurve } from './toCurve';
 import { bezierSubDivision } from './bezierSubdivision';
+import { computeIntersections } from './intersection/bezier-line-intersection';
 
 export type PointOnPath = SegmentPoint;
 
@@ -503,10 +504,13 @@ export default class Path2D {
     // todo
   }
 
-  public getLineIntersections(x1: number, y1: number, x2: number, y2: number) {
-    const bezierCurves = this.toCurve().getPathList();
-    
-    
+  public getLineIntersections(x1: number, y1: number, x2: number, y2: number): [number, number][] {
+    const bezierCurves = getPathCurveList(this);
+    const out: [number, number][] = [];
+    bezierCurves.forEach(p => {
+      computeIntersections([p[0], p[2], p[4], p[6]], [p[1], p[3], p[5], p[7]], [x1, x2], [y1, y2], out);
+    });
+    return out;
   }
 
   public stroke(options: {
