@@ -92,6 +92,10 @@ export default class ScrollView extends Group {
   protected afterUpdateAll() {
     this._updateHorizontalBar();
     this._updateVerticalBar();
+    this._scrollContentGroup?.setAttr({
+      translateX: -this._scrollLeft,
+      translateY: -this._scrollTop,
+    });
     setTimeout(() => {
       this._updateHorizontalBar();
       this._updateVerticalBar();
