@@ -133,9 +133,29 @@ export default class Path2D {
     return subPathList;
   }
 
+  public isSimple() {
+     /**
+     * @todo
+     */
+    const hasNextMoveTo = this._pathList.findIndex(command => command.action ==='moveTo')!== -1;
+    if (hasNextMoveTo) {
+      return false;
+    }
+    return this.isSelfIntersecting();
+  }
+
+  public isSelfIntersecting() {
+    /**
+     * @todo
+     */
+    return false;
+  }
+
   // swapXY
   public reflect() {
-    // todo
+    /**
+     * @todo
+     */
   }
 
   public connectPath(path: Path2D) {

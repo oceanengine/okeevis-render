@@ -23,7 +23,8 @@ const path = new Path({
     pathData: getPath(),
     stroke: 'red',
     lineWidth: 1,
-    pointerEvents: 'none'
+    pointerEvents: 'none',
+    fill: 'yellow'
 });
 const line = new Line({
     x1: l1[0],
