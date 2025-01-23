@@ -572,6 +572,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
+  public getState(state: Status): boolean {
+    return (this._statusConfig || {})[state] || false;
+  }
+
   private updateCascadeAttr() {
     this.dirty();
     const stateStyles = this._attr.stateStyles;
