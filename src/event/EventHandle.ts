@@ -976,7 +976,7 @@ export default class EventHandle {
   };
 
   private _syntheticFocusEvent = (prevFocus: Element | null, curFocus: Element | null) => {
-    if (prevFocus && curFocus && prevFocus.contains(curFocus)) {
+    if (prevFocus === curFocus) {
       return;
     }
     this._focusTarget = curFocus;
