@@ -1,1 +1,1 @@
-import './event-focus';
+import './diff';

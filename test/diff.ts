@@ -4,6 +4,10 @@ import Group from '../src/shapes/Group';
 import Rect from '../src/shapes/Rect';
 import Line from '../src/shapes/Line';
 import Circle from '../src/shapes/Circle';
+import { getScheduler } from '../src/multi-thread/scheduler';
+import { registerFeature } from '../src/utils/featureManager';
+registerFeature('worker', getScheduler);
+
 
 const dom = document.getElementById('root') as HTMLDivElement;
 const render = new Render(dom, {renderer: 'canvas', workerEnabled: true,});
@@ -18,7 +22,7 @@ const group = new Group({
   fill: 'blue',
 });
 
-group.addAll(makeCircle(3000));
+group.addAll(makeCircle(20000));
 render.add(group);
 group.children().forEach(item => item.animateTo({
   position: [Math.random() * 640, Math.random()*480],

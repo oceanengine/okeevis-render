@@ -24,6 +24,7 @@ export interface FrameData {
   clearRects: BBox[];
   taskId?: number;
   rafId?: number;
+  frameCount?: number;
 }
 
 export class CommandBufferEncoder {

@@ -26,8 +26,8 @@ export class WorkerScheduler {
     {
       lastTime: number;
       onPainted: onDataReady;
-      locked: boolean;
       frameCount: number;
+      waitForRenderFrame: number;
     }
   > = {};
 
@@ -44,9 +44,9 @@ export class WorkerScheduler {
     const taskId = rafUserId++;
     this._taskConfig[taskId] = {
       onPainted: option.onPainted,
-      locked: false,
       lastTime: 0,
       frameCount: 0,
+      waitForRenderFrame: 1,
     };
     let unregisted = false;
     const raf = (rafCb: RafCallback) => {
@@ -60,7 +60,7 @@ export class WorkerScheduler {
       idList.push(id);
       this._pendingTasks.set(taskId, idList);
       if (!this._windowRafId) {
-        this._windowRafId = requestAnimationFrame(this._queryFrame);
+        this._windowRafId = window.requestAnimationFrame(this._queryFrame);
       }
       return id;
     };
@@ -87,8 +87,10 @@ export class WorkerScheduler {
   }
 
   private _commitFrameData(taskId: number, data: FrameData) {
+    const task = this._taskConfig[taskId];
     data.taskId = taskId;
     data.rafId = this._windowRafId;
+    data.frameCount = task.frameCount;
     this._frameDataQueue.unshift(data);
     this._queryThread();
   }
@@ -96,10 +98,9 @@ export class WorkerScheduler {
   private _requestTaskFrame(now: number, taskId: number, taskCbList: number[]) {
     const pendingTask = this._pendingTasks;
     const task = this._taskConfig[taskId];
-    if (task.locked) {
+    if (task.frameCount - task.waitForRenderFrame >= 1) {
       return;
     }
-    task.locked = true;
     task.lastTime = now;
     task.frameCount++;
     pendingTask.delete(taskId);
@@ -107,6 +108,7 @@ export class WorkerScheduler {
       this._rafIdCbMap.get(id)(now);
       this._rafIdCbMap.delete(id);
     });
+
   }
 
   private _queryFrame = () => {
@@ -117,21 +119,38 @@ export class WorkerScheduler {
     });
     this._windowRafId = null;
     if (pendingTask.size) {
-      this._windowRafId = requestAnimationFrame(this._queryFrame);
+      this._windowRafId = window.requestAnimationFrame(this._queryFrame);
     }
   };
 
   private _queryThread() {
     const idleThread = this._getIdleThread();
     if (idleThread && this._frameDataQueue.length) {
-      const frameData = this._frameDataQueue.pop();
+      const index = this._frameDataQueue.findIndex(frame => {
+        const task = this._taskConfig[frame.taskId];
+        return frame.frameCount === task.waitForRenderFrame;
+      });
+
+      if (index === -1) {
+        return;
+      }
+      
+      const frameData = this._frameDataQueue[index];
+
+      this._frameDataQueue.splice(index, 1);
       idleThread.run(frameData, data => {
         const taskId = frameData.taskId;        
         const task = this._taskConfig[taskId];
 
         // task may has been unregistered;
         if (task) {
-          task.locked = false;
+          if (task.frameCount > frameData.frameCount) {
+            task.waitForRenderFrame = frameData.frameCount + 1;
+          } else {
+            window.requestAnimationFrame(() => {
+              task.waitForRenderFrame = frameData.frameCount + 1;
+            })
+          }
           task.onPainted(data, frameData.clearRects);
         }
         // if (this._windowRafId > frameData.rafId) {
