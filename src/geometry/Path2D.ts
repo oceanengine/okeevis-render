@@ -544,6 +544,16 @@ export default class Path2D {
     // todo
   }
 
+  public isPointInPath(x: number, y: number, fillRule: 'nonzero' | 'evenodd' = 'nonzero'): boolean {
+    // todo
+    return false;
+  }
+
+  public isPointInStroke(x: number, y: number, width: number): boolean {
+    // todo
+    return false;
+  }
+
   private _pushBBoxPoints(points: Point[], bbox: BBox) {
     const { x, y, width, height } = bbox;
     points.push({ x, y });
