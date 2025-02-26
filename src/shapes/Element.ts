@@ -1411,6 +1411,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const offsetX = this._stickOffsetX;
     const offsetY = this._stickOffsetY;
     let flagDirty = false;
+    const originXComputed = this._getOrigin(originX, 'x');
+    const originYComputed = this._getOrigin(originY, 'y');
     if (translateX !== 0 || translateY !== 0) {
       flagDirty = true;
       out[6] = translateX;
@@ -1418,11 +1420,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     if (rotation !== 0) {
       flagDirty = true;
-      transformUtils.rotate(out, rotation, originX, originY);
+      transformUtils.rotate(out, rotation, originXComputed, originYComputed);
     }
     if (scaleX !== 1 || scaleY !== 1) {
       flagDirty = true;
-      transformUtils.scale(out, scaleX, scaleY, originX, originY);
+      transformUtils.scale(out, scaleX, scaleY, originXComputed, originYComputed);
     }
     if (matrix) {
       flagDirty = true;
@@ -1451,6 +1453,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
   public dirtyBBox() {
     this._bboxDirty = true;
     this.dirtyClientBoundingRect();
+    if (lodash.isString(this.attr.originX) || lodash.isString(this.attr.originY)) {
+      this._transformDirty = true;
+    }
   }
 
   private _mountClip() {
@@ -1497,5 +1502,32 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _removeFromFrame() {
     this._inFrameAble = false;
     this.ownerRender?.__removeFrameableElement(this);
+  }
+
+  private _getOrigin(value: number | 'top' | 'left' | 'right' | 'center' | 'bottom', axis: 'x' | 'y') {
+    if (typeof value === 'number') {
+      return value;
+    }
+    const localBBox = this.getBBox();
+    if (value === 'left') {
+      return localBBox.x;
+    }
+    if (value === 'right') {
+      return localBBox.x + localBBox.width;
+    }
+    if (value === 'top') {
+      return localBBox.y;
+    }
+    if (value === 'bottom') {
+      return localBBox.y + localBBox.height;
+    }
+    if (value === 'center') {
+      if (axis === 'x') {
+        return localBBox.x + localBBox.width / 2;
+      }
+      if (axis === 'y') {
+        return localBBox.y + localBBox.height / 2;
+      }
+    }
   }
 }
