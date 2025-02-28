@@ -133,7 +133,6 @@ type Status =
   | 'animation'
   | 'hover'
   | 'focus'
-  | 'blur'
   | 'selected'
   | 'checked'
   | 'active';
