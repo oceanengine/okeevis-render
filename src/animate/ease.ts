@@ -3,6 +3,10 @@
 
 export type EasingName = keyof typeof easing;
 export type EasingFunction = (k: number) => number;
+
+export const cubicBezier = (p1x: number, p1y: number, p2x: number, p2y: number) => {
+  return (k: number) =>  3 * (1 - k) ** 2 * k * p1y + 3 * (1 -k) * k ** 2 * p2y + k ** 3;
+}
 const easing = {
   Linear: (k: number): number => {
     return k;

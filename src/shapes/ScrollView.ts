@@ -3,9 +3,10 @@ import Element from './Element';
 import Rect, { RectAttr } from './Rect';
 import * as lodash from '../utils/lodash';
 import type DOMNode from './DOMNode';
-import { isMobile } from '../utils/env';
-import { SyntheticEvent } from '../event';
+import { isMobile, isPC } from '../utils/env';
+import { SyntheticDragEvent, SyntheticEvent } from '../event';
 import { interpolateNumber } from '../interpolate';
+import { cubicBezier } from '../animate/ease';
 
 export interface ScrollViewAttr extends GroupAttr {
   x: number;
@@ -18,7 +19,9 @@ export interface ScrollViewAttr extends GroupAttr {
   scrollY?: boolean;
   onScroll?: (event: SyntheticEvent) => void;
   maxScrollLeft?: number;
+  minScrollLeft?: number;
   maxScrollTop?: number;
+  minScrollTop?: number;
   showScrollBar?: boolean | 'hover' | 'scrolling';
   scrollBarSize?: number;
   scrollThumbColor?: string;
@@ -26,6 +29,7 @@ export interface ScrollViewAttr extends GroupAttr {
   scrollTrackColor?: string;
   scrollTrackBorderColor?: string;
   directionalLockEnabled?: boolean;
+  bounces?: boolean;
 }
 const enum KEY_CODE {
   ARROW_DOWN = 40,
@@ -70,6 +74,14 @@ export default class ScrollView extends Group {
 
   private _inTransction: boolean = false;
 
+  private _lastDragEvent: SyntheticDragEvent;
+
+  private _transitionRAF: any;
+
+  private _isPanningScroll: boolean = false;
+
+  private _isInTransitionScroll: boolean = false;
+  
   private _lockedDirection: 'horizonal' | 'vertical' | undefined;
 
   // eslint-disable-next-line no-useless-constructor
@@ -136,6 +148,7 @@ export default class ScrollView extends Group {
       scrollThumbHoverColor: '#c1c1c1',
       scrollTrackColor: '#fafafa',
       scrollTrackBorderColor: '#ebebeb',
+      bounces: true,
     };
   }
 
@@ -154,6 +167,9 @@ export default class ScrollView extends Group {
   }
 
   public set scrollLeft(x: number) {
+    if (!this._isInTransitionScroll) {
+      this.ownerRender.cancelAnimationFrame(this._transitionRAF);
+    }
     const { scrollWidth, maxScrollLeft } = this.attr;
     const width = this.clientWidth;
     const scrollLeft = lodash.clamp(x, 0, maxScrollLeft || scrollWidth - width);
@@ -172,9 +188,12 @@ export default class ScrollView extends Group {
   }
 
   public set scrollTop(y: number) {
-    const { scrollHeight, maxScrollTop } = this.attr;
-    const height = this.clientHeight;
-    const scrollTop = lodash.clamp(y, 0, maxScrollTop || scrollHeight - height);
+    if (!this._isInTransitionScroll) {
+      this.ownerRender.cancelAnimationFrame(this._transitionRAF);
+    }
+    const { height, scrollHeight, maxScrollTop, bounces } = this.attr;
+    const minScrollTop = bounces ? (this._isPanningScroll || this._transitionRAF ? 0 : 0) : 0;
+    const scrollTop = lodash.clamp(y, minScrollTop, maxScrollTop || scrollHeight - height);
     if (scrollTop === this._scrollTop) {
       return;
     }
@@ -251,8 +270,75 @@ export default class ScrollView extends Group {
       getDragOffset: () => {
         return { x: 0, y: 0 };
       },
-      onDrag: e =>
-        isMobile && this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy),
+      onDragStart: () => {
+        this.ownerRender.cancelAnimationFrame(this._transitionRAF);
+        this._transitionRAF = null;
+      },
+      onDrag: e => {
+        if (isMobile) {
+          this._isPanningScroll = true;
+          this._lastDragEvent = e;
+          this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy);
+        }
+      },
+      onDragEnd: event => {
+        if (!event || !this._lastDragEvent) {
+          return;
+        }
+        // iScroll https://wzes.github.io/2019/10/23/JavaScript/iScroll/index.html
+
+        const during = event.timeStamp - this._lastDragEvent.timeStamp;
+        this._isPanningScroll = false;
+        const rAF = this.ownerRender.requestAnimationFrame
+        let {dx, dy} = this._lastDragEvent;
+        const { scrollX, scrollY, width, height, scrollWidth, scrollHeight } = this.attr;
+        if (!scrollX || width >= scrollWidth) {
+          dx = 0;
+        }
+        if (!scrollY || height >= scrollHeight) {
+          dy = 0;
+        }
+        const minScrollLeft = this.attr.minScrollLeft?? 0;
+        const maxScrollLeft = this.attr.maxScrollLeft ?? this.attr.scrollWidth - this.clientWidth;
+        const maxScrollTop = this.attr.maxScrollTop ?? this.attr.scrollHeight - this.clientHeight;
+        const minScrollTop = this.attr.minScrollTop ?? 0;
+        this._lastDragEvent = null;
+        const speed = Math.sqrt(dx * dx + dy * dy);
+        // 超出边界回弹
+
+        if (during > 300 || speed === 0) {
+          return;
+        }
+        const startTime = Date.now();
+        const deceleration = 0.3;
+        const frameCount = Math.abs(speed) / deceleration;
+        const initialLeft = this.scrollLeft;
+        const initialTop = this.scrollTop;
+        const maxMoveMent = speed * frameCount - 1 / 2 * deceleration * frameCount ** 2;
+        const ease = cubicBezier(.25, .46, .45, .94);
+        const transitionScroll = () => {
+          this._isInTransitionScroll = true;
+          const t = Math.min((Date.now() - startTime) / 16, frameCount) / frameCount;
+          const movement = ease(t) * maxMoveMent;
+          const nextScrollLeft = dx !== 0 ? initialLeft - movement * (dx > 0 ? 1 : -1) : initialLeft;
+          const nextScrollTop =  dy !== 0 ? initialTop - movement * (dy > 0 ? 1 : -1) : initialTop;
+          this.scrollLeft = nextScrollLeft;
+          this.scrollTop = nextScrollTop;
+          this._isInTransitionScroll = false;
+          const isYOverflow = nextScrollTop < minScrollTop || nextScrollTop > maxScrollTop;
+          const isXOverflow = nextScrollLeft < minScrollLeft || nextScrollLeft > maxScrollLeft;
+          if (isXOverflow && isYOverflow) {
+            this._transitionRAF = null;
+            return;
+          }
+          if (t < 1) {
+            this._transitionRAF = rAF(transitionScroll)
+          } else {
+            this._transitionRAF = null;
+          }
+        }
+        this._transitionRAF = rAF(transitionScroll);
+      }
     }));
     this._bgRect = new Rect({
       key: 'event-rect',
@@ -278,6 +364,9 @@ export default class ScrollView extends Group {
         self._updateVerticalBar();
       },
       onWheel: event => {
+        if (this._transitionRAF) {
+          return;
+        }
         const _this = event.currentTarget as ScrollView;
         const { scrollTop, scrollLeft, clientWidth, clientHeight, attr } = _this;
         const isToBottom = scrollTop + clientHeight - attr.scrollHeight === 0;
@@ -452,6 +541,7 @@ export default class ScrollView extends Group {
       y,
       width,
       height,
+      scrollHeight,
       scrollWidth,
       showScrollBar,
       scrollBarSize,
@@ -462,7 +552,7 @@ export default class ScrollView extends Group {
     const clientWidth = this.clientWidth;
     const scaleX = clientWidth / scrollWidth;
     const dx = this.scrollLeft * scaleX;
-    const yposition = y + height - scrollBarSize / 2 - 0.5;
+    const yPosition = y + Math.min(height, scrollHeight) - scrollBarSize / 2 - 0.5;
     let show = !!(scaleX < 1 && showScrollBar);
     if (showScrollBar === 'hover') {
       show = show && this._isMouseEnter;
@@ -471,7 +561,7 @@ export default class ScrollView extends Group {
       display: show,
       opacity: 1,
       x,
-      y: yposition - scrollBarSize / 2,
+      y: yPosition - scrollBarSize / 2,
       width,
       height: scrollBarSize,
       fill: scrollTrackColor,
@@ -482,7 +572,7 @@ export default class ScrollView extends Group {
       display: show,
       opacity: 1,
       x: x + dx,
-      y: yposition - scrollThumbWidth / 2,
+      y: yPosition - scrollThumbWidth / 2,
       width: clientWidth * scaleX,
       height: scrollThumbWidth,
     });
@@ -494,6 +584,7 @@ export default class ScrollView extends Group {
       y,
       width,
       height,
+      scrollWidth,
       scrollHeight,
       showScrollBar,
       scrollBarSize,
@@ -504,7 +595,7 @@ export default class ScrollView extends Group {
     const clientHeight = this.clientHeight;
     const scaleY = clientHeight / scrollHeight;
     const dy = this.scrollTop * scaleY;
-    const xposition = x + width - scrollBarSize / 2 - 0.5;
+    const xPosition = x + Math.min(width, scrollWidth) - scrollBarSize / 2 - 0.5;
     let show = !!(scaleY < 1 && showScrollBar);
     if (showScrollBar === 'hover') {
       show = show && this._isMouseEnter;
@@ -512,7 +603,7 @@ export default class ScrollView extends Group {
     this._verticalScrollTrack.setAttr({
       display: show,
       opacity: 1,
-      x: xposition - scrollBarSize / 2,
+      x: xPosition - scrollBarSize / 2,
       y,
       width: scrollBarSize,
       height,
@@ -523,7 +614,7 @@ export default class ScrollView extends Group {
     this._verticalScrollBar.setAttr({
       display: show,
       opacity: 1,
-      x: xposition - scrollThumbWidth / 2,
+      x: xPosition - scrollThumbWidth / 2,
       y: y + dy,
       width: scrollThumbWidth,
       height: clientHeight * scaleY,

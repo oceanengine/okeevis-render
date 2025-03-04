@@ -17,6 +17,7 @@ import type { CommandBufferEncoder } from './multi-thread/command-buffer';
 import { BBox } from './utils/bbox';
 import { getFeature } from './utils/featureManager';
 import { PluginManager, AbstractPlugin } from './PluginManager'
+import { RafCallback } from './multi-thread/scheduler';
 
 registerPainter('canvas', CanvasPainter);
 registerPainter('svg', SVGPainter);
@@ -178,8 +179,12 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this.dispatch('resize');
   }
 
-  public getRaf(): typeof requestAnimationFrame {
-    return this._raf as typeof requestAnimationFrame;
+  public requestAnimationFrame = (rafCb: RafCallback): number => {
+    return this._raf(rafCb) as number;
+  }
+
+  public cancelAnimationFrame = (id: number) =>  {
+    this._caf(id);
   }
 
   public isWorkerEnabled(): boolean {
@@ -352,7 +357,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this._hookElementEffects.unshift(effect);
     if (!this._effectPending) {
       this._effectPending = true;
-      this.getRaf()(() => {
+      this._raf(() => {
         this._hookElementEffects.forEach(effect => effect());
         this._effectPending = false;
         this._hookElementEffects.length = 0;

@@ -743,6 +743,11 @@ export default class EventHandle {
         ...this._getDragParam(mouseEventParam),
       });
       this._dispatchSyntheticEvent(onDragEvent, this._draggingTarget);
+      setTimeout(() => {
+        // mouseup to dom
+        this._prevMouseTarget = this._mouseDownTarget;
+        this.dispatch('mousemove',{x, y});
+      });
     }
     this._draggingTarget = null;
   };
