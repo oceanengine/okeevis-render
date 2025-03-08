@@ -1042,8 +1042,14 @@ export default class EventHandle {
     mouseEventParam: SyntheticMouseEventParams,
   ) {
     this._prevMouseTarget = target;
-    const mouseoutEvent = new SyntheticMouseEvent('mouseout', mouseEventParam);
-    const mouseoverEvent = new SyntheticMouseEvent('mouseover', mouseEventParam);
+    const mouseoutEvent = new SyntheticMouseEvent('mouseout', {
+     ...mouseEventParam,
+     relatedTarget: target,
+    });
+    const mouseoverEvent = new SyntheticMouseEvent('mouseover', {
+     ...mouseEventParam,
+     relatedTarget: prevMouseTarget,
+    });
     this._dispatchSyntheticEvent(mouseoutEvent, prevMouseTarget);
     this._dispatchSyntheticEvent(mouseoverEvent, target);
     const containSelf = true;
@@ -1056,6 +1062,7 @@ export default class EventHandle {
         const mouseleaveEvent = new SyntheticMouseEvent('mouseleave', {
           ...mouseEventParam,
           bubbles: false,
+          relatedTarget: target,
         });
         this._dispatchSyntheticEvent(mouseleaveEvent, prevNode);
       }
@@ -1065,6 +1072,7 @@ export default class EventHandle {
         const mouseenterEvent = new SyntheticMouseEvent('mouseenter', {
           ...mouseEventParam,
           bubbles: false,
+          relatedTarget: prevMouseTarget,
         });
         this._dispatchSyntheticEvent(mouseenterEvent, currentNode);
       }
