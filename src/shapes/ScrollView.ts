@@ -114,12 +114,12 @@ export default class ScrollView extends Group {
     });
   }
 
+
   /**
-   *
-   * @param children children
+   * @override
    */
-  protected updateChildren(children: Element | Element[]) {
-    this._scrollContentGroup?.updateAll(Array.isArray(children) ? children : [children]);
+  protected getChildrenContainer(): Group {
+    return this._scrollContentGroup;
   }
 
   public getContentGroup(): Group {
@@ -261,7 +261,7 @@ export default class ScrollView extends Group {
   }
 
   protected created() {
-    const { x, y, width, height, children } = this.attr;
+    const { x, y, width, height } = this.attr;
     const clipRect = new Rect({ x, y, width, height });
     const clipGroup = (this._clipGroup = new Group({
       key: 'clip-group',
@@ -441,9 +441,6 @@ export default class ScrollView extends Group {
     clipGroup.add(contentGroup);
     this._scrollContentGroup = contentGroup;
     this._attachScrollBar();
-    if (children) {
-      this.updateChildren(children);
-    }
   }
 
   private _eventScrollBy(target: ScrollView, dx: number, dy: number) {
