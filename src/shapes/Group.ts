@@ -31,6 +31,8 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
 
   protected _chunks: T[][] = [];
 
+  private _childrenChanged = false;
+
   public get size(): number {
     return this._length; 
   }
@@ -51,20 +53,31 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
 
   protected onAttrChange(key: any, value: any, oldValue: any) {
     super.onAttrChange(key, value, oldValue);
+    if (key === 'children') {
+      this._childrenChanged = true;
+    }
     if (shapeKeys.indexOf(key) !== -1) {
       this.dirtyTextChildBBox();
     }
   }
 
   protected afterAttrChanged() {
-    const { children } = this.attr;
-    if (children) {
-      this.updateChildren(children);
+    super.afterAttrChanged();
+    if (this._childrenChanged) {
+      this._childrenChanged = false;
+      this.mountChildren();
     }
   }
 
-  protected updateChildren(children: T | T[]) {
-    this.updateAll(Array.isArray(children) ? children : [children]);
+  protected getChildrenContainer(): Group {
+    return this;
+  }
+
+  protected mountChildren() {
+    const children = this.attr.children;
+    if (this.ownerRender && children) {
+      this.getChildrenContainer().updateAll(Array.isArray(children) ? children : [children]);
+    }
   }
 
   public getAnimationKeys(): Array<keyof GroupAttr> {
@@ -72,7 +85,11 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
   }
 
   public computeBoundingClientRect(): BBox {
-    return this.getBBox();
+    const bboxList = this.children()
+    .filter(item => item.attr.display)
+    .map(child => child.getBoundingClientRect());
+
+    return unionBBox(bboxList);
   }
 
   public getCurrentDirtyRect(): BBox {
@@ -86,9 +103,22 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
 
   protected computeBBox(): BBox {
     const bboxList = this.children()
-      .filter(item => item.attr.display)
-      .map(child => child.getBoundingClientRect());
+    .filter(item => item.attr.display)
+    .map(child => child.computeBBoxWithLocalTransform());
+
     return unionBBox(bboxList);
+  }
+  
+  public computeBBoxWithLocalTransform(): BBox {
+    const bboxList = this.children()
+   .filter(item => item.attr.display)
+   .map(child => child.computeBBoxWithLocalTransform());
+    const bbox = unionBBox(bboxList);
+    const matrix = this.getTransform(true);
+    if (!matrix) {
+      return bbox;
+    }
+    return this.computeBBoxWithTransform(bbox, 0, 0, bbox.width, bbox.height, matrix);
   }
 
   public mounted() {
@@ -97,6 +127,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       this.onChunkChange();
     }
     this.eachChild(child => child.mounted());
+    this.mountChildren();
   }
 
   public dirtyTransform() {
@@ -336,7 +367,6 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
   }
 
   public updateAll(list: T[], transition: boolean = true) {
-
     if (this._chunks?.length) {
       this.replaceChunks([]);
     }
@@ -385,7 +415,9 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
         if (Element.isHookElement(prevElement)) {
           prevElement.updateProps((nextElement as unknown as HookElement).props);
         } else {
-          ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children(), transition);
+          if (!prevElement.attr.children) {
+            ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children(), transition);
+          }
           const chunks = ((nextElement as any) as Group).getChunks();
           ((prevElement as unknown) as Group).replaceChunks(chunks);
         }
@@ -393,6 +425,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       // todo clone matrix
       const dragOffset = nextElement.getDragOffset();
       prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
+      
       this._diffUpdateElement(prevElement, nextElement, transition);
     });
 

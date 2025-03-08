@@ -296,7 +296,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _stickOffsetX: number = 0;
 
   private _stickOffsetY: number = 0;
-
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
@@ -865,7 +864,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return getSVGStyleAttributes(this as any);
   }
 
-  protected computeBoundingClientRect(out: BBox): BBox {
+  public computeBBoxWithLocalTransform() {
+    const out: BBox = {x: 0, y: 0, width: 0, height: 0};
+    return this.computeBoundingClientRect(out, false);
+  }
+
+  protected computeBoundingClientRect(out: BBox, isGlobal = true): BBox {
     // todo gc optimize
     let { x, y, width, height } = this.getBBox();
     if (
@@ -879,7 +883,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const hasStroke = this.hasStroke();
     const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
     const offsetLineWidth = (Math.sqrt(2) / 2) * lineWidth;
-    const matrix = this.getGlobalTransform(true);
+    const matrix =  isGlobal ? this.getGlobalTransform(true) : this.getTransform(true);
     x -= offsetLineWidth;
     y -= offsetLineWidth;
     width += offsetLineWidth * 2;

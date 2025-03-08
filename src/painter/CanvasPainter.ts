@@ -745,7 +745,7 @@ export default class CanvasPainter implements Painter {
     const ctx = this._ctx;
     const bbox = isClientBBox ? item.getBoundingClientRect() : item.getBBox();
     ctx.save();
-    if (isClientBBox || item.isGroup) {
+    if (isClientBBox) {
       styleHelper.resetTransform(ctx);
       if (this.dpr !== 1) {
         ctx.scale(this.dpr, this.dpr);
