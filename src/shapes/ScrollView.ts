@@ -17,6 +17,7 @@ export interface ScrollViewAttr extends GroupAttr {
   scrollHeight?: number;
   scrollX?: boolean;
   scrollY?: boolean;
+  initialOffset?:[number, number];
   onScroll?: (event: SyntheticEvent) => void;
   maxScrollLeft?: number;
   minScrollLeft?: number;
@@ -142,6 +143,7 @@ export default class ScrollView extends Group {
       scrollHeight: 0,
       scrollX: false,
       scrollY: false,
+      initialOffset: [0, 0],
       showScrollBar: false,
       scrollBarSize: 11,
       scrollThumbColor: '#e0e0e0',
@@ -257,6 +259,8 @@ export default class ScrollView extends Group {
 
   public mounted() {
     super.mounted();
+    const [initialOffsetX, initialOffsetY] = this.attr.initialOffset || [0, 0];
+    this.scrollTo(initialOffsetX, initialOffsetY);
     this._updateDomNodeClipAndSticky();
   }
 

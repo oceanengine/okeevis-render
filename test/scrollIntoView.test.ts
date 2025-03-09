@@ -16,6 +16,7 @@ const scrollView = new ScrollView({
   scrollWidth: 810,
   scrollHeight: 4000,
   showScrollBar: true,
+  initialOffset: [-100, 800]
 });
 
 
