@@ -55,7 +55,7 @@ export default class CanvasPainter implements Painter {
 
   private _paintPosition: [number, number];
 
-  private _frameTimes: number[] = [];
+  private _fps: number;
 
   private _viewPort: BBox;
 
@@ -102,10 +102,12 @@ export default class CanvasPainter implements Painter {
     const showFPS = this.render.showFPS;
     const needUpdate = this.render.needUpdate();
     if (showFPS && now) {
-      this._frameTimes.push(now);
-      if (this._frameTimes.length > 60) {
-        this._frameTimes.shift();
-      }
+      this.render.requestAnimationFrame(t => {
+        this._fps = Math.floor(1000 / (t - now));
+        if (!this.render.needUpdate()) {
+          this._drawFPS();
+        }
+      });
     }
 
     const maxDirtyRects = this.render.maxDirtyRects;
@@ -790,16 +792,9 @@ export default class CanvasPainter implements Painter {
 
   private _drawFPS() {
     fpsText.setAttr('display', this.render.showFPS);
-    fpsRect.setAttr('display', this.render.showFPS);
-    const frameTimes = this._frameTimes;
-    const startTime = frameTimes[0];
-    const endTime = frameTimes[frameTimes.length - 1];
-    if (endTime === startTime) {
-      return;
-    }
-    const fps = Math.floor((frameTimes.length * 1000) / (endTime - startTime));
+    fpsRect.setAttr('display', this.render.showFPS);   
     fpsText.setAttr({
-      text: fps + ' fps',
+      text: this._fps + ' fps',
     });
     this.drawElement(fpsRect);
     this.drawElement(fpsText);
