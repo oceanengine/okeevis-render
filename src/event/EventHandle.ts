@@ -624,7 +624,7 @@ export default class EventHandle {
     }
   };
 
-  private _handleNativeKeyboardEvent = (nativeEvent: KeyboardEvent) => {
+  private _handleNativeKeyboardEvent = (nativeEvent: KeyboardEvent & {char: string}) => {
     const {
       altKey,
       char,
@@ -638,7 +638,7 @@ export default class EventHandle {
       metaKey,
       repeat,
       shiftKey,
-    } = nativeEvent;
+    } = nativeEvent
     const param: SyntheticKeyboardEventParams = {
       bubbles: true,
       original: nativeEvent,

@@ -319,7 +319,7 @@ export default class ScrollView extends Group {
         const initialLeft = this.scrollLeft;
         const initialTop = this.scrollTop;
         const maxMoveMent = speed * frameCount - 1 / 2 * deceleration * frameCount ** 2;
-        const ease = cubicBezier(.25, .46, .45, .94);
+        const ease = cubicBezier(0, .5, .2, 1);
         const transitionScroll = () => {
           this._isInTransitionScroll = true;
           const t = Math.min((Date.now() - startTime) / 16, frameCount) / frameCount;
