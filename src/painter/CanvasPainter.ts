@@ -12,7 +12,7 @@ import { IDENTRY_MATRIX } from '../constant';
 import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
 import { fpsRect, fpsText } from './fps';
-import { isArray } from 'lodash-es';
+import { isArray, sum } from 'lodash-es';
 
 const contextKeys: Array<keyof ShapeAttr> = [
   'fill',
@@ -55,7 +55,7 @@ export default class CanvasPainter implements Painter {
 
   private _paintPosition: [number, number];
 
-  private _fps: number;
+  private _frameTimes: number[] = [];
 
   private _viewPort: BBox;
 
@@ -103,10 +103,7 @@ export default class CanvasPainter implements Painter {
     const needUpdate = this.render.needUpdate();
     if (showFPS && now) {
       this.render.requestAnimationFrame(t => {
-        this._fps = Math.floor(1000 / (t - now));
-        if (!this.render.needUpdate()) {
-          this._drawFPS();
-        }
+        this._frameTimes.push(t - now);
       });
     }
 
@@ -791,10 +788,14 @@ export default class CanvasPainter implements Painter {
   };
 
   private _drawFPS() {
+    if (!this._frameTimes.length) {
+      return;
+    }
+    const fps = Math.floor(1000 / sum(this._frameTimes) * this._frameTimes.length)
     fpsText.setAttr('display', this.render.showFPS);
     fpsRect.setAttr('display', this.render.showFPS);   
     fpsText.setAttr({
-      text: this._fps + ' fps',
+      text: fps + ' fps',
     });
     this.drawElement(fpsRect);
     this.drawElement(fpsText);
