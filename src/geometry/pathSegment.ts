@@ -1,5 +1,10 @@
 import Path2d, { PathAction } from './Path2D';
 import { getPointOnPolar, equalWithTolerance } from '../utils/math';
+import { pointInLineStroke } from './contain/line';
+import { pointInArcStroke } from './contain/arc';
+import { pointInBezierStroke } from './contain/bezier';
+import { pointInEllipseStroke } from './contain/ellipse';
+import { angle, Vec2 } from '../utils/vec2';
 
 export interface Segment {
   type: 'line' | 'arc' | 'bezier' | 'ellipse'; // todo ellipse/qurdatic
@@ -109,7 +114,7 @@ function pointAtArc(
   };
 }
 
-function pointAtBezier(
+export function pointAtBezier(
   t: number,
   p1x: number,
   p1y: number,
@@ -181,7 +186,37 @@ export function getPointAtSegment(t: number, segment: Segment): SegmentPoint {
   return segmentFn[segment.type].apply(null, [t, ...segment.params]);
 }
 
-export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
+export function isPointInSegmentStroke(segment: Segment, lineWidth: number, x: number, y: number): boolean {
+  const { type, params} = segment;
+  if (type === 'line') {
+    const [x1, y1, x2, y2] = params;
+    return pointInLineStroke(x1, y1, x2, y2, lineWidth, x, y);
+  }
+
+  if (type === 'arc') {
+    const [cx, cy, r, start, end] = params;
+    return pointInArcStroke(cx, cy, r, start, end, false, lineWidth, x, y);
+  }
+
+  if (type === 'ellipse') {
+    const [cx, cy, rx, ry, xAxisRotation, start, end, clockWise] = params;
+    const midAngle = (start + end) / 2 + xAxisRotation;
+    const midVec: Vec2 = [Math.cos(midAngle), Math.sin(midAngle)];
+    const rotate = Math.abs(angle(midVec, [x - cx, y - cy]));
+    const delta = Math.abs(start - end);
+    const inAngle = rotate < delta / 2 || equalWithTolerance(rotate, delta / 2);
+    return pointInEllipseStroke(cx, cy, rx, ry, lineWidth, x, y) && inAngle;
+  }
+
+  if (type === 'bezier') {
+    const [x1, y1, c1x, c1y, c2x, c2y, x2, y2] = params;
+    return pointInBezierStroke(x1, y1, c1x, c1y, c2x, c2y, x2, y2, lineWidth, x, y);
+  }
+  
+  return false;
+}
+
+export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | 'fill'= 'stroke'): Segment[] {
   const pathList = path.getPathList();
   let startX: number;
   let startY: number;
@@ -190,12 +225,23 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
   let action: PathAction['action'];
   let params: number[];
   let currentPath: PathAction;
+  let subSegmentIndex: number = 0;
   for (let i = 0; i < pathList.length; i++) {
     currentPath = pathList[i];
     action = currentPath.action;
     params = currentPath.params;
 
     if (action === 'moveTo') {
+      if (type === 'fill') {
+        const isClosable = isSegmentClosable(out.slice(subSegmentIndex));
+        if (isClosable  && !(startX === endX && startY === endY)) {
+          out.push({
+            type: 'line',
+            params: [endX, endY, startX, startY],
+          });
+          subSegmentIndex = out.length;
+        }
+      }
       startX = params[0];
       startY = params[1];
       endX = params[0];
@@ -266,6 +312,7 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
       });
       endX = x;
       endY = y;
+      subSegmentIndex = out.length;
     }
     if (action === 'quadraticCurveTo') {
       // todo
@@ -281,14 +328,28 @@ export function getPathSegments(path: Path2d, out: Segment[]): Segment[] {
       endY = cy + ry * Math.sin(end);
     }
 
-    if (action === 'closePath') {
+    if (action === 'closePath' && !(startX === endX && startY === endY)) {
       out.push({
         type: 'line',
         params: [endX, endY, startX, startY],
       });
       endX = params[0];
       endY = params[1];
+      subSegmentIndex = out.length;
+    }
+  }
+  if (type === 'fill') {
+    const lastSegments = out.slice(subSegmentIndex);
+    if (isSegmentClosable(lastSegments)  && !(startX === endX && startY === endY)) {
+      out.push({
+        type: 'line',
+        params: [endX, endY, startX, startY],
+      });
     }
   }
   return out;
+}
+
+function isSegmentClosable(segments: Segment[]): boolean {
+  return !(!segments.length  || (segments.length === 1 && segments[0].type === 'line'));
 }

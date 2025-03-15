@@ -11,6 +11,7 @@ import {
   getSegmentLength,
   getPointAtSegment,
   SegmentPoint,
+  isPointInSegmentStroke,
 } from './pathSegment';
 import { getPathCurveList, pathToCurve } from './toCurve';
 import { bezierSubDivision } from './bezierSubdivision';
@@ -448,7 +449,7 @@ export default class Path2D {
     return lodash.sum(segments.map(item => getSegmentLength(item)));
   }
 
-  public getSegments(): Segment[] {
+  protected getSegments(): Segment[] {
     return getPathSegments(this, []);
   }
 
@@ -545,13 +546,21 @@ export default class Path2D {
   }
 
   public isPointInPath(x: number, y: number, fillRule: 'nonzero' | 'evenodd' = 'nonzero'): boolean {
-    // todo
-    return false;
+    const fillSegments = getPathSegments(this, [], 'fill');
+    if (!fillSegments.length) {
+      return false;
+    }
+    let windingNumber = 0;
+    let crossNumber = 0;
+    fillSegments.forEach(segment => {
+      const { type, params } = segment;
+      // 重合边
+      // 顶点
+    })
   }
 
-  public isPointInStroke(x: number, y: number, width: number): boolean {
-    // todo
-    return false;
+  public isPointInStroke(x: number, y: number, strokeWidth: number): boolean {
+    return this.getSegments().some(segment => isPointInSegmentStroke(segment, strokeWidth, x, y));
   }
 
   private _pushBBoxPoints(points: Point[], bbox: BBox) {

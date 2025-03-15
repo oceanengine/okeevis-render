@@ -1,4 +1,5 @@
 import { Render, Path, Circle, Line} from '../src'
+import { pointDistanceToBezier } from '../src/geometry/contain/bezier';
 import Path2D from '../src/geometry/Path2D';
 
 const dom = document.getElementById('root') as HTMLDivElement
@@ -11,6 +12,26 @@ const p4 = [300, 10];
 const l1 = [30, 30];
 const l2 = [300, 300];
 const intersectionPoints: Circle[] = [];
+const circle = new Circle({
+    cx: 0,
+    cy: 0,
+    radius: 0,
+    stroke: 'red',
+    lineWidth: 1
+})
+
+render.add(circle);
+
+render.on('mousemove', e => {
+    const x = e.x;
+    const y = e.y;
+    const distance = pointDistanceToBezier(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], p4[0], p4[1],x,y);
+    circle.setAttr({
+        cx: x,
+        cy: y,
+        radius: distance,
+    })
+})
 
 const getPath = () => {
     const path = new Path2D();
@@ -24,7 +45,6 @@ const path = new Path({
     stroke: 'red',
     lineWidth: 1,
     pointerEvents: 'none',
-    fill: 'yellow'
 });
 const line = new Line({
     x1: l1[0],

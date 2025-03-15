@@ -1,1 +1,1 @@
-import './scrollIntoView.test';
+import './intersection.test';
