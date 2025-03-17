@@ -13,15 +13,21 @@ import {
   SegmentPoint,
   isPointInSegmentStroke,
 } from './pathSegment';
-import { getPathCurveList, pathToCurve } from './toCurve';
+import { pathToCurve, segmentToCurve } from './toCurve';
 import { bezierSubDivision } from './bezierSubdivision';
-import { computeIntersections } from './intersection/bezier-line-intersection';
+import { bezierLineIntersection } from './intersection/bezier-line-intersection';
 
 export type PointOnPath = SegmentPoint;
 
 interface Point {
   x: number;
   y: number;
+}
+
+export interface PathIntersection {
+  x: number;
+  y: number;
+  winding: -1 | 1;
 }
 
 export interface PathAction {
@@ -521,19 +527,6 @@ export default class Path2D {
     return path;
   }
 
-  public getIntersections(path: Path2D) {
-    // todo
-  }
-
-  public getLineIntersections(x1: number, y1: number, x2: number, y2: number): [number, number][] {
-    const bezierCurves = getPathCurveList(this);
-    const out: [number, number][] = [];
-    bezierCurves.forEach(p => {
-      computeIntersections([p[0], p[2], p[4], p[6]], [p[1], p[3], p[5], p[7]], [x1, x2], [y1, y2], out);
-    });
-    return out;
-  }
-
   public stroke(options: {
     width: number,
     miterLimit: string;
@@ -550,13 +543,30 @@ export default class Path2D {
     if (!fillSegments.length) {
       return false;
     }
-    let windingNumber = 0;
-    let crossNumber = 0;
+    let windingNumber = 0; // 非零环绕
+    let crossNumber = 0; // 奇偶环绕
+    // 水平射线测试
     fillSegments.forEach(segment => {
-      const { type, params } = segment;
-      // 重合边
-      // 顶点
-    })
+      const curves = segmentToCurve(segment, []);
+      curves.forEach(curve => {
+        const [x1, y1, x2, y2, x3, y3, x4, y4] = curve;
+        const maxX = Math.max(x1, x2, x3, x4);
+        const intersections = bezierLineIntersection(x1, y1, x2, y2, x3, y3, x4, y4, x, y, maxX + 1, y);
+        intersections.forEach(intersection => {
+          if (fillRule === 'nonzero') {
+            windingNumber += intersection.winding;
+          } else if (fillRule === 'evenodd') {
+            crossNumber++;
+          }
+        })
+      })
+    });
+    if (fillRule === 'nonzero') {
+      return windingNumber !== 0;
+    } else if (fillRule === 'evenodd') {
+      return crossNumber % 2 === 1;
+    }
+    return false;
   }
 
   public isPointInStroke(x: number, y: number, strokeWidth: number): boolean {

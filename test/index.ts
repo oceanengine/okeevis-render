@@ -1,1 +1,1 @@
-import './intersection.test';
+import './bezier-pick.test';

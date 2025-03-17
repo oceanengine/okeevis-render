@@ -17,7 +17,8 @@ const circle = new Circle({
     cy: 0,
     radius: 0,
     stroke: 'red',
-    lineWidth: 1
+    lineWidth: 1,
+    pointerEvents: 'none'
 })
 
 render.add(circle);
@@ -43,8 +44,14 @@ const getPath = () => {
 const path = new Path({
     pathData: getPath(),
     stroke: 'red',
-    lineWidth: 1,
-    pointerEvents: 'none',
+    fill: 'red',
+    fillOpacity: .2,
+    lineWidth: 2,
+    stateStyles: {
+        hover: {
+            stroke: 'blue'
+        }
+    }
 });
 const line = new Line({
     x1: l1[0],
@@ -61,7 +68,7 @@ function updateIntersection() {
     path.setAttr('pathData', pathData);
     intersectionPoints.forEach(p => render.remove(p));
     intersectionPoints.length = 0;
-    const intersections = pathData.getLineIntersections(l1[0], l1[1], l2[0], l2[1]);
+    const intersections: any[] = [];
     intersections.forEach(p => {
         const circle = new Circle({
             cx: p[0],

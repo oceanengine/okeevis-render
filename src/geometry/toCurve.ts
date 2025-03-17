@@ -1,5 +1,5 @@
 import Path2D, { PathAction } from './Path2D';
-import { getPathSegments } from './pathSegment';
+import { getPathSegments, Segment } from './pathSegment';
 import * as mat3 from '../../js/mat3';
 import { transformMat3 } from '../utils/vec2';
 import { equalWithTolerance } from '../utils/math';
@@ -7,23 +7,26 @@ import { equalWithTolerance } from '../utils/math';
 export function getPathCurveList(path: Path2D): number[][] {
   const segments = getPathSegments(path, []);
   const curveList: number[][] = [];
-  segments.forEach(seg => {
-    const { type, params } = seg;
-    if (type === 'line') {
-      const [x1, y1, x2, y2] = params;
-      curveList.push(lineToCurve(x1, y1, x2, y2));
-    } else if (type === 'arc') {
-      const [cx, cy, r, start, end, antiClockwise] = params;
-      ellipseToCurve(cx, cy, r, r, 0, start, end, !antiClockwise as any as boolean, curveList);
-    } else if (type === 'bezier') {
-      curveList.push([...params]);
-    } else if (type === 'ellipse') {
-      const [cx, cy, rx, ry, rotation, start, end, clockWise] = params;
-      ellipseToCurve(cx, cy, rx, ry, rotation, start, end, clockWise as any as boolean, curveList);
-    }
-  });
-
+  segments.forEach(seg => segmentToCurve(seg, curveList));
+  
   return curveList;
+}
+
+export function segmentToCurve(seg: Segment, out: number[][]): number[][] {
+  const { type, params } = seg;
+  if (type === 'line') {
+    const [x1, y1, x2, y2] = params;
+    out.push(lineToCurve(x1, y1, x2, y2));
+  } else if (type === 'arc') {
+    const [cx, cy, r, start, end, antiClockwise] = params;
+    ellipseToCurve(cx, cy, r, r, 0, start, end, !antiClockwise as any as boolean, out);
+  } else if (type === 'bezier') {
+    out.push([...params]);
+  } else if (type === 'ellipse') {
+    const [cx, cy, rx, ry, rotation, start, end, clockWise] = params;
+    ellipseToCurve(cx, cy, rx, ry, rotation, start, end, clockWise as any as boolean, out);
+  }
+  return out;
 }
 
 export function pathToCurve(path: Path2D): Path2D {

@@ -1,130 +1,168 @@
-type CubicNumber = [number, number, number, number];
+import { cross } from '../../utils/vec2';
+import type { PathIntersection } from '../Path2D';
+import { pointAtBezier } from '../pathSegment';
+import { getPolynomialRoots } from './polynomial';
 
-var S=new Array() /*splines*/
-var P =new Array() /*control points*/
-var I =new Array() /*intersection points*/
 
 /*computes intersection between a cubic spline and a line segment*/
-export function computeIntersections(px: CubicNumber, py: CubicNumber, lx: [number, number], ly: [number, number], out: [number, number][]) {
-  var X = Array();
 
-  var A = ly[1] - ly[0]; //A=y2-y1
-  var B = lx[0] - lx[1]; //B=x1-x2
-  var C = lx[0] * (ly[0] - ly[1]) + ly[0] * (lx[1] - lx[0]); //C=x1*(y1-y2)+y1*(x2-x1)
+export function bezierLineIntersection(
+  p1x: number,
+  p1y: number,
+  p2x: number,
+  p2y: number,
+  p3x: number,
+  p3y: number,
+  p4x: number,
+  p4y: number,
+  a1x: number,
+  a1y: number,
+  a2x: number,
+  a2y: number,
+  result: PathIntersection[] = [],
+): PathIntersection[] {
+  var ax: number,
+    ay: number,
+    bx: number,
+    by: number,
+    cx: number,
+    cy: number,
+    dx: number,
+    dy: number; // temporary variables
+  var c3x: number,
+    c3y: number,
+    c2x: number,
+    c2y: number,
+    c1x: number,
+    c1y: number,
+    c0x: number,
+    c0y: number; // coefficients of cubic
+  var cl; // c coefficient for normal form of line
+  var nx, ny; // normal for normal form of line
 
-  var bx = bezierCoeffs(px[0], px[1], px[2], px[3]);
-  var by = bezierCoeffs(py[0], py[1], py[2], py[3]);
+  // used to determine if point is on line segment
+  var minx = Math.min(a1x, a2x),
+    miny = Math.min(a1y, a2y),
+    maxx = Math.max(a1x, a2x),
+    maxy = Math.max(a1y, a2y);
 
-  var P = Array();
-  P[0] = A * bx[0] + B * by[0]; /*t^3*/
-  P[1] = A * bx[1] + B * by[1]; /*t^2*/
-  P[2] = A * bx[2] + B * by[2]; /*t*/
-  P[3] = A * bx[3] + B * by[3] + C; /*1*/
+  // Start with Bezier using Bernstein polynomials for weighting functions:
+  //     (1-t^3)P1 + 3t(1-t)^2P2 + 3t^2(1-t)P3 + t^3P4
+  //
+  // Expand and collect terms to form linear combinations of original Bezier
+  // controls.  This ends up with a vector cubic in t:
+  //     (-P1+3P2-3P3+P4)t^3 + (3P1-6P2+3P3)t^2 + (-3P1+3P2)t + P1
+  //             /\                  /\                /\       /\
+  //             ||                  ||                ||       ||
+  //             c3                  c2                c1       c0
 
-  var r = cubicRoots(P);
+  // Calculate the coefficients
+  ax = p1x * -1;
+  ay = p1y * -1;
+  bx = p2x * 3;
+  by = p2y * 3;
+  cx = p3x * -3;
+  cy = p3y * -3;
+  dx = ax + bx + cx + p4x;
+  dy = ay + by + cy + p4y;
+  c3x = dx;
+  c3y = dy; // vec
 
-  /*verify the roots are in bounds of the linear segment*/
-  for (var i = 0; i < 3; i++) {
-    var t = r[i];
+  ax = p1x * 3;
+  ay = p1y * 3;
+  bx = p2x * -6;
+  by = p2y * -6;
+  cx = p3x * 3;
+  cy = p3y * 3;
+  dx = ax + bx + cx;
+  dy = ay + by + cy;
+  c2x = dx;
+  c2y = dy; // vec
 
-    X[0] = bx[0] * t * t * t + bx[1] * t * t + bx[2] * t + bx[3];
-    X[1] = by[0] * t * t * t + by[1] * t * t + by[2] * t + by[3];
+  ax = p1x * -3;
+  ay = p1y * -3;
+  bx = p2x * 3;
+  by = p2y * 3;
+  cx = ax + bx;
+  cy = ay + by;
+  c1x = cx;
+  c1y = cy; // vec
 
-    /*above is intersection point assuming infinitely long line segment,
-          make sure we are also in bounds of the line*/
-    var s;
-    if (lx[1] - lx[0] != 0) /*if not vertical line*/ s = (X[0] - lx[0]) / (lx[1] - lx[0]);
-    else s = (X[1] - ly[0]) / (ly[1] - ly[0]);
+  c0x = p1x;
+  c0y = p1y;
 
-    /*in bounds?*/
-    if (!(t < 0 || t > 1.0 || s < 0 || s > 1.0)) {
-      out.push([X[0], X[1]])
-    }
-  }
-}
+  // Convert line to normal form: ax + by + c = 0
+  // Find normal to line: negative inverse of original line's slope
+  nx = a1y - a2y;
+  ny = a2x - a1x;
 
-/*based on http://mysite.verizon.net/res148h4j/javascript/script_exact_cubic.html#the%20source%20code*/
-function cubicRoots(P: number[]): number[] {
-  var a = P[0];
-  var b = P[1];
-  var c = P[2];
-  var d = P[3];
+  // Determine new c coefficient
+  cl = a1x * a2y - a2x * a1y;
 
-  var A = b / a;
-  var B = c / a;
-  var C = d / a;
+  // ?Rotate each cubic coefficient using line for new coordinate system?
+  // Find roots of rotated cubic
+  var roots = getPolynomialRoots(
+    // dot products => x * x + y * y
+    nx * c3x + ny * c3y,
+    nx * c2x + ny * c2y,
+    nx * c1x + ny * c1y,
+    nx * c0x + ny * c0y + cl,
+  );
 
-  var Q: number, R: number, D: number, S: number, T: number, Im: number;
+  // Any roots in closed interval [0,1] are intersections on Bezier, but
+  // might not be on the line segment.
+  // Find intersections and calculate point coordinates
+  for (var i = 0; i < roots.length; i++) {
+    var t = roots[i];
 
-  var Q = (3 * B - Math.pow(A, 2)) / 9;
-  var R = (9 * A * B - 27 * C - 2 * Math.pow(A, 3)) / 54;
-  var D = Math.pow(Q, 3) + Math.pow(R, 2); // polynomial discriminant
+    if (0 <= t && t <= 1) {
+      // We're within the Bezier curve
+      // Find point on Bezier
+      // lerp: x1 + (x2 - x1) * t
+      var p5x = p1x + (p2x - p1x) * t;
+      var p5y = p1y + (p2y - p1y) * t; // lerp(p1, p2, t);
 
-  var t: number[] = Array();
+      var p6x = p2x + (p3x - p2x) * t;
+      var p6y = p2y + (p3y - p2y) * t;
 
-  if (D >= 0) {
-    // complex or duplicate roots
-    var S = sgn(R + Math.sqrt(D)) * Math.pow(Math.abs(R + Math.sqrt(D)), 1 / 3);
-    var T = sgn(R - Math.sqrt(D)) * Math.pow(Math.abs(R - Math.sqrt(D)), 1 / 3);
+      var p7x = p3x + (p4x - p3x) * t;
+      var p7y = p3y + (p4y - p3y) * t;
 
-    t[0] = -A / 3 + (S + T); // real root
-    t[1] = -A / 3 - (S + T) / 2; // real part of complex root
-    t[2] = -A / 3 - (S + T) / 2; // real part of complex root
-    Im = Math.abs((Math.sqrt(3) * (S - T)) / 2); // complex part of root pair
+      var p8x = p5x + (p6x - p5x) * t;
+      var p8y = p5y + (p6y - p5y) * t;
 
-    /*discard complex roots*/
-    if (Im != 0) {
-      t[1] = -1;
-      t[2] = -1;
-    }
-  } // distinct real roots
-  else {
-    var th = Math.acos(R / Math.sqrt(-Math.pow(Q, 3)));
+      var p9x = p6x + (p7x - p6x) * t;
+      var p9y = p6y + (p7y - p6y) * t;
 
-    t[0] = 2 * Math.sqrt(-Q) * Math.cos(th / 3) - A / 3;
-    t[1] = 2 * Math.sqrt(-Q) * Math.cos((th + 2 * Math.PI) / 3) - A / 3;
-    t[2] = 2 * Math.sqrt(-Q) * Math.cos((th + 4 * Math.PI) / 3) - A / 3;
-    Im = 0.0;
-  }
-
-  /*discard out of spec roots*/
-  for (var i = 0; i < 3; i++) if (t[i] < 0 || t[i] > 1.0) t[i] = -1;
-
-  /*sort but place -1 at the end*/
-  t = sortSpecial(t);
-
-  return t;
-}
-
-function sortSpecial(a: number[]): number[] {
-  var flip;
-  var temp;
-
-  do {
-    flip = false;
-    for (var i = 0; i < a.length - 1; i++) {
-      if ((a[i + 1] >= 0 && a[i] > a[i + 1]) || (a[i] < 0 && a[i + 1] >= 0)) {
-        flip = true;
-        temp = a[i];
-        a[i] = a[i + 1];
-        a[i + 1] = temp;
+      // candidate
+      var p10x = p8x + (p9x - p8x) * t;
+      var p10y = p8y + (p9y - p8y) * t;
+      const { alpha } = pointAtBezier(t, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y);
+      const crossValue = cross([a2x - a1x, a2y - a1y], [Math.cos(alpha), Math.sin(alpha)]);
+      const winding = crossValue > 0 ? 1 : -1;
+      const point: PathIntersection = {
+        x: p10x,
+        y: p10y,
+        winding,
+      };
+      // See if point is on line segment
+      if (a1x === a2x) {
+        // vertical
+        if (miny <= p10y && p10y <= maxy) {
+          if (result) result.push(point);
+          else return [];
+        }
+      } else if (a1y === a2y) {
+        // horizontal
+        if (minx <= p10x && p10x <= maxx) {
+          if (result) result.push(point);
+          else return [];
+        }
+      } else if (p10x >= minx && p10y >= miny && p10x <= maxx && p10y <= maxy) {
+        if (result) result.push(point);
+        else return [];
       }
     }
-  } while (flip);
-  return a;
-}
-
-// sign of number
-function sgn(x: number): number {
-  if (x < 0.0) return -1;
-  return 1;
-}
-
-function bezierCoeffs(P0: number, P1: number, P2: number, P3: number): number[] {
-  var Z = Array();
-  Z[0] = -P0 + 3 * P1 + -3 * P2 + P3;
-  Z[1] = 3 * P0 - 6 * P1 + 3 * P2;
-  Z[2] = -3 * P0 + 3 * P1;
-  Z[3] = P0;
-  return Z;
+  }
+  return result;
 }

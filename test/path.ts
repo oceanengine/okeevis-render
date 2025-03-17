@@ -5,7 +5,7 @@ import Path from '../src/shapes/Path'
 // https://spritejs.org/demo/#/svg_path
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, {renderer: 'svg'})
+const render = new Render(dom, {renderer: 'canvas'})
 
 // const outterFirePaths = [
 //   'M19.8,22.3C15.3,23.1,6.5,33.4,6.5,33.4c-0.7,0.4-1.6,0.2-2-0.5c-0.1-0.2-0.2-0.3-0.2-0.5L1.4,15.7C0.2,8.6,4.9,1.8,12,0.6c7.1-1.2,13.8,3.5,15.1,10.6C28,16.6,24.9,21.3,19.8,22.3z',
@@ -45,7 +45,14 @@ const path1 = new Path({
     ctx.closePath();
   },
 stroke: 'rgba(0,255,0,0.2)',
-lineWidth:1,
+fill: 'blue',
+lineWidth:10,
+draggable: true,
+stateStyles: {
+  hover: {
+    fill: 'red'
+  }
+}
 })
 
 const path2 = new Path({

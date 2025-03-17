@@ -37,6 +37,14 @@ export default class Path extends Shape<PathAttr> {
     return this.attr.pathData?.getPathBBox() || { x: 0, y: 0, width: 0, height: 0 };
   }
 
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
+    return this.getPathData().isPointInStroke(x, y, lineWidth);
+  }
+
+  public isPointInFill(x: number, y: number): boolean {
+    return this.getPathData().isPointInPath(x, y);
+  }
+
   protected prevProcessAttr(attr: PathAttr) {
     super.prevProcessAttr(attr);
     this._setAttrPathData(attr);
@@ -50,8 +58,5 @@ export default class Path extends Shape<PathAttr> {
     }
   }
 
-  public pickByGPU(): boolean {
-    return true;
-  }
 }
 Element.createPath = () => new Path;
