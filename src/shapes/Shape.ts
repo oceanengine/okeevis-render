@@ -73,6 +73,14 @@ export default class Shape<T extends CommonAttr = ShapeAttr> extends Element<T> 
     return path;
   }
 
+  public isPointInStroke(x: number, y: number, lineWidth: number): boolean {
+    return this.getPathData().isPointInStroke(x, y, lineWidth);
+  }
+
+  public isPointInFill(x: number, y: number): boolean {
+    return this.getPathData().isPointInPath(x, y);
+  }
+
   public getTotalLength(): number {
     return this.getPathData().getTotalLength();
   }
