@@ -312,6 +312,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this.attr.className || '';
   }
 
+  public get isConnected(): boolean {
+    return !!this.ownerRender;
+  }
+
   public getAnimationKeys(): Array<keyof T> {
     return [
       'fill',

@@ -169,7 +169,7 @@ export default class ScrollView extends Group {
   }
 
   public set scrollLeft(x: number) {
-    if (!this._isInTransitionScroll && this.ownerRender) {
+    if (!this._isInTransitionScroll && this.isConnected) {
       this.ownerRender.cancelAnimationFrame(this._transitionRAF);
     }
     const { scrollWidth, maxScrollLeft } = this.attr;
@@ -190,7 +190,7 @@ export default class ScrollView extends Group {
   }
 
   public set scrollTop(y: number) {
-    if (!this._isInTransitionScroll && this.ownerRender) {
+    if (!this._isInTransitionScroll && this.isConnected) {
       this.ownerRender.cancelAnimationFrame(this._transitionRAF);
     }
     const { height, scrollHeight, maxScrollTop, bounces } = this.attr;
