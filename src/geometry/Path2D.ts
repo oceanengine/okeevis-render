@@ -178,6 +178,16 @@ export default class Path2D {
     }
   }
 
+  public fillable() {
+    // todo
+    return false;
+  }
+
+  public getSimpleFillSegments(): Segment[]  {
+    // todo
+    return [];
+  }
+
   // swapXY
   public reflect() {
     /**
@@ -349,11 +359,11 @@ export default class Path2D {
     rotation: number,
     start: number,
     end: number,
-    closewise: boolean = true,
+    clockwise: boolean = true,
   ): this {
     this._pathList.push({
       action: 'ellipse',
-      params: [x, y, radiusX, radiusY, rotation, start, end, closewise],
+      params: [x, y, radiusX, radiusY, rotation, start, end, clockwise],
     });
 
     return this;
