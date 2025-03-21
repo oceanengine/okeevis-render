@@ -1,6 +1,7 @@
 import { Render, Path, Circle, Line} from '../src'
 import { pointDistanceToBezier } from '../src/geometry/contain/bezier';
 import Path2D from '../src/geometry/Path2D';
+import { selfIntersection } from '../src/geometry/intersection/self-intersection'
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom);
@@ -22,6 +23,13 @@ const circle = new Circle({
 })
 
 render.add(circle);
+const intersectionCircle = new Circle({
+    cx: 0,
+    cy: 0,
+    radius: 0,
+    fill: 'red',
+});
+render.add(intersectionCircle);
 
 render.on('mousemove', e => {
     const x = e.x;
@@ -38,6 +46,15 @@ const getPath = () => {
     const path = new Path2D();
     path.moveTo(p1[0], p1[1]);
     path.bezierCurveTo(p2[0], p2[1], p3[0], p3[1], p4[0], p4[1]);
+    const roots = selfIntersection(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], p4[0], p4[1]);
+    roots.forEach(p => {
+        const point = path.getPointAtLength(p);
+        intersectionCircle.setAttr({ 
+            cx: point.x,
+            cy: point.y,
+            radius: 10,
+        })
+    })    
     return path;
 }
 

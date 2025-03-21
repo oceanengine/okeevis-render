@@ -16,6 +16,8 @@ import {
 import { pathToCurve, segmentToCurve } from './toCurve';
 import { bezierSubDivision } from './bezierSubdivision';
 import { bezierLineIntersection } from './intersection/bezier-line-intersection';
+import { selfIntersection } from './intersection/self-intersection';
+import { bezierIntersection } from './intersection/bezier-intersection';
 
 export type PointOnPath = SegmentPoint;
 
@@ -83,17 +85,15 @@ export default class Path2D {
       const { x, y, width, height } = appendPath.getPathBBox();
       appendPath.shrink(x + width / 2, y + height / 2);
       if (delta > 0) {
-        toSubPathList.push(appendPath)
+        toSubPathList.push(appendPath);
       } else {
         fromSubPathList.push(appendPath);
       }
     }
     for (let i = 0; i < max; i++) {
       const fromxx = fromSubPathList[i];
-      const toxx = toSubPathList[i]; 
-      const fromCount = fromxx
-        .getPathList()
-        .filter(path => path.action === 'bezierCurveTo').length;
+      const toxx = toSubPathList[i];
+      const fromCount = fromxx.getPathList().filter(path => path.action === 'bezierCurveTo').length;
       const toCount = toxx.getPathList().filter(path => path.action === 'bezierCurveTo').length;
       const commonMultiple = getLeastCommonMultiple(fromCount, toCount);
       fromxx.subdivision(commonMultiple / fromCount);
@@ -141,10 +141,7 @@ export default class Path2D {
   }
 
   public isSimple() {
-     /**
-     * @todo
-     */
-    const hasNextMoveTo = this._pathList.findIndex(command => command.action ==='moveTo')!== -1;
+    const hasNextMoveTo = this._pathList.findIndex(command => command.action === 'moveTo') !== -1;
     if (hasNextMoveTo) {
       return false;
     }
@@ -152,10 +149,33 @@ export default class Path2D {
   }
 
   public isSelfIntersecting() {
-    /**
-     * @todo
-     */
-    return false;
+    const segments = this.getSegments();
+    const curves: number[][] = [];
+    segments.forEach(segment => segmentToCurve(segment, curves));
+    for (let i = 0; i < curves.length; i++) {
+      const curve1 = curves[i];
+      if (
+        segments[i].type === 'bezier' &&
+        selfIntersection(
+          curve1[0],
+          curve1[1],
+          curve1[2],
+          curve1[3],
+          curve1[4],
+          curve1[5],
+          curve1[6],
+          curve1[7],
+        ).length > 0
+      ) {
+        return true;
+      }
+      for (let j = i + 1; j < curves.length; j++) {
+        const curve2 = curves[j];
+        if (bezierIntersection(curve1, curve2).length > 0) {
+          return true;
+        }
+      }
+    }
   }
 
   // swapXY
@@ -528,7 +548,7 @@ export default class Path2D {
   }
 
   public stroke(options: {
-    width: number,
+    width: number;
     miterLimit: string;
     join: CanvasLineJoin;
     cap: CanvasLineCap;
@@ -551,15 +571,28 @@ export default class Path2D {
       curves.forEach(curve => {
         const [x1, y1, x2, y2, x3, y3, x4, y4] = curve;
         const maxX = Math.max(x1, x2, x3, x4);
-        const intersections = bezierLineIntersection(x1, y1, x2, y2, x3, y3, x4, y4, x, y, maxX + 1, y);
+        const intersections = bezierLineIntersection(
+          x1,
+          y1,
+          x2,
+          y2,
+          x3,
+          y3,
+          x4,
+          y4,
+          x,
+          y,
+          maxX + 1,
+          y,
+        );
         intersections.forEach(intersection => {
           if (fillRule === 'nonzero') {
             windingNumber += intersection.winding;
           } else if (fillRule === 'evenodd') {
             crossNumber++;
           }
-        })
-      })
+        });
+      });
     });
     if (fillRule === 'nonzero') {
       return windingNumber !== 0;
