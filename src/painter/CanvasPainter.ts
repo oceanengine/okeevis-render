@@ -700,7 +700,7 @@ export default class CanvasPainter implements Painter {
     }
 
     if (shadowBlur > 0 && !isTransparent(shadowColor)) {
-      styleHelper.setShadow(ctx, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor);
+      styleHelper.setShadow(ctx, shadowOffsetX * this.dpr, shadowOffsetY * this.dpr, shadowBlur * this.dpr, shadowColor);
     }
   }
 
