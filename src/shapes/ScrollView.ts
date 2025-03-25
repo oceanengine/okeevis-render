@@ -160,8 +160,8 @@ export default class ScrollView extends Group {
   }
 
   public get clientHeight() {
-    const { showScrollBar, scrollY, height, scrollHeight, scrollBarSize } = this.attr;
-    return showScrollBar && scrollY && height < scrollHeight ? height - scrollBarSize : height;
+    const { showScrollBar, scrollX, width, height, scrollWidth, scrollBarSize } = this.attr;
+    return showScrollBar && scrollX && width < scrollWidth ? height - scrollBarSize : height;
   }
 
   public get scrollLeft(): number {
@@ -373,6 +373,7 @@ export default class ScrollView extends Group {
         }
         const _this = event.currentTarget as ScrollView;
         const { scrollTop, scrollLeft, clientWidth, clientHeight, attr } = _this;
+        const { scrollX, scrollY } = attr;
         const isToBottom = scrollTop + clientHeight - attr.scrollHeight === 0;
         const isToRight = scrollLeft + clientWidth - attr.scrollWidth === 0;
         const { pixelX, pixelY } = event.normalizeWheel;
@@ -393,7 +394,7 @@ export default class ScrollView extends Group {
         if (this._isScrolling) {
           event.nativePreventDefault();
           this._debounceStopScroll();
-          this._defaultScrollBy(event, pixelX, pixelY);
+          this._defaultScrollBy(event, scrollX ? pixelX : 0, scrollY ? pixelY : 0);
         }
 
       },
