@@ -82,6 +82,8 @@ export default class ScrollView extends Group {
   private _isPanningScroll: boolean = false;
 
   private _isInTransitionScroll: boolean = false;
+
+  private _dragStartPosition: number;
   
   private _lockedDirection: 'horizonal' | 'vertical' | undefined;
 
@@ -502,19 +504,29 @@ export default class ScrollView extends Group {
     this._horizontalScrollBar = new Rect({
       key: 'scrollbar-x',
       ...commonBarAttr,
+      onDragStart: e => {
+        const item = e.target.parentNode as ScrollView;
+        item._dragStartPosition = this.scrollLeft;
+      },
       onDrag: e => {
         const item = e.target.parentNode as ScrollView;
         const scaleX = item.clientWidth / item.attr.scrollWidth;
-        (item as this)._eventScrollBy(item, e.dx / scaleX, 0);
+        const movement = this._dragStartPosition + (e.x - e.startX) / scaleX - this.scrollLeft;
+        (item as this)._eventScrollBy(item, movement, 0);
       },
     });
     this._verticalScrollBar = new Rect({
       key: 'scrollbar-y',
       ...commonBarAttr,
+      onDragStart: e => {
+        const item = e.target.parentNode as ScrollView;
+        item._dragStartPosition = this.scrollTop;
+      },
       onDrag: e => {
         const item = e.target.parentNode as ScrollView;
         const scaleY = item.clientHeight / item.attr.scrollHeight;
-        (item as this)._eventScrollBy(item, 0, e.dy / scaleY);
+        const movement = this._dragStartPosition + (e.y - e.startY) / scaleY - this.scrollTop;
+        (item as this)._eventScrollBy(item, 0, movement);
       },
     });
     this._horizontalScrollTrack = new Rect({
