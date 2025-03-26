@@ -390,8 +390,6 @@ export default class EventHandle {
     const dragEventParam: SyntheticDragEventParams = {
       startX: null,
       startY: null,
-      offsetX: null,
-      offsetY: null,
       x: null,
       y: null,
       dx: null,
@@ -937,20 +935,16 @@ export default class EventHandle {
 
   private _getDragParam(
     event: SyntheticMouseEventParams | SyntheticTouch,
-  ): Pick<SyntheticDragEventParams, 'startX' | 'startY' | 'offsetX' | 'offsetY' | 'dx' | 'dy'> {
+  ): Pick<SyntheticDragEventParams, 'startX' | 'startY' | 'dx' | 'dy'> {
     const { x: startX, y: startY } = this._dragStartMouse;
     const { x: prevX, y: prevY } = this._prevMousePosition || { x: startX, y: startY };
     const { x, y } = event;
-    const offsetX = x - startX;
-    const offsetY = y - startY;
     const dx = x - prevX;
     const dy = y - prevY;
 
     return {
       startX,
       startY,
-      offsetX,
-      offsetY,
       dx,
       dy,
     };

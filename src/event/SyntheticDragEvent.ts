@@ -3,8 +3,6 @@ import SyntheticMouseEvent, { SyntheticMouseEventParams } from './SyntheticMouse
 export interface SyntheticDragEventParams extends SyntheticMouseEventParams {
   startX: number;
   startY: number;
-  offsetX: number;
-  offsetY: number;
   dx: number;
   dy: number;
 }
@@ -28,8 +26,6 @@ export default class SyntheticDragEvent extends SyntheticMouseEvent<DragEvent> {
     super(type, params);
     this.startX = params.startX;
     this.startY = params.startY;
-    this.offsetX = params.offsetX;
-    this.offsetY = params.offsetY;
     this.dx = params.dx;
     this.dy = params.dy;
   }
