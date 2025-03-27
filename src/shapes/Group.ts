@@ -412,8 +412,12 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
         nextElement.attr.ref.current = prevElement;
       }
       if (prevElement.isGroup) {
-        if (Element.isHookElement(prevElement)) {
-          prevElement.updateProps((nextElement as unknown as HookElement).props);
+        if (Element.isHookElement(prevElement) && Element.isHookElement(nextElement)) {
+          if (prevElement.$$type === nextElement.$$type) {
+            prevElement.updateProps((nextElement as unknown as HookElement).props);
+          } else {
+            prevElement.replaceWith(nextElement);
+          }
         } else {
           if (!prevElement.attr.children) {
             ((prevElement as unknown) as Group).updateAll(((nextElement as any) as Group).children(), transition);
@@ -426,7 +430,9 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       const dragOffset = nextElement.getDragOffset();
       prevElement.setDragOffset(dragOffset[0], dragOffset[1]);
       
-      this._diffUpdateElement(prevElement, nextElement, transition);
+      if (!Element.isHookElement(prevElement)) {
+        this._diffUpdateElement(prevElement, nextElement, transition);
+      }
     });
 
     result.added.forEach(index => {
@@ -576,14 +582,6 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
 
   private _diffUpdateElement(prevElement: Element, nextElement: Element, transition: boolean) {
     const nextAttr = nextElement.getUserAttr();
-    if (Element.isHookElement(prevElement) && Element.isHookElement(nextElement)) {
-      if (prevElement.$$type === nextElement.$$type) {
-        (prevElement as HookElement).updateProps((nextElement as HookElement).props);
-      } else {
-        prevElement.replaceWith(nextElement);
-      }
-      return;
-    }
     prevElement.replaceAttr(nextAttr, transition);
   }
 

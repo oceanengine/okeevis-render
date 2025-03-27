@@ -18,6 +18,7 @@ import { BBox } from './utils/bbox';
 import { getFeature } from './utils/featureManager';
 import { PluginManager, AbstractPlugin } from './PluginManager'
 import { RafCallback } from './multi-thread/scheduler';
+import { ReactSystem } from './react/react-system';
 
 registerPainter('canvas', CanvasPainter);
 registerPainter('svg', SVGPainter);
@@ -57,6 +58,8 @@ export default class Render extends EventFul<RenderEventHandleParam> {
   public eventListener: Function;
 
   public chunksElement: ES6Set<Group> = new ES6Set();
+
+  public reactSystem: ReactSystem = new ReactSystem(this);
 
   private _dom: HTMLElement;
 
@@ -99,10 +102,6 @@ export default class Render extends EventFul<RenderEventHandleParam> {
   private _workerEnabled: boolean;
 
   private _commandBuffer: CommandBufferEncoder;
-
-  private _effectPending: boolean = false;
-
-  private _hookElementEffects: Function[] = [];
 
   private _pluginManager: PluginManager;
 
@@ -314,6 +313,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     this.removeAllListeners();
     this._eventHandle.dispose();
     this._eventElementHandle.dispose();
+    this.reactSystem.dispose;
     this._frameAbleElement.clear();
     this.chunksElement.clear();
     this._rootGroup.clear();
@@ -351,18 +351,6 @@ export default class Render extends EventFul<RenderEventHandleParam> {
 
   public __removeFrameableElement(element: Element<any>) {
     this._frameAbleElement.delete(element);
-  }
-
-  public __pushPendingEffect(effect: Function) {
-    this._hookElementEffects.unshift(effect);
-    if (!this._effectPending) {
-      this._effectPending = true;
-      this._raf(() => {
-        this._hookElementEffects.forEach(effect => effect());
-        this._effectPending = false;
-        this._hookElementEffects.length = 0;
-      })
-    }
   }
 
   protected onEvent(type: string, ...params: any[]) {

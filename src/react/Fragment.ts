@@ -5,3 +5,4 @@ export function Fragment(props: {children?: ReactNode}) {
 };
 
 Fragment.displayName = 'Fragment';
+Fragment.$$typeof ='react.fragment';

@@ -43,7 +43,7 @@ export class HookElement<T = {}> extends Group {
 
   public _hooks: Hook;
 
-  private _willUpdate: boolean = false;
+  private _willUpdateState: boolean = false;
 
   private _portalFragment: HookElement;
 
@@ -86,12 +86,9 @@ export class HookElement<T = {}> extends Group {
   }
 
   public updateState() {
-    if (!this._willUpdate) {
-      this._willUpdate = true;
-      Promise.resolve().then(() => {
-        this.renderWithHooks(true);
-        this._willUpdate = false;
-      });
+    if (!this._willUpdateState) {
+      this._willUpdateState = true;
+      this.ownerRender.reactSystem.pushUpdateStateElement(this);
     }
   }
 
@@ -99,7 +96,7 @@ export class HookElement<T = {}> extends Group {
     if ((this.$$type as unknown as MemoComponent<T>).$$typeof === 'react.memo') {
       const compare = (this.$$type as MemoComponent<any>).compare || shallowEqual;
       const propsChanged = !compare(this.props, nextProps);
-      if (!propsChanged) {
+      if (!propsChanged && !this._willUpdateState) {
         return;
       }
     }
@@ -127,6 +124,7 @@ export class HookElement<T = {}> extends Group {
     currentHook = this._hooks;
     prevHook = undefined;
     const vnode = this.$$type(this.props);
+    this._willUpdateState = false;
     const nodeList = Array.isArray(vnode) ? vnode : [vnode];
     const validNodeList = nodeList.filter(node => node);
     if (!again) {
@@ -348,7 +346,7 @@ export function useReducer<R extends Reducer<any, any>, I>(
 }
 
 function pushPendingEffect(hook: Hook) {
-  hook._component.ownerRender.__pushPendingEffect(() => {
+  hook._component.ownerRender.reactSystem.pushPendingEffect(() => {
     hook.memoizedState = hook.baseState[0]();
   });
 }
