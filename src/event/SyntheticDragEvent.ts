@@ -14,10 +14,6 @@ export default class SyntheticDragEvent extends SyntheticMouseEvent<DragEvent> {
 
   public startY: number;
 
-  public offsetX: number;
-
-  public offsetY: number;
-
   public dx: number;
 
   public dy: number;
