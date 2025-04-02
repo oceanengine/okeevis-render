@@ -32,6 +32,7 @@ const Child = (props: any) => {
         y={150}
         fill="red"
         color="yellow"
+        transitionDelay={300}
         transitionProperty="all"
         transitionDuration={1000}
         transitionEase="BounceOut"

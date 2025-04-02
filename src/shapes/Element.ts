@@ -613,18 +613,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
     for (const key in attr) {
       const oldValue = oldAttr[key];
       const newValue = this.attr[key];
+
+      const index = currentTransitions.findIndex(transition => transition.transitionProperty === key);
+      if (index !== -1) {
+        this.dispatchEvent(new SyntheticTransitionEvent('transitioncancel', {
+          elapsedTime: 0, // todo
+          propertyName: key,
+          bubbles: true,
+        }));
+        currentTransitions.splice(index, 1);
+      }
+    
       if (oldValue !== newValue) {
         this.onAttrChange(key, newValue, oldValue);
         this._changedTransitionProperties.push([key, oldValue as any === 'currentColor' ? color : oldValue]);
-        const index = currentTransitions.findIndex(transition => transition.transitionProperty === key);
-        if (index !== -1) {
-          this.dispatchEvent(new SyntheticTransitionEvent('transitioncancel', {
-            elapsedTime: 0, // todo
-            propertyName: key,
-            bubbles: true,
-          }));
-          currentTransitions.splice(index, 1);
-        }
       }
     }
 
@@ -1343,8 +1345,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
     this.startAttrTransaction();
-    this._runAnimation(now);
-    this._applyTransition(now);
+    this._runAnimations(now);
+    this._runTransitions(now);
     if (!(this._animations.length || this._transitions.length)) {
       this._removeFromFrame();
     }
@@ -1537,7 +1539,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return animationKeys;
   }
 
-  private _runAnimation(now: number) {
+  private _runAnimations(now: number) {
     if (!this._animations.length) {
       return;
     }
@@ -1573,12 +1575,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     animate = null;
   }
 
-  private _applyTransition(tick: number) {
+  private _runTransitions(tick: number) {
     if (!this._transitions.length) {
       return;
     }
     this._transitions.forEach(transition => {
-      const {
+      let {
         startTime,
         values,
         transitionProperty,
@@ -1588,12 +1590,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
       } = transition;
       let progress = 0;
       let fn: Function = interpolate;
-      if (startTime) {
-        progress = Math.min((tick - startTime) / transitionDuration, 1);
-      } else {
-        transition.startTime = tick;
+      if (!startTime) {
+        startTime = transition.startTime = tick;
       }
+      if (tick - startTime < transitionDelay) {
+        this._setTransitionAttr(transitionProperty as keyof T, values[0]);
+        return;
+      }
+
+      transition.started = true;
+
+      progress = Math.min((tick - startTime - transitionDelay) / transitionDuration, 1);
+     
       progress = parseEase(transitionTimingFunction as EasingName)(progress);
+      
       if (progress === 0) {
         this.dispatchEvent(new SyntheticTransitionEvent('transitionstart', {
           elapsedTime: 0,
@@ -1709,6 +1719,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
           values: [oldValue, newValue],
           finished: false,
           startTime: 0,
+          started: false,
           transitionProperty: key as string,
           transitionDelay,
           transitionDuration,
