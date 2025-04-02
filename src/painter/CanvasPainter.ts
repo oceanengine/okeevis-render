@@ -792,7 +792,7 @@ export default class CanvasPainter implements Painter {
     if (!this._frameTimes.length) {
       return;
     }
-    const fps = Math.floor(1000 / sum(this._frameTimes) * this._frameTimes.length)
+    const fps = Math.round(1000 / sum(this._frameTimes) * this._frameTimes.length)
     fpsText.setAttr('display', this.render.showFPS);
     fpsRect.setAttr('display', this.render.showFPS);   
     fpsText.setAttr({
