@@ -254,8 +254,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _changedTransitionProperties: [keyof T, any][] = [];
 
-  private _isTransitionUpdated: boolean = false;
-
   private _bbox: BBox;
 
   private _bboxDirty: boolean = true;
@@ -598,6 +596,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   private dirtyStatusAttr(attr: T) {
+    const color = this.getExtendAttr('color');
     const oldAttr = this.attr;
 
     // todo cancel exist transition
@@ -606,18 +605,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
     this.updateCascadeAttr();
 
-    this._isTransitionUpdated = true;
-
     for (const key in attr) {
       const oldValue = oldAttr[key];
       const newValue = this.attr[key];
       if (oldValue !== newValue) {
         this.onAttrChange(key, newValue, oldValue);
+        this._changedTransitionProperties.push([key, oldValue as any === 'currentColor' ? color : oldValue]);
       }
     }
     this._processGradientAttr(this.attr);
     this._processChangedTransition();
-    this._isTransitionUpdated = false;
   }
 
   public show() {
@@ -953,10 +950,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
   protected onAttrChange<U extends keyof T>(key: U, newValue: T[U], oldValue: T[U]) {
     if (newValue === oldValue) {
       return;
-    }
-
-    if (this._isTransitionUpdated) {
-      this._changedTransitionProperties.push([key, oldValue]);
     }
 
     if (transformKeys.indexOf(key as keyof CommonAttr) !== -1) {

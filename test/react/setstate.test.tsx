@@ -31,6 +31,7 @@ const Child = (props: any) => {
         x={200}
         y={150}
         fill="red"
+        color="yellow"
         transitionProperty="all"
         transitionDuration={1000}
         transitionEase='BounceOut'
@@ -40,7 +41,7 @@ const Child = (props: any) => {
             fontSize: 200,
         }}
         activeStyle={{
-          fill: 'yellow',
+          fill: 'currentColor',
         }}
         onTransitionEnd={e => console.log(e)}
         onClick={() => {
