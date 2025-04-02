@@ -115,6 +115,7 @@ export default class CanvasPainter implements Painter {
       if (
         !this._isFirstFrame &&
         this.render.enableDirtyRect &&
+        !(this.render.showBoundingRect || this.render.showBBox) &&
         dirytCount > 0 &&
         dirytCount <= maxDirtyRects
       ) {
