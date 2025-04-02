@@ -604,9 +604,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private dirtyStatusAttr(attr: T) {
     const color = this.getExtendAttr('color');
     const oldAttr = this.attr;
-
-    // todo cancel exist transition
-    this._transitionAttr = {} as any;
+    this._transitionAttr = {} as T;
+    const currentTransitions = this._transitions;
     this._transitions = [];
 
     this.updateCascadeAttr();
@@ -617,8 +616,19 @@ export default class Element<T extends CommonAttr = ElementAttr>
       if (oldValue !== newValue) {
         this.onAttrChange(key, newValue, oldValue);
         this._changedTransitionProperties.push([key, oldValue as any === 'currentColor' ? color : oldValue]);
+        const index = currentTransitions.findIndex(transition => transition.transitionProperty === key);
+        if (index !== -1) {
+          this.dispatchEvent(new SyntheticTransitionEvent('transitioncancel', {
+            elapsedTime: 0, // todo
+            propertyName: key,
+            bubbles: true,
+          }));
+          currentTransitions.splice(index, 1);
+        }
       }
     }
+
+    this._transitions = currentTransitions;
     this._processGradientAttr(this.attr);
     this._processChangedTransition();
   }

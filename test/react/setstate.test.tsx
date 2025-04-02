@@ -59,6 +59,7 @@ const App = () => {
   console.log('app render');
   return (
     <Group
+      onTransitionCancel={e => console.log('cancel', e.propertyName)}
       onTransitionRun={e => console.log('run', e.propertyName)}
       onTransitionStart={e => console.log('start', e.propertyName)}
       onTransitionEnd={e => console.log('end', e.propertyName)}
@@ -73,6 +74,9 @@ const App = () => {
         width={100}
         height={100}
         fill="#fff"
+        activeStyle={{
+          fill: 'red',
+        }}
         lineWidth={1}
         shadowColor="red"
         shadowBlur={4}
