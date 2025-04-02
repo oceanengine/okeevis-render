@@ -16,7 +16,7 @@ const scrollView = new ScrollView({
   scrollY: true,
   scrollWidth: 410,
   scrollHeight: 800,
-  showScrollBar: true,
+  showScrollBar: 'scrolling',
   scrollBarSize: 20,
   scrollThumbColor: 'red',
   scrollThumbHoverColor: 'blue',
@@ -35,7 +35,7 @@ const nestScrollView = new ScrollView({
   scrollWidth: 410,
   scrollHeight: 800,
   onScroll: () => console.log('nest scrolled'),
-  showScrollBar: true,
+  showScrollBar: 'scrolling',
 });
 
 nestScrollView.addContent(scrollView);

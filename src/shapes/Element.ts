@@ -7,7 +7,8 @@ import Group, { GroupAttr } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
-import easingFunctions, { EasingName } from '../animate/ease';
+import { EasingName, parseEase,} from '../animate/ease';
+import { Transition } from '../animate/Transition';
 import { interpolate } from '../interpolate';
 import interpolatePath from '../interpolate/interpolatePath';
 import interpolateColor from '../interpolate/interpolateColor';
@@ -26,7 +27,7 @@ import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
 import type Path from '../shapes/Path';
 import { HookElement } from '../react/hooks';
-import { SyntheticAnimationEvent } from '../event/SyntheticAnimationEvent';
+import { SyntheticAnimationEvent, SyntheticTransitionEvent } from '../event';
 import { TextAttr } from './Text';
 import { parseCssGradient, isCssGradient } from '../color/css-gradient-parser';
 import type ScrollView from './ScrollView';
@@ -122,22 +123,23 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
     delay?: number;
   };
   sticky?: {top?: number; left?: number; right?: number; bottom?: number};
-  stateStyles?: stateStyle;
+  stateStyles?: Record<string, ElementAttr>;
+  hoverStyle?: ElementAttr;
+  selectedStyle?: ElementAttr;
+  focusStyle?: ElementAttr;
+  activeStyle?: ElementAttr;
   className?: string;
   rough?: boolean;
   roughOptions?: RoughOptions;
 }
 
 type Status =
-  | 'transition'
-  | 'animation'
   | 'hover'
   | 'focus'
   | 'selected'
   | 'checked'
   | 'active';
-type StatusConfig = Partial<Record<Status, boolean>>;
-type stateStyle = Partial<Record<Status, ElementAttr>>;
+type StatusConfig = Partial<Record<string, boolean>>;
 
 export const defaultCanvasContext: ShapeAttr = {
   fill: 'none',
@@ -253,6 +255,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _animations: AnimateOption<T>[] = [];
 
+  private _transitions: Transition[] = [];
+
+  private _isTransitionUpdated: boolean = false;
+
   private _bbox: BBox;
 
   private _bboxDirty: boolean = true;
@@ -293,9 +299,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _attr: T;
 
+  private _transitionAttr: T;
+
   private _stickOffsetX: number = 0;
 
   private _stickOffsetY: number = 0;
+  
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
@@ -377,18 +386,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
         break;
       case 'blur':
         this.setState('focus', false);
-        break;
-      case 'animationstart':
-        this.setState('animation', true);
-        break;
-      case 'animationend':
-        this.setState('animation', false);
-        break;
-      case 'transitionstart':
-        this.setState('transition', true);
-        break;
-      case 'transitionend':
-        this.setState('transition', false);
         break;
     }
     this._attr.onEvent?.apply(null, params);
@@ -565,12 +562,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (!this._statusConfig) {
       this._statusConfig = {};
     }
-    const { stateStyles } = this._attr;
+    const statusStyle = this._getStatusStyle(state);
     const prevValue = this._statusConfig[state] || false;
 
     this._statusConfig[state] = value;
-    if (stateStyles?.[state] && prevValue !== value) {
-      this.dirtyStatusAttr(stateStyles[state] as T);
+    if (statusStyle&& prevValue !== value) {
+      this.dirtyStatusAttr(statusStyle);
     }
   }
 
@@ -582,20 +579,28 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.dirty();
     const stateStyles = this._attr.stateStyles;
     const statusConfig = this._statusConfig;
-    const keys = Object.keys(stateStyles) as Status[];
+    const statusList = Object.keys(stateStyles || {}).concat('hover', 'focus', 'selected', 'active');
     const cascadingAttr: T = { ...this._attr };
-    for (const key of keys) {
-      const keyAttr = stateStyles[key];
-      if (keyAttr && statusConfig[key]) {
+    for (const status of statusList) {
+      const keyAttr = this._getStatusStyle(status);
+      if (keyAttr && statusConfig[status]) {
         Object.assign(cascadingAttr, keyAttr);
       }
     }
+    Object.assign(cascadingAttr, this._transitionAttr);
     this.attr = cascadingAttr;
   }
 
   private dirtyStatusAttr(attr: T) {
     const oldAttr = this.attr;
+  
+    // todo cancel exist transition
+    this._transitionAttr = {} as any;
+    this._transitions = [];
+
     this.updateCascadeAttr();
+
+    this._isTransitionUpdated = true;
     for (const key in attr) {
       const oldValue = oldAttr[key];
       const newValue = this.attr[key];
@@ -603,6 +608,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         this.onAttrChange(key, newValue, oldValue);
       }
     }
+    this._isTransitionUpdated = false;
   }
 
   public show() {
@@ -937,6 +943,29 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
 
+    if (this._isTransitionUpdated) {
+      const { transitionProperty, transitionDelay = 0, transitionDuration = 0, transitionEase = 'Linear' } = this.attr;
+      const animatableKeys = this._getAnimationKeys();
+      const transitionAble = animatableKeys.includes(key) && (transitionProperty === 'all' || (lodash.isArray(transitionProperty) && transitionProperty.includes(key as any)));
+      if (transitionAble) {
+        const index = this._transitions.findIndex(item => item.transitionProperty === key);
+        if (index !== -1) {
+         this._transitions.splice(index, 1); 
+        }
+        this._transitions.push({
+          values: [oldValue, newValue],
+          finished: false,
+          startTime: 0,
+          transitionProperty: key as string,
+          transitionDelay,
+          transitionDuration,
+          transitionTimingFunction: transitionEase,
+        });
+        this._addToFrame();
+      }
+
+    }
+
     if (transformKeys.indexOf(key as keyof CommonAttr) !== -1) {
       this.dirtyTransform();
     }
@@ -1126,6 +1155,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
       clip.destroy();
     }
     this.stopAllAnimation();
+    this._transitions.length = 0;
+    this._transitionAttr = null;
     this.removeAllListeners();
   }
 
@@ -1193,11 +1224,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   ) {
     this.prevProcessAttr(toAttr);
     const fromAttr = this.attr;
-    let animationKeys = animationKeysMap[this.type] as Array<keyof T>;
-    if (!animationKeys) {
-      animationKeys = this.getAnimationKeys();
-      animationKeysMap[this.type] = animationKeys as Array<keyof ShapeAttr>;
-    }
+    let animationKeys = this._getAnimationKeys();
     animationKeys = animationKeys.filter(key => {
       const toValue = toAttr[key];
       const fromValue = fromAttr[key];
@@ -1247,7 +1274,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.animateTo({} as T, {
       ease,
       during,
-      delay,
+      delay, 
       callback,
       onFrame: (t: number) => {
         const point = path.getPointAtPercent(t);
@@ -1323,42 +1350,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
       clipElement && clipElement.onFrame(now);
     }
 
-    if (!this._animations.length) {
+    if (!(this._animations.length || this._transitions.length)) {
       this._removeFromFrame();
       return;
     }
-
-    let animate = this._animations[0];
-    let progress = 0;
-    if (animate.startTime) {
-      progress = Math.min((now - animate.startTime) / animate.during, 1);
-    } else {
-      animate.startTime = now;
-    }
-    progress =
-      typeof animate.ease === 'function'
-        ? animate.ease(progress)
-        : easingFunctions[animate.ease || 'Linear'](progress);
-    let fn: Function = interpolate;
     this.startAttrTransaction();
-    for (const key in animate.to) {
-      if (key === 'color' || key === 'fill' || key === 'stroke' || key === 'shadowColor') {
-        fn = interpolateColor;
-      } else if (key === 'pathData') {
-        fn = interpolatePath;
-      } else {
-        fn = interpolate;
-      }
-      this.setAttr(key, fn(animate.from[key], animate.to[key], progress));
-    }
-    if (progress === 1) {
-      animate.callback && animate.callback();
-      animate.stopped = true;
-    }
-    animate.onFrame && animate.onFrame(progress);
-    progress >= 1 && this._animations.shift();
-    animate = null;
-    if (!this._animations.length) {
+    this._runAnimation(now);
+    this._applyTransition(now);
+    if (!(this._animations.length || this._transitions.length)) {
       this._removeFromFrame();
     }
     this.endAttrTransaction();
@@ -1535,6 +1534,117 @@ export default class Element<T extends CommonAttr = ElementAttr>
       if (axis === 'y') {
         return localBBox.y + localBBox.height / 2;
       }
+    }
+  }
+
+  private _getAnimationKeys(): Array<keyof T> {
+    let animationKeys = animationKeysMap[this.type] as Array<keyof T>;
+    if (!animationKeys) {
+      animationKeys = this.getAnimationKeys();
+      animationKeysMap[this.type] = animationKeys as Array<keyof ShapeAttr>;
+    }
+    return animationKeys;
+  }
+
+  private _runAnimation(now: number) {
+    if (!this._animations.length) {
+      return;
+    }
+
+    let animate = this._animations[0];
+    let progress = 0;
+    if (animate.startTime) {
+      progress = Math.min((now - animate.startTime) / animate.during, 1);
+    } else {
+      animate.startTime = now;
+    }
+    progress =
+      typeof animate.ease === 'function'
+        ? animate.ease(progress)
+        : parseEase(animate.ease)(progress);
+    let fn: Function = interpolate;
+    for (const key in animate.to) {
+      if (key === 'color' || key === 'fill' || key === 'stroke' || key === 'shadowColor') {
+        fn = interpolateColor;
+      } else if (key === 'pathData') {
+        fn = interpolatePath;
+      } else {
+        fn = interpolate;
+      }
+      this.setAttr(key, fn(animate.from[key], animate.to[key], progress));
+    }
+    if (progress === 1) {
+      animate.callback && animate.callback();
+      animate.stopped = true;
+    }
+    animate.onFrame && animate.onFrame(progress);
+    progress >= 1 && this._animations.shift();
+    animate = null;
+  }
+
+  private _applyTransition(tick: number) {
+    if (!this._transitions.length) {
+      return;
+    }
+    this._transitions.forEach(transition => {
+      const { startTime, values, transitionProperty, transitionDuration, transitionTimingFunction, transitionDelay = 0 } = transition;
+      let progress = 0;
+      let fn: Function = interpolate;
+      if (startTime) {
+        progress = Math.min((tick - startTime) / transitionDuration, 1);
+      } else {
+        transition.startTime = tick;
+      }
+      progress = parseEase(transitionTimingFunction as EasingName)(progress);
+      if (transitionProperty === 'color' || transitionProperty === 'fill' || transitionProperty === 'stroke' || transitionProperty === 'shadowColor') {
+        fn = interpolateColor;
+      } else if (transitionProperty === 'pathData') {
+        fn = interpolatePath;
+      } else {
+        fn = interpolate;
+      }
+      this._setTransitionAttr(transitionProperty as keyof T, fn(values[0], values[1], progress));
+      if (progress >= 1) {
+        transition.finished = true;
+        this._setTransitionAttr(transitionProperty as keyof T, undefined);
+        this.dispatch('transitionend',new SyntheticTransitionEvent('transitionend', {
+          elapsedTime: transitionDuration,
+          propertyName: transitionProperty,
+          bubbles: true,
+        }));
+      }
+    });
+    this._transitions = this._transitions.filter(transition => !transition.finished);
+    if (this._transitions.length === 0) {
+      this._transitionAttr = null;
+    } 
+  }
+
+  private _setTransitionAttr(key: keyof T, value: any) {
+    if (!this._transitionAttr) {
+      this._transitionAttr = {} as T;
+    }
+    if (value === undefined) {
+      delete this._transitionAttr[key];
+      return;
+    } else {
+      this._transitionAttr[key] = value;
+    }
+    const oldValue = this.attr[key];
+    this.attr[key] = value;
+    this.onAttrChange(key, value, oldValue);
+  }
+
+  private _getStatusStyle(status: string): T {
+    switch (status) {
+      case 'active':
+        return this.attr.activeStyle as T;
+      case 'hover':
+        return this.attr.hoverStyle as T;
+      case 'focus':
+        return this.attr.focusStyle as T;
+      default:
+        return this.attr.stateStyles?.[status]  as T;
     }
   }
 }

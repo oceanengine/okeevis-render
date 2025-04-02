@@ -447,7 +447,7 @@ export default class ScrollView extends Group {
     });
     clipGroup.add(contentGroup);
     this._scrollContentGroup = contentGroup;
-    this._attachScrollBar();
+    this._initScrollBar();
   }
 
   private _eventScrollBy(target: ScrollView, dx: number, dy: number) {
@@ -486,7 +486,7 @@ export default class ScrollView extends Group {
     );
   }
 
-  private _attachScrollBar() {
+  private _initScrollBar() {
     const { scrollThumbColor, scrollThumbHoverColor } = this.attr;
     const commonBarAttr: RectAttr = {
       draggable: true,
@@ -505,13 +505,13 @@ export default class ScrollView extends Group {
       key: 'scrollbar-x',
       ...commonBarAttr,
       onDragStart: e => {
-        const item = e.target.parentNode as ScrollView;
-        item._dragStartPosition = this.scrollLeft;
+        const item = e.target.parentNode as ScrollView
+        item._dragStartPosition = item.scrollLeft;
       },
       onDrag: e => {
-        const item = e.target.parentNode as ScrollView;
+        const item = e.target.parentNode as ScrollView as this;
         const scaleX = item.clientWidth / item.attr.scrollWidth;
-        const movement = this._dragStartPosition + (e.x - e.startX) / scaleX - this.scrollLeft;
+        const movement = item._dragStartPosition + (e.x - e.startX) / scaleX - item.scrollLeft;
         (item as this)._eventScrollBy(item, movement, 0);
       },
     });
@@ -520,13 +520,13 @@ export default class ScrollView extends Group {
       ...commonBarAttr,
       onDragStart: e => {
         const item = e.target.parentNode as ScrollView;
-        item._dragStartPosition = this.scrollTop;
+        item._dragStartPosition = (e.target as this).scrollTop;
       },
       onDrag: e => {
-        const item = e.target.parentNode as ScrollView;
+        const item = e.target.parentNode as ScrollView as this;
         const scaleY = item.clientHeight / item.attr.scrollHeight;
-        const movement = this._dragStartPosition + (e.y - e.startY) / scaleY - this.scrollTop;
-        (item as this)._eventScrollBy(item, 0, movement);
+        const movement = item._dragStartPosition + (e.y - e.startY) / scaleY - item.scrollTop;
+        item._eventScrollBy(item, 0, movement);
       },
     });
     this._horizontalScrollTrack = new Rect({
