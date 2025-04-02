@@ -520,7 +520,7 @@ export default class ScrollView extends Group {
       ...commonBarAttr,
       onDragStart: e => {
         const item = e.target.parentNode as ScrollView;
-        item._dragStartPosition = (e.target as this).scrollTop;
+        item._dragStartPosition = item.scrollTop;
       },
       onDrag: e => {
         const item = e.target.parentNode as ScrollView as this;
