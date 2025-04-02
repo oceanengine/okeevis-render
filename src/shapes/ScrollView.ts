@@ -539,14 +539,10 @@ export default class ScrollView extends Group {
     });
     this._updateHorizontalBar();
     this._updateVerticalBar();
-    if (this.attr.scrollX) {
-      this.add(this._horizontalScrollTrack);
-      this.add(this._horizontalScrollBar);
-    }
-    if (this.attr.scrollY) {
-      this.add(this._verticalScrollTrack);
-      this.add(this._verticalScrollBar);
-    }
+    this.add(this._horizontalScrollTrack);
+    this.add(this._horizontalScrollBar);
+    this.add(this._verticalScrollTrack);
+    this.add(this._verticalScrollBar);
   }
 
   private _updateHorizontalBar() {
@@ -561,13 +557,14 @@ export default class ScrollView extends Group {
       scrollBarSize,
       scrollTrackColor,
       scrollTrackBorderColor,
+      scrollX,
     } = this.attr;
     const scrollThumbWidth = scrollBarSize - 5;
     const clientWidth = this.clientWidth;
     const scaleX = clientWidth / scrollWidth;
     const dx = this.scrollLeft * scaleX;
     const yPosition = y + Math.min(height, scrollHeight) - scrollBarSize / 2 - 0.5;
-    let show = !!(scaleX < 1 && showScrollBar);
+    let show = !!(scaleX < 1 && showScrollBar) && scrollX;
     if (showScrollBar === 'hover') {
       show = show && this._isMouseEnter;
     }
@@ -604,13 +601,14 @@ export default class ScrollView extends Group {
       scrollBarSize,
       scrollTrackColor,
       scrollTrackBorderColor,
+      scrollY,
     } = this.attr;
     const scrollThumbWidth = scrollBarSize - 5;
     const clientHeight = this.clientHeight;
     const scaleY = clientHeight / scrollHeight;
     const dy = this.scrollTop * scaleY;
     const xPosition = x + Math.min(width, scrollWidth) - scrollBarSize / 2 - 0.5;
-    let show = !!(scaleY < 1 && showScrollBar);
+    let show = !!(scaleY < 1 && showScrollBar) && scrollY;
     if (showScrollBar === 'hover') {
       show = show && this._isMouseEnter;
     }
