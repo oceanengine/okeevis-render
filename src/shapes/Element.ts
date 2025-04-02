@@ -7,7 +7,7 @@ import Group, { GroupAttr } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue } from '../color';
 import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
-import { EasingName, parseEase,} from '../animate/ease';
+import { EasingName, parseEase } from '../animate/ease';
 import { Transition } from '../animate/Transition';
 import { interpolate } from '../interpolate';
 import interpolatePath from '../interpolate/interpolatePath';
@@ -54,7 +54,7 @@ export interface BaseAttr extends TransformConf, EventConf {
 
   fill?: ColorValue | ColorValue[];
   stroke?: ColorValue;
-  color?: ColorValue
+  color?: ColorValue;
   strokeNoScale?: boolean;
   lineWidth?: number;
   pickingBuffer?: number;
@@ -68,32 +68,32 @@ export interface BaseAttr extends TransformConf, EventConf {
   fillOpacity?: number;
   strokeOpacity?: number;
   blendMode?:
-  'source-over'|
-  'source-in'|
-  'source-out'|
-  'source-atop'|
-  'destination-over'|
-  'destination-in'|
-  'destination-out'|
-  'destination-atop'|
-  'lighter'|
-  'copy'|
-  'xor'|
-  'multiply'|
-  'screen'|
-  'overlay'|
-  'darken'|
-  'lighten'|
-  'color-dodge'|
-  'color-burn'|
-  'hard-light'|
-  'soft-light'|
-  'difference'|
-  'exclusion'|
-  'hue'|
-  'saturation'|
-  'color'|
-  'luminosity';
+    | 'source-over'
+    | 'source-in'
+    | 'source-out'
+    | 'source-atop'
+    | 'destination-over'
+    | 'destination-in'
+    | 'destination-out'
+    | 'destination-atop'
+    | 'lighter'
+    | 'copy'
+    | 'xor'
+    | 'multiply'
+    | 'screen'
+    | 'overlay'
+    | 'darken'
+    | 'lighten'
+    | 'color-dodge'
+    | 'color-burn'
+    | 'hard-light'
+    | 'soft-light'
+    | 'difference'
+    | 'exclusion'
+    | 'hue'
+    | 'saturation'
+    | 'color'
+    | 'luminosity';
 
   clip?: Shape | RefObject<Shape>;
 
@@ -122,7 +122,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
     ease?: EasingName;
     delay?: number;
   };
-  sticky?: {top?: number; left?: number; right?: number; bottom?: number};
+  sticky?: { top?: number; left?: number; right?: number; bottom?: number };
   stateStyles?: Record<string, ElementAttr>;
   hoverStyle?: ElementAttr;
   selectedStyle?: ElementAttr;
@@ -133,12 +133,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   roughOptions?: RoughOptions;
 }
 
-type Status =
-  | 'hover'
-  | 'focus'
-  | 'selected'
-  | 'checked'
-  | 'active';
+type Status = 'hover' | 'focus' | 'selected' | 'checked' | 'active';
 type StatusConfig = Partial<Record<string, boolean>>;
 
 export const defaultCanvasContext: ShapeAttr = {
@@ -304,7 +299,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _stickOffsetX: number = 0;
 
   private _stickOffsetY: number = 0;
-  
+
   public constructor(attr?: T) {
     super();
     this.id = nodeId++;
@@ -426,7 +421,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   public hasFill(): boolean {
     const fill = this.getExtendAttr('fill');
-    return fill && fill !== 'none' && (fill as ColorValue[]).length !== 0
+    return fill && fill !== 'none' && (fill as ColorValue[]).length !== 0;
   }
 
   public hasStroke() {
@@ -544,9 +539,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
     } else {
       const transitionAttr =
         transitionProperty === 'all' ? nextAttr : lodash.pick(nextAttr, transitionProperty as any);
-      this
-        .stopAllAnimation()
-        .animateTo(transitionAttr, transitionDuration, transitionEase, null, transitionDelay);
+      this.stopAllAnimation().animateTo(
+        transitionAttr,
+        transitionDuration,
+        transitionEase,
+        null,
+        transitionDelay,
+      );
     }
     if ((this as any as TypeCustomElement).$$CustomType) {
       (this as any as TypeCustomElement).skipUpdate();
@@ -566,7 +565,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const prevValue = this._statusConfig[state] || false;
 
     this._statusConfig[state] = value;
-    if (statusStyle&& prevValue !== value) {
+    if (statusStyle && prevValue !== value) {
       this.dirtyStatusAttr(statusStyle);
     }
   }
@@ -579,7 +578,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.dirty();
     const stateStyles = this._attr.stateStyles;
     const statusConfig = this._statusConfig;
-    const statusList = Object.keys(stateStyles || {}).concat('hover', 'focus', 'selected', 'active');
+    const statusList = Object.keys(stateStyles || {}).concat(
+      'hover',
+      'focus',
+      'selected',
+      'active',
+    );
     const cascadingAttr: T = { ...this._attr };
     for (const status of statusList) {
       const keyAttr = this._getStatusStyle(status);
@@ -593,7 +597,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private dirtyStatusAttr(attr: T) {
     const oldAttr = this.attr;
-  
+
     // todo cancel exist transition
     this._transitionAttr = {} as any;
     this._transitions = [];
@@ -637,21 +641,27 @@ export default class Element<T extends CommonAttr = ElementAttr>
     let scrollLeft: number;
     let behavior: ScrollBehavior = 'smooth';
     const topMap = {
-      start: itemBBox.y -  scrollView.attr.y,
+      start: itemBBox.y - scrollView.attr.y,
       center: itemBBox.y + itemBBox.height / 2 - scrollView.attr.y - scrollView.clientHeight / 2,
-      end:  itemBBox.y - scrollView.attr.y - scrollView.clientHeight + itemBBox.height,
+      end: itemBBox.y - scrollView.attr.y - scrollView.clientHeight + itemBBox.height,
       nearest: 0,
     };
     const currentScrollTop = scrollView.scrollTop;
     const currentScrollLeft = scrollView.scrollLeft;
-    topMap.nearest = Math.abs(currentScrollTop - topMap.start) < Math.abs(currentScrollTop - topMap.end) ? topMap.start : topMap.end;
+    topMap.nearest =
+      Math.abs(currentScrollTop - topMap.start) < Math.abs(currentScrollTop - topMap.end)
+        ? topMap.start
+        : topMap.end;
     const leftMap = {
       start: itemBBox.x - scrollView.attr.x,
       center: itemBBox.x + itemBBox.width / 2 - scrollView.attr.x - scrollView.clientWidth / 2,
-      end:  itemBBox.x - scrollView.attr.x - scrollView.clientWidth + itemBBox.width,
+      end: itemBBox.x - scrollView.attr.x - scrollView.clientWidth + itemBBox.width,
       nearest: 0,
     };
-    leftMap.nearest = Math.abs(currentScrollLeft - leftMap.start) < Math.abs(currentScrollLeft - leftMap.end) ? leftMap.start : leftMap.end;
+    leftMap.nearest =
+      Math.abs(currentScrollLeft - leftMap.start) < Math.abs(currentScrollLeft - leftMap.end)
+        ? leftMap.start
+        : leftMap.end;
 
     if (lodash.isBoolean(scrollOptions)) {
       if (scrollOptions === true) {
@@ -661,7 +671,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
       scrollLeft = leftMap.start;
     } else {
-      const { block = 'start', inline = 'nearest', } = scrollOptions;
+      const { block = 'start', inline = 'nearest' } = scrollOptions;
       behavior = scrollOptions.behavior || behavior;
       scrollTop = topMap[block];
       scrollLeft = leftMap[inline];
@@ -875,17 +885,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public computeBBoxWithLocalTransform() {
-    const out: BBox = {x: 0, y: 0, width: 0, height: 0};
+    const out: BBox = { x: 0, y: 0, width: 0, height: 0 };
     return this.computeBoundingClientRect(out, false);
   }
 
   protected computeBoundingClientRect(out: BBox, isGlobal = true): BBox {
     // todo gc optimize
     let { x, y, width, height } = this.getBBox();
-    if (
-      this.type === 'text' &&
-      (this.attr as TextAttr).overline
-    ) {
+    if (this.type === 'text' && (this.attr as TextAttr).overline) {
       const fontSize = (this as any).getExtendAttr('fontSize');
       y -= fontSize * 0.1;
       height += fontSize * 0.1;
@@ -893,7 +900,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const hasStroke = this.hasStroke();
     const lineWidth = hasStroke && !this.isGroup ? this.getExtendAttr('lineWidth') : 0;
     const offsetLineWidth = (Math.sqrt(2) / 2) * lineWidth;
-    const matrix =  isGlobal ? this.getGlobalTransform(true) : this.getTransform(true);
+    const matrix = isGlobal ? this.getGlobalTransform(true) : this.getTransform(true);
     x -= offsetLineWidth;
     y -= offsetLineWidth;
     width += offsetLineWidth * 2;
@@ -944,13 +951,21 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (this._isTransitionUpdated) {
-      const { transitionProperty, transitionDelay = 0, transitionDuration = 0, transitionEase = 'Linear' } = this.attr;
+      const {
+        transitionProperty,
+        transitionDelay = 0,
+        transitionDuration = 0,
+        transitionEase = 'Linear',
+      } = this.attr;
       const animatableKeys = this._getAnimationKeys();
-      const transitionAble = animatableKeys.includes(key) && (transitionProperty === 'all' || (lodash.isArray(transitionProperty) && transitionProperty.includes(key as any)));
+      const transitionAble =
+        animatableKeys.includes(key) &&
+        (transitionProperty === 'all' ||
+          (lodash.isArray(transitionProperty) && transitionProperty.includes(key as any)));
       if (transitionAble) {
         const index = this._transitions.findIndex(item => item.transitionProperty === key);
         if (index !== -1) {
-         this._transitions.splice(index, 1); 
+          this._transitions.splice(index, 1);
         }
         this._transitions.push({
           values: [oldValue, newValue],
@@ -963,7 +978,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
         });
         this._addToFrame();
       }
-
     }
 
     if (transformKeys.indexOf(key as keyof CommonAttr) !== -1) {
@@ -977,8 +991,11 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (key === 'shadowBlur') {
       this._currentPaintAreaDirty = true;
     }
-    
-    if ((key === 'fill' || key === 'color' || key === 'stroke') && ((lodash.isString(newValue) && isCssGradient(newValue)) || lodash.isArray(newValue))) {
+
+    if (
+      (key === 'fill' || key === 'color' || key === 'stroke') &&
+      ((lodash.isString(newValue) && isCssGradient(newValue)) || lodash.isArray(newValue))
+    ) {
       if (lodash.isArray(newValue)) {
         this.attr[key] = newValue.map(item => {
           if (isCssGradient(item)) {
@@ -1274,7 +1291,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.animateTo({} as T, {
       ease,
       during,
-      delay, 
+      delay,
       callback,
       onFrame: (t: number) => {
         const point = path.getPointAtPercent(t);
@@ -1438,7 +1455,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
     if (offsetX !== 0 || offsetY !== 0) {
       flagDirty = true;
-      mat3.translate(out, out, [offsetX, offsetY])
+      mat3.translate(out, out, [offsetX, offsetY]);
     }
     return flagDirty ? out : null;
   }
@@ -1510,7 +1527,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.ownerRender?.__removeFrameableElement(this);
   }
 
-  private _getOrigin(value: number | 'top' | 'left' | 'right' | 'center' | 'bottom', axis: 'x' | 'y') {
+  private _getOrigin(
+    value: number | 'top' | 'left' | 'right' | 'center' | 'bottom',
+    axis: 'x' | 'y',
+  ) {
     if (typeof value === 'number') {
       return value;
     }
@@ -1587,7 +1607,14 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
     this._transitions.forEach(transition => {
-      const { startTime, values, transitionProperty, transitionDuration, transitionTimingFunction, transitionDelay = 0 } = transition;
+      const {
+        startTime,
+        values,
+        transitionProperty,
+        transitionDuration,
+        transitionTimingFunction,
+        transitionDelay = 0,
+      } = transition;
       let progress = 0;
       let fn: Function = interpolate;
       if (startTime) {
@@ -1596,7 +1623,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
         transition.startTime = tick;
       }
       progress = parseEase(transitionTimingFunction as EasingName)(progress);
-      if (transitionProperty === 'color' || transitionProperty === 'fill' || transitionProperty === 'stroke' || transitionProperty === 'shadowColor') {
+      if (
+        transitionProperty === 'color' ||
+        transitionProperty === 'fill' ||
+        transitionProperty === 'stroke' ||
+        transitionProperty === 'shadowColor'
+      ) {
         fn = interpolateColor;
       } else if (transitionProperty === 'pathData') {
         fn = interpolatePath;
@@ -1607,17 +1639,20 @@ export default class Element<T extends CommonAttr = ElementAttr>
       if (progress >= 1) {
         transition.finished = true;
         this._setTransitionAttr(transitionProperty as keyof T, undefined);
-        this.dispatch('transitionend',new SyntheticTransitionEvent('transitionend', {
-          elapsedTime: transitionDuration,
-          propertyName: transitionProperty,
-          bubbles: true,
-        }));
+        this.dispatch(
+          'transitionend',
+          new SyntheticTransitionEvent('transitionend', {
+            elapsedTime: transitionDuration,
+            propertyName: transitionProperty,
+            bubbles: true,
+          }),
+        );
       }
     });
     this._transitions = this._transitions.filter(transition => !transition.finished);
     if (this._transitions.length === 0) {
       this._transitionAttr = null;
-    } 
+    }
   }
 
   private _setTransitionAttr(key: keyof T, value: any) {
@@ -1644,7 +1679,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       case 'focus':
         return this.attr.focusStyle as T;
       default:
-        return this.attr.stateStyles?.[status]  as T;
+        return this.attr.stateStyles?.[status] as T;
     }
   }
 }
