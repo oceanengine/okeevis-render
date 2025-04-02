@@ -36,8 +36,11 @@ const Child = (props: any) => {
         transitionEase='BounceOut'
         fontSize={100}
         hoverStyle={{
-            fill: 'blue',
+            fill: 'linear-gradient(red, blue)',
             fontSize: 200,
+        }}
+        activeStyle={{
+          fill: 'yellow',
         }}
         onTransitionEnd={e => console.log(e)}
         onClick={() => {

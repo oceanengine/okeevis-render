@@ -252,6 +252,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _transitions: Transition[] = [];
 
+  private _changedTransitionProperties: [keyof T, any][] = [];
+
   private _isTransitionUpdated: boolean = false;
 
   private _bbox: BBox;
@@ -605,6 +607,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.updateCascadeAttr();
 
     this._isTransitionUpdated = true;
+
     for (const key in attr) {
       const oldValue = oldAttr[key];
       const newValue = this.attr[key];
@@ -612,6 +615,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
         this.onAttrChange(key, newValue, oldValue);
       }
     }
+    this._processGradientAttr(this.attr);
+    this._processChangedTransition();
     this._isTransitionUpdated = false;
   }
 
@@ -951,33 +956,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     if (this._isTransitionUpdated) {
-      const {
-        transitionProperty,
-        transitionDelay = 0,
-        transitionDuration = 0,
-        transitionEase = 'Linear',
-      } = this.attr;
-      const animatableKeys = this._getAnimationKeys();
-      const transitionAble =
-        animatableKeys.includes(key) &&
-        (transitionProperty === 'all' ||
-          (lodash.isArray(transitionProperty) && transitionProperty.includes(key as any)));
-      if (transitionAble) {
-        const index = this._transitions.findIndex(item => item.transitionProperty === key);
-        if (index !== -1) {
-          this._transitions.splice(index, 1);
-        }
-        this._transitions.push({
-          values: [oldValue, newValue],
-          finished: false,
-          startTime: 0,
-          transitionProperty: key as string,
-          transitionDelay,
-          transitionDuration,
-          transitionTimingFunction: transitionEase,
-        });
-        this._addToFrame();
-      }
+      this._changedTransitionProperties.push([key, oldValue]);
     }
 
     if (transformKeys.indexOf(key as keyof CommonAttr) !== -1) {
@@ -990,22 +969,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
     if (key === 'shadowBlur') {
       this._currentPaintAreaDirty = true;
-    }
-
-    if (
-      (key === 'fill' || key === 'color' || key === 'stroke') &&
-      ((lodash.isString(newValue) && isCssGradient(newValue)) || lodash.isArray(newValue))
-    ) {
-      if (lodash.isArray(newValue)) {
-        this.attr[key] = newValue.map(item => {
-          if (isCssGradient(item)) {
-            return parseCssGradient(item) as any;
-          }
-          return item;
-        }) as any;
-      } else {
-        this.attr[key] = parseCssGradient(newValue) as any;
-      }
     }
 
     if (this.shapeKeys.indexOf(key) !== -1) {
@@ -1033,6 +996,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (this.attr !== this._attr) {
       this.updateCascadeAttr();
     }
+    this._processGradientAttr(this.attr);
   }
 
   public mounted() {
@@ -1681,5 +1645,65 @@ export default class Element<T extends CommonAttr = ElementAttr>
       default:
         return this.attr.stateStyles?.[status] as T;
     }
+  }
+
+  private _processGradientAttr(attr: T) {
+    const keys: (keyof T)[] = ['fill', 'stroke', 'color'];
+    keys.forEach(key => {
+      const newValue = attr[key];
+      if (!newValue) {
+        return;
+      }
+      if ((lodash.isString(newValue) && isCssGradient(newValue)) || lodash.isArray(newValue)) {
+        if (lodash.isArray(newValue)) {
+          attr[key] = newValue.map(item => {
+            if (isCssGradient(item)) {
+              return parseCssGradient(item) as any;
+            }
+            return item;
+          }) as any;
+        } else {
+          attr[key] = parseCssGradient(newValue) as any;
+        }
+      }
+    });
+  }
+
+  private _processChangedTransition() {
+    if (!this._changedTransitionProperties.length) {
+      return;
+    }
+    const {
+      transitionProperty,
+      transitionDelay = 0,
+      transitionDuration = 0,
+      transitionEase = 'Linear',
+    } = this.attr;
+    const animatableKeys = this._getAnimationKeys();
+    for (const changedAttr of this._changedTransitionProperties) {
+      const [key, oldValue] = changedAttr;
+      const newValue = this.attr[key as keyof T];
+      const transitionAble =
+        animatableKeys.includes(key as keyof T) &&
+        (transitionProperty === 'all' ||
+          (lodash.isArray(transitionProperty) && transitionProperty.includes(key as any)));
+      if (transitionAble) {
+        const index = this._transitions.findIndex(item => item.transitionProperty === key);
+        if (index !== -1) {
+          this._transitions.splice(index, 1);
+        }
+        this._transitions.push({
+          values: [oldValue, newValue],
+          finished: false,
+          startTime: 0,
+          transitionProperty: key as string,
+          transitionDelay,
+          transitionDuration,
+          transitionTimingFunction: transitionEase,
+        });
+      }
+    }
+    this._addToFrame();
+    this._changedTransitionProperties.length = 0;
   }
 }
