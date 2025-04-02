@@ -48,6 +48,7 @@ export interface EventConf {
   onAnimationStart?: (event: SyntheticAnimationEvent) => void;
   onAnimationCancel?: (event: SyntheticAnimationEvent) => void;
   onAnimationEnd?: (event: SyntheticAnimationEvent) => void;
+  onTransitionRun?: (event: SyntheticTransitionEvent) => void;
   onTransitionStart?:(event: SyntheticTransitionEvent) => void;
   onTransitionEnd?:(event: SyntheticTransitionEvent) => void;
   onTransitionCancel?:(event: SyntheticTransitionEvent) => void;

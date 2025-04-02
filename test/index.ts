@@ -1,1 +1,1 @@
-import './diff';
+import './react/setstate.test';

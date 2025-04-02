@@ -121,6 +121,10 @@ export default class EventHandle {
     }
   }
 
+  public dispatchEvent(event: SyntheticEvent, target: Element) {
+    this._dispatchSyntheticEvent(event, target);
+  }
+
   public pickTarget(x: number, y: number): Element {
     // console.time('pick');
     const pixelPainter = this._PixelPainter;

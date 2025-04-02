@@ -13,7 +13,7 @@ import { interpolate } from '../interpolate';
 import interpolatePath from '../interpolate/interpolatePath';
 import interpolateColor from '../interpolate/interpolateColor';
 import { TransformConf } from '../abstract/TransformAble';
-import { EventConf, RenderEventHandleParam } from '../event';
+import { EventConf, RenderEventHandleParam, SyntheticEvent } from '../event';
 import Shape, { ShapeAttr } from './Shape';
 import Marker from './Marker';
 import * as mat3 from '../../js/mat3';
@@ -354,6 +354,12 @@ export default class Element<T extends CommonAttr = ElementAttr>
       // rotation: 0,
       // strokeNoScale: false,
     } as T;
+  }
+
+  public dispatchEvent(event: SyntheticEvent): void {
+    if (this.isConnected) {
+      this.ownerRender.getEventHandle().dispatchEvent(event, this as any);
+    }
   }
 
   protected onEvent(type: string, ...params: any[]) {
@@ -1003,8 +1009,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     }
     if (this.attr.animation) {
-      this.dispatch(
-        'animationstart',
+      this.dispatchEvent(
         new SyntheticAnimationEvent('animationstart', {
           bubbles: false,
           timeStamp: Date.now(),
@@ -1017,8 +1022,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
         ease: 'Linear',
         ...(this.attr.animation as AnimateOption<T>),
         callback: () => {
-          this.dispatch(
-            'animationend',
+          this.dispatchEvent(
             new SyntheticAnimationEvent('animationend', {
               bubbles: false,
               timeStamp: Date.now(),
@@ -1580,6 +1584,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
         transition.startTime = tick;
       }
       progress = parseEase(transitionTimingFunction as EasingName)(progress);
+      if (progress === 0) {
+        this.dispatchEvent(new SyntheticTransitionEvent('transitionstart', {
+          elapsedTime: 0,
+          propertyName: transitionProperty,
+          bubbles: true,
+        }));
+      }
       if (
         transitionProperty === 'color' ||
         transitionProperty === 'fill' ||
@@ -1596,8 +1607,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       if (progress >= 1) {
         transition.finished = true;
         this._setTransitionAttr(transitionProperty as keyof T, undefined);
-        this.dispatch(
-          'transitionend',
+        this.dispatchEvent(
           new SyntheticTransitionEvent('transitionend', {
             elapsedTime: transitionDuration,
             propertyName: transitionProperty,
@@ -1694,6 +1704,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
           transitionDuration,
           transitionTimingFunction: transitionEase,
         });
+        this.dispatchEvent(
+          new SyntheticTransitionEvent('transitionrun', {
+            elapsedTime: 0,
+            propertyName: key as string,
+            bubbles: true,
+          }),
+        );
       }
     }
     this._addToFrame();
