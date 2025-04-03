@@ -76,10 +76,11 @@ export default class Text extends Shape<TextAttr> {
     return !!((text + '').indexOf('\n') !== -1 || truncate);
   }
 
-  protected prevProcessAttr(attr: TextAttr) {
-    super.prevProcessAttr(attr);
-    if (attr.children && !attr.text) {
-      attr.text = Array.isArray(attr.children) ? attr.children.join('') : attr.children;
+  protected afterAttrChanged(): void {
+    super.afterAttrChanged();
+    const children = this.attr.children;
+    if (children) {
+      this.attr.text = this.attr.children;
     }
   }
 

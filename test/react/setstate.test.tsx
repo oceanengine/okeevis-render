@@ -34,15 +34,14 @@ const Child = (props: any) => {
         color="yellow"
         transitionDelay={0}
         transitionProperty="all"
-        transitionDuration={1000}
+        transitionDuration={600}
         transitionEase="cubic-bezier(0.42, 0.0, 0.58, 1.0)"
         fontSize={100}
         hoverStyle={{
-          fill: 'linear-gradient(red, blue)',
           fontSize: 200,
         }}
         activeStyle={{
-          fill: 'currentColor',
+          fill: 'red',
         }}
         onClick={() => {
           setValue(2);

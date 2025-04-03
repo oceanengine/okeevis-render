@@ -520,6 +520,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
     if (!this._inTransaction) {
       this.afterAttrChanged();
+      if (this.attr !== this._attr) {
+        this.updateCascadeAttr();
+      }
     }
 
     return this;
@@ -557,6 +560,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       (this as any as TypeCustomElement).skipUpdate();
     }
     this.endAttrTransaction();
+    if (this.attr !== this._attr) {
+      this.updateCascadeAttr();
+    }
   }
 
   public removeAttr(attribute: keyof T) {
@@ -1004,9 +1010,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   protected afterAttrChanged() {
     this._cacheRough = undefined;
-    if (this.attr !== this._attr) {
-      this.updateCascadeAttr();
-    }
     this._processGradientAttr(this.attr);
   }
 
@@ -1347,10 +1350,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
     this.startAttrTransaction();
     this._runAnimations(now);
     this._runTransitions(now);
+    this.endAttrTransaction();
     if (!(this._animations.length || this._transitions.length)) {
       this._removeFromFrame();
     }
-    this.endAttrTransaction();
   }
 
   public getClipElement(): Shape {
@@ -1579,6 +1582,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (!this._transitions.length) {
       return;
     }
+    this.dirty();
     this._transitions.forEach(transition => {
       let {
         startTime,
@@ -1604,13 +1608,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
      
       progress = parseEase(transitionTimingFunction as EasingName)(progress);
       
-      if (progress === 0) {
-        this.dispatchEvent(new SyntheticTransitionEvent('transitionstart', {
-          elapsedTime: 0,
-          propertyName: transitionProperty,
-          bubbles: true,
-        }));
-      }
       if (
         transitionProperty === 'color' ||
         transitionProperty === 'fill' ||
@@ -1624,6 +1621,15 @@ export default class Element<T extends CommonAttr = ElementAttr>
         fn = interpolate;
       }
       this._setTransitionAttr(transitionProperty as keyof T, fn(values[0], values[1], progress));
+
+      if (progress === 0) {
+        this.dispatchEvent(new SyntheticTransitionEvent('transitionstart', {
+          elapsedTime: 0,
+          propertyName: transitionProperty,
+          bubbles: true,
+        }));
+      }
+
       if (progress >= 1) {
         transition.finished = true;
         this._setTransitionAttr(transitionProperty as keyof T, undefined);
@@ -1730,7 +1736,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
             elapsedTime: 0,
             propertyName: key as string,
             bubbles: true,
-          }),
+          })
         );
       }
     }
