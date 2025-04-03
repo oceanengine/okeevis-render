@@ -32,10 +32,10 @@ const Child = (props: any) => {
         y={150}
         fill="red"
         color="yellow"
-        transitionDelay={300}
+        transitionDelay={0}
         transitionProperty="all"
         transitionDuration={1000}
-        transitionEase="BounceOut"
+        transitionEase="cubic-bezier(0.42, 0.0, 0.58, 1.0)"
         fontSize={100}
         hoverStyle={{
           fill: 'linear-gradient(red, blue)',

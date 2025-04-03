@@ -1,35 +1,33 @@
 /* eslint-disable no-cond-assign  */
 /* eslint-disable no-return-assign  */
 
+import { cubicBezier } from "./cubic-bezier";
+
 export type EasingName = keyof typeof easing | string;
 export type EasingFunction = (k: number) => number;
-
-export const cubicBezier = (p1x: number, p1y: number, p2x: number, p2y: number) => {
-  return (k: number) =>  3 * (1 - k) ** 2 * k * p1y + 3 * (1 -k) * k ** 2 * p2y + k ** 3;
-}
 
 const easeCache: Record<string, EasingFunction> = {};
 
 const linear = (k: number) => k;
+
+// https://developer.mozilla.org/zh-CN/docs/Web/CSS/easing-function
 const ease = cubicBezier(0.25, 0.1, 0.25, 1.0);
 const easeIn = cubicBezier(0.42, 0.0, 1.0, 1.0);
 const easeOut = cubicBezier(0.0, 0.0, 0.58, 1.0);
-const easeInOut = cubicBezier(0.42, 0.0, 0.58, 1.0)
+const easeInOut = cubicBezier(0.42, 0.0, 0.58, 1.0);
 
 export function parseEase(inputEase: EasingName): EasingFunction {
   if (typeof inputEase === 'function') {
     return inputEase;
   }
-  if (easing[inputEase as keyof typeof easing]) {
-    return easing[inputEase as keyof typeof easing];
+  if (easeCache[inputEase as keyof typeof easing]) {
+    return easeCache[inputEase as keyof typeof easing];
   }
   if (inputEase.startsWith('cubic-bezier')) {
     const [p1x, p1y, p2x, p2y] = inputEase.slice(13, -1).split(',').map(Number);
-    if (easeCache[inputEase]) {
-      return easeCache[inputEase];
-    }
-    easeCache[inputEase] = cubicBezier(p1x, p1y, p2x, p2y);
-    return easeCache[inputEase];
+    const bezierEase = cubicBezier(p1x, p1y, p2x, p2y);
+    easeCache[inputEase] = bezierEase;
+    return bezierEase;
   }
   return linear;
 }

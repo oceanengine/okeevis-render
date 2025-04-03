@@ -6,7 +6,7 @@ import type DOMNode from './DOMNode';
 import { isMobile, isPC } from '../utils/env';
 import { SyntheticDragEvent, SyntheticEvent } from '../event';
 import { interpolateNumber } from '../interpolate';
-import { cubicBezier } from '../animate/ease';
+import { cubicBezier } from '../animate/cubic-bezier';
 
 export interface ScrollViewAttr extends GroupAttr {
   x: number;
