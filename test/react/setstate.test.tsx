@@ -41,7 +41,7 @@ const Child = (props: any) => {
           fontSize: 200,
         }}
         activeStyle={{
-          fill: 'red',
+          fill: 'blue',
         }}
         onClick={() => {
           setValue(2);
@@ -75,7 +75,7 @@ const App = () => {
         height={100}
         fill="#fff"
         activeStyle={{
-          fill: 'red',
+          fill: 'blue',
         }}
         lineWidth={1}
         shadowColor="red"
@@ -83,9 +83,25 @@ const App = () => {
         shadowOffsetX={4}
         shadowOffsetY={4}
         transitionProperty={'all'}
-        transitionDuration={300}
+        transitionDuration={1000}
+        originX={'center'}
+        originY={'center'}
+        animation={{
+          keyframes: [{rotation: 0,}, {rotation: Math.PI * 2,}],
+          duration: 3000,
+          direction: 'alternate',
+          iterations: Infinity,
+        }}
         hoverStyle={{
-          shadowBlur: 50
+          shadowBlur: 50,
+          fill: 'green',
+          animation: {
+            keyframes: [{rotation: 0,}, {rotation: Math.PI * 2,}],
+            duration: 1000,
+            iterations: Infinity,
+            direction: 'alternate',
+            easing: 'linear'
+          }
         }}
       />
     </Group>

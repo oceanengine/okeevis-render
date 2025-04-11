@@ -17,10 +17,8 @@ const rect = new Rect({
     'linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%)', 
     'linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%)'
   ],
-  stateStyles:{
-    hover: {
-      fill: 'red'
-    }
+  hoverStyle: {
+    fill: 'red'
   }
 });
 (window as any).rect = rect;

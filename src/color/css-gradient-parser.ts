@@ -3,12 +3,11 @@
  * angle:  45deg/turn/rad/grad |  | to left  (default to bottom)  0 means to top
  * color-stops: #33,  red 10%, orange 25%, yellow 50% 70%, orange;
  */
-
+import { isString } from 'lodash-es';
 import Gradient, { ColorStop } from '../abstract/Gradient';
 import LinearGradient from './LinearGradient';
 import RadialGradient from './RadialGradient';
-import { interpolateNumber } from '../interpolate';
-import { isString } from 'lodash-es';
+import { processOffsetList } from '../utils/offset-list';
 
 export type GradientPoints = [[number, number], [number, number]];
 
@@ -440,46 +439,8 @@ export function parseCssGradient(str: string): Gradient {
     }
     gradientPoints = cornerMap[cornerSide] as GradientPoints;
   }
-  let begin: number = undefined;
-  let end: number = undefined;
-  const unsetOffsets: ColorStop[] = [];
-  for (let i = 0; i < colorStops.length; i++) {
-    const { offset } = colorStops[i];
-    if (offset === undefined) {
-      unsetOffsets.push(colorStops[i]);
-    } else {
-      if (!unsetOffsets.length) {
-        begin = offset;
-      } else {
-        end = offset;
-        setUnsetOffsets(unsetOffsets, begin, end);
-        unsetOffsets.length = 0;
-        begin = offset;
-        end = undefined;
-      }
-    }
-    if (unsetOffsets.length && i === colorStops.length - 1) {
-      setUnsetOffsets(unsetOffsets, begin, end);
-    }
-  }
-
-  function setUnsetOffsets(unsetStops: ColorStop[], start: number, end: number) {
-    if (start === undefined) {
-      unsetStops[0].offset = 0;
-      start = 0;
-    }
-
-    if (end === undefined) {
-      unsetStops[unsetStops.length - 1].offset = 1;
-      end = 1;
-    }
-
-    unsetStops = unsetStops.filter(item => item.offset === undefined);
-
-    unsetStops.forEach((item, index) => {
-      item.offset = interpolateNumber(start, end, (index + 1) / (unsetStops.length + 1));
-    });
-  }
+  
+  processOffsetList(colorStops)
   
   let res: Gradient;
   if (gradientTypeName === 'linear-gradient') {

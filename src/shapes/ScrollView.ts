@@ -243,17 +243,14 @@ export default class ScrollView extends Group {
     };
 
     if (behavior === 'smooth') {
-      this.addAnimation({
-        from: {} as any,
-        to: {} as any,
-        ease: 'CubicIn',
-        stopped: false,
-        during: 300,
+      const animation = this.addAnimation([{}, {}],{
+        easing: 'CubicIn',
+        duration: 300,
         delay: 0,
-        onFrame: (e: number) => {
-          applyScroll(interpolateNumber(scrollLeft, left, e), interpolateNumber(scrollTop, top, e));
-        },
       });
+      animation.ontick = (e: number) => {
+        applyScroll(interpolateNumber(scrollLeft, left, e), interpolateNumber(scrollTop, top, e));
+      };
     } else {
       applyScroll(left, top);
     }

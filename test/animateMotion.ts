@@ -63,12 +63,12 @@ const shpaeLine = new Line({
     lineWidth: 0,
   });
   render.add(circle)
-  circle.animateMotion({
-    path: item.getPathData(),
-    during: 3000,
+  circle.animateMotion(item.getPathData(), {
+    duration: 3000,
     rotate: 'auto',
+    iterations: 3,
+    direction: 'alternate',
   })
-
 })
 
 render.add(bezier)

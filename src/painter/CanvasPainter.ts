@@ -104,6 +104,9 @@ export default class CanvasPainter implements Painter {
     if (showFPS && now) {
       this.render.requestAnimationFrame(t => {
         this._frameTimes.push(t - now);
+        if (this._frameTimes.length > 60) {
+          this._frameTimes.shift();
+        }
       });
     }
 

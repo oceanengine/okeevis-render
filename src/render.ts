@@ -19,6 +19,7 @@ import { getFeature } from './utils/featureManager';
 import { PluginManager, AbstractPlugin } from './PluginManager'
 import { RafCallback } from './multi-thread/scheduler';
 import { ReactSystem } from './react/react-system';
+import { AnimationTimeline } from './animate/interface';
 
 registerPainter('canvas', CanvasPainter);
 registerPainter('svg', SVGPainter);
@@ -60,6 +61,8 @@ export default class Render extends EventFul<RenderEventHandleParam> {
   public chunksElement: ES6Set<Group> = new ES6Set();
 
   public reactSystem: ReactSystem = new ReactSystem(this);
+
+  public timeline: AnimationTimeline | null = {currentTime: null};
 
   private _dom: HTMLElement;
 
@@ -363,6 +366,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     if (this._disposed || this._isOnframe) {
       return;
     }
+    (this.timeline as any).currentTime = now;
     this._requestAnimationFrameId = null;
     this._isOnframe = true;
     this._frameAbleElement.forEach(item => item.onFrame(now));
