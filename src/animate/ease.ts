@@ -20,15 +20,21 @@ export function parseEase(inputEase: EasingName): EasingFunction {
   if (typeof inputEase === 'function') {
     return inputEase;
   }
-  if (easeCache[inputEase as keyof typeof easing]) {
-    return easeCache[inputEase as keyof typeof easing];
+  if (easing[inputEase  as keyof typeof easing]) {
+    return easing[inputEase  as keyof typeof easing];
   }
+
+  if (easeCache[inputEase]) {
+    return easeCache[inputEase];
+  }
+
   if (inputEase.startsWith('cubic-bezier')) {
     const [p1x, p1y, p2x, p2y] = inputEase.slice(13, -1).split(',').map(Number);
     const bezierEase = cubicBezier(p1x, p1y, p2x, p2y);
     easeCache[inputEase] = bezierEase;
     return bezierEase;
   }
+
   return linear;
 }
 

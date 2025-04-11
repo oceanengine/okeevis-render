@@ -6,7 +6,9 @@ import type SVGPainter from '../painter/SVGPainter';
 import Group, { GroupAttr } from './Group';
 import * as lodash from '../utils/lodash';
 import { ColorValue } from '../color';
-import AnimateAble, { AnimateConf, AnimateOption } from '../abstract/AnimateAble';
+import AnimateAble, { AnimateConf } from '../abstract/AnimateAble';
+import { WebAnimatable, Keyframe, KeyframeEffectOptions } from '../animate/WebAnimateAble';
+import { Animation } from '../animate/Animation';
 import { EasingName, parseEase } from '../animate/ease';
 import { Transition } from '../animate/Transition';
 import { interpolate } from '../interpolate';
@@ -27,13 +29,17 @@ import Shadow from '../svg/Shadow';
 import Path2D from '../geometry/Path2D';
 import type Path from '../shapes/Path';
 import { HookElement } from '../react/hooks';
-import { SyntheticAnimationEvent, SyntheticTransitionEvent } from '../event';
+import { SyntheticTransitionEvent } from '../event';
 import { TextAttr } from './Text';
 import { parseCssGradient, isCssGradient } from '../color/css-gradient-parser';
 import type ScrollView from './ScrollView';
 import { TypeCustomElement } from './CustomElement';
 
+const STYLE_ANIMATION_ID = '$$styleAnimation';
+
 export type ElementAttr = GroupAttr & ShapeAttr & { [key: string]: any };
+
+type MotionRotate = number | 'auto' | 'auto-reverse';
 
 export const defaultSetting: { during: number; ease: EasingName } = {
   during: 300,
@@ -115,13 +121,7 @@ export interface CommonAttr<T extends BaseAttr = BaseAttr> extends BaseAttr {
   transitionDuration?: number;
   transitionDelay?: number;
   tabIndex?: number;
-  animation?: {
-    from: ElementAttr;
-    to: ElementAttr;
-    during?: number;
-    ease?: EasingName;
-    delay?: number;
-  };
+  animation?: KeyframeEffectOptions & { keyframes: Keyframe[] | Keyframe };
   sticky?: { top?: number; left?: number; right?: number; bottom?: number };
   stateStyles?: Record<string, ElementAttr>;
   hoverStyle?: ElementAttr;
@@ -192,7 +192,7 @@ const defaultTRansformConf: CommonAttr = {
 let nodeId = 1;
 export default class Element<T extends CommonAttr = ElementAttr>
   extends Eventful<RenderEventHandleParam>
-  implements AnimateAble<T>
+  implements AnimateAble<T>, WebAnimatable
 {
   public static createPath: () => Path;
 
@@ -248,7 +248,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   private _dirty: boolean = true;
 
-  private _animations: AnimateOption<T>[] = [];
+  private _animations: Animation[] = [];
 
   private _transitions: Transition[] = [];
 
@@ -293,6 +293,8 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private _statusConfig: StatusConfig = null;
 
   private _attr: T;
+
+  private _animationAttr: T;
 
   private _transitionAttr: T;
 
@@ -589,7 +591,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
   private updateCascadeAttr() {
     this.dirty();
     const stateStyles = this._attr.stateStyles;
-    const statusConfig = this._statusConfig;
+    const statusConfig = this._statusConfig || {};
     const statusList = Object.keys(stateStyles || {}).concat(
       'hover',
       'focus',
@@ -604,6 +606,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     }
     Object.assign(cascadingAttr, this._transitionAttr);
+    Object.assign(cascadingAttr, this._animationAttr);
     this.attr = cascadingAttr;
   }
 
@@ -620,19 +623,26 @@ export default class Element<T extends CommonAttr = ElementAttr>
       const oldValue = oldAttr[key];
       const newValue = this.attr[key];
 
-      const index = currentTransitions.findIndex(transition => transition.transitionProperty === key);
+      const index = currentTransitions.findIndex(
+        transition => transition.transitionProperty === key,
+      );
       if (index !== -1) {
-        this.dispatchEvent(new SyntheticTransitionEvent('transitioncancel', {
-          elapsedTime: 0, // todo
-          propertyName: key,
-          bubbles: true,
-        }));
+        this.dispatchEvent(
+          new SyntheticTransitionEvent('transitioncancel', {
+            elapsedTime: 0, // todo
+            propertyName: key,
+            bubbles: true,
+          }),
+        );
         currentTransitions.splice(index, 1);
       }
-    
+
       if (oldValue !== newValue) {
         this.onAttrChange(key, newValue, oldValue);
-        this._changedTransitionProperties.push([key, oldValue as any === 'currentColor' ? color : oldValue]);
+        this._changedTransitionProperties.push([
+          key,
+          (oldValue as any) === 'currentColor' ? color : oldValue,
+        ]);
       }
     }
 
@@ -980,6 +990,21 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this.dirtyTransform();
     }
 
+    if (key === 'animation') {
+      const curAnimationIndex = this._animations.findIndex(
+        animate => animate.id === STYLE_ANIMATION_ID,
+      );
+      if (curAnimationIndex !== -1) {
+        this._animations.splice(curAnimationIndex, 1);
+      }
+      const value = newValue as any as KeyframeEffectOptions & { keyframes: Keyframe | Keyframe[] };
+      if (!value) {
+        return;
+      }
+      const animation = this.animate(value.keyframes, value);
+      animation.id = STYLE_ANIMATION_ID;
+    }
+
     if (key === 'display') {
       this.dirtyBBox();
     }
@@ -1014,39 +1039,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
   }
 
   public mounted() {
+    const { onMounted, animation } = this.attr;
     if (!(this.parentNode && this.parentNode.ownerRender)) {
       return;
     }
     if (this.parentNode) {
       this.ownerRender = this.parentNode.ownerRender;
-      if (this.attr.onMounted || this._animations.length) {
+      if (onMounted || this._animations.length) {
         this._addToFrame();
       }
     }
-    if (this.attr.animation) {
-      this.dispatchEvent(
-        new SyntheticAnimationEvent('animationstart', {
-          bubbles: false,
-          timeStamp: Date.now(),
-          elapsedTime: 0,
-        }),
-      );
-      this.addAnimation({
-        stopped: false,
-        during: 300,
-        ease: 'Linear',
-        ...(this.attr.animation as AnimateOption<T>),
-        callback: () => {
-          this.dispatchEvent(
-            new SyntheticAnimationEvent('animationend', {
-              bubbles: false,
-              timeStamp: Date.now(),
-              elapsedTime: 0,
-            }),
-          );
-        },
-      } as AnimateOption<T>);
-    }
+    this._animations.forEach(animate => animate.setTarget(this, this._updateAnimationAttr));
     this._mountClip();
   }
 
@@ -1157,26 +1160,35 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return this._dragOffset;
   }
 
-  public animateMorphing(path: Path2D, during: number = 300) {
+  public toCurvePath(): Path {
     const curPath = (this as any as Shape).getPathData();
-    const [from, to] = Path2D.morphing(curPath, path);
     const newNode = Element.createPath().setAttr({
       ...this.attr,
-      pathData: from,
+      pathData: curPath,
     });
     this.replaceWith(newNode);
-    newNode.animateTo(
-      {
-        pathData: to,
-      },
-      {
-        during,
-        callback: () => {
-          newNode.setAttr('pathData', path);
-        },
-      },
-    );
     return newNode;
+  }
+
+  public animateMorphing(path: Path2D, options: number | KeyframeEffectOptions): Animation {
+    if (this.type !== 'path') {
+      throw new Error('only path can animateMorphing');
+    }
+    const curPath = (this as any as Shape).getPathData();
+    const [from, to] = Path2D.morphing(curPath, path);
+    const animation = this.animate(
+      [
+        { pathData: from },
+        {
+          pathData: to,
+        },
+      ],
+      options,
+    );
+    animation.onfinish = () => {
+      (this as any as Path).setAttr('pathData', path);
+    };
+    return animation;
   }
 
   public setDragOffset(x: number, y: number) {
@@ -1208,6 +1220,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
 
   /* ************ AnimateAble Begin ******************* */
 
+  /**
+   * @deprecated use animate instead
+   */
   public animateTo(
     toAttr: T,
     duringOrConf: number | AnimateConf = defaultSetting.during,
@@ -1234,58 +1249,83 @@ export default class Element<T extends CommonAttr = ElementAttr>
       }
     });
     this.setAttr(nonAnimateAttr);
+    let onFrame: (k: number) => void;
+    const animateOption: KeyframeEffectOptions = {
+      duration: defaultSetting.during,
+      easing: defaultSetting.ease,
+      fill: 'forwards',
+    };
     if (typeof duringOrConf === 'object') {
-      this.addAnimation({
-        stopped: false,
-        from: animateFromAttr as T,
-        to: animateToAttr,
-        ...(defaultSetting as any),
-        ...duringOrConf,
-      });
+      animateOption.duration = duringOrConf.during;
+      animateOption.easing = duringOrConf.ease;
+      animateOption.delay = duringOrConf.delay;
+      onFrame = duringOrConf.onFrame as any;
     } else {
-      this.addAnimation({
-        from: animateFromAttr as T,
-        to: animateToAttr,
-        during: duringOrConf,
-        ease,
-        callback,
-        delay,
-        stopped: false,
-      });
+      animateOption.duration = duringOrConf;
+      animateOption.easing = ease;
+      animateOption.delay = delay;
+    }
+    const animation = this.addAnimation([animateFromAttr, animateToAttr], animateOption);
+    animation.ontick = onFrame;
+    animation.onfinish = () => {
+      callback && callback();
+      animation.commitStyles();
+    };
+  }
+
+  public animate(
+    keyframes: Keyframe[] | Keyframe | null,
+    options?: number | KeyframeEffectOptions,
+  ): Animation {
+    if (Array.isArray(keyframes)) {
+      return this.addAnimation(keyframes, options);
+    } else {
+      const fromKeyFrame: any = {};
+      for (let key in keyframes) {
+        fromKeyFrame[key] = this.getExtendAttr(key as any);
+      }
+      return this.addAnimation([fromKeyFrame, keyframes], options);
     }
   }
 
-  public animateMotion(animateConf: {
-    path: Path2D;
-    rotate?: number | 'auto' | 'auto-reverse';
-    during?: number;
-    ease?: EasingName;
-    callback?: Function;
-    delay?: number;
-  }) {
-    const { path, rotate = 0, during = 300, ease = 'Linear', callback, delay = 0 } = animateConf;
-    this.animateTo({} as T, {
-      ease,
-      during,
-      delay,
-      callback,
-      onFrame: (t: number) => {
-        const point = path.getPointAtPercent(t);
-        const matrix = mat3.createVec3();
-        let theta: number = rotate as number;
-        if (rotate === 'auto') {
-          theta = point.alpha + Math.PI / 2;
-        }
-        if (rotate === 'auto-reverse') {
-          theta = point.alpha - Math.PI / 2;
-        }
-        mat3.translate(matrix, matrix, [point.x, point.y]);
-        if (theta !== 0) {
-          mat3.rotate(matrix, matrix, theta);
-        }
-        this.setAttr('matrix', matrix as any);
-      },
-    });
+  public getAnimations(options?: { subtree?: boolean }): Animation[] {
+    return [];
+  }
+
+  public animateMotion(
+    path: string | Path2D,
+    options:
+      | number
+      | (KeyframeEffectOptions & {
+          rotate?: MotionRotate;
+        }),
+  ): Animation {
+    let rotate: MotionRotate = 0;
+    if (typeof options === 'object' && options.rotate) {
+      rotate = options.rotate;
+    }
+    const pathData = typeof path === 'string' ? new Path2D(path) : path;
+    const animation = this.animate([{}, {}], options);
+    animation.ontick = (t: number) => {
+      if (animation.direction === 'backward') {
+        t = 1 - t;
+      }
+      const point = pathData.getPointAtPercent(t);
+      const matrix = mat3.createVec3();
+      let theta: number = rotate as number;
+      if (rotate === 'auto') {
+        theta = point.alpha + Math.PI / 2;
+      }
+      if (rotate === 'auto-reverse') {
+        theta = point.alpha - Math.PI / 2;
+      }
+      mat3.translate(matrix, matrix, [point.x, point.y]);
+      if (theta !== 0) {
+        mat3.rotate(matrix, matrix, theta);
+      }
+      this.setAttr('matrix', matrix as any);
+    };
+    return animation;
   }
 
   public divide(count: number): Element[] {
@@ -1310,15 +1350,22 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
   }
 
-  protected addAnimation(option: AnimateOption<T>) {
-    this._animations.push(option);
+  protected addAnimation(
+    keyframes: Keyframe[],
+    options?: KeyframeEffectOptions | number,
+  ): Animation {
+    const animation = new Animation(keyframes as any, options);
+    // todo align keyframe attributes with same key
+    animation.setTarget(this, this._updateAnimationAttr);
+    animation.play();
+    this._animations.push(animation);
     this._addToFrame();
+    return animation;
   }
 
-  // todo gotoend support
   public stopAllAnimation(): this {
-    // todo goToEnd
     this._animations.length = 0;
+    this._removeFromFrame();
     return this;
   }
 
@@ -1348,8 +1395,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
     this.startAttrTransaction();
-    this._runAnimations(now);
+    this.dirty();
     this._runTransitions(now);
+    this._runAnimations();
     this.endAttrTransaction();
     if (!(this._animations.length || this._transitions.length)) {
       this._removeFromFrame();
@@ -1542,47 +1590,49 @@ export default class Element<T extends CommonAttr = ElementAttr>
     return animationKeys;
   }
 
-  private _runAnimations(now: number) {
+  private _runAnimations() {
     if (!this._animations.length) {
       return;
     }
 
-    let animate = this._animations[0];
-    let progress = 0;
-    if (animate.startTime) {
-      progress = Math.min((now - animate.startTime) / animate.during, 1);
-    } else {
-      animate.startTime = now;
-    }
-    progress =
-      typeof animate.ease === 'function'
-        ? animate.ease(progress)
-        : parseEase(animate.ease)(progress);
-    let fn: Function = interpolate;
-    for (const key in animate.to) {
-      if (key === 'color' || key === 'fill' || key === 'stroke' || key === 'shadowColor') {
-        fn = interpolateColor;
-      } else if (key === 'pathData') {
-        fn = interpolatePath;
-      } else {
-        fn = interpolate;
-      }
-      this.setAttr(key, fn(animate.from[key], animate.to[key], progress));
-    }
-    if (progress === 1) {
-      animate.callback && animate.callback();
-      animate.stopped = true;
-    }
-    animate.onFrame && animate.onFrame(progress);
-    progress >= 1 && this._animations.shift();
-    animate = null;
+    this._animations.forEach(animation => {
+      animation.tick(this._setAnimationAttr as any);
+    });
+    // emit animation event
+    this._animations = this._animations.filter(
+      animation => !(animation.playState === 'finished' && !animation.isPersisted),
+    );
   }
+
+  private _updateAnimationAttr = () => {
+    this.dirty();
+    const oldAttr = this._animationAttr;
+    const animationAttr = {};
+    this._animations.forEach(animation => {
+      Object.assign(animationAttr, animation.getStyles());
+    });
+    this._animationAttr = animationAttr as T;
+    this.updateCascadeAttr();
+    for (const key in oldAttr) {
+      this.onAttrChange(key as keyof T, this._animationAttr[key], oldAttr[key]);
+    }
+    this.afterAttrChanged();
+  };
+
+  private _setAnimationAttr = (key: string, value: any) => {
+    if (!this._animationAttr) {
+      this._animationAttr = {} as T;
+    }
+    this._animationAttr[key as keyof T] = value;
+    const oldValue = this.attr[key as keyof T];
+    this.attr[key as keyof T] = value;
+    this.onAttrChange(key as keyof T, value, oldValue);
+  };
 
   private _runTransitions(tick: number) {
     if (!this._transitions.length) {
       return;
     }
-    this.dirty();
     this._transitions.forEach(transition => {
       let {
         startTime,
@@ -1605,9 +1655,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
       transition.started = true;
 
       progress = Math.min((tick - startTime - transitionDelay) / transitionDuration, 1);
-     
+
       progress = parseEase(transitionTimingFunction as EasingName)(progress);
-      
+
       if (
         transitionProperty === 'color' ||
         transitionProperty === 'fill' ||
@@ -1623,11 +1673,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._setTransitionAttr(transitionProperty as keyof T, fn(values[0], values[1], progress));
 
       if (progress === 0) {
-        this.dispatchEvent(new SyntheticTransitionEvent('transitionstart', {
-          elapsedTime: 0,
-          propertyName: transitionProperty,
-          bubbles: true,
-        }));
+        this.dispatchEvent(
+          new SyntheticTransitionEvent('transitionstart', {
+            elapsedTime: 0,
+            propertyName: transitionProperty,
+            bubbles: true,
+          }),
+        );
       }
 
       if (progress >= 1) {
@@ -1736,7 +1788,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
             elapsedTime: 0,
             propertyName: key as string,
             bubbles: true,
-          })
+          }),
         );
       }
     }

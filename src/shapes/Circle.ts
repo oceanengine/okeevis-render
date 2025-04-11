@@ -39,7 +39,6 @@ export default class Circle extends Shape<CircleAttr> {
 
   protected createRough(roughCanvas: RoughCanvas, options?: RoughOptions): Drawable {
     const { cx, cy, radius } = this.attr;
-    const path = this.getPathData().getSVGPathString();
     return roughCanvas.circle(cx, cy, radius * 2, options);
   }
 

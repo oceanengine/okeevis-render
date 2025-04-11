@@ -5,7 +5,7 @@ export interface SyntheticAnimationEventParams extends SyntheticEventParams {
   elapsedTime: number;
 }
 
-export class SyntheticAnimationEvent<T extends MouseEvent = MouseEvent> extends SyntheticEvent<T> {
+export class SyntheticAnimationEvent extends SyntheticEvent<null> {
   public syntheticType = 'animation';
 
   public elapsedTime: number;
