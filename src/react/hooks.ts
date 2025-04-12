@@ -92,6 +92,10 @@ export class HookElement<T = {}> extends Group {
     }
   }
 
+  public willUpdate() {
+    this._willUpdateState = true;
+  }
+
   public updateProps(nextProps: T) {
     if ((this.$$type as unknown as MemoComponent<T>).$$typeof === 'react.memo') {
       const compare = (this.$$type as MemoComponent<any>).compare || shallowEqual;

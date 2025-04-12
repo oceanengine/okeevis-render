@@ -68,6 +68,14 @@ export class ReactSystem {
             return getNearestCommonAncestor(pre, cur);
         }, elements[0]) as HookElement;
         (root as any).renderWithHooks(true);
+        elements.forEach(element => {
+            const ancestors = element.getAncestorNodes();
+            ancestors.forEach(ancestor => {
+              if (root.contains(ancestor) && Element.isHookElement(ancestor) && (ancestor as any).$$typeof === 'react.memo') {
+                ancestor.willUpdate();
+              }
+            })
+        });
         this._updateStateElements.length = 0;
         this._updateStatePending = false;
     })
