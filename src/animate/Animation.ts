@@ -20,7 +20,7 @@ export class Animation extends EventFul {
   public ontick: (e: number) => void | null;
   public oncancel: ((this: Animation, ev: AnimationPlaybackEvent) => any) | null;
   /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Animation/finish_event) */
-  public onfinish: ((this: Animation, ev: AnimationPlaybackEvent) => any) | null;
+  public onfinish: (() => void) | null;
   /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Animation/remove_event) */
   public onremove: ((this: Animation, ev: AnimationPlaybackEvent) => any) | null;
   private _finished: Promise<Animation>;
@@ -75,6 +75,7 @@ export class Animation extends EventFul {
     this.playState = 'idle';
     this._elapsedTime = 0;
     this._iterationCount = 1;
+    this._interpolateAttr = {};
     this._updateAnimationAttr();
   }
 
@@ -117,6 +118,7 @@ export class Animation extends EventFul {
       this._interpolateAttr = this._keyframes[0];
     }
     this._updateAnimationAttr();
+    this.onfinish && this.onfinish();
   }
 
   public pause() {
