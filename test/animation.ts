@@ -18,28 +18,33 @@ const shape = new Circle({
     fill: 'yellow',
   }
 });
-let count = 0;
-const animation = shape.animate([
-  {
-    fill: 'yellow',
-    translateX: 0,
-  },
-  {
-    fill: 'red',
-    translateX: 100,
-  },
-], {
-  duration: 300,
-  iterations: 2,
-  direction: 'alternate',
-  playbackRate: 1,
-  easing: 'ease-in',
-  delay: 1000,
-  fill: 'none'
-});
-render.on('click', () => {
-  animation.finish();
-});
-(window as any).shape = shape;
+render.on('mousemove', e =>{
+  shape.animate(
+    {
+      cx: e.x,
+      cy: e.y,
+    }
+  , { duration: 500, fill: "forwards" },)
+})
+// let count = 0;
+// const animation = shape.animate([
+//   {
+//     fill: 'yellow',
+//     translateX: 0,
+//   },
+//   {
+//     fill: 'red',
+//     translateX: 100,
+//   },
+// ], {
+//   duration: 300,
+//   iterations: 2,
+//   direction: 'alternate',
+//   playbackRate: 1,
+//   easing: 'ease-in',
+//   delay: 1000,
+//   fill: 'none'
+// });
 
-render.add(shape);
+
+render.add(shape);(window as any).shape = shape;

@@ -1,1 +1,1 @@
-import './benchmark.test'
+import './animation'

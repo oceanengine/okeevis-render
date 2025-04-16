@@ -56,6 +56,9 @@ export class Animation extends EventFul {
     this._updateAnimationAttr = updateAnimationAttr;
     if (target.isConnected) {
       this.timeline = target.ownerRender.timeline;
+      if (!this.currentTime) {
+        this.currentTime = this.timeline.currentTime;
+      }
     }
   }
 
