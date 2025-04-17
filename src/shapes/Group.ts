@@ -27,6 +27,8 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
 
   public shapeKeys = shapeKeys;
 
+  public _zIndexDirty: boolean = false;
+
   private _length: number = 0;
 
   protected _chunks: T[][] = [];
@@ -306,6 +308,7 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     this.children().forEach(item => this.remove(item));
     this._length = 0;
     this._chunks = [];
+    this._zIndexDirty = false;
     this.dirty();
     this.dirtyBBox();
   }
@@ -467,6 +470,20 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       node = node.nextSibling as T;
     }
     node = null;
+  }
+
+  public eachChildSorted(callback: (child: T) => void) {
+    if (!this._zIndexDirty) {
+      this.eachChild(child => callback(child));
+      return;
+    }
+    const children = this.children();
+    children.sort((a, b) => {
+      const aZIndex = a.attr.zIndex || 0;
+      const bZIndex = b.attr.zIndex || 0;
+      return aZIndex - bZIndex;
+    });
+    children.forEach(child => callback(child));
   }
 
   public children(): T[] {

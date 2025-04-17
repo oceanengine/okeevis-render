@@ -134,7 +134,9 @@ export default class EventHandle {
         inBBox(node.getBoundingClientRect(), x, y) && node.getExtendAttr('pointerEvents') !== 'none'
       );
     }
-    const pickNodes = this._getHandleGroup().getAllLeafNodes([], filter).reverse();
+    const pickNodes = this._getHandleGroup().getAllLeafNodes([], filter).sort((a, b) => {
+      return (a.attr.zIndex || 0) - (b.attr.zIndex || 0);
+    }).reverse();
 
     let geometryPickIndex: number = -1;
     let gpuPickIndex: number = -1;

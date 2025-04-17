@@ -1013,6 +1013,10 @@ export default class Element<T extends CommonAttr = ElementAttr>
       this._currentPaintAreaDirty = true;
     }
 
+    if (key === 'zIndex' && this.parentNode) {
+      this.parentNode._zIndexDirty = true;
+    }
+
     if (this.shapeKeys.indexOf(key) !== -1) {
       this.dirtyBBox();
     }

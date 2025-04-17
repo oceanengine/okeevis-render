@@ -282,7 +282,7 @@ export default class CanvasPainter implements Painter {
       this._brushRect(ctx, dirtyRegion);
       ctx.clip();
     }
-    this.render.getRoot().eachChild(item => this.drawElement(item, dirtyRegion));
+    this.render.getRoot().eachChildSorted(item => this.drawElement(item, dirtyRegion));
     ctx.restore();
     // console.timeEnd('paint');
   }
@@ -295,7 +295,7 @@ export default class CanvasPainter implements Painter {
 
   public drawElement = (item: Element, dirtyRegion?: BBox) => {
     if (Element.isHookElement(item)) {
-      item.eachChild(child => this.drawElement(child, dirtyRegion));
+      item.eachChildSorted(child => this.drawElement(child, dirtyRegion));
       return;
     }
     const ctx = this._ctx;
@@ -426,7 +426,7 @@ export default class CanvasPainter implements Painter {
       //   ctx.beginPath();
       // }
 
-      (item as Group).eachChild(child => this.drawElement(child, dirtyRegion));
+      (item as Group).eachChildSorted(child => this.drawElement(child, dirtyRegion));
 
       // if (batchBrush) {
       //   if (fill && fill !== 'none') {
