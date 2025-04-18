@@ -12,5 +12,8 @@ export function createContext<T>(defaultValue: T): Context<T> {
       return props.children(value) as ReactElement;
     },
   };
+  (context.Provider as any).displayName = 'Context.Provider';
+  (context.Provider as any).$$typeof = 'react.context';
+  (context.Consumer as any).displayName = 'Context.Consumer';
   return context;
 }
