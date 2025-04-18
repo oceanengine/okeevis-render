@@ -47,6 +47,8 @@ export class HookElement<T = {}> extends Group {
 
   private _portalFragment: HookElement;
 
+  public _dependentContexts: Set<HookElement> = new Set();
+
   public constructor(type: any, props: T & { key?: string | number }) {
     super();
     this.key = this.attr.key = props.key;
@@ -67,6 +69,7 @@ export class HookElement<T = {}> extends Group {
 
   public destroy() {
     super.destroy();
+    this._dependentContexts.clear();
     let hook = this._hooks;
     while (hook) {
       if (hook.type === HookType.EFFECT) {
@@ -104,6 +107,15 @@ export class HookElement<T = {}> extends Group {
         return;
       }
     }
+    
+    if ((this as any).$$type.$$typeof === 'react.context' && (this.props as any).value !== (nextProps as any).value) {
+      this.traverse(node => {
+        if (Element.isHookElement(node) && node._dependentContexts.has(this)) {
+          node.willUpdate();
+        }
+      })
+    }
+    
     this.props = nextProps;
     if (this.$$type === Portal) {
       this._portalFragment.updateProps(nextProps);
@@ -284,6 +296,7 @@ export function useContext<T>(context: Context<T>): T {
   let node = currentComponent.parentNode;
   while (node) {
     if (Element.isHookElement(node) && node.$$type === Provider) {
+      currentComponent._dependentContexts.add(node);
       return (node.props as any).value;
     }
     node = node.parentNode;

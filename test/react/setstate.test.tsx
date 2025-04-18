@@ -21,12 +21,14 @@ render.showBBox = false;
 render.showFPS = true;
 const app = createRoot(render.getRoot());
 
-const Child = (props: any) => {
+const Context = createContext({});
+
+const Child = memo((props: any) => {
   const [value, setValue] = useState(1);
-  console.log('child render', value);
+  const ctx = useContext(Context);
+  console.log('child render ctx', ctx);
 
   return (
-    <>
       <Text
         x={200}
         y={150}
@@ -43,33 +45,26 @@ const Child = (props: any) => {
         activeStyle={{
           fill: 'blue',
         }}
-        onClick={() => {
-          setValue(2);
-          props.setValue(2);
-        }}
       >
-        {value}
+        {ctx}
       </Text>
-    </>
   );
-};
+});
 
 const App = () => {
   const [value, setValue] = useState(1);
   console.log('app render');
   return (
-    <Group
-      onTransitionCancel={e => console.log('cancel', e.propertyName)}
-      onTransitionRun={e => console.log('run', e.propertyName)}
-      onTransitionStart={e => console.log('start', e.propertyName)}
-      onTransitionEnd={e => console.log('end', e.propertyName)}
-    >
+    <Context.Provider value={value}>
+
+    <Group >
       <Text x={100} y={100} fill="red" fontSize={24}>
         {value}
       </Text>
-      <Child setValue={setValue} />
+      <Child value={1} />
       <Rect
         x={100}
+        onClick={() => setValue(2)}
         y={200}
         width={100}
         height={100}
@@ -86,25 +81,9 @@ const App = () => {
         transitionDuration={1000}
         originX={'center'}
         originY={'center'}
-        animation={{
-          keyframes: [{rotation: 0,}, {rotation: Math.PI * 2,}],
-          duration: 3000,
-          direction: 'alternate',
-          iterations: Infinity,
-        }}
-        hoverStyle={{
-          shadowBlur: 50,
-          fill: 'green',
-          animation: {
-            keyframes: [{rotation: 0,}, {rotation: Math.PI * 2,}],
-            duration: 1000,
-            iterations: Infinity,
-            direction: 'alternate',
-            easing: 'linear'
-          }
-        }}
       />
     </Group>
+    </Context.Provider>
   );
 };
 
