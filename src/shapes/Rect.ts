@@ -38,10 +38,7 @@ export default class Rect extends Shape<RectAttr> {
 
   public brush(ctx: CanvasRenderingContext2D): void {
     const { x, y, width, height, borderRadius = 0, r = borderRadius } = this.attr;
-    if ((width === 0 || height === 0) && !this.isClip) {
-      return;
-    }
-    if (!r) {
+    if (!r || width === 0 || height === 0) {
       ctx.rect(x, y, width, height);
     } else {
       // topleft topright bottomright bottomleft
