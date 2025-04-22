@@ -3,6 +3,7 @@ import Circle from '../src/shapes/Circle'
 
 const dom = document.getElementById('root') as HTMLDivElement
 const render = new Render(dom, {renderer: 'canvas'})
+render.showBBox = true;
 const shape = new Circle({
   cx: 150,
   cy: 150,
@@ -12,20 +13,17 @@ const shape = new Circle({
   lineWidth: 20,
   transitionProperty: 'all',
   transitionDuration: 1000,
-  onAnimationStart: () => console.log('animationstart'),
-  onAnimationEnd: () => console.log('animationend'),
-  hoverStyle: {
-    fill: 'yellow',
-  }
+  
 });
-render.on('mousemove', e =>{
-  shape.animate(
-    {
-      cx: e.x,
-      cy: e.y,
-    }
-  , { duration: 500, fill: "forwards" },)
-})
+
+// render.on('mousemove', e =>{
+//   shape.animate(
+//     {
+//       cx: e.x,
+//       cy: e.y,
+//     }
+//   , { duration: 500, fill: "forwards" },)
+// })
 // let count = 0;
 // const animation = shape.animate([
 //   {
@@ -48,3 +46,14 @@ render.on('mousemove', e =>{
 
 
 render.add(shape);(window as any).shape = shape;
+render.updateAll([new Circle({
+  cx: 400,
+  cy: 150,
+  radius: 50,
+  fill: 'red',
+  stroke:'red',
+  lineWidth: 20,
+  onMouseEnter: e => {
+    e.target.animateTo({ fill: '#' + Math.random().toString(16).slice(2, 8) }, 1000)
+  },
+})])

@@ -1257,7 +1257,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const animateOption: KeyframeEffectOptions = {
       duration: defaultSetting.during,
       easing: defaultSetting.ease,
-      fill: 'forwards',
+      legacy: true,
     };
     if (typeof duringOrConf === 'object') {
       animateOption.duration = duringOrConf.during;
@@ -1273,7 +1273,6 @@ export default class Element<T extends CommonAttr = ElementAttr>
     animation.ontick = onFrame;
     animation.onfinish = () => {
       callback && callback();
-      animation.commitStyles();
     };
   }
 
@@ -1600,12 +1599,16 @@ export default class Element<T extends CommonAttr = ElementAttr>
     }
 
     this._animations.forEach(animation => {
-      animation.tick(this._setAnimationAttr as any);
+      animation.tick(animation.legacy ? this._legacySetAttr : this._setAnimationAttr as any);
     });
     // emit animation event
     this._animations = this._animations.filter(
       animation => !(animation.playState === 'finished' && !animation.isPersisted),
     );
+  }
+
+  private _legacySetAttr = (key: string, value: any) => {
+    this.setAttr(key as keyof T, value);
   }
 
   private _updateAnimationAttr = () => {

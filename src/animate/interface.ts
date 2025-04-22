@@ -39,6 +39,7 @@ interface EffectTiming {
 export interface KeyframeEffectOptions extends EffectTiming {
   composite?: CompositeOperation;
   iterationComposite?: IterationCompositeOperation;
+  legacy?: boolean;
 }
 
 /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AnimationEffect) */

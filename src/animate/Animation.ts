@@ -56,14 +56,16 @@ export class Animation extends EventFul {
     this._updateAnimationAttr = updateAnimationAttr;
     if (target.isConnected) {
       this.timeline = target.ownerRender.timeline;
-      if (!this.currentTime) {
-        this.currentTime = this.timeline.currentTime;
-      }
+      
     }
   }
 
   public get finished(): Promise<Animation> {
     return this._finished;
+  }
+
+  public get legacy(): boolean {
+    return this._options.legacy;
   }
 
   public get isPersisted(): boolean {
@@ -105,7 +107,6 @@ export class Animation extends EventFul {
         new SyntheticAnimationEvent('animationend', {
           elapsedTime: this._elapsedTime,
           bubbles: true,
-
         }),
       );
     }, this._options.endDelay || 0);
@@ -120,7 +121,9 @@ export class Animation extends EventFul {
     if (this.direction === 'backward' && (fill === 'both' || fill === 'backwards')) {
       this._interpolateAttr = this._keyframes[0];
     }
-    this._updateAnimationAttr();
+    if (!this.legacy) {
+      this._updateAnimationAttr();
+    }
     this.onfinish && this.onfinish();
   }
 
@@ -179,12 +182,16 @@ export class Animation extends EventFul {
 
     if (!this.currentTime) {
       if (fill === 'both' || fill === 'forwards') {
-        this._interpolateAttr =  {...curDirection === 'forward' ? this._keyframes[0] : last(this._keyframes)};
+        this._interpolateAttr = {
+          ...(curDirection === 'forward' ? this._keyframes[0] : last(this._keyframes)),
+        };
       }
-      this._updateAnimationAttr();
+      if (!this.legacy) {
+        this._updateAnimationAttr();
+      }
     }
     const delay = this._iterationCount === 1 ? startDelay : 0;
-    const prevTime = this.currentTime || timeline.currentTime;
+    const prevTime = this.currentTime || (timeline.currentTime - 16);
     this.currentTime = timeline.currentTime;
     const timePassed = this.currentTime - prevTime;
     this._elapsedTime += timePassed * playbackRate;
@@ -227,7 +234,6 @@ export class Animation extends EventFul {
       this._interpolateAttr[key] = value;
       updater(key, value);
     }
-
 
     if (this.ontick) {
       this.ontick(progress);
