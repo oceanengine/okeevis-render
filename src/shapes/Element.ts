@@ -1652,7 +1652,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       let progress = 0;
       let fn: Function = interpolate;
       if (!startTime) {
-        startTime = transition.startTime = tick;
+        startTime = transition.startTime = tick - 16;
       }
       if (tick - startTime < transitionDelay) {
         this._setTransitionAttr(transitionProperty as keyof T, values[0]);
