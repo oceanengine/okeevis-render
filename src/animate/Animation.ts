@@ -81,6 +81,7 @@ export class Animation extends EventFul {
     this._elapsedTime = 0;
     this._iterationCount = 1;
     this._interpolateAttr = {};
+    this._persisted = false;
     this._updateAnimationAttr();
   }
 
