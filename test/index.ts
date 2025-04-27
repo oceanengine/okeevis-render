@@ -1,1 +1,1 @@
-import './react/setstate.test'
+import './intersection2.test';

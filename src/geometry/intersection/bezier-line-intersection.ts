@@ -141,6 +141,8 @@ export function bezierLineIntersection(
       const crossValue = cross([a2x - a1x, a2y - a1y], [Math.cos(alpha), Math.sin(alpha)]);
       const winding = crossValue > 0 ? 1 : -1;
       const point: PathIntersection = {
+        t1: t,
+        t2: (p10x - a1x) / (a2x - a1x),
         x: p10x,
         y: p10y,
         winding,

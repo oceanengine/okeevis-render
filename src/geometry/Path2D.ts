@@ -30,6 +30,8 @@ export interface PathIntersection {
   x: number;
   y: number;
   winding: -1 | 1;
+  t1: number;
+  t2: number;
 }
 
 export interface PathAction {
