@@ -1,6 +1,7 @@
 import { diff } from '@egjs/list-differ';
 import Element, { defaultSetting } from './Element';
 import { TypeCustomElement } from './CustomElement';
+import { forEach } from '../react/Children';
 import Shape from './Shape';
 import { TextAttr, shapeKeys } from './Text';
 import { BBox, unionBBox, ceilBBox } from '../utils/bbox';
@@ -78,7 +79,13 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
   protected mountChildren() {
     const children = this.attr.children;
     if (this.ownerRender && children) {
-      this.getChildrenContainer().updateAll(Array.isArray(children) ? children : [children]);
+      const nodes: Element[] = [];
+      const mapChildren = forEach(children, (child: any) => {
+        if (child && Element.isElementConstructor(child)) {
+          nodes.push(child);
+        }
+      });
+      this.getChildrenContainer().updateAll(nodes);
     }
   }
 
