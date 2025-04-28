@@ -13,7 +13,7 @@ export function bezierSubDivision(params: number[], count: number): number[][] {
   return out;
 }
 
-function divideBezierAt(params: number[], e: number): number[][] {
+export function divideBezierAt(params: number[], e: number): number[][] {
   const [pax, pay, pbx, pby, pcx, pcy, pdx, pdy] = params;
   const t1 = 1 - e;
   const pe = {
