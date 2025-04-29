@@ -57,14 +57,17 @@ import React, {
       <EditDot x={bezierp7[0]} y={bezierp7[1]} onMove={setBezierp7} />
       <EditDot x={bezierp8[0]} y={bezierp8[1]} onMove={setBezierp8} />
       {bezierIntersect.map(({x, y}) => <Circle cx={x} cy={y} radius={5} fill="blue" pointerEvents='none' />)}
-      <Text x={bezierp1[0]} y={bezierp1[1] - 10}>{'p1' + bezierp1.join(', ')}</Text>
-      <Text x={bezierp2[0]} y={bezierp2[1] - 10}>{'p2' + bezierp2.join(', ')}</Text>
-      <Text x={bezierp3[0]} y={bezierp3[1] - 10}>{'p3' + bezierp3.join(', ')}</Text>
-      <Text x={bezierp4[0]} y={bezierp4[1] - 10}>{'p4' + bezierp4.join(', ')}</Text>
-      <Text x={bezierp5[0]} y={bezierp5[1] - 10}>{'p5' + bezierp5.join(', ')}</Text>
-      <Text x={bezierp6[0]} y={bezierp6[1] - 10}>{'p6' + bezierp6.join(', ')}</Text>
-      <Text x={bezierp7[0]} y={bezierp7[1] - 10}>{'p7' + bezierp7.join(', ')}</Text>
-      <Text x={bezierp8[0]} y={bezierp8[1] - 10}>{'p8' + bezierp8.join(', ')}</Text>
+      <Group stroke="none" fill="#000" pointerEvents='none'>
+        <Text x={bezierp1[0]} y={bezierp1[1] - 10}>{'p1' + bezierp1.join(', ')}</Text>
+        <Text x={bezierp2[0]} y={bezierp2[1] - 10}>{'p2' + bezierp2.join(', ')}</Text>
+        <Text x={bezierp3[0]} y={bezierp3[1] - 10}>{'p3' + bezierp3.join(', ')}</Text>
+        <Text x={bezierp4[0]} y={bezierp4[1] - 10}>{'p4' + bezierp4.join(', ')}</Text>
+        <Text x={bezierp5[0]} y={bezierp5[1] - 10}>{'p5' + bezierp5.join(', ')}</Text>
+        <Text x={bezierp6[0]} y={bezierp6[1] - 10}>{'p6' + bezierp6.join(', ')}</Text>
+        <Text x={bezierp7[0]} y={bezierp7[1] - 10}>{'p7' + bezierp7.join(', ')}</Text>
+        <Text x={bezierp8[0]} y={bezierp8[1] - 10}>{'p8' + bezierp8.join(', ')}</Text>
+      </Group>
+
     </Group>
   };
   

@@ -18,6 +18,7 @@ import { bezierSubDivision } from './bezierSubdivision';
 import { bezierLineIntersection } from './intersection/bezier-line-intersection';
 import { selfIntersection } from './intersection/self-intersection';
 import { bezierIntersection } from './intersection/bezier-intersection';
+import { segmentIntersection } from './intersection/segment-intersection';
 
 export type PointOnPath = SegmentPoint;
 
@@ -148,6 +149,16 @@ export default class Path2D {
       return false;
     }
     return this.isSelfIntersecting();
+  }
+
+  public getIntersections(path: Path2D): PathIntersection[] {
+    const path1Segments = this.getSegments();
+    const path2Segments = path.getSegments();
+    const intersections: PathIntersection[] = [];
+    path1Segments.forEach(segment1 => {
+      path2Segments.forEach(segment2 => segmentIntersection(segment1, segment2, intersections));
+    });
+    return intersections;
   }
 
   public isSelfIntersecting() {

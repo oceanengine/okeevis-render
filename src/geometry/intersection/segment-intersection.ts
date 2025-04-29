@@ -5,10 +5,9 @@ import { bezierIntersection } from './bezier-intersection';
 import { bezierLineIntersection } from './bezier-line-intersection';
 import { lineLineIntersection } from './line-line-intersection';
 
-export function segmentIntersection(segment1: Segment, segment2: Segment): PathIntersection[] {
+export function segmentIntersection(segment1: Segment, segment2: Segment, res: PathIntersection[] = []): PathIntersection[] {
   const { type: type1, params: params1 } = segment1;
   const { type: type2, params: params2 } = segment2;
-  const res: PathIntersection[] = [];
   if (type1 === 'line' && type2 === 'line') {
     const [x1, y1, x2, y2] = params1;
     const [x3, y3, x4, y4] = params2;
