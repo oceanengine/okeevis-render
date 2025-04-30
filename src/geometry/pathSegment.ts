@@ -5,6 +5,7 @@ import { pointInArcStroke } from './contain/arc';
 import { pointInBezierStroke } from './contain/bezier';
 import { pointInEllipseStroke } from './contain/ellipse';
 import { angle, Vec2 } from '../utils/vec2';
+import { divideBezierAt } from './bezierSubdivision';
 
 export interface Segment {
   type: 'line' | 'arc' | 'bezier' | 'ellipse'; // todo ellipse/qurdatic
@@ -173,6 +174,40 @@ export function getSegmentLength(segment: Segment): number {
   }
   if (segment.type === 'bezier') {
     return bezierLength.apply(null, segment.params);
+  }
+}
+
+export function clipSegment(segment: Segment, t1: number, t2: number): Segment {
+  if (segment.type === 'line') {
+    const [x1, y1, x2, y2] = segment.params;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    return {
+      type: 'line',
+      params: [x1 + dx * t1, y1 + dy * t1, x1 + dx * t2, y1 + dy * t2],
+    };
+  }
+  if (segment.type === 'arc') {
+    const [cx, cy, r, start, end] = segment.params;
+    const delta = end - start;
+    return {
+      type: 'arc',
+      params: [cx, cy, r, start + delta * t1, start + delta * t2],
+    }
+  }
+  if (segment.type === 'bezier') {
+    const divideCurves = divideBezierAt(segment.params, t1);
+    if (t2 === 1) {
+      return {
+        type: 'bezier',
+        params: divideCurves[1],
+      }
+    }
+    const divideCurves2 = divideBezierAt(divideCurves[1], (t2 - t1) / (1 - t1));
+    return {
+      type: 'bezier',
+      params: divideCurves2[0],
+    }
   }
 }
 

@@ -45,10 +45,10 @@ export function pathToCurve(path: Path2D): Path2D {
   }
   return curvePath;
 }
-function lineToCurve(x1: number, y1: number, x2: number, y2: number): number[] {
+export function lineToCurve(x1: number, y1: number, x2: number, y2: number): number[] {
   return [x1, y1, x1, y1, x2, y2, x2, y2];
 }
-function ellipseToCurve(
+export function ellipseToCurve(
   cx: number,
   cy: number,
   rx: number,
@@ -67,7 +67,7 @@ function ellipseToCurve(
   }
 }
 
-function arcToCurve(
+export function arcToCurve(
   cx: number,
   cy: number,
   rx: number,

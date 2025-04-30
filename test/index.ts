@@ -1,1 +1,1 @@
-import './intersection2.test';
+import './path-offset.test';
