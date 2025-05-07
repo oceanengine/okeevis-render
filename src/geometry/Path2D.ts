@@ -151,6 +151,11 @@ export default class Path2D {
     return this.isSelfIntersecting();
   }
 
+  public isClosed(): boolean {
+    // todo
+    return false;
+  }
+
   public getIntersections(path: Path2D): PathIntersection[] {
     const path1Segments = this.getSegments();
     const path2Segments = path.getSegments();
@@ -498,7 +503,7 @@ export default class Path2D {
     return lodash.sum(segments.map(item => getSegmentLength(item)));
   }
 
-  protected getSegments(): Segment[] {
+  public getSegments(): Segment[] {
     return getPathSegments(this, []);
   }
 

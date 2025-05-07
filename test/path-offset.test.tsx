@@ -72,7 +72,7 @@ const App = () => {
 
   return (
     <>
-      <Path pathData={path} stroke="#000" lineWidth={40} />
+      <Path pathData={path} stroke="none" lineWidth={40} />
       <Path pathData={path} stroke="#fff" lineWidth={2} />
       <EditDot x={p1[0]} y={p1[1]} onMove={setp1} />
       <EditDot x={p2[0]} y={p2[1]} onMove={setp2} />

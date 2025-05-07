@@ -211,6 +211,30 @@ export function clipSegment(segment: Segment, t1: number, t2: number): Segment {
   }
 }
 
+export function reverseSegment(segment: Segment): Segment {
+  if (segment.type === 'line') {
+    const [x1, y1, x2, y2] = segment.params;
+    return {
+      type: 'line',
+      params: [x2, y2, x1, y1],
+    }
+  }
+  if (segment.type === 'arc') {
+    const [cx, cy, r, start, end] = segment.params;
+    return {
+      type: 'arc',
+      params: [cx, cy, r, end, start],
+    }
+  }
+  if (segment.type === 'bezier') {
+    const [x1, y1, c1x, c1y, c2x, c2y, x2, y2] = segment.params;
+    return {
+      type: 'bezier',
+      params: [x2, y2, c2x, c2y, c1x, c1y, x1, y1],
+    }
+  }
+}
+
 const segmentFn = {
   line: pointAtLine,
   arc: pointAtArc,

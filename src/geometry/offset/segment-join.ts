@@ -2,7 +2,13 @@
 import { segmentIntersection } from '../intersection/segment-intersection';
 import { clipSegment, getPointAtSegment, Segment } from '../pathSegment';
 
-export function segmentJoin(seg1: Segment, seg2: Segment, originX: number, originY: number, lineJoin: 'miter' | 'round' | 'bevel', lineWidth: number,  miterLimit: number): Segment[] {
+export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'round' | 'bevel', lineWidth: number,  miterLimit: number): Segment[] {
+  if (seg1 === seg2) {
+    return [seg1];
+  }
+  if (!seg1 || !seg2) {
+    return [seg1, seg2].filter(seg => seg);
+  }
   const intersections = segmentIntersection(seg1, seg2);
   if (!intersections.length) {
     // https://developer.mozilla.org/zh-CN/docs/Web/SVG/Reference/Attribute/stroke-linejoin
@@ -13,11 +19,11 @@ export function segmentJoin(seg1: Segment, seg2: Segment, originX: number, origi
       if (p1.alpha === p2.alpha) {
         return [seg1, seg2];
       }
-      const distance = Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
-      // todo
-      const joinX = 0;
-      const joinY = 0;
-      const joinDistance = Math.sqrt((joinX - originX) ** 2 + (joinY - originY) ** 2);
+      const alpha = (Math.PI - Math.abs(p1.alpha - p2.alpha)) / 2;
+      const growLength = Math.abs(lineWidth / 2 / Math.tan(alpha))
+      const joinX = p1.x + Math.cos(p1.alpha) * growLength;
+      const joinY = p1.y + Math.sin(p1.alpha) * growLength;
+      const joinDistance = 0;
       if (joinDistance / lineWidth <= miterLimit) {
         return [
           seg1,
