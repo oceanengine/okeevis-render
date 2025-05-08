@@ -152,8 +152,15 @@ export default class Path2D {
   }
 
   public isClosed(): boolean {
-    // todo
-    return false;
+    return this._pathList.some(command => {
+      if (command.action ==='closePath' || command.action === 'rect') {
+        return true;
+      }
+      if (command.action === 'arc') {
+        const [x, y, r, startAngle, endAngle] = command.params;
+        return equalWithTolerance(Math.abs(startAngle - endAngle), Math.PI * 2);
+      }
+    })
   }
 
   public getIntersections(path: Path2D): PathIntersection[] {
