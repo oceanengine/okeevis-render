@@ -15,12 +15,11 @@ export function offsetSegment(segment: Segment, d: number): Segment[] {
       },
     ];
   } else if (segment.type === 'arc') {
-    const [cx, cy, r, startAngle, endAngle] = segment.params;
-    const flag = endAngle - startAngle > 0 ? 1 : -1;
+    const [cx, cy, r, startAngle, endAngle, flag = 0] = segment.params;
     return [
       {
         type: 'arc',
-        params: [cx, cy, Math.max(r + d * flag, 0), startAngle, endAngle],
+        params: [cx, cy, Math.max(r + d * (flag ? -1 : 1), 0), startAngle, endAngle],
       },
     ];
   } else if (segment.type === 'bezier') {

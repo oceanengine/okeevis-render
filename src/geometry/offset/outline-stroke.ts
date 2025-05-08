@@ -10,7 +10,7 @@ function runSegmentOnPath(path: Path2D, segment: Segment) {
     path.lineTo(x2, y2);
   } else if (segment.type === 'arc') {
     const [cx, cy, r, startAngle, endAngle, anticlockwise] = segment.params;
-    path.arc(cx, cy, r, startAngle, endAngle);
+    path.arc(cx, cy, r, startAngle, endAngle, !!anticlockwise);
   } else if (segment.type === 'bezier') {
     const [x1, y1, x2, y2, x3, y3, x4, y4] = segment.params;
     path.bezierCurveTo(x2, y2, x3, y3, x4, y4);

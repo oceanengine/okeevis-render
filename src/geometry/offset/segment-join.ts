@@ -52,9 +52,13 @@ export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'r
         seg2
       ]
     } else if (lineJoin === 'round') {
-      const cx = (p1.x + p2.x) / 2;
-      const cy = (p1.y + p2.y) / 2;
+      const midx = (p1.x + p2.x) / 2;
+      const midy = (p1.y + p2.y) / 2;
+      const midAngle = (p1.alpha + p2.alpha - Math.PI) / 2 + Math.PI;
       const r = lineWidth / 2;
+      const distance = r * Math.cos(Math.abs(p1.alpha - p2.alpha) / 2);
+      const cx = midx + distance * Math.cos(midAngle);
+      const cy = midy + distance * Math.sin(midAngle);
       const startAngle = Math.atan2(p1.y - cy, p1.x - cx);
       const endAngle = Math.atan2(p2.y - cy, p2.x - cx);
       const connectSegment: Segment = {

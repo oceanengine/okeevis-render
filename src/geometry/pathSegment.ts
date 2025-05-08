@@ -220,10 +220,10 @@ export function reverseSegment(segment: Segment): Segment {
     }
   }
   if (segment.type === 'arc') {
-    const [cx, cy, r, start, end] = segment.params;
+    const [cx, cy, r, start, end, antiClockWise = 0] = segment.params;
     return {
       type: 'arc',
-      params: [cx, cy, r, end, start],
+      params: [cx, cy, r, end, start, Number(!antiClockWise)],
     }
   }
   if (segment.type === 'bezier') {
@@ -308,12 +308,14 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
     }
     if (action === 'lineTo') {
       const [x, y] = params;
-      out.push({
-        type: 'line',
-        params: [endX, endY, x, y],
-      });
-      endX = x;
-      endY = y;
+      if (x !== endX || y !== endY) {
+        out.push({
+          type: 'line',
+          params: [endX, endY, x, y],
+        });
+        endX = x;
+        endY = y;
+      }
     }
     if (action === 'arc') {
       const [cx, cy, r, start, end] = params;
@@ -323,7 +325,7 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
         startX = startPoint.x;
         startY = startPoint.y;
       }
-      if (i > 0) {
+      if (i > 0 && !(startX === endX && startY === endY)) {
         out.push({
           type: 'line',
           params: [endX, endY, startPoint.x, startPoint.y],
