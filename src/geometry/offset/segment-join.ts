@@ -4,10 +4,10 @@ import { clipSegment, getPointAtSegment, Segment } from '../pathSegment';
 
 export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'round' | 'bevel', lineWidth: number,  miterLimit: number): Segment[] {
   if (seg1 === seg2) {
-    return [seg1];
+    return [];
   }
   if (!seg1 || !seg2) {
-    return [seg1, seg2].filter(seg => seg);
+    return [];
   }
   const intersections = segmentIntersection(seg1, seg2);
   if (!intersections.length) {
@@ -17,7 +17,10 @@ export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'r
     if (lineJoin === 'miter') {
       // connect two point with line
       if (p1.alpha === p2.alpha) {
-        return [seg1, seg2];
+        return [{
+          type: 'line',
+          params: [p1.x, p1.y, p2.x, p2.y],
+        }];
       }
       const alpha = (Math.PI - Math.abs(p1.alpha - p2.alpha)) / 2;
       const growLength = Math.abs(lineWidth / 2 / Math.tan(alpha))
@@ -26,7 +29,6 @@ export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'r
       const joinDistance = 0;
       if (joinDistance / lineWidth <= miterLimit) {
         return [
-          seg1,
           {
             type: 'line',
             params: [p1.x, p1.y, joinX, joinY],
@@ -35,21 +37,17 @@ export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'r
             type: 'line',
             params: [joinX, joinY, p2.x, p2.y],
           },
-          seg2
         ]
       } else {
         // todo
       }
       
     } else if (lineJoin === 'bevel') {
-      const connectSegment: Segment = {
-        type: 'line',
-        params: [p1.x, p1.y, p2.x, p2.y],
-      };
       return [
-        seg1,
-        connectSegment,
-        seg2
+        {
+          type: 'line',
+          params: [p1.x, p1.y, p2.x, p2.y],
+        }
       ]
     } else if (lineJoin === 'round') {
       const midx = (p1.x + p2.x) / 2;
@@ -61,21 +59,20 @@ export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'r
       const cy = midy + distance * Math.sin(midAngle);
       const startAngle = Math.atan2(p1.y - cy, p1.x - cx);
       const endAngle = Math.atan2(p2.y - cy, p2.x - cx);
-      const connectSegment: Segment = {
-        type: 'arc',
-        params: [cx, cy, r, startAngle, endAngle]
-      };
       return [
-        seg1,
-        connectSegment,
-        seg2
+        {
+          type: 'arc',
+          params: [cx, cy, r, startAngle, endAngle]
+        }
       ]
     }
   } else {
     const {t1, t2 } = intersections[0];
+    const clip1 = clipSegment(seg1, 0, t1);
+    const clip2 = clipSegment(seg2, t2, 1);
+    seg1.params = clip1.params;
+    seg2.params = clip2.params;
     return [
-      clipSegment(seg1, 0, t1),
-      clipSegment(seg2, t2, 1),
     ]
   }
 }

@@ -285,6 +285,18 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
   let params: number[];
   let currentPath: PathAction;
   let subSegmentIndex: number = 0;
+  
+  const pushLineSegment = (seg: Segment) => {
+    if (seg.type === 'line') {
+      const [x1, y1, x2, y2] = seg.params;
+      if (x1 !== x2 || y1 !== y2) {
+        out.push({
+          type: 'line',
+          params: [x1, y1, x2, y2],
+        });
+      }
+    }
+  }
   for (let i = 0; i < pathList.length; i++) {
     currentPath = pathList[i];
     action = currentPath.action;
@@ -294,7 +306,7 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
       if (type === 'fill') {
         const isClosable = isSegmentClosable(out.slice(subSegmentIndex));
         if (isClosable  && !(startX === endX && startY === endY)) {
-          out.push({
+          pushLineSegment({
             type: 'line',
             params: [endX, endY, startX, startY],
           });
@@ -308,32 +320,30 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
     }
     if (action === 'lineTo') {
       const [x, y] = params;
-      if (x !== endX || y !== endY) {
-        out.push({
+      pushLineSegment({
           type: 'line',
           params: [endX, endY, x, y],
         });
         endX = x;
         endY = y;
-      }
     }
     if (action === 'arc') {
-      const [cx, cy, r, start, end] = params;
+      const [cx, cy, r, start, end, antiClockWise] = params;
       const startPoint = getPointOnPolar(cx, cy, r, start);
       const endPoint = getPointOnPolar(cx, cy, r, end);
       if (i === 0) {
         startX = startPoint.x;
         startY = startPoint.y;
       }
-      if (i > 0 && !(startX === endX && startY === endY)) {
-        out.push({
+      if (i > 0) {
+        pushLineSegment({
           type: 'line',
           params: [endX, endY, startPoint.x, startPoint.y],
         });
       }
       out.push({
         type: 'arc',
-        params: [cx, cy, r, start, end],
+        params: [cx, cy, r, start, end, antiClockWise],
       });
       endX = endPoint.x;
       endY = endPoint.y;
@@ -341,6 +351,7 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
 
     if (action === 'arcTo') {
       // todo
+      
     }
 
     if (action === 'bezierCurveTo') {
@@ -390,7 +401,7 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
     }
 
     if (action === 'closePath' && !(startX === endX && startY === endY)) {
-      out.push({
+      pushLineSegment({
         type: 'line',
         params: [endX, endY, startX, startY],
       });

@@ -26,7 +26,7 @@ const App = () => {
     y: 300,
     width: 100,
     height: 100,
-    borderRadius: 30,
+    borderRadius: 0,
   });
   const polyLine = new Polyline({
     pointList: [
@@ -96,7 +96,7 @@ const App = () => {
     });
   }, []);
   return (
-    <Group lineJoin={outlineOption.strokeLineJoin} lineCap={lineCap} scaleX={2} scaleY={2}>
+    <Group lineJoin={outlineOption.strokeLineJoin} lineCap={lineCap} scaleX={1.5} scaleY={1.5}>
       <Group fill="none" stroke="#000" opacity={0.6} lineWidth={outlineOption.strokeWidth}>
         {line}
         {circle}

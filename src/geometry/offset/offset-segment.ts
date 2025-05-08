@@ -1,5 +1,5 @@
 import { Segment } from '../pathSegment';
-import { CubicCurve, FloatPoint, CubicCurveBuilder, offsetCurve, } from '../../../js/offsetting'
+import { CubicCurve, FloatPoint, CubicCurveBuilder, offsetCurve } from '../../../js/offsetting';
 
 export function offsetSegment(segment: Segment, d: number): Segment[] {
   if (segment.type === 'line') {
@@ -15,20 +15,25 @@ export function offsetSegment(segment: Segment, d: number): Segment[] {
       },
     ];
   } else if (segment.type === 'arc') {
-    const [cx, cy, r, startAngle, endAngle, flag = 0] = segment.params;
-    return [
-      {
-        type: 'arc',
-        params: [cx, cy, Math.max(r + d * (flag ? -1 : 1), 0), startAngle, endAngle],
-      },
-    ];
+    const [cx, cy, r, startAngle, endAngle, flag] = segment.params;
+    const r2 = Math.max(r + d * (flag ? -1 : 1), 0);
+    if (r > 0) {
+      return [
+        {
+          type: 'arc',
+          params: [cx, cy, r2, startAngle, endAngle, flag],
+        },
+      ];
+    } else {
+      return [];
+    }
   } else if (segment.type === 'bezier') {
     const [x1, y1, c1x, c1y, c2x, c2y, x2, y2] = segment.params;
     const curve = new CubicCurve(
       new FloatPoint(x1, y1),
       new FloatPoint(c1x, c1y),
-      new FloatPoint(c2x, c2y), 
-      new FloatPoint(x2, y2)
+      new FloatPoint(c2x, c2y),
+      new FloatPoint(x2, y2),
     );
     const accuracy = 0.005 + (0.0001 - 0.005) * 0.5;
     const builder = new CubicCurveBuilder();
@@ -38,7 +43,7 @@ export function offsetSegment(segment: Segment, d: number): Segment[] {
       return {
         type: 'bezier',
         params: [P0.X, P0.Y, P1.X, P1.Y, P2.X, P2.Y, P3.X, P3.Y],
-      }
-    })
+      };
+    });
   }
 }

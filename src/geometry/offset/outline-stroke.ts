@@ -4,15 +4,24 @@ import { offsetSegment } from './offset-segment';
 import { segmentJoin } from './segment-join';
 import { getPointAtSegment, reverseSegment, Segment } from '../pathSegment';
 
-function runSegmentOnPath(path: Path2D, segment: Segment) {
+function runSegmentOnPath(path: Path2D, segment: Segment, isFirst: boolean = false) {
   if (segment.type === 'line') {
     const [x1, y1, x2, y2] = segment.params;
+    if (isFirst) {
+      path.moveTo(x1, y1);
+    }
     path.lineTo(x2, y2);
   } else if (segment.type === 'arc') {
     const [cx, cy, r, startAngle, endAngle, anticlockwise] = segment.params;
+    if (isFirst) {
+      path.moveTo(cx + r * Math.cos(startAngle), cy + r * Math.sin(startAngle));
+    }
     path.arc(cx, cy, r, startAngle, endAngle, !!anticlockwise);
   } else if (segment.type === 'bezier') {
     const [x1, y1, x2, y2, x3, y3, x4, y4] = segment.params;
+    if (isFirst) {
+      path.moveTo(x1, y1);
+    }
     path.bezierCurveTo(x2, y2, x3, y3, x4, y4);
   }
 }
@@ -44,73 +53,92 @@ export function outlineStroke(path: Path2D, options: StrokeOptions): Path2D {
   for (const subPath of subPathList) {
     const segments = subPath.getSegments();
     const isClosed = subPath.isClosed();
-    const outsideSegments = segments.map(segment => {
-      return offsetSegment(segment, strokeWidth / 2);
-    });
+    const outsideSegments = segments
+      .map(segment => {
+        return offsetSegment(segment, strokeWidth / 2);
+      })
+      .filter(seg => seg.length);
     const insideSegments = segments
       .map(segment => {
         return offsetSegment(segment, -strokeWidth / 2);
       })
+      .filter(seg => seg.length)
       .reverse()
       .map(segs => segs.reverse().map(seg => reverseSegment(seg)));
-    [outsideSegments, insideSegments].forEach((segments, mainIndex) => {
-      segments.reduce((prev, curr, index) => {
-        const prevLastSeg = prev ? last(prev) : null;
-        const [currentFirstSeg, ...currentRestSegs] = curr;
-        const joinSegments = segmentJoin(
-          prevLastSeg,
-          currentFirstSeg,
-          strokeLineJoin,
-          strokeWidth,
-          strokeMiterLimit,
-        );
-        if (index === 0) {
-          const startPoint = getPointAtSegment(0, currentFirstSeg);
-          if ((isClosed && mainIndex === 1)) {
-            res.moveTo(startPoint.x, startPoint.y);
-          } else if ((strokeLineCap === 'butt' && !isClosed)) {
-            if (mainIndex === 0) {
-              res.moveTo(startPoint.x, startPoint.y);
-            } else {
-              res.lineTo(startPoint.x, startPoint.y);
-            }
-          } else if (strokeLineCap === 'round' && !isClosed) {
-            const {x, y, alpha} = subPath.getPointAtPercent(mainIndex === 0 ? 0 : 1);
-            const startAngle = alpha + Math.PI / 2 * (mainIndex === 0 ? 1 : -1);
-            const endAngle = startAngle + Math.PI;
-            const r = strokeWidth / 2;
-            if (mainIndex === 0) {
-              const startX = x + r * Math.cos(startAngle);
-              const startY = y + r * Math.sin(startAngle);
-              res.moveTo(startX, startY);
-            }
-            res.arc(x, y, r, startAngle, endAngle);
-          } else if (strokeLineCap === 'square' && !isClosed) {
-            const {x, y, alpha} = subPath.getPointAtPercent(mainIndex === 0 ? 0 : 1);
-            const alpha1 = alpha + Math.PI / 2 * (mainIndex === 0? 1 : -1);
-            const alpha2 = alpha1 + Math.PI / 4;
-            const alpha4 = alpha2 + Math.PI / 2;
-            const r = strokeWidth / 2;
-            const r2 = r * Math.sqrt(2);
-            if (mainIndex === 0) {
-              res.moveTo(x + r * Math.cos(alpha1), y + r * Math.sin(alpha1));
-            }
-            res.lineTo(x + r2 * Math.cos(alpha2), y + r2 * Math.sin(alpha2));
-            res.lineTo(x + r2 * Math.cos(alpha4), y + r2 * Math.sin(alpha4));
-          }
+    const [outerJoins, innerJoins] = [outsideSegments, insideSegments].map(pathSegments =>
+      pathSegments.map((curSegs, index) => {
+        const curLast = last(curSegs);
+        if (pathSegments.length === 1) {
+          return [];
         }
-        joinSegments.forEach(seg => {
-          runSegmentOnPath(res, seg);
-        });
-        currentRestSegs.forEach(seg => {
-          runSegmentOnPath(res, seg);
-        });
-        if (index === segments.length - 1 && mainIndex === 1) {
-          res.closePath();
+        let nextSegs = pathSegments[index + 1];
+        if (index === pathSegments.length - 1 && isClosed) {
+          nextSegs = pathSegments[0];
         }
-        return curr;
-      }, null);
+        if (!nextSegs) {
+          return [];
+        }
+        const nextFirst = nextSegs[0];
+        return segmentJoin(curLast, nextFirst, strokeLineJoin, strokeWidth, strokeMiterLimit);
+      }),
+    );
+
+    const addLineCap = (side: 'start' | 'end') => {
+      const { x, y, alpha } = subPath.getPointAtPercent(side === 'start' ? 0 : 1);
+      if (strokeLineCap === 'square') {
+        const alpha1 = alpha + (Math.PI / 2) * (side === 'start' ? 1 : -1);
+        const alpha2 = alpha1 + Math.PI / 4;
+        const alpha4 = alpha2 + Math.PI / 2;
+        const r = strokeWidth / 2;
+        const r2 = r * Math.sqrt(2);
+        if (side === 'start') {
+          res.moveTo(x + r * Math.cos(alpha1), y + r * Math.sin(alpha1));
+        }
+        res.lineTo(x + r2 * Math.cos(alpha2), y + r2 * Math.sin(alpha2));
+        res.lineTo(x + r2 * Math.cos(alpha4), y + r2 * Math.sin(alpha4));
+      }
+      if (strokeLineCap === 'round') {
+        const startAngle = alpha + (Math.PI / 2) * (side === 'start' ? 1 : -1);
+        const endAngle = startAngle + Math.PI;
+        const r = strokeWidth / 2;
+        if (side === 'start') {
+          const startX = x + r * Math.cos(startAngle);
+          const startY = y + r * Math.sin(startAngle);
+          res.moveTo(startX, startY);
+        }
+        res.arc(x, y, r, startAngle, endAngle);
+      }
+    };
+
+    if (isClosed || (strokeLineCap === 'butt' && !isClosed)) {
+      const firstOuterPoint = getPointAtSegment(0, outsideSegments[0][0]);
+      res.moveTo(firstOuterPoint.x, firstOuterPoint.y);
+    } else {
+      addLineCap('start');
+    }
+
+    outerJoins.forEach((joins, index) => {
+      outsideSegments[index].forEach(seg => runSegmentOnPath(res, seg));
+      joins.forEach(seg => runSegmentOnPath(res, seg));
     });
+
+    if (isClosed) {
+      const firstInnerPoint = getPointAtSegment(0, insideSegments[0][0]);
+      res.moveTo(firstInnerPoint.x, firstInnerPoint.y);
+    } else {
+      if (strokeLineCap === 'butt') {
+        const firstInnerPoint = getPointAtSegment(0, insideSegments[0][0]);
+        res.lineTo(firstInnerPoint.x, firstInnerPoint.y);
+      } else {
+        addLineCap('end');
+      }
+    }
+
+    innerJoins.forEach((joins, index) => {
+      insideSegments[index].forEach(seg => runSegmentOnPath(res, seg));
+      joins.forEach(seg => runSegmentOnPath(res, seg));
+    });
+    res.closePath();
   }
   return res;
 }
