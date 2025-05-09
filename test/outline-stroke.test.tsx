@@ -64,8 +64,9 @@ const App = () => {
     cx: 600,
     cy: 150,
     radius: 80,
+    radiusI: 20,
     start: 0,
-    end: Math.PI / 2,
+    end: Math.PI* 3 / 2,
   });
 
   const arc = new Arc({
@@ -73,7 +74,7 @@ const App = () => {
     cy: 350,
     radius: 80,
     start: 0,
-    end: Math.PI / 2,
+    end: Math.PI ,
   });
 
   const outlineOption: any = {

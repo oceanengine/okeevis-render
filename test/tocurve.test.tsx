@@ -12,7 +12,7 @@ const App = () => {
     stroke: 'red',
     lineWidth:4,
     brush: ctx => {
-      ctx.arc(600, 150, 75,  Math.PI/ 2,0, true);
+      ctx.arc(600, 150, 75, 5.654866776461628, 0, true);
     }
   });
   const curve = arc.getPathData().toCurve();

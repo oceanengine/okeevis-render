@@ -12,9 +12,11 @@ export function bezierIntersection(
 ): PathIntersection[] {
   recursiveBezierIntersection(curve1, curve2, 0, 1, 0, 1, res);
   // uniq points
-  res = res.filter((item, index) => {
+  const uniqRes = res.filter((item, index) => {
     return res.findIndex(v => equalWithTolerance(v.x, item.x, threshold) && equalWithTolerance(v.y, item.y, threshold)) === index;
-  })
+  });
+  res.length = uniqRes.length;
+  res.forEach((item, i) => res[i] = uniqRes[i]);
   return res;
 }
 
