@@ -188,11 +188,11 @@ export function clipSegment(segment: Segment, t1: number, t2: number): Segment {
     };
   }
   if (segment.type === 'arc') {
-    const [cx, cy, r, start, end] = segment.params;
+    const [cx, cy, r, start, end, antiClockWise] = segment.params;
     const delta = end - start;
     return {
       type: 'arc',
-      params: [cx, cy, r, start + delta * t1, start + delta * t2],
+      params: [cx, cy, r, start + delta * t1, start + delta * t2, antiClockWise],
     }
   }
   if (segment.type === 'bezier') {

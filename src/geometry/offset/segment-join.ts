@@ -2,7 +2,7 @@
 import { segmentIntersection } from '../intersection/segment-intersection';
 import { clipSegment, getPointAtSegment, Segment } from '../pathSegment';
 
-export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'round' | 'bevel', lineWidth: number,  miterLimit: number): Segment[] {
+export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'round' | 'bevel', lineWidth: number,  miterLimit: number = 10): Segment[] {
   if (seg1 === seg2) {
     return [];
   }
@@ -23,11 +23,11 @@ export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'r
         }];
       }
       const alpha = (Math.PI - Math.abs(p1.alpha - p2.alpha)) / 2;
-      const growLength = Math.abs(lineWidth / 2 / Math.tan(alpha))
-      const joinX = p1.x + Math.cos(p1.alpha) * growLength;
-      const joinY = p1.y + Math.sin(p1.alpha) * growLength;
-      const joinDistance = 0;
-      if (joinDistance / lineWidth <= miterLimit) {
+      const currentMiterLimit = Math.abs(1 / Math.sin(alpha));
+      if (currentMiterLimit <= miterLimit) {
+        const growLength = Math.abs(lineWidth / 2 / Math.tan(alpha))
+        const joinX = p1.x + Math.cos(p1.alpha) * growLength;
+        const joinY = p1.y + Math.sin(p1.alpha) * growLength;
         return [
           {
             type: 'line',
@@ -39,7 +39,13 @@ export function segmentJoin(seg1: Segment, seg2: Segment, lineJoin: 'miter' | 'r
           },
         ]
       } else {
-        // todo
+        // bevel
+        return [
+          {
+            type: 'line',
+            params: [p1.x, p1.y, p2.x, p2.y],
+          }
+        ]
       }
       
     } else if (lineJoin === 'bevel') {

@@ -18,7 +18,7 @@ export function segmentIntersection(segment1: Segment, segment2: Segment, res: P
   } else if (type1 === 'line' && type2 === 'bezier') {
     const [x1, y1, x2, y2] = params1;
     const [p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y] = params2;
-    const points = bezierLineIntersection(
+    bezierLineIntersection(
       p1x,
       p1y,
       p2x,

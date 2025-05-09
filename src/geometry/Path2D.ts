@@ -177,6 +177,7 @@ export default class Path2D {
     const segments = this.getSegments();
     const curves: number[][] = [];
     segments.forEach(segment => segmentToCurve(segment, curves));
+    // todo ignore duplicate test (i,j) (j,i)
     for (let i = 0; i < curves.length; i++) {
       const curve1 = curves[i];
       if (

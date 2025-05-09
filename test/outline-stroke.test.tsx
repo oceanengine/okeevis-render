@@ -1,5 +1,17 @@
 import React, { useState, createRoot, useEffect } from '../src/react';
-import { Render, Group, Line, Circle, Text, Path, Rect, Polyline, Polygon, Sector, Arc } from '../src';
+import {
+  Render,
+  Group,
+  Line,
+  Circle,
+  Text,
+  Path,
+  Rect,
+  Polyline,
+  Polygon,
+  Sector,
+  Arc,
+} from '../src';
 import { outlineStroke } from '../src/geometry/offset/outline-stroke';
 const dom = document.getElementById('root') as HTMLDivElement;
 const render = new Render(dom, { renderer: 'canvas' });
@@ -8,7 +20,7 @@ render.enableDirtyRect = false;
 render.showFPS = false;
 
 const App = () => {
-  const [lineJoin, setLineJoin] = useState('round');
+  const [lineJoin, setLineJoin] = useState('miter');
   const [lineCap, setLineCap] = useState<CanvasLineCap>('round');
   const line = new Line({
     x1: 100,
@@ -33,14 +45,18 @@ const App = () => {
       { x: 400, y: 100 },
       { x: 300, y: 200 },
       { x: 350, y: 180 },
+      {
+        x: 300,
+        y: 100,
+      },
     ],
   });
 
   const polygon = new Polygon({
     pointList: [
-      { x: 400, y: 300 },
-      { x: 300, y: 400 },
-      { x: 350, y: 280 },
+      { x: 380, y: 300 },
+      { x: 370, y: 400 },
+      { x: 360, y: 280 },
     ],
   });
 
@@ -96,7 +112,7 @@ const App = () => {
     });
   }, []);
   return (
-    <Group lineJoin={outlineOption.strokeLineJoin} lineCap={lineCap} scaleX={1.5} scaleY={1.5}>
+    <Group draggable lineJoin={outlineOption.strokeLineJoin} lineCap={lineCap} scaleX={1.5} scaleY={1.5}>
       <Group fill="none" stroke="#000" opacity={0.6} lineWidth={outlineOption.strokeWidth}>
         {line}
         {circle}
