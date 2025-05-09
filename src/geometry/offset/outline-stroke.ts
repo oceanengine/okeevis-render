@@ -111,8 +111,10 @@ export function outlineStroke(path: Path2D, options: StrokeOptions): Path2D {
     };
 
     if (isClosed || (strokeLineCap === 'butt' && !isClosed)) {
-      const firstOuterPoint = getPointAtSegment(0, outsideSegments[0][0]);
-      res.moveTo(firstOuterPoint.x, firstOuterPoint.y);
+      if (outsideSegments.length) {
+        const firstOuterPoint = getPointAtSegment(0, outsideSegments[0][0]);
+        res.moveTo(firstOuterPoint.x, firstOuterPoint.y);
+      }
     } else {
       addLineCap('start');
     }
@@ -123,8 +125,11 @@ export function outlineStroke(path: Path2D, options: StrokeOptions): Path2D {
     });
 
     if (isClosed) {
-      const firstInnerPoint = getPointAtSegment(0, insideSegments[0][0]);
-      res.moveTo(firstInnerPoint.x, firstInnerPoint.y);
+      if (insideSegments.length) {
+        const firstInnerPoint = getPointAtSegment(0, insideSegments[0][0]);
+        res.moveTo(firstInnerPoint.x, firstInnerPoint.y);
+
+      }
     } else {
       if (strokeLineCap === 'butt') {
         const firstInnerPoint = getPointAtSegment(0, insideSegments[0][0]);

@@ -61,8 +61,10 @@ export default class Sector extends Shape<SectorAttr> {
     const delta = Math.abs(start - end);
     if (equalWithTolerance(delta, PI2) || delta > PI2) {
       ctx.arc(cx, cy, radius, PI2, 0, true);
-      ctx.moveTo(cx + radiusI, cy);
-      ctx.arc(cx, cy, radiusI, 0, PI2, false);
+      if (radiusI > 0) {
+        ctx.moveTo(cx + radiusI, cy);
+        ctx.arc(cx, cy, radiusI, 0, PI2, false);
+      }
       return;
     }
     const anticlockwise = end < start;
