@@ -77,7 +77,7 @@ export function arcToCurve(
   end: number,
   clockWise: boolean,
 ): number[] {
-  const theta = (end - start) * (clockWise ? 1 : -1);
+  const theta = Math.abs(end - start) * (clockWise ? 1 : -1);
   const h = ((4 / 3) * (1 - Math.cos(theta / 2))) / Math.sin(theta / 2);
   const p1 = [1, 0];
   const p2 = [1, p1[1] + h];
