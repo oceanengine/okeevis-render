@@ -341,10 +341,12 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
           params: [endX, endY, startPoint.x, startPoint.y],
         });
       }
-      out.push({
-        type: 'arc',
-        params: [cx, cy, r, start, end, antiClockWise],
-      });
+      if (r > 0 && start !== end) {
+        out.push({
+          type: 'arc',
+          params: [cx, cy, r, start, end, antiClockWise],
+        });
+      }
       endX = endPoint.x;
       endY = endPoint.y;
     }
