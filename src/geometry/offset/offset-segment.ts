@@ -1,5 +1,6 @@
 import { Segment } from '../pathSegment';
 import { CubicCurve, FloatPoint, CubicCurveBuilder, offsetCurve } from '../../../js/offsetting';
+import { segmentToCurve } from '../toCurve';
 
 export function offsetSegment(segment: Segment, d: number): Segment[] {
   if (segment.type === 'line') {
@@ -45,5 +46,15 @@ export function offsetSegment(segment: Segment, d: number): Segment[] {
         params: [P0.X, P0.Y, P1.X, P1.Y, P2.X, P2.Y, P3.X, P3.Y],
       };
     });
+  } else if (segment.type === 'ellipse') {
+    const bezierCurves = segmentToCurve(segment, []);
+    const res: Segment[] = [];
+    bezierCurves.map(curve => offsetSegment({
+      type: 'bezier',
+      params: curve,
+    }, d)).forEach(segments => {
+      res.push(...segments);
+    })
+    return res;
   }
 }

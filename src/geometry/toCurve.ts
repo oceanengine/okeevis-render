@@ -23,8 +23,8 @@ export function segmentToCurve(seg: Segment, out: number[][]): number[][] {
   } else if (type === 'bezier') {
     out.push([...params]);
   } else if (type === 'ellipse') {
-    const [cx, cy, rx, ry, rotation, start, end, clockWise] = params;
-    ellipseToCurve(cx, cy, rx, ry, rotation, start, end, clockWise as any as boolean, out);
+    const [cx, cy, rx, ry, rotation, start, end, antiClockwise] = params;
+    ellipseToCurve(cx, cy, rx, ry, rotation, start, end, !antiClockwise, out);
   }
   return out;
 }
@@ -86,8 +86,10 @@ export function arcToCurve(
   const matrix = mat3.create();
   //先缩放，后旋转，再平移
   mat3.translate(matrix, matrix, [cx, cy]);
-  mat3.rotate(matrix, matrix, start + xAxisRotation);
   mat3.scale(matrix, matrix, [rx, ry]);
+  // todo elipsis xaxisrotation is not supported currently
+  mat3.rotate(matrix, matrix, start + xAxisRotation);
+
   [p1, p2, p3, p4].forEach((p: [number, number]) => transformMat3(p, p, matrix));
   return [...p1, ...p2, ...p3, ...p4];
 }

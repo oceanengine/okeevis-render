@@ -393,10 +393,10 @@ export function getPathSegments(path: Path2d, out: Segment[], type: 'stroke' | '
     }
 
     if (action === 'ellipse') {
-      const [cx, cy, rx, ry, rotation, start, end, clockWise] = params;
+      const [cx, cy, rx, ry, rotation, start, end, counterClockwise] = params;
       out.push({
         type: 'ellipse',
-        params: [cx,cy, rx, ry, rotation, start, end, clockWise]
+        params: [cx,cy, rx, ry, rotation, start, end, counterClockwise]
       });
       endX = cx + rx * Math.cos(end);
       endY = cy + ry * Math.sin(end);

@@ -36,7 +36,7 @@ export default class Circle extends Shape<EllipseAttr> {
 
   public brush(ctx: CanvasRenderingContext2D) {
     const { cx, cy, rx, ry } = this.attr;
-    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2, false);
     //  polyfill
     //  ctx.save();
     //  choose Max(a, b) as the arc radius

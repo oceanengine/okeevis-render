@@ -160,6 +160,10 @@ export default class Path2D {
         const [x, y, r, startAngle, endAngle] = command.params;
         return equalWithTolerance(Math.abs(startAngle - endAngle), Math.PI * 2);
       }
+      if (command.action === 'ellipse') {
+        const [cx, cy, rx, ry, xAxisRotation, startAngle, endAngle] = command.params;
+        return equalWithTolerance(Math.abs(startAngle - endAngle), Math.PI * 2);
+      }
     })
   }
 
@@ -385,11 +389,11 @@ export default class Path2D {
     rotation: number,
     start: number,
     end: number,
-    clockwise: boolean = true,
+    counterClockwise: boolean = false,
   ): this {
     this._pathList.push({
       action: 'ellipse',
-      params: [x, y, radiusX, radiusY, rotation, start, end, clockwise],
+      params: [x, y, radiusX, radiusY, rotation, start, end, counterClockwise],
     });
 
     return this;
