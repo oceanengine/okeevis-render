@@ -46,3 +46,21 @@ export function divideBezierAt(params: number[], e: number): number[][] {
     [pe.x, pe.y, pj.x, pj.y, ph.x, ph.y, pdx, pdy],
   ];
 }
+
+
+export function bezierMonotoneSubDivision(params: number[], axis: 'x' | 'y'): number[][] {
+  // 拆分bezier曲线，保证曲线的单调性
+  const [x0, y0, x1, y1, x2, y2, x3, y3] = params;
+  const ax = x3 - 3 * x2 + 3 * x1 - x0;// t^3
+  const bx = 3 * x2 - 6 * x1 + 3 * x0; // t^2
+  const cx = 3 * x1 - 3 * x0; // t
+  // 导数是二次方程
+  const a = 3 * ax**2;
+  const b = 2 * bx;
+  const c = cx;
+  const discriminant = b**2 - 4 * a * c;
+  if (discriminant < 0) {
+    // 没有解
+    return [];
+  }
+}

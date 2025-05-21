@@ -172,7 +172,7 @@ export default class ScrollView extends Group {
 
   public set scrollLeft(x: number) {
     if (!this._isInTransitionScroll && this.isConnected) {
-      this.ownerRender.cancelAnimationFrame(this._transitionRAF);
+      this._cancelRaf();
     }
     const { scrollWidth, maxScrollLeft } = this.attr;
     const width = this.clientWidth;
@@ -193,7 +193,7 @@ export default class ScrollView extends Group {
 
   public set scrollTop(y: number) {
     if (!this._isInTransitionScroll && this.isConnected) {
-      this.ownerRender.cancelAnimationFrame(this._transitionRAF);
+      this._cancelRaf();
     }
     const { height, scrollHeight, maxScrollTop, bounces } = this.attr;
     const minScrollTop = bounces ? (this._isPanningScroll || this._transitionRAF ? 0 : 0) : 0;
@@ -274,7 +274,7 @@ export default class ScrollView extends Group {
         return { x: 0, y: 0 };
       },
       onDragStart: () => {
-        this.ownerRender.cancelAnimationFrame(this._transitionRAF);
+        this._cancelRaf();
         this._transitionRAF = null;
       },
       onDrag: e => {
@@ -723,5 +723,9 @@ export default class ScrollView extends Group {
         (item as DOMNode).getContainer().style.clipPath = cssclip;
       }
     });
+  }
+
+  private _cancelRaf() {
+    this.ownerRender?.cancelAnimationFrame(this._transitionRAF);
   }
 }
