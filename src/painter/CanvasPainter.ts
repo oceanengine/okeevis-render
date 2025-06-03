@@ -13,6 +13,7 @@ import * as styleHelper from '../canvas/style';
 import { getCanvasCreator } from '../canvas/createCanvas';
 import { fpsRect, fpsText } from './fps';
 import { isArray, sum } from 'lodash-es';
+import { isPC } from '../utils/env';
 
 const contextKeys: Array<keyof ShapeAttr> = [
   'fill',
@@ -78,6 +79,7 @@ export default class CanvasPainter implements Painter {
       // tab switch must redraw
       document.addEventListener('visibilitychange', this._handleDocumentVisibilityChange);
       window.addEventListener('resize', this._handleWindowResize);
+      window.addEventListener('wheel', this._handleWindowResize)
     }
     this._viewPort = { x: 0, y: 0, width: render.getWidth(), height: render.getHeight() };
   }
@@ -472,6 +474,7 @@ export default class CanvasPainter implements Painter {
     if (this.render.isBrowser()) {
       document.removeEventListener('visibilitychange', this._handleDocumentVisibilityChange);
       window.removeEventListener('resize', this._handleWindowResize);
+      window.removeEventListener('wheel', this._handleWindowResize);
     }
     this._canvas = null;
     this.render = null;
@@ -775,13 +778,17 @@ export default class CanvasPainter implements Painter {
     }
   };
 
-  private _handleWindowResize = () => {
+  private _handleWindowResize = (e: MouseEvent) => {
     if (!this.render.autoDpr) {
       return;
     }
+     if (e.type === 'wheel' && !e.ctrlKey) {
+      return
+    }
     this._isFirstFrame = true;
-    if (window.devicePixelRatio !== this.dpr) {
-      this.resize(this.render.getWidth(), this.render.getHeight(), window.devicePixelRatio);
+    const nextDpr = isPC ? Math.min(window.devicePixelRatio * (window.visualViewport?.scale || 1), 10) : window.devicePixelRatio;
+    if (nextDpr !== this.dpr) {
+      this.resize(this.render.getWidth(), this.render.getHeight(), nextDpr);
       this.render.getRoot().traverse(node => {
         const { fill } = node.attr;
         if (isPattern(fill)) {
