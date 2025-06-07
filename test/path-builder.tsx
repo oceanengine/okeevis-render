@@ -13,6 +13,20 @@ const App = () => {
   const [pointsArray, setPointsArray] = useState<[number, number][][]>([]);
   const [currentPoints, setCurrentPoints] = useState<[number, number][]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
+  const path = new Path2D();
+  pointsArray.forEach(points => {
+    points.forEach((point, index) => {
+      if (index === 0) {
+        path.moveTo(point[0], point[1]);
+      } else {
+        path.lineTo(point[0], point[1]);
+      }
+      if (index === points.length - 1) {
+        path.closePath();
+      }
+    });
+  });
+  console.log(path.getSVGPathString());
   return (
     <Group>
       <Rect
@@ -61,21 +75,8 @@ const App = () => {
         }}
       />
       <Path
-       pointerEvents='none'
-        brush={ctx => {
-          pointsArray.forEach(points => {
-            points.forEach((point, index) => {
-              if (index === 0) {
-                ctx.moveTo(point[0], point[1]);
-              } else {
-                ctx.lineTo(point[0], point[1]);
-              }
-              if (index === points.length - 1) {
-                ctx.closePath();
-              }
-            });
-          });
-        }}
+        pointerEvents="none"
+        pathData={path}
         stroke="#000"
         fill="#eee"
         lineWidth={1}

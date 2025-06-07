@@ -1,1 +1,1 @@
-import './outline-stroke.test'
+import './vatti.test.tsx';

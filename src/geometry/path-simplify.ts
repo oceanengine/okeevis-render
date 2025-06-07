@@ -10,10 +10,3 @@ export function simplifyPath(path: Path2D, fillRule: 'nonzero' | 'evenodd' = 'no
 
     return new Path2D();
 }
-
-const enum PathRelation {
-    Contain, // path1 contains path2
-    Contained, // path1 is contained by path2
-    CommonSide, // path1 and path2 have common side
-    Separate, // path1 and path2 are separate
-}
