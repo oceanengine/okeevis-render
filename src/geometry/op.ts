@@ -201,14 +201,13 @@ export function scanLine(path: Path2D) {
         }
       }
     }
-    console.log(horizontalEdges);
     remainEdges = remainEdges.filter(edge => edge.end.y < yBottom);
     const topActiveEdges = activeEdges.filter(
       edge => edge.start.y <= yBottom || edge.end.y < yBottom,
     );
     const bottomActiveEdges = activeEdges.filter(
       edge => edge.end.y >= yBottom || edge.start.y > yBottom,
-    );
+    )
     activeEdges.forEach(edge => {
       scanBeamList.push(edge.end);
     });
@@ -218,7 +217,7 @@ export function scanLine(path: Path2D) {
       findIntersections(topActiveEdges, intersections, intersected);
       findIntersections(bottomActiveEdges, intersections, intersected);
     }
-    if (remainEdges.length === 0) {
+    if (!remainEdges.length) {
       break;
     }
 
