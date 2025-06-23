@@ -24,23 +24,23 @@ export function createReactRenderer(ReactDOM: {
   version: string;
   createRoot?: any;
 }): DOMRenderer {
-  if (ReactDOM.createRoot) {
-    let app: any;
-    return {
-      update: (dom, content) => {
-        if (!app) {
-          app = ReactDOM.createRoot(dom);
-        }
-        app.render(content);
-      },
-      destroy: dom => {
-        if (app) {
-          app.unmount();
-          app = null;
-        }
-      },
-    };
-  }
+  // if (ReactDOM.createRoot) {
+  //   let app: any;
+  //   return {
+  //     update: (dom, content) => {
+  //       if (!app) {
+  //         app = ReactDOM.createRoot(dom);
+  //       }
+  //       app.render(content);
+  //     },
+  //     destroy: dom => {
+  //       if (app) {
+  //         app.unmount();
+  //         app = null;
+  //       }
+  //     },
+  //   };
+  // }
   return {
     update: (dom, content) => ReactDOM.render(content, dom),
     destroy: dom => ReactDOM.unmountComponentAtNode(dom),
