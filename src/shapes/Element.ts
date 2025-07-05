@@ -1307,6 +1307,9 @@ export default class Element<T extends CommonAttr = ElementAttr>
     if (typeof options === 'object' && options.rotate) {
       rotate = options.rotate;
     }
+    if (typeof options === 'object') {
+      options.legacy = true;
+    }
     const pathData = typeof path === 'string' ? new Path2D(path) : path;
     const animation = this.animate([{}, {}], options);
     animation.ontick = (t: number) => {
