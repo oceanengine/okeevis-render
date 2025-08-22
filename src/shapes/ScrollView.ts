@@ -297,11 +297,12 @@ export default class ScrollView extends Group {
           return;
         }
         const firstEvent = recentDragEvents[0];
+        const count = recentDragEvents.length;
         this._dragHistory.length = 0;
         this._isPanningScroll = false;
         const rAF = this.ownerRender.requestAnimationFrame
-        let dx = event.x - firstEvent.x;
-        let dy = event.y - firstEvent.y;
+        let dx = (event.x - firstEvent.x) / count;
+        let dy = (event.y - firstEvent.y) / count;
         const during = time - firstEvent.t;
         const { scrollX, scrollY, width, height, scrollWidth, scrollHeight } = this.attr;
         if (!scrollX || width >= scrollWidth) {
@@ -315,6 +316,8 @@ export default class ScrollView extends Group {
         const maxScrollTop = this.attr.maxScrollTop ?? this.attr.scrollHeight - this.clientHeight;
         const minScrollTop = this.attr.minScrollTop ?? 0;
         const speed = Math.sqrt(dx * dx + dy * dy);
+        const scaleX = Math.abs(dx) / speed;
+        const scaleY = Math.abs(dy) / speed;
         // 超出边界回弹
 
         if (during > 300 || speed === 0) {
@@ -322,18 +325,18 @@ export default class ScrollView extends Group {
         }
 
         const startTime = Date.now();
-        const deceleration = 0.3;
+        const deceleration = 0.08;
         const frameCount = Math.abs(speed) / deceleration;
         const initialLeft = this.scrollLeft;
         const initialTop = this.scrollTop;
-        const maxMoveMent = speed * frameCount - 1 / 2 * deceleration * frameCount ** 2;
+        const maxMoveMent = speed ** 2 * 3;
         const ease = cubicBezier(0, .5, .2, 1);
         const transitionScroll = () => {
           this._isInTransitionScroll = true;
           const t = Math.min((Date.now() - startTime) / 16, frameCount) / frameCount;
           const movement = ease(t) * maxMoveMent;
-          const nextScrollLeft = dx !== 0 ? initialLeft - movement * (dx > 0 ? 1 : -1) : initialLeft;
-          const nextScrollTop =  dy !== 0 ? initialTop - movement * (dy > 0 ? 1 : -1) : initialTop;
+          const nextScrollLeft = dx !== 0 ? initialLeft - movement * scaleX * (dx > 0 ? 1 : -1) : initialLeft;
+          const nextScrollTop =  dy !== 0 ? initialTop - movement * scaleY * (dy > 0 ? 1 : -1) : initialTop;
           this.scrollLeft = nextScrollLeft;
           this.scrollTop = nextScrollTop;
           this._isInTransitionScroll = false;
