@@ -75,7 +75,7 @@ export default class ScrollView extends Group {
 
   private _inTransction: boolean = false;
 
-  private _lastDragEvent: SyntheticDragEvent;
+  private _dragHistory: Array<{x: number, y: number, t: number}> = [];
 
   private _transitionRAF: any;
 
@@ -276,24 +276,33 @@ export default class ScrollView extends Group {
       onDragStart: () => {
         this._cancelRaf();
         this._transitionRAF = null;
+        this._dragHistory.length = 0;
       },
       onDrag: e => {
         if (isMobile) {
           this._isPanningScroll = true;
-          this._lastDragEvent = e;
+          this._pushDragHistory(e.x, e.y);
           this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy);
         }
       },
       onDragEnd: event => {
-        if (!event || !this._lastDragEvent) {
+        if (!event || !this._dragHistory.length) {
           return;
         }
         // iScroll https://wzes.github.io/2019/10/23/JavaScript/iScroll/index.html
-
-        const during = event.timeStamp - this._lastDragEvent.timeStamp;
+        // 100ms 3 or 4 history;
+        const time = Date.now();
+        const recentDragEvents = this._dragHistory.filter(item => time - item.t < 100);
+        if (!recentDragEvents.length) {
+          return;
+        }
+        const firstEvent = recentDragEvents[0];
+        this._dragHistory.length = 0;
         this._isPanningScroll = false;
         const rAF = this.ownerRender.requestAnimationFrame
-        let {dx, dy} = this._lastDragEvent;
+        let dx = event.x - firstEvent.x;
+        let dy = event.y - firstEvent.y;
+        const during = time - firstEvent.t;
         const { scrollX, scrollY, width, height, scrollWidth, scrollHeight } = this.attr;
         if (!scrollX || width >= scrollWidth) {
           dx = 0;
@@ -305,13 +314,13 @@ export default class ScrollView extends Group {
         const maxScrollLeft = this.attr.maxScrollLeft ?? this.attr.scrollWidth - this.clientWidth;
         const maxScrollTop = this.attr.maxScrollTop ?? this.attr.scrollHeight - this.clientHeight;
         const minScrollTop = this.attr.minScrollTop ?? 0;
-        this._lastDragEvent = null;
         const speed = Math.sqrt(dx * dx + dy * dy);
         // 超出边界回弹
 
         if (during > 300 || speed === 0) {
           return;
         }
+
         const startTime = Date.now();
         const deceleration = 0.3;
         const frameCount = Math.abs(speed) / deceleration;
@@ -330,7 +339,7 @@ export default class ScrollView extends Group {
           this._isInTransitionScroll = false;
           const isYOverflow = nextScrollTop < minScrollTop || nextScrollTop > maxScrollTop;
           const isXOverflow = nextScrollLeft < minScrollLeft || nextScrollLeft > maxScrollLeft;
-          if (isXOverflow && isYOverflow) {
+          if ((isXOverflow || !scrollX) && (isYOverflow || !scrollY)) {
             this._transitionRAF = null;
             return;
           }
@@ -727,5 +736,12 @@ export default class ScrollView extends Group {
 
   private _cancelRaf() {
     this.ownerRender?.cancelAnimationFrame(this._transitionRAF);
+  }
+
+  private _pushDragHistory(x: number, y: number) {
+    if (this._dragHistory.length > 4) {
+      this._dragHistory.shift();
+    }
+    this._dragHistory.push({x, y, t: Date.now()});
   }
 }
