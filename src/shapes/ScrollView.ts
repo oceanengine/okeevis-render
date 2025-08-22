@@ -4,7 +4,7 @@ import Rect, { RectAttr } from './Rect';
 import * as lodash from '../utils/lodash';
 import type DOMNode from './DOMNode';
 import { isMobile, isPC } from '../utils/env';
-import { SyntheticDragEvent, SyntheticEvent } from '../event';
+import { SyntheticEvent } from '../event';
 import { interpolateNumber } from '../interpolate';
 import { cubicBezier } from '../animate/cubic-bezier';
 
@@ -19,6 +19,7 @@ export interface ScrollViewAttr extends GroupAttr {
   scrollY?: boolean;
   initialOffset?:[number, number];
   onScroll?: (event: SyntheticEvent) => void;
+  onScrollEnd?: (event: SyntheticEvent) => void;
   maxScrollLeft?: number;
   minScrollLeft?: number;
   maxScrollTop?: number;
@@ -84,6 +85,8 @@ export default class ScrollView extends Group {
   private _isInTransitionScroll: boolean = false;
 
   private _dragStartPosition: number;
+
+  private _transitionJustStoped: boolean = false;
   
   private _lockedDirection: 'horizonal' | 'vertical' | undefined;
 
@@ -279,6 +282,7 @@ export default class ScrollView extends Group {
         this._dragHistory.length = 0;
       },
       onDrag: e => {
+        this._transitionJustStoped = false;
         if (isMobile) {
           this._isPanningScroll = true;
           this._pushDragHistory(e.x, e.y);
@@ -287,13 +291,19 @@ export default class ScrollView extends Group {
       },
       onDragEnd: event => {
         if (!event || !this._dragHistory.length) {
+          if (this._transitionJustStoped) {
+            this._dispatchScrollEndEvent();
+            this._transitionJustStoped = false;
+          }
           return;
         }
+        this._transitionJustStoped = false;
         // iScroll https://wzes.github.io/2019/10/23/JavaScript/iScroll/index.html
         // 100ms 3 or 4 history;
         const time = Date.now();
         const recentDragEvents = this._dragHistory.filter(item => time - item.t < 100);
         if (!recentDragEvents.length) {
+          this._dispatchScrollEndEvent();
           return;
         }
         const firstEvent = recentDragEvents[0];
@@ -321,6 +331,7 @@ export default class ScrollView extends Group {
         // 超出边界回弹
 
         if (during > 300 || speed === 0) {
+          this._dispatchScrollEndEvent();
           return;
         }
 
@@ -344,12 +355,14 @@ export default class ScrollView extends Group {
           const isXOverflow = nextScrollLeft < minScrollLeft || nextScrollLeft > maxScrollLeft;
           if ((isXOverflow || !scrollX) && (isYOverflow || !scrollY)) {
             this._transitionRAF = null;
+            this._dispatchScrollEndEvent();
             return;
           }
           if (t < 1) {
             this._transitionRAF = rAF(transitionScroll)
           } else {
             this._transitionRAF = null;
+            this._dispatchScrollEndEvent();
           }
         }
         this._transitionRAF = rAF(transitionScroll);
@@ -739,6 +752,9 @@ export default class ScrollView extends Group {
 
   private _cancelRaf() {
     this.ownerRender?.cancelAnimationFrame(this._transitionRAF);
+    if (this._transitionRAF) {
+      this._transitionJustStoped = true;
+    }
   }
 
   private _pushDragHistory(x: number, y: number) {
@@ -746,5 +762,13 @@ export default class ScrollView extends Group {
       this._dragHistory.shift();
     }
     this._dragHistory.push({x, y, t: Date.now()});
+  }
+
+  private _dispatchScrollEndEvent() {
+    this.dispatch('scrollend', new SyntheticEvent('scrollend', {
+       timeStamp: Date.now(),
+        bubbles: false,
+        original: undefined,
+    }));
   }
 }
