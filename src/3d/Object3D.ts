@@ -1,12 +1,16 @@
-import Element from "../shapes/Element";
+import Element, {ElementAttr} from "../shapes/Element";
+import { Geometry } from "./Geometry";
 
+export interface Object3DAttr extends ElementAttr {
+    
+}
 
-
-export class Object3D extends Element {
+export class Object3D<T={}> extends Element<T & ElementAttr> {
     private _position: number[] = [0, 0, 0];
     private _rotation: number[] = [0, 0, 0];
     private _scale: number[] = [1, 1, 1];
     private _matrix: number[] = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    private _geometry: Geometry;
     public get position() {
         return this._position;
     }
