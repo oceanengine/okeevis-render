@@ -93,6 +93,6 @@ export {
 
 declare global {
   namespace JSX {
-      interface IntrinsicAttributes {key?: string | number}
+      interface IntrinsicAttributes {key?: string | number | null}
   }
 }
