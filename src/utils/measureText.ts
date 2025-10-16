@@ -1,6 +1,7 @@
 import LRUMap from './LRU';
 import ES6Set from './set';
 import { TextAttr } from '../shapes/Text';
+import { settings } from '../settings';
 
 import * as styleHelper from '../canvas/style';
 
@@ -75,7 +76,7 @@ function initTextContext(ctx: CanvasRenderingContext2D, textStyle: TextAttr = {}
     fontWeight = 'normal',
     fontStyle = 'normal',
   } = textStyle;
-  styleHelper.setFontStyle(ctx, fontSize, fontFamily, fontWeight, fontStyle);
+  styleHelper.setFontStyle(ctx, fontSize * settings.FONT_SCALE, fontFamily, fontWeight, fontStyle);
 }
 function getCacheKey(text: string, textStyle: TextAttr): string {
   const {

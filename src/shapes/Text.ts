@@ -3,6 +3,7 @@ import { CommonAttr } from './Element';
 import * as lodash from '../utils/lodash';
 import { BBox, inBBox } from '../utils/bbox';
 import { measureText } from '../utils/measureText';
+import { settings } from '../settings';
 
 type TextDecoration = 'underline' | 'line-through' | 'overline';
 
@@ -45,7 +46,7 @@ export const shapeKeys: Array<keyof TextAttr> = [
   'children',
   'underline',
   'overline',
-  'linethrough'
+  'linethrough',
 ];
 export interface TextSpan {
   x: number;
@@ -189,14 +190,14 @@ export default class Text extends Shape<TextAttr> {
   }
 
   public getTextStyle(): TextAttr {
-    const fontSize = this.getExtendAttr('fontSize');
+    const fontSize = this.getExtendAttr('fontSize') * settings.FONT_SCALE;
     return {
       fontSize,
       fontFamily: this.getExtendAttr('fontFamily'),
       fontWeight: this.getExtendAttr('fontWeight'),
       textAlign: this.getExtendAttr('textAlign'),
       textBaseline: this.getExtendAttr('textBaseline'),
-      lineHeight: this.attr.lineHeight || fontSize,
+      lineHeight: (this.attr.lineHeight * settings.FONT_SCALE) || fontSize,
     };
   }
 
@@ -223,7 +224,7 @@ export default class Text extends Shape<TextAttr> {
     if (this._isEmpty) {
       return { x: 0, y: 0, width: 0, height: 0 };
     }
-    const { x, y, } = this.attr;
+    const { x, y } = this.attr;
     const textStyle = this.getTextStyle();
     const { fontSize, textAlign, textBaseline, lineHeight } = textStyle;
     let textWidth: number;

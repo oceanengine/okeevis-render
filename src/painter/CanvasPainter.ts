@@ -14,6 +14,7 @@ import { getCanvasCreator } from '../canvas/createCanvas';
 import { fpsRect, fpsText } from './fps';
 import { isArray, sum } from 'lodash-es';
 import { isPC } from '../utils/env';
+import { settings } from '../settings';
 
 const contextKeys: Array<keyof ShapeAttr> = [
   'fill',
@@ -674,7 +675,7 @@ export default class CanvasPainter implements Painter {
     }
 
     if (fontSize || fontFamily || fontWeight || fontVariant || fontStyle) {
-      const _fontSize = item.getExtendAttr('fontSize');
+      const _fontSize = item.getExtendAttr('fontSize') * settings.FONT_SCALE;
       const _fontFamily = item.getExtendAttr('fontFamily');
       const _fontWeight = item.getExtendAttr('fontWeight');
       const _fontStyle = item.getExtendAttr('fontStyle');

@@ -28,6 +28,7 @@ export { default as Pattern } from './color/Pattern';
 export { default as PathShape } from './geometry/Path2D';
 export { RefObject, createRef } from './utils/ref';
 export { setCanvasCreator } from './canvas/createCanvas';
+export { settings } from './settings';
 export { setImageLoader } from './utils/imageLoader';
 export { registerDOMRenderer, createReactRenderer } from './utils/dom-renderer';
 export { registerPainter } from './painter';
