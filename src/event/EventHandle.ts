@@ -76,6 +76,8 @@ export default class EventHandle {
 
   private _frameCallback: Function[] = [];
 
+  private _isEnter: boolean = false;
+
   public constructor(render: Render, eventOnly: boolean = false) {
     this.render = render;
     this._PixelPainter = new CanvasPainter(render, true);
@@ -516,6 +518,7 @@ export default class EventHandle {
   };
 
   private _handleMouseLeave = (nativeEvent: WheelEvent) => {
+    this._isEnter = false;
     if (this._draggingTarget) {
       return;
     }
@@ -556,6 +559,7 @@ export default class EventHandle {
 
   private _handleMouseEnter = (nativeEvent: WheelEvent) => {
     const { x, y } = this._getMousePosition(nativeEvent);
+    this._isEnter = true;
     const target = this.pickTarget(x, y);
     if (this.render.isBrowser() && !this._eventOnly) {
       const cursor = target.getExtendAttr('cursor');
@@ -730,7 +734,7 @@ export default class EventHandle {
 
   private _handleDocumentMouseUp = (nativeEvent: MouseEvent) => {
     this._mouseDownTarget?.setState('active', false);
-    if (!isMobile) {
+    if (!isMobile && !this._isEnter) {
       this._prevMouseTarget = null;
     }
     const { x, y } = this._getMousePosition(nativeEvent);
