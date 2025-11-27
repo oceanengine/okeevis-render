@@ -3,6 +3,7 @@ import { CommonAttr } from './Element';
 import { equalWithTolerance, PI2, getPointOnPolar } from '../utils/math';
 import { BBox, sectorBBox } from '../utils/bbox';
 import { isPointInSector, isPointInSectorStroke } from '../geometry/contain/sector';
+import { isBoolean } from 'lodash-es';
 
 interface Point {
   x: number;
@@ -16,7 +17,7 @@ export interface SectorAttr extends CommonAttr {
   radiusI?: number;
   start?: number;
   end?: number;
-  round?: boolean;
+  round?: boolean | [boolean, boolean];
   borderRadius?: number | number[];
 }
 
@@ -72,14 +73,14 @@ export default class Sector extends Shape<SectorAttr> {
       let roundStart: number;
       let roundEnd: number;
       ctx.arc(cx, cy, radiusI, end, start, !anticlockwise);
-      if (round) {
+      if (isBoolean(round) && round || Array.isArray(round) && round[0]) {
         const { x, y } = getPointOnPolar(cx, cy, (radius + radiusI) / 2, start);
         roundStart = !anticlockwise ? start - Math.PI : start + Math.PI;
         roundEnd = start;
         ctx.arc(x, y, Math.abs(radius - radiusI) / 2, roundStart, roundEnd, anticlockwise);
       }
       ctx.arc(cx, cy, radius, start, end, anticlockwise);
-      if (round) {
+      if (isBoolean(round) && round || Array.isArray(round) && round[1]) {
         const { x, y } = getPointOnPolar(cx, cy, (radius + radiusI) / 2, end);
         roundStart = end;
         roundEnd = !anticlockwise ? end + Math.PI : end - Math.PI;

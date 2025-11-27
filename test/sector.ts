@@ -2,7 +2,7 @@ import Render from '../src/render'
 import Sector from '../src/shapes/Sector'
 
 const dom = document.getElementById('root') as HTMLDivElement
-const render = new Render(dom, { renderer: 'svg' })
+const render = new Render(dom, { renderer: 'canvas' })
 
 const shape = new Sector({
   cx: 200,
@@ -15,9 +15,7 @@ const shape = new Sector({
   stroke: '#333',
   lineWidth: 2,
   lineJoin: 'round',
-  round: false,
-  borderRadius: 25,
-
+  round: [false, false],
 })
 const shape2 = new Sector({
   cx: 200,
