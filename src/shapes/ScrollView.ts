@@ -276,96 +276,99 @@ export default class ScrollView extends Group {
       getDragOffset: () => {
         return { x: 0, y: 0 };
       },
-      onDragStart: () => {
-        this._cancelRaf();
-        this._transitionRAF = null;
-        this._dragHistory.length = 0;
+      onDragStart: e => {
+        const self =  e.currentTarget.parentNode as ScrollView;
+        self._cancelRaf();
+        self._transitionRAF = null;
+        self._dragHistory.length = 0;
       },
       onDrag: e => {
-        this._transitionJustStoped = false;
+        const self = e.currentTarget.parentNode as ScrollView;
+        self._transitionJustStoped = false;
         if (isMobile) {
-          this._isPanningScroll = true;
-          this._pushDragHistory(e.x, e.y);
-          this._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy);
+          self._isPanningScroll = true;
+          self._pushDragHistory(e.x, e.y);
+          self._eventScrollBy(e.currentTarget.parentNode as ScrollView, -e.dx, -e.dy);
         }
       },
       onDragEnd: event => {
-        if (!event || !this._dragHistory.length) {
-          if (this._transitionJustStoped) {
-            this._dispatchScrollEndEvent();
-            this._transitionJustStoped = false;
+        const self = event.currentTarget.parentNode as ScrollView;
+        if (!event || !self._dragHistory.length) {
+          if (self._transitionJustStoped) {
+            self._dispatchScrollEndEvent();
+            self._transitionJustStoped = false;
           }
           return;
         }
-        this._transitionJustStoped = false;
+        self._transitionJustStoped = false;
         // iScroll https://wzes.github.io/2019/10/23/JavaScript/iScroll/index.html
         // 100ms 3 or 4 history;
         const time = Date.now();
-        const recentDragEvents = this._dragHistory.filter(item => time - item.t < 100);
+        const recentDragEvents = self._dragHistory.filter(item => time - item.t < 100);
         if (!recentDragEvents.length) {
-          this._dispatchScrollEndEvent();
+          self._dispatchScrollEndEvent();
           return;
         }
         const firstEvent = recentDragEvents[0];
         const count = recentDragEvents.length;
-        this._dragHistory.length = 0;
-        this._isPanningScroll = false;
-        const rAF = this.ownerRender.requestAnimationFrame
+        self._dragHistory.length = 0;
+        self._isPanningScroll = false;
+        const rAF = self.ownerRender.requestAnimationFrame
         let dx = (event.x - firstEvent.x) / count;
         let dy = (event.y - firstEvent.y) / count;
         const during = time - firstEvent.t;
-        const { scrollX, scrollY, width, height, scrollWidth, scrollHeight } = this.attr;
+        const { scrollX, scrollY, width, height, scrollWidth, scrollHeight } = self.attr;
         if (!scrollX || width >= scrollWidth) {
           dx = 0;
         }
         if (!scrollY || height >= scrollHeight) {
           dy = 0;
         }
-        const minScrollLeft = this.attr.minScrollLeft?? 0;
-        const maxScrollLeft = this.attr.maxScrollLeft ?? this.attr.scrollWidth - this.clientWidth;
-        const maxScrollTop = this.attr.maxScrollTop ?? this.attr.scrollHeight - this.clientHeight;
-        const minScrollTop = this.attr.minScrollTop ?? 0;
+        const minScrollLeft = self.attr.minScrollLeft?? 0;
+        const maxScrollLeft = self.attr.maxScrollLeft ?? self.attr.scrollWidth - self.clientWidth;
+        const maxScrollTop = self.attr.maxScrollTop ?? self.attr.scrollHeight - self.clientHeight;
+        const minScrollTop = self.attr.minScrollTop ?? 0;
         const speed = Math.sqrt(dx * dx + dy * dy);
         const scaleX = Math.abs(dx) / speed;
         const scaleY = Math.abs(dy) / speed;
         // 超出边界回弹
 
         if (during > 300 || speed === 0) {
-          this._dispatchScrollEndEvent();
+          self._dispatchScrollEndEvent();
           return;
         }
 
         const startTime = Date.now();
         const deceleration = 0.08;
         const frameCount = Math.abs(speed) / deceleration;
-        const initialLeft = this.scrollLeft;
-        const initialTop = this.scrollTop;
+        const initialLeft = self.scrollLeft;
+        const initialTop = self.scrollTop;
         const maxMoveMent = speed ** 2 * 3;
         const ease = cubicBezier(0, .5, .2, 1);
         const transitionScroll = () => {
-          this._isInTransitionScroll = true;
+          self._isInTransitionScroll = true;
           const t = Math.min((Date.now() - startTime) / 16, frameCount) / frameCount;
           const movement = ease(t) * maxMoveMent;
           const nextScrollLeft = dx !== 0 ? initialLeft - movement * scaleX * (dx > 0 ? 1 : -1) : initialLeft;
           const nextScrollTop =  dy !== 0 ? initialTop - movement * scaleY * (dy > 0 ? 1 : -1) : initialTop;
-          this.scrollLeft = nextScrollLeft;
-          this.scrollTop = nextScrollTop;
-          this._isInTransitionScroll = false;
+          self.scrollLeft = nextScrollLeft;
+          self.scrollTop = nextScrollTop;
+          self._isInTransitionScroll = false;
           const isYOverflow = nextScrollTop < minScrollTop || nextScrollTop > maxScrollTop;
           const isXOverflow = nextScrollLeft < minScrollLeft || nextScrollLeft > maxScrollLeft;
           if ((isXOverflow || !scrollX) && (isYOverflow || !scrollY)) {
-            this._transitionRAF = null;
-            this._dispatchScrollEndEvent();
+            self._transitionRAF = null;
+            self._dispatchScrollEndEvent();
             return;
           }
           if (t < 1) {
-            this._transitionRAF = rAF(transitionScroll)
+            self._transitionRAF = rAF(transitionScroll)
           } else {
-            this._transitionRAF = null;
-            this._dispatchScrollEndEvent();
+            self._transitionRAF = null;
+            self._dispatchScrollEndEvent();
           }
         }
-        this._transitionRAF = rAF(transitionScroll);
+        self._transitionRAF = rAF(transitionScroll);
       }
     }));
     this._bgRect = new Rect({
