@@ -6,6 +6,8 @@ import { cubicBezier } from "./cubic-bezier";
 export type EasingName = keyof typeof easing | string;
 export type EasingFunction = (k: number) => number;
 
+type StepPosition = 'start' | 'end' | 'jump-start' | 'jump-end' | 'jump-none' | 'jump-both';
+
 const easeCache: Record<string, EasingFunction> = {};
 
 const linear = (k: number) => k;
@@ -33,6 +35,46 @@ export function parseEase(inputEase: EasingName): EasingFunction {
     const bezierEase = cubicBezier(p1x, p1y, p2x, p2y);
     easeCache[inputEase] = bezierEase;
     return bezierEase;
+  }
+
+  if (inputEase.startsWith('linear(')) {
+    // todo;
+  }
+
+  if (inputEase.startsWith('step')) {
+    const [stepCountString, positionString = 'end'] = inputEase.slice(5, -1).split(',') as [string, StepPosition];
+    let stepCount = Number(stepCountString);
+    const position = positionString.trim();
+    if (position === 'jump-both') {
+      stepCount += 1;
+    }
+
+    if (position === 'jump-none') {
+      stepCount -= 1;
+    }
+
+    const step = 1 / stepCount;
+
+    if (stepCount <= 0) {
+      throw new Error('step count must be positive integer');
+    }
+
+    return k => {
+      if (position === 'start' || position === 'jump-start') {
+        if (k === 0) {
+          return step;
+        }
+        return Math.ceil(k / step) * step;
+      }
+
+      if (position === 'end' || position === 'jump-end') {
+       if (k >= 1) {
+          return k;
+        }
+        return Math.floor(k / step) * step;
+      }
+    }
+
   }
 
   return linear;
