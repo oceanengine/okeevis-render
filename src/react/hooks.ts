@@ -10,6 +10,7 @@ import {
   Context,
   MutableRefObject,
   MemoComponent,
+  Ref,
 } from './types';
 
 /**
@@ -107,15 +108,18 @@ export class HookElement<T = {}> extends Group {
         return;
       }
     }
-    
-    if ((this as any).$$type.$$typeof === 'react.context' && (this.props as any).value !== (nextProps as any).value) {
+
+    if (
+      (this as any).$$type.$$typeof === 'react.context' &&
+      (this.props as any).value !== (nextProps as any).value
+    ) {
       this.traverse(node => {
         if (Element.isHookElement(node) && node._dependentContexts.has(this)) {
           node.willUpdate();
         }
-      })
+      });
     }
-    
+
     this.props = nextProps;
     if (this.$$type === Portal) {
       this._portalFragment.updateProps(nextProps);
@@ -168,11 +172,10 @@ function getProcessList(nodes: any[]): Element[] {
 }
 
 function getCurrentHook(): Hook {
-
   if (!currentComponent) {
     throw new Error('hook must be used in a component');
   }
-  
+
   let hook: Hook;
   if (currentHook) {
     hook = currentHook;
@@ -212,7 +215,8 @@ export function useState<S>(initialState: S | (() => S)): [S, Dispatch<SetStateA
   const hook = getCurrentHook();
   if (!hook._component) {
     hook._component = currentComponent;
-    hook.baseState = typeof initialState === 'function' ? (initialState as () => S)() : initialState;
+    hook.baseState =
+      typeof initialState === 'function' ? (initialState as () => S)() : initialState;
   }
   const setState: Dispatch<SetStateAction<S>> = (value: SetStateAction<S>) => {
     if (value === hook.baseState) {
@@ -360,6 +364,23 @@ export function useReducer<R extends Reducer<any, any>, I>(
   };
 
   return [hook.baseState, dispatch];
+}
+
+export function useImperativeHandle<T, R extends T>(
+  ref: Ref<T> | undefined,
+  createHandle: () => R,
+  deps?: DependencyList,
+): void {
+  useEffect(
+    () => {
+      if (typeof ref === 'function') {
+        ref(createHandle());
+      } else if (ref) {
+        (ref as MutableRefObject<T>).current = createHandle();
+      }
+    },
+    deps == null ? deps : [...deps, ref],
+  );
 }
 
 function pushPendingEffect(hook: Hook) {

@@ -12,6 +12,9 @@ type Key = string | number;
 interface RefObject<T> {
   readonly current: T | null;
 }
+
+type RefCallback<T> = { bivarianceHack(instance: T | null): void }["bivarianceHack"];
+type Ref<T> = RefCallback<T> | RefObject<T> | null;
 interface MutableRefObject<T> {
   current: T;
 }
@@ -89,6 +92,8 @@ export {
   DependencyList,
   NamedExoticComponent,
   MemoComponent,
+  RefCallback,
+  Ref,
 };
 
 declare global {

@@ -8,9 +8,10 @@ import React, {
   createPortal,
   createRoot,
   memo,
+  Ref,
 } from '../src/react';
 import { Render, Group, Rect, Line, Text } from '../src';
-import { useContext, useReducer } from '../src/react/hooks';
+import { useContext, useImperativeHandle, useReducer } from '../src/react/hooks';
 
 const dom = document.getElementById('root') as HTMLDivElement;
 
@@ -50,10 +51,16 @@ const Component = (props: { x: number }) => {
 };
 Component.displayName = 'Component';
 
-const MyGroup = (props: { a: number; b: number }) => {
+const MyGroup = (props: { a: number; b: number, ref: Ref<{fn: () => void}>}) => {
   const [time, setTime] = useState(10);
   const contextValue = useContext(Context);
   console.log('root context value', contextValue);
+  console.log('props ref', props.ref);
+  useImperativeHandle(props.ref, () => ({
+    fn: () => {
+      console.log('ref method');
+    }
+  }));
   return (
     <>
       <Line  x1={0} y1={0} x2={100} y2={100} lineWidth={3} stroke="blue" />
@@ -79,10 +86,8 @@ const MyGroup = (props: { a: number; b: number }) => {
             fill={time === 10 ? 'red' : 'blue'}
             fontSize={24 + time * 12}
             transitionProperty='all'
-            stateStyles={{
-              hover:{
-                fill: 'yellow'
-              }
+            hoverStyle={{
+              fill: 'yellow'
             }}
             onClick={() => {
               setTime(20);
@@ -103,6 +108,7 @@ MyGroup.displayName = 'MyGroup';
 
 const App = () => {
   const [value, setValue] = useState(1);
+  const ref = useRef<{fn: () => void}>(null);
   const reducer = useCallback((state: any, action: any) => {
     return {value: action.value as number};
   }, [])
@@ -111,6 +117,9 @@ const App = () => {
   valueRef.current = value;
   console.log('------', valueRef.current);
   useEffect(() => {
+    if (ref.current) {
+      ref.current.fn();
+    }
     setTimeout(() => {
       dispatch({
         type: 'test',
@@ -121,7 +130,7 @@ const App = () => {
   }, [])
   return (
     <Context.Provider value={store.value}>
-      <MyGroup a={1} b={1} />
+      <MyGroup a={1} b={1} ref={ref} />
     </Context.Provider>
   );
 };
