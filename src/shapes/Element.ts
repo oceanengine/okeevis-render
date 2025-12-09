@@ -1765,7 +1765,7 @@ export default class Element<T extends CommonAttr = ElementAttr>
       return;
     }
     const {
-      transitionProperty,
+      transitionProperty = 'all',
       transitionDelay = 0,
       transitionDuration = 0,
       transitionEase = 'Linear',

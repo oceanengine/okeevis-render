@@ -14,7 +14,13 @@ const rect = new Rect({
   stroke: 'red',
   lineWidth: 20,
   draggable: true,
-  rotation: 0.02,
+  rotation: 0,
+  originX: 150,
+  originY: 150,
+  transitionDuration: 300,
+  hoverStyle:{
+    fill: 'yellow'    
+  }
 });
 // rect.stopAllAnimation().setAttr({scaleX: 0, scaleY: 0}).animateTo({scale: [2, 2]})
 
