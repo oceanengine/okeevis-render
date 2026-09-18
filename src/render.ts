@@ -366,6 +366,7 @@ export default class Render extends EventFul<RenderEventHandleParam> {
     if (this._disposed || this._isOnframe) {
       return;
     }
+    console.log('frame');
     (this.timeline as any).currentTime = now;
     this._requestAnimationFrameId = null;
     this._isOnframe = true;

@@ -39,7 +39,6 @@ const contextKeys: Array<keyof ShapeAttr> = [
   'lineDash',
   'clip',
 ];
-
 export default class CanvasPainter implements Painter {
   public render: Render;
 
@@ -68,6 +67,10 @@ export default class CanvasPainter implements Painter {
   private _contextStroke: ColorValue;
 
   private roughCanvas: RoughCanvas = undefined;
+
+  private  _paintStartTime: number = 0;
+
+  private _drawingElement: Element | undefined = undefined;
 
   private roughConfig: {rough: boolean; options: RoughOptions} = { rough: false, options: {} };
 
@@ -264,6 +267,7 @@ export default class CanvasPainter implements Painter {
 
   public paint(dirtyRegion?: BBox) {
     // console.time('paint');
+    this._paintStartTime = Date.now();
     const ctx = this._ctx;
     const dpr = this.dpr;
     if (!dirtyRegion) {
@@ -285,7 +289,14 @@ export default class CanvasPainter implements Painter {
       this._brushRect(ctx, dirtyRegion);
       ctx.clip();
     }
-    this.render.getRoot().eachChildSorted(item => this.drawElement(item, dirtyRegion));
+    const drawingElement = this._drawingElement;
+    if (!drawingElement) {
+      this.drawElement(this.render.getRoot(), dirtyRegion);
+    } else {
+      // 恢复绘制当前元素
+      this._drawingElement = undefined;
+      this.drawSiblingElement(drawingElement);
+    }
     ctx.restore();
     // console.timeEnd('paint');
   }
@@ -297,6 +308,11 @@ export default class CanvasPainter implements Painter {
   }
 
   public drawElement = (item: Element, dirtyRegion?: BBox) => {
+    if (Date.now() - this._paintStartTime > 16) {
+      this._drawingElement = item;
+      return;
+    }
+
     if (Element.isHookElement(item)) {
       item.eachChildSorted(child => this.drawElement(child, dirtyRegion));
       return;
@@ -455,6 +471,18 @@ export default class CanvasPainter implements Painter {
       ctx.restore();
     }
   };
+
+  public drawSiblingElement(item: Element) {
+    const nextParentSibling = item.parentNode?.nextSibling;
+    let current = item;
+    while (current) {
+      this.drawElement(current);
+      current = current.nextSibling;
+    }
+    if (nextParentSibling) {
+      this.drawSiblingElement(nextParentSibling);
+    }
+  }
 
   public isFullPaintNextFrame(): boolean {
     return !this.render.enableDirtyRect || this._isFirstFrame;
