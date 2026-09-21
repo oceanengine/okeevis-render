@@ -470,16 +470,19 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
     })
   }
 
-  public eachChild(callback: (child: T) => void) {
+  public eachChild(callback: (child: T) => (void | boolean)) {
     let node = this.firstChild as T;
     while (node) {
-      callback(node);
+      const ret = callback(node);
+      if (ret === false) {
+        break;
+      }
       node = node.nextSibling as T;
     }
     node = null;
   }
 
-  public eachChildSorted(callback: (child: T) => void) {
+  public eachChildSorted(callback: (child: T) => (void | boolean)) {
     if (!this._zIndexDirty) {
       this.eachChild(child => callback(child));
       return;
@@ -490,7 +493,12 @@ export default class Group<T extends Element = Element> extends Element<GroupAtt
       const bZIndex = b.attr.zIndex || 0;
       return aZIndex - bZIndex;
     });
-    children.forEach(child => callback(child));
+    for (const child of children) {
+      const ret = callback(child);
+      if (ret === false) {
+        break;
+      }
+    }
   }
 
   public children(): T[] {

@@ -120,7 +120,7 @@ export default class CanvasPainter implements Painter {
     const dirtyElements = this.render.getDirtyElements();
     const dirytCount = dirtyElements.size;
     const chunk = this.render.getOneChunk();
-    if (needUpdate) {
+    if (needUpdate || this._drawingElement) {
       if (
         !this._isFirstFrame &&
         this.render.enableDirtyRect &&
@@ -192,7 +192,7 @@ export default class CanvasPainter implements Painter {
     ctx.translate(-x, -y);
     styleHelper.setLineJoin(ctx, defaultCanvasContext.lineJoin);
 
-    this.render.getRoot().eachChild(item => this.drawElement(item));
+    this.render.getRoot().eachChildSorted(item => this.drawElement(item));
     ctx.restore();
     if (ctx.draw) {
       ctx.draw(true);
@@ -271,7 +271,7 @@ export default class CanvasPainter implements Painter {
     const ctx = this._ctx;
     const dpr = this.dpr;
     if (!dirtyRegion) {
-      ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+      // ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
     } else {
       const { x, y, width, height } = dirtyRegion;
       ctx.clearRect(x * dpr, y * dpr, width * dpr, height * dpr);
@@ -290,6 +290,8 @@ export default class CanvasPainter implements Painter {
       ctx.clip();
     }
     const drawingElement = this._drawingElement;
+    console.log('drawingElement', drawingElement);
+    
     if (!drawingElement) {
       this.drawElement(this.render.getRoot(), dirtyRegion);
     } else {
@@ -310,7 +312,8 @@ export default class CanvasPainter implements Painter {
   public drawElement = (item: Element, dirtyRegion?: BBox) => {
     if (Date.now() - this._paintStartTime > 16) {
       this._drawingElement = item;
-      return;
+      this.render.nextTick();
+      return false;
     }
 
     if (Element.isHookElement(item)) {
@@ -476,7 +479,10 @@ export default class CanvasPainter implements Painter {
     const nextParentSibling = item.parentNode?.nextSibling;
     let current = item;
     while (current) {
-      this.drawElement(current);
+      const res = this.drawElement(current);
+      if (res === false) {
+        break;
+      }
       current = current.nextSibling;
     }
     if (nextParentSibling) {
