@@ -151,7 +151,7 @@ export default class DOMNode extends Shape<DOMNodeAttr> {
   }
 
   protected onAttrChange(attr: any, value: unknown, oldValue: unknown) {
-    super.onAttrChange(attr, value, oldValue);
+    super.onAttrChange(attr, value as any, oldValue as any);
     if (attr === 'text') {
       this._contentDirty = true;
     }

@@ -5,7 +5,7 @@ import type CanvasPainter from '../painter/CanvasPainter';
 import type SVGPainter from '../painter/SVGPainter';
 import Group, { GroupAttr } from './Group';
 import * as lodash from '../utils/lodash';
-import { ColorValue } from '../color';
+import { ColorValue, isCssVar } from '../color';
 import AnimateAble, { AnimateConf } from '../abstract/AnimateAble';
 import { WebAnimatable, Keyframe, KeyframeEffectOptions } from '../animate/WebAnimateAble';
 import { Animation } from '../animate/Animation';
@@ -48,7 +48,8 @@ export const defaultSetting: { during: number; ease: EasingName } = {
 
 const reuseBBoxVectors: Vec2[] = [createVec2(), createVec2(), createVec2(), createVec2()];
 
-export interface BaseAttr extends TransformConf, EventConf {
+type CssVarName  = `--${string}`;
+export interface BaseAttr extends TransformConf, EventConf, Record<CssVarName, string | number> {
   key?: string | number;
   ref?: RefObject<Element>;
   data?: any;
@@ -425,6 +426,17 @@ export default class Element<T extends CommonAttr = ElementAttr>
     const globalTransform = this.getGlobalTransform();
     const scale = globalTransform[0];
     return ((value as any as number) / scale) as any;
+  }
+
+  public getVariableValue(cssvar: string): string {
+    const [name, defaultValue] = cssvar.slice(4, -1).split(',').map((item) => item.trim());
+    const isBrowser = this.ownerRender?.isBrowser();
+    const value = this.getExtendAttr(name as any as keyof T) || (isBrowser ? this.ownerRender?.getDom().style.getPropertyValue(name): undefined);
+    const res = value ?? defaultValue
+    if (isCssVar(res)) {
+      return this.getVariableValue(res as string);
+    }
+    return res as string;
   }
 
   public hasFill(): boolean {
@@ -1675,6 +1687,13 @@ export default class Element<T extends CommonAttr = ElementAttr>
         transitionProperty === 'shadowColor'
       ) {
         fn = interpolateColor;
+        if (isCssVar(values[0])) {
+          values[0] = this.getVariableValue(values[0]);
+        }
+        if (isCssVar(values[1])) {
+          values[1] = this.getVariableValue(values[1]);
+        }
+        // cssvar parse
       } else if (transitionProperty === 'pathData') {
         fn = interpolatePath;
       } else {

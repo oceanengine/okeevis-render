@@ -41,7 +41,7 @@ export class Thread {
       if (!this._loadedImage.has(id)) {
         this._loadedImage.add(id);
         const canvas = new OffscreenCanvas(image.width, image.height);
-        canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+        (canvas.getContext('2d') as any as CanvasRenderingContext2D).drawImage(image, 0, 0, image.width, image.height);
         postImages.push(canvas.transferToImageBitmap());
         imageIds.push(id);
       }

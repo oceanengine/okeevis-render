@@ -8,6 +8,7 @@ import { interpolate } from '../interpolate';
 import interpolatePath from '../interpolate/interpolatePath';
 import interpolateColor from '../interpolate/interpolateColor';
 import EventFul from '../utils/Eventful';
+import { isCssVar } from '../color';
 export class Animation extends EventFul {
   public currentTime: number | null;
   public id: string;
@@ -226,6 +227,12 @@ export class Animation extends EventFul {
       }
       if (key === 'color' || key === 'fill' || key === 'stroke' || key === 'shadowColor') {
         fn = interpolateColor;
+        if (isCssVar(fromKeyFrame[key])) {
+          fromKeyFrame[key] = this._target.getVariableValue(fromKeyFrame[key] as string);
+        }
+        if (isCssVar(targetKeyFrame[key])) {
+          targetKeyFrame[key] = this._target.getVariableValue(targetKeyFrame[key] as string);
+        }
       } else if (key === 'pathData') {
         fn = interpolatePath;
       } else {

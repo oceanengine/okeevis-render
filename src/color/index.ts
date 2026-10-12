@@ -73,6 +73,10 @@ export function isTransparent(color: unknown): boolean {
   return color === RGBA_TRANSPARENT || color === NAME_TRANSPARENT;
 }
 
+export function isCssVar(value: unknown): boolean {
+  return typeof value === 'string' && value.startsWith('var(');
+}
+
 export function getCtxColor(
   ctx: CanvasRenderingContext2D,
   color: ColorValue,
@@ -81,6 +85,9 @@ export function getCtxColor(
   if (lodash.isString(color)) {
     if (color === 'currentColor') {
       return getCtxColor(ctx, item.getExtendAttr('color'), item);
+    }
+    if (isCssVar(color)) {
+      return item.getVariableValue(color);
     }
     return color;
   }

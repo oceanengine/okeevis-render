@@ -1,1 +1,1 @@
-import './rect'
+import './cssvar.test'

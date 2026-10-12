@@ -10,7 +10,7 @@ const rect = new Rect({
   y: 100,
   width: 100,
   height: 100,
-  fill: 'blue',
+  fill: 'var(--test)',
   stroke: 'red',
   lineWidth: 20,
   draggable: true,
@@ -18,6 +18,7 @@ const rect = new Rect({
   originX: 150,
   originY: 150,
   transitionDuration: 300,
+  '--test': 'red',
   hoverStyle:{
     fill: 'yellow'    
   }
